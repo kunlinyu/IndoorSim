@@ -3,26 +3,19 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
-using UnityEngine;
-
-public class RotateNext
+public class PSLGPolygonSearcher
 {
-    struct ThetaWithIndex
-    {
-        public double theta;
-        public int index;
-    }
-
     public struct OutInfo
     {
         public CellVertex targetCellVertex;
         public Point closestPoint;
     }
 
-    public static List<CellVertex> SearchPolygon(CellVertex start, CellVertex end, Point startdir,
-                                                 Func<CellVertex, List<OutInfo>> adjacentFinder)
+    public static List<CellVertex> Search(CellVertex start, CellVertex end, Point startdir,
+                                          Func<CellVertex, List<OutInfo>> adjacentFinder)
     {
         if (System.Object.ReferenceEquals(start, end)) return new List<CellVertex>() { start };
+
         List<CellVertex> result = new List<CellVertex>();
         result.Add(start);
 
@@ -54,6 +47,7 @@ public class RotateNext
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
             Next(current.Geom, closestPoint, startIndex, out int CWNextIndex, out int CCWNextIndex);
+
             last = current;
             current = neighbors[CCWNextIndex];
             result.Add(current);
@@ -79,6 +73,13 @@ public class RotateNext
         return result;
 
     }
+
+    struct ThetaWithIndex
+    {
+        public double theta;
+        public int index;
+    }
+
     public static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex)
     {
         if (startIndex >= neighbor.Count)
@@ -87,8 +88,8 @@ public class RotateNext
         List<ThetaWithIndex> thetaWithIndices = new List<ThetaWithIndex>();
         for (int i = 0; i < neighbor.Count; i++)
         {
-            double x = neighbor[i].Coordinate.X - center.Coordinate.X;
-            double y = neighbor[i].Coordinate.Y - center.Coordinate.Y;
+            double x = neighbor[i].X - center.X;
+            double y = neighbor[i].Y - center.Y;
             double theta = Math.Atan2(y, x);
             thetaWithIndices.Add(new ThetaWithIndex() { theta = theta, index = i });
         }

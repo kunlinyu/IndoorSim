@@ -4,12 +4,9 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
 using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 
 public class RotationNextTest
 {
-
     private void AssertListCellVertex(List<CellVertex> path, params CellVertex[] expect)
     {
         Assert.AreEqual(expect.Length, path.Count);
@@ -25,24 +22,24 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv3, cv3.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -59,24 +56,24 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv3, cv0, cv0.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv3, cv0, cv0.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -94,28 +91,28 @@ public class RotationNextTest
         CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
         CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv4, cv4.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
                     break;
                 case 4:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
             }
             return result;
@@ -133,28 +130,28 @@ public class RotationNextTest
         CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
         CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv4, cv4.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
                     break;
                 case 4:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
             }
             return result;
@@ -171,26 +168,26 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv3, cv3.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -207,24 +204,24 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(3.0d, 0.1d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv3, cv3.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -241,24 +238,24 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(3.0d, -0.1d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv3, cv3.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -275,22 +272,22 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv3, cv3.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
                     break;
                 case 2:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
                     break;
                 case 3:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
                     break;
             }
             return result;
@@ -304,7 +301,7 @@ public class RotationNextTest
     {
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv1, cv1.Geom, cv => new List<RotateNext.OutInfo>());
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => new List<PSLGPolygonSearcher.OutInfo>());
 
         Assert.IsEmpty(path);
     }
@@ -316,16 +313,16 @@ public class RotationNextTest
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv1, cv1.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
                     break;
             }
             return result;
@@ -340,16 +337,16 @@ public class RotationNextTest
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
 
-        List<CellVertex> path = RotateNext.SearchPolygon(cv0, cv0, cv0.Geom, (cv) =>
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv0, cv0.Geom, (cv) =>
         {
-            var result = new List<RotateNext.OutInfo>();
+            var result = new List<PSLGPolygonSearcher.OutInfo>();
             switch (cv.Id)
             {
                 case 0:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
                     break;
                 case 1:
-                    result.Add(new RotateNext.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
+                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
                     break;
             }
             return result;
