@@ -5,20 +5,27 @@ using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 #nullable enable
 
-class IndoorTiling
+public class IndoorTiling
 {
     public const double RemainSpaceSize = 10000.0d;
-    [JsonPropertyAttribute] private List<CellVertex> vertexPool = new List<CellVertex>();
-    [JsonPropertyAttribute] private List<CellBoundary> boundaryPool = new List<CellBoundary>();
-    [JsonPropertyAttribute] private List<CellSpace> spacePool = new List<CellSpace>();
-    [JsonPropertyAttribute] private List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
-    [JsonIgnore] private CellSpace universalRemainSpace;  // URS
+    [JsonPropertyAttribute] private ICollection<CellVertex> vertexPool = new List<CellVertex>();
+    [JsonPropertyAttribute] private ICollection<CellBoundary> boundaryPool = new List<CellBoundary>();
+    [JsonPropertyAttribute] private ICollection<CellSpace> spacePool = new List<CellSpace>();
+    [JsonPropertyAttribute] private ICollection<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
 
+    [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
+    [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
+    [JsonIgnore] private Dictionary<CellSpace, HashSet<RepresentativeLine>> space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
+    [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
 
-    [JsonIgnore] private Dictionary<CellVertex, List<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, List<CellBoundary>>();
-    [JsonIgnore] private Dictionary<CellVertex, List<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, List<CellSpace>>();
-    [JsonIgnore] private Dictionary<CellSpace, List<RepresentativeLine>> space2RLines = new Dictionary<CellSpace, List<RepresentativeLine>>();
-    [JsonIgnore] private Dictionary<CellBoundary, List<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, List<RepresentativeLine>>();
+    public CellSpace? PickCellSpace(Point point)
+        => spacePool.FirstOrDefault(cs => cs.Geom.Contains(point));
+
+    public ICollection<CellVertex> Neighbor(CellVertex cv)
+        => vertex2Boundaries[cv].Select(b => b.Another(cv)).ToList();
+
+    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
+        => vertex2Boundaries[cv1].Where(b => Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
 
     public IndoorTiling()
     {
@@ -29,8 +36,6 @@ class IndoorTiling
             new Coordinate( RemainSpaceSize, -RemainSpaceSize),
             new Coordinate( RemainSpaceSize,  RemainSpaceSize),
         };
-        universalRemainSpace = new CellSpace(new GeometryFactory().CreatePolygon(cas), new List<CellVertex>(), true);
-        spacePool.Add(universalRemainSpace);
     }
 
     public void AddBoundary(LineString ls)
@@ -43,90 +48,151 @@ class IndoorTiling
 
     private bool AnyPolygonContainNewBoundary(LineString ls)
     {
-        return false;
+        return false;  // TODO
     }
 
-    private enum EditBoundaryMode
+    private List<PSLGPolygonSearcher.OutInfo> AdjacentFinder(CellVertex cv)
     {
-        CreateNewHole,
-        ConnectTwoBoundary,
-        ExtendBoundary,
-        CutNewCellSpace,
+        var result = new List<PSLGPolygonSearcher.OutInfo>();
 
+        HashSet<CellBoundary> boundaries = vertex2Boundaries[cv];
+        foreach (CellBoundary boundary in boundaries)
+            result.Add(new PSLGPolygonSearcher.OutInfo()
+            {
+                targetCellVertex = boundary.Another(cv),
+                boundary = boundary
+            });
+        return result;
+    }
 
-        RemoveHole,
-        SplitBoundary,
-        ShrinkBoundary,
-        MergeCellSpace,
-    };
     public void AddBoundary(LineString ls, CellVertex start, CellVertex end)
     {
-        // TODO: Check ls start/end coordinate
-        // TODO: Check intersection
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
+        if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
+        if (Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
+        // TODO: Check intersection
 
         bool newStart = !vertexPool.Contains(start);
         bool newEnd = !vertexPool.Contains(end);
-
-        // mode
-        EditBoundaryMode mode;
-        if (newStart && newEnd)                        // both are new
-            mode = EditBoundaryMode.CreateNewHole;
-        else if (newStart ^ newEnd)                    // one new one old
-            mode = EditBoundaryMode.ExtendBoundary;
-        else if (Reachable(start, end))                // no new vertex, reachable
-            mode = EditBoundaryMode.CutNewCellSpace;
-        else                                           // no new vertex, un-reachable
-            mode = EditBoundaryMode.ConnectTwoBoundary;
-
-        // target cellspace
-        CellSpace? targetCellSpace;
-        var RPoint = RepresentativePointOfLineString(ls);
-        targetCellSpace = spacePool.FirstOrDefault(cellspace => cellspace.Geom.Contains(RPoint));
-        if (targetCellSpace == null)
-            throw new Exception("Oops! no cellspace contain the RPoint of new boundary");
-
-        // Add Vertices
-        if (newStart) vertexPool.Add(start);
-        if (newEnd) vertexPool.Add(end);
-
-        // Add Boundary
         CellBoundary boundary = new CellBoundary(ls, start, end);
-        boundaryPool.Add(boundary);
 
-        // Or Detect and add new polygon
-        // Or split exist polygon
-        if (mode == EditBoundaryMode.CreateNewHole)
+        // create new CellSpace
+        if (!newStart && !newEnd && Reachable(start, end))
         {
-            targetCellSpace.AddNewHole(start, end);
-        }
-        else if (mode == EditBoundaryMode.ConnectTwoBoundary)
-        {
-            targetCellSpace.ConnectTwoBoundary(start, end);
-        }
-        else if (mode == EditBoundaryMode.ExtendBoundary)
-        {
-            if (newStart)  // first argument is vertex on boundary, second is new vertex
-                targetCellSpace.ExtendBoundary(end, start);
+            List<CellVertex> path1 = PSLGPolygonSearcher.Search(start, end, ls.GetPointN(1), AdjacentFinder, out List<CellBoundary> boundaries1);
+            path1.Add(start);
+            boundaries1.Add(boundary);
+
+            List<CellVertex> path2 = PSLGPolygonSearcher.Search(end, start, ls.GetPointN(ls.NumPoints - 2), AdjacentFinder, out List<CellBoundary> boundaries2);
+            path2.Add(end);
+            boundaries2.Add(boundary);
+
+            var gf = new GeometryFactory();
+
+            bool path1IsCCW = gf.CreateLinearRing(path1.Select(cv => cv.Coordinate).ToArray()).IsCCW;
+            bool path2IsCCW = gf.CreateLinearRing(path2.Select(cv => cv.Coordinate).ToArray()).IsCCW;
+
+            // TODO new cellspace is a hole of another?
+
+            // Add Vertices
+            if (newStart) vertexPool.Add(start);
+            if (newEnd) vertexPool.Add(end);
+
+            // Add Boundary
+            AddBoundaryInternal(boundary);
+
+            // split one CellSpace to two CellSpaces
+            if (path1IsCCW && path2IsCCW)
+            {
+                CellSpace oldCellSpace = PickCellSpace(ls.InteriorPoint) ?? throw new ArgumentException("Oops!");
+                CellSpace newCellSpace1 = CreateCellSpace(path1, boundaries1, gf);
+                CellSpace newCellSpace2 = CreateCellSpace(path2, boundaries2, gf);
+
+                RemoveSpaceInternal(oldCellSpace);
+
+                AddSpaceInternal(newCellSpace1);
+                AddSpaceInternal(newCellSpace2);
+            }
+            // create new CellSpace
+            else if (path1IsCCW ^ path2IsCCW)
+            {
+                CellSpace space;
+                if (path1IsCCW)
+                    space = CreateCellSpace(path1, boundaries1, gf);
+                else
+                    space = CreateCellSpace(path2, boundaries2, gf);
+
+                // Add Space
+                AddSpaceInternal(space);
+
+            }
             else
-                targetCellSpace.ExtendBoundary(start, end);
+                throw new Exception("should not get to here");
         }
-        else if (mode == EditBoundaryMode.CutNewCellSpace)
-        {
-            var newPolygon = targetCellSpace.CutNewCellSpace(start, end);
-            // TODO: use this newPolygon add to pool
-        }
+
+        // remove useless vertex
 
 
 
         // update lookup tables
     }
 
-    private static Point RepresentativePointOfLineString(LineString ls)
+    private void AddBoundaryInternal(CellBoundary boundary)
     {
-        if (ls.NumPoints == 2) return ls.Centroid;
-        if (ls.NumPoints > 2) return ls.GetPointN(1);
-        throw new ArgumentException("LineString less than 2 points");
+        boundaryPool.Add(boundary);
+
+        if (vertex2Boundaries.ContainsKey(boundary.P0))
+            vertex2Boundaries[boundary.P0].Add(boundary);
+        else
+            vertex2Boundaries[boundary.P0] = new HashSet<CellBoundary>();
+
+        if (vertex2Boundaries.ContainsKey(boundary.P1))
+            vertex2Boundaries[boundary.P1].Add(boundary);
+        else
+            vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
+    }
+
+    private void RemoveBoundaryInternal(CellBoundary boundary)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("Can not find the boundary");
+        boundaryPool.Remove(boundary);
+        vertex2Boundaries[boundary.P0].Remove(boundary);
+        vertex2Boundaries[boundary.P1].Remove(boundary);
+    }
+
+    private void AddSpaceInternal(CellSpace space)
+    {
+        spacePool.Add(space);
+        foreach (var vertex in space.Vertices)
+            if (vertex2Spaces.ContainsKey(vertex))
+                vertex2Spaces[vertex].Add(space);
+            else
+                vertex2Spaces[vertex] = new HashSet<CellSpace>();
+    }
+
+    private void RemoveSpaceInternal(CellSpace space)
+    {
+        if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
+        spacePool.Remove(space);
+        foreach (var vertex in space.Vertices)
+            vertex2Spaces[vertex].Remove(space);
+    }
+
+    private CellSpace CreateCellSpace(List<CellVertex> path, List<CellBoundary> boundaries, GeometryFactory gf)
+    {
+        List<Coordinate> polygonPoints = new List<Coordinate>();
+        for (int i = 0; i < boundaries.Count; i++)
+        {
+            LineString boundaryPoints = boundaries[i].GeomOrder(path[i], path[i + 1]);
+            var ignoreLastOne = new ArraySegment<Coordinate>(boundaryPoints.Coordinates, 0, boundaryPoints.NumPoints - 1).ToArray();
+            polygonPoints.AddRange(ignoreLastOne);
+        }
+        polygonPoints.Add(polygonPoints[0]);
+        Polygon polygon = gf.CreatePolygon(polygonPoints.ToArray());
+
+        return new CellSpace(polygon, path.GetRange(0, path.Count - 1));
     }
 
     public void RemoveBoundary(CellBoundary cb)

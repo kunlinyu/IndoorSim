@@ -8,12 +8,13 @@ public class PSLGPolygonSearcher
     public struct OutInfo
     {
         public CellVertex targetCellVertex;
-        public Point closestPoint;
+        public CellBoundary boundary;
     }
 
     public static List<CellVertex> Search(CellVertex start, CellVertex end, Point startdir,
-                                          Func<CellVertex, List<OutInfo>> adjacentFinder)
+                                          Func<CellVertex, List<OutInfo>> adjacentFinder, out List<CellBoundary> boundaries)
     {
+        boundaries = new List<CellBoundary>();
         if (System.Object.ReferenceEquals(start, end)) return new List<CellVertex>() { start };
 
         List<CellVertex> result = new List<CellVertex>();
@@ -27,13 +28,14 @@ public class PSLGPolygonSearcher
             List<OutInfo> outInfos = adjacentFinder(current);
             if (outInfos.Count == 0) return new List<CellVertex>();
             List<CellVertex> neighbors = outInfos.Select(oi => oi.targetCellVertex).ToList();
-            List<Point> closestPoint = outInfos.Select(oi => oi.closestPoint).ToList();
+            List<CellBoundary> outBoundaries = outInfos.Select(oi => oi.boundary).ToList();
+            List<Point> closestPoints = outBoundaries.Select(b => b.ClosestPointTo(current)).ToList();
 
             int startIndex = -1;
             if (last == null)
             {
-                closestPoint.Add(startdir);
-                startIndex = closestPoint.Count - 1;
+                closestPoints.Add(startdir);
+                startIndex = closestPoints.Count - 1;
             }
             else
             {
@@ -46,11 +48,12 @@ public class PSLGPolygonSearcher
             }
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
-            Next(current.Geom, closestPoint, startIndex, out int CWNextIndex, out int CCWNextIndex);
+            Next(current.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
 
             last = current;
             current = neighbors[CCWNextIndex];
             result.Add(current);
+            boundaries.Add(outBoundaries[CCWNextIndex]);
 
             // come back to start, no path from start to end
             if (System.Object.ReferenceEquals(current, start)) return new List<CellVertex>();
@@ -80,7 +83,7 @@ public class PSLGPolygonSearcher
         public int index;
     }
 
-    public static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex)
+    private static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex)
     {
         if (startIndex >= neighbor.Count)
             throw new ArgumentException($"startIndex({startIndex}) out of range(0-{neighbor.Count - 1})");

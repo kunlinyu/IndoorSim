@@ -1,3 +1,4 @@
+using System;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 #nullable enable
@@ -8,11 +9,12 @@ struct BoundaryType
 }
 public class CellBoundary
 {
-    [JsonPropertyAttribute] private LineString geom;
+    [JsonPropertyAttribute] public LineString Geom { get; private set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
 
     //      P1
+    //      ^
     //      |
     // left | right
     //      |
@@ -27,10 +29,50 @@ public class CellBoundary
     [JsonPropertyAttribute] public bool leftFunctional = false;
     [JsonPropertyAttribute] public bool rightFunctional = false;
 
+    [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
+
+    public LineString GeomOrder(CellVertex start, CellVertex end)
+    {
+        if (Object.ReferenceEquals(start, P0) && Object.ReferenceEquals(end, P1)) return this.Geom;
+        if (Object.ReferenceEquals(start, P1) && Object.ReferenceEquals(end, P0)) return this.GeomReverse;
+        throw new ArgumentException("Don't contain vertices");
+    }
+
     public CellBoundary(LineString ls, CellVertex p0, CellVertex p1)
     {
-        geom = ls;
+        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        Geom = ls;
         P0 = p0;
         P1 = p1;
+    }
+
+    public CellBoundary(CellVertex p0, CellVertex p1)
+    {
+        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
+        Geom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate});
+        P0 = p0;
+        P1 = p1;
+    }
+
+    public bool Contains(CellVertex cv)
+    {
+        if (Object.ReferenceEquals(cv, P0)) return true;
+        if (Object.ReferenceEquals(cv, P1)) return true;
+        return false;
+    }
+
+    public CellVertex Another(CellVertex one)
+    {
+        if (Object.ReferenceEquals(one, P0)) return P1;
+        if (Object.ReferenceEquals(one, P1)) return P0;
+        throw new ArgumentException("Not any one of my CellVertex");
+    }
+
+    public Point ClosestPointTo(CellVertex cv)
+    {
+        if (Object.ReferenceEquals(cv, P0)) return Geom.GetPointN(1);
+        if (Object.ReferenceEquals(cv, P1)) return Geom.GetPointN(Geom.NumPoints - 2);
+        throw new ArgumentException("Not any one of my CellVertex");
     }
 }

@@ -5,6 +5,25 @@ using NetTopologySuite.Geometries;
 
 using NUnit.Framework;
 
+class AdjacentFinder
+{
+    private List<CellBoundary> boundaries;
+    public AdjacentFinder(List<CellBoundary> boundaries)
+    {
+        this.boundaries = boundaries;
+    }
+
+    public List<PSLGPolygonSearcher.OutInfo> Find(CellVertex cv)
+    {
+        var result = new List<PSLGPolygonSearcher.OutInfo>();
+        foreach (CellBoundary b in boundaries)
+            if (b.Contains(cv))
+                result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = b.Another(cv), boundary = b });
+        return result;
+    }
+
+}
+
 public class RotationNextTest
 {
     private void AssertListCellVertex(List<CellVertex> path, params CellVertex[] expect)
@@ -21,29 +40,14 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv2, cv3),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -55,29 +59,14 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv2, cv3),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv3, cv0, cv0.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv3, cv0, cv0.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv3, cv2, cv1, cv0);
     }
@@ -90,33 +79,15 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
         CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv1, cv3),
+            new CellBoundary(cv3, cv4),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
-                    break;
-                case 4:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv3, cv4);
     }
@@ -129,33 +100,15 @@ public class RotationNextTest
         CellVertex cv2 = new CellVertex(new Point(0.5d, 0.5d), 2);
         CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
         CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv1, cv3),
+            new CellBoundary(cv3, cv4),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv4, closestPoint = cv4.Geom });
-                    break;
-                case 4:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv3, cv4);
     }
@@ -167,31 +120,15 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv1, cv3),
+            new CellBoundary(cv2, cv3),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv3);
     }
@@ -203,29 +140,14 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(3.0d, 0.1d), 3);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv2, cv3),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -237,29 +159,13 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(3.0d, -0.1d), 3);
-
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv2, cv3),
+        };
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -271,27 +177,13 @@ public class RotationNextTest
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
         CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv2, cv3),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    break;
-                case 2:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv3, closestPoint = cv3.Geom });
-                    break;
-                case 3:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv2, closestPoint = cv2.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         Assert.IsEmpty(path);
     }
@@ -301,7 +193,8 @@ public class RotationNextTest
     {
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => new List<PSLGPolygonSearcher.OutInfo>());
+        var finder = new AdjacentFinder(new List<CellBoundary>());
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         Assert.IsEmpty(path);
     }
@@ -312,21 +205,12 @@ public class RotationNextTest
     {
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0, cv1);
     }
@@ -336,21 +220,12 @@ public class RotationNextTest
     {
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+        };
 
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv0, cv0.Geom, (cv) =>
-        {
-            var result = new List<PSLGPolygonSearcher.OutInfo>();
-            switch (cv.Id)
-            {
-                case 0:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv1, closestPoint = cv1.Geom });
-                    break;
-                case 1:
-                    result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = cv0, closestPoint = cv0.Geom });
-                    break;
-            }
-            return result;
-        });
+        var finder = new AdjacentFinder(boundaries);
+        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv0, cv0.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
 
         AssertListCellVertex(path, cv0);
     }
