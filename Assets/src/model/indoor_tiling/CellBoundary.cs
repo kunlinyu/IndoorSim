@@ -30,6 +30,7 @@ public class CellBoundary
     // left/right Functional == true means agents may stop at the left/right side of this boundary to do something
     [JsonPropertyAttribute] public bool LeftFunctional { get; set; } = false;
     [JsonPropertyAttribute] public bool RightFunctional { get; set; }= false;
+    [JsonIgnore] public Action OnUpdate = () => {};
 
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
 

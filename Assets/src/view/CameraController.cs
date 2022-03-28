@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] public const float KeyboardMoveSpeed = 1.0f;
+    [SerializeField] public const float KeyboardMoveSpeed = 0.1f;
     [SerializeField] public const float dragSpeed = 0.001f;
     [SerializeField] public const float rotationSpeed = 0.05f;
     [SerializeField] public const float mouseScrollSpeed = 1.0f;
@@ -35,10 +35,7 @@ public class CameraController : MonoBehaviour
             move += Vector3.down;
 
         if (Input.mouseScrollDelta.y != 0)
-        {
-            Debug.Log(Input.mouseScrollDelta.y);
             move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
-        }
 
         if (move.magnitude > 0.0)
             MoveCameraXZ(transform.position, KeyboardMoveSpeed * move);

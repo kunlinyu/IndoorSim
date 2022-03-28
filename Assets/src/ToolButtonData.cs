@@ -5,9 +5,11 @@ using UnityEngine;
 
 public enum ToolType
 {
+    ViewSelect,
     RedoUndo,
     BasicShape,
     ParametricShape,
+    DoAfterSelect,
     Asset,
 }
 

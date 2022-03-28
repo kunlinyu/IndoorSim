@@ -21,6 +21,38 @@ public class IndoorTiling
     public CellSpace? PickCellSpace(Point point)
         => spacePool.FirstOrDefault(cs => cs.Geom.Contains(point));
 
+    public CellVertex? PickCellVertex(Point point, double radius)
+    {
+        double minDistance = Double.MaxValue;
+        CellVertex? vertex = null;
+        foreach (CellVertex cv in vertexPool)
+        {
+            double distance = cv.Geom.Distance(point);
+            if (minDistance > distance)
+            {
+                minDistance = distance;
+                vertex = cv;
+            }
+        }
+        return minDistance < radius ? vertex : null;
+    }
+
+    public CellBoundary? PickCellBoundary(Point point, double radius)
+    {
+        double minDistance = Double.MaxValue;
+        CellBoundary? boundary = null;
+        foreach (CellBoundary cb in boundaryPool)
+        {
+            double distance = cb.Geom.Distance(point);
+            if (minDistance > distance)
+            {
+                minDistance = distance;
+                boundary = cb;
+            }
+        }
+        return minDistance < radius ? boundary : null;
+    }
+
     public ICollection<CellVertex> Neighbor(CellVertex cv)
         => vertex2Boundaries[cv].Select(b => b.Another(cv)).ToList();
 

@@ -9,6 +9,7 @@ public class CellSpace
     [JsonPropertyAttribute] public LinkedList<CellVertex> Vertices { get; private set; }
     [JsonPropertyAttribute] public LinkedList<CellBoundary> Boundaries { get; private set; }
     [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
+    [JsonIgnore] public Action OnUpdate = () => {};
 
     public CellSpace(Polygon polygon, ICollection<CellVertex> vertices, ICollection<CellBoundary> boundaries)
     {
