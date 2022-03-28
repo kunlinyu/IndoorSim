@@ -7,22 +7,14 @@ public class CellSpace
 {
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
     [JsonPropertyAttribute] public LinkedList<CellVertex> Vertices { get; private set; }
+    [JsonPropertyAttribute] public LinkedList<CellBoundary> Boundaries { get; private set; }
     [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
 
-    [JsonIgnore] public bool IsUniversalRemainSpace { get; set; } = false;
-    public CellSpace(Polygon polygon, ICollection<CellVertex> vertices)
+    public CellSpace(Polygon polygon, ICollection<CellVertex> vertices, ICollection<CellBoundary> boundaries)
     {
         Geom = polygon;
-        this.Vertices = new LinkedList<CellVertex>(vertices);
-        if (polygon.Holes.Length > 0)
-            throw new ArgumentException("non universal remain space should not contain holes");
-    }
-
-    public CellSpace(Polygon polygon, ICollection<CellVertex> vertices, bool universalRemainSpace)
-    {
-        Geom = polygon;
-        this.Vertices = new LinkedList<CellVertex>(vertices);
-        IsUniversalRemainSpace = universalRemainSpace;
+        Vertices = new LinkedList<CellVertex>(vertices);
+        Boundaries = new LinkedList<CellBoundary>(boundaries);
     }
 
     public void AddNewHole(CellVertex start, CellVertex end)

@@ -133,10 +133,6 @@ public class IndoorTiling
         }
 
         // remove useless vertex
-
-
-
-        // update lookup tables
     }
 
     private void AddBoundaryInternal(CellBoundary boundary)
@@ -192,14 +188,15 @@ public class IndoorTiling
         polygonPoints.Add(polygonPoints[0]);
         Polygon polygon = gf.CreatePolygon(polygonPoints.ToArray());
 
-        return new CellSpace(polygon, path.GetRange(0, path.Count - 1));
+        return new CellSpace(polygon, path.GetRange(0, path.Count - 1), boundaries);
     }
 
-    public void RemoveBoundary(CellBoundary cb)
+    public void RemoveBoundary(CellBoundary boundary)
     {
-        if (!boundaryPool.Contains(cb)) throw new ArgumentException("can not find cell boundary");
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("can not find cell boundary");
 
         // Remove Boundary only
+        RemoveBoundaryInternal(boundary);
         // Or remove polygon
         // Or merge polygon
         // Remove Vertex
