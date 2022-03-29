@@ -100,6 +100,7 @@ public class Utils
     }
     static public Vector3 Coor2Vec(Coordinate coordinate) => new Vector3((float)coordinate.X, 0.0f, (float)coordinate.Y);
     static public Coordinate Vec2Coor(Vector3 vec) => new Coordinate(vec.x, vec.z);
+    static public Coordinate? Vec2Coor(Vector3? vec) => vec == null ? null : new Coordinate(vec!.Value.x, vec!.Value.z);
 
     static public Vector3 Coor2Screen(Coordinate coor) => Camera.main.WorldToScreenPoint(Utils.Coor2Vec(coor));
 

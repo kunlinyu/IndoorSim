@@ -3,6 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+
+using UnityEngine;
+
 #nullable enable
 
 public class IndoorTiling
@@ -17,6 +20,14 @@ public class IndoorTiling
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
     [JsonIgnore] private Dictionary<CellSpace, HashSet<RepresentativeLine>> space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
+
+    [JsonIgnore] public Action<CellVertex> OnVertexCreated = (v) => { };
+    [JsonIgnore] public Action<CellBoundary> OnBoundaryCreated = (b) => { };
+    [JsonIgnore] public Action<CellSpace> OnSpaceCreated = (s) => { };
+
+    [JsonIgnore] public Action<CellVertex> OnVertexRemoved = (v) => { };
+    [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
+    [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
 
     public CellSpace? PickCellSpace(Point point)
         => spacePool.FirstOrDefault(cs => cs.Geom.Contains(point));
@@ -57,17 +68,10 @@ public class IndoorTiling
         => vertex2Boundaries[cv].Select(b => b.Another(cv)).ToList();
 
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
-        => vertex2Boundaries[cv1].Where(b => Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
+        => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
 
     public IndoorTiling()
     {
-        Coordinate[] cas = {
-            new Coordinate( RemainSpaceSize,  RemainSpaceSize),
-            new Coordinate(-RemainSpaceSize,  RemainSpaceSize),
-            new Coordinate(-RemainSpaceSize, -RemainSpaceSize),
-            new Coordinate( RemainSpaceSize, -RemainSpaceSize),
-            new Coordinate( RemainSpaceSize,  RemainSpaceSize),
-        };
     }
 
     public void AddBoundary(LineString ls)
@@ -102,7 +106,7 @@ public class IndoorTiling
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
         if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
         if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
-        if (Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
+        if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
         // TODO: Check intersection
 
@@ -163,6 +167,15 @@ public class IndoorTiling
             else
                 throw new Exception("should not get to here");
         }
+        else
+        {
+            // Add Vertices
+            if (newStart) vertexPool.Add(start);
+            if (newEnd) vertexPool.Add(end);
+
+            // Add Boundary
+            AddBoundaryInternal(boundary);
+        }
 
         // remove useless vertex
     }
@@ -180,6 +193,10 @@ public class IndoorTiling
             vertex2Boundaries[boundary.P1].Add(boundary);
         else
             vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
+
+        OnBoundaryCreated.Invoke(boundary);
+
+        Debug.Log("AddBoundary");
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)

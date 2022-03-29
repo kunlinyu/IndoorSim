@@ -1,5 +1,7 @@
 using UnityEngine;
 
+
+[RequireComponent(typeof(Camera))]
 public class CameraController : MonoBehaviour
 {
     [SerializeField] public const float KeyboardMoveSpeed = 0.1f;
@@ -7,6 +9,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] public const float rotationSpeed = 0.05f;
     [SerializeField] public const float mouseScrollSpeed = 1.0f;
     [SerializeField] public const float minHeight = 1.0f;
+
+    private static Plane ground = new Plane(Vector3.up, Vector3.zero);
 
     Vector3 anchorMouse;
     Quaternion anchorRot;
@@ -88,5 +92,14 @@ public class CameraController : MonoBehaviour
         transform.Translate(moveVector);
         cameraEuler.x = pitch;
         transform.rotation = Quaternion.Euler(cameraEuler);
+    }
+
+    public static Vector3? mousePositionOnGround()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (ground.Raycast(ray, out float enter))
+            return ray.GetPoint(enter);
+
+        return null;
     }
 }
