@@ -21,11 +21,24 @@ public class VertexController : MonoBehaviour
     }
 
     [SerializeField] public float widthFactor = 0.2f;
-    [SerializeField] public float radiusFactor = 0.02f;
+    [SerializeField] public float radiusFactor = 0.1f;
     [SerializeField] public int step = 16;
     [SerializeField] public int sortingLayerId = 0;
     [SerializeField] public int sortingOrder = 0;
     [SerializeField] public Material material;
+
+    private bool heightLight = false;
+    public bool HeightLight
+    {
+        get => heightLight;
+        set
+        {
+            heightLight = value;
+            needUpdateRenderer = true;
+        }
+    }
+
+    private bool needUpdateRenderer = true;
 
     private int lastCameraHeightInt;
 
@@ -48,20 +61,22 @@ public class VertexController : MonoBehaviour
         if (lastCameraHeightInt != newHeightInt)
         {
             lastCameraHeightInt = newHeightInt;
-            updateRenderer();
+            needUpdateRenderer = true;
         }
+        if (needUpdateRenderer)
+            updateRenderer();
     }
 
     void updateCollider()
     {
         GetComponent<SphereCollider>().center = Vector3.zero;
-        GetComponent<SphereCollider>().radius = 0.01f;
+        GetComponent<SphereCollider>().radius = 0.1f;
     }
 
     void updateTransform()
     {
-        transform.position = Utils.Coor2Vec(vertex.Coordinate);
-        transform.rotation = Quaternion.identity;
+        transform.localPosition = Utils.Coor2Vec(vertex.Coordinate);
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f); ;
     }
 
     private static Vector3[] CirclePosition(Vector3 center, float radius, int step)
@@ -95,5 +110,11 @@ public class VertexController : MonoBehaviour
         lr.sortingLayerID = sortingLayerId;
         lr.sortingOrder = sortingOrder;
         lr.material = material;
+        if (HeightLight)
+            lr.material.color = new Color(1.0f, 0.8f, 0.8f);
+        else
+            lr.material.color = new Color(0.8f, 1.0f, 0.6f);
+
+        needUpdateRenderer = false;
     }
 }

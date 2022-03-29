@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class BoundaryController : MonoBehaviour
 {
     private CellBoundary boundary;
@@ -20,6 +21,7 @@ public class BoundaryController : MonoBehaviour
     void Start()
     {
         updateRenderer();
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);;
     }
 
     // Update is called once per frame
@@ -41,8 +43,5 @@ public class BoundaryController : MonoBehaviour
         lr.endWidth = 0.1f;
         lr.numCapVertices = 0;
         lr.numCornerVertices = 0;
-        // lr.sortingLayerID = sortingLayerId;
-        // lr.sortingOrder = sortingOrder;
-        // lr.material = material;
     }
 }

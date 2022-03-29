@@ -1,4 +1,5 @@
-using System;
+using System.Linq;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using UnityEngine;
 #nullable enable
@@ -10,6 +11,10 @@ public class LineString : MonoBehaviour, ITool
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
     private Point? lastPoint = null;
+
+    private HashSet<VertexController> oldVCs = new HashSet<VertexController>();
+
+    public const float radiusFactor = 0.1f;
 
     void Awake()
     {
@@ -38,6 +43,20 @@ public class LineString : MonoBehaviour, ITool
         {
             lastPoint = null;
         }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        float radius = Camera.main.transform.position.y * radiusFactor;
+        RaycastHit[] hits = Physics.SphereCastAll(Camera.main.transform.position, radius, ray.direction, 100.0f);
+        HashSet<VertexController> newVCs = new HashSet<VertexController>(hits.Select(hit => hit.collider.gameObject.GetComponent<VertexController>()).ToArray());
+
+        foreach (VertexController vc in newVCs)
+            if (!oldVCs.Contains(vc))
+                vc.HeightLight = true;
+        foreach (VertexController vc in oldVCs)
+            if (!newVCs.Contains(vc))
+                vc.HeightLight = false;
+
+        oldVCs = newVCs;
 
         UpdateLineRenderer();
     }

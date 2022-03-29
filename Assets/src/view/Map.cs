@@ -19,7 +19,6 @@ public class Map : MonoBehaviour
 
     void Start()
     {
-        transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
 
         vertexParentObj = new GameObject("vertex parent");
         vertexParentObj.transform.SetParent(transform);
