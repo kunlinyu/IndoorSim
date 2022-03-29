@@ -33,8 +33,6 @@ public class VertexController : MonoBehaviour
         GetComponent<LineRenderer>().positionCount = 0;
         material = new Material(Shader.Find("Sprites/Default"));
         material.color = new Color(1.0f, 0.8f, 0.8f);
-
-        vertex = new CellVertex(new GeometryFactory().CreatePoint(new Coordinate(0.0d, 0.0d)));
     }
 
     // Update is called once per frame
@@ -48,15 +46,15 @@ public class VertexController : MonoBehaviour
         }
     }
 
-    Vector3[] CirclePosition(Vector2 center, float radius, int step)
+    Vector3[] CirclePosition(Vector3 center, float radius, int step)
     {
         Vector3[] result = new Vector3[step];
         for (int i = 0; i < step; i++)
         {
             float theta = 2 * Mathf.PI / step * i;
             float x = center.x + radius * Mathf.Cos(theta);
-            float y = center.y + radius * Mathf.Sin(theta);
-            result[i] = new Vector3(x, 0.0f, y);
+            float z = center.z + radius * Mathf.Sin(theta);
+            result[i] = new Vector3(x, 0.0f, z);
         }
         return result;
     }

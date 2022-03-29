@@ -133,8 +133,14 @@ public class IndoorTiling
             // TODO new cellspace is a hole of another?
 
             // Add Vertices
-            if (newStart) vertexPool.Add(start);
-            if (newEnd) vertexPool.Add(end);
+            if (newStart) {
+                vertexPool.Add(start);
+                OnVertexCreated(start);
+            }
+            if (newEnd) {
+                vertexPool.Add(end);
+                OnVertexCreated(end);
+            }
 
             // Add Boundary
             AddBoundaryInternal(boundary);
@@ -170,8 +176,14 @@ public class IndoorTiling
         else
         {
             // Add Vertices
-            if (newStart) vertexPool.Add(start);
-            if (newEnd) vertexPool.Add(end);
+            if (newStart) {
+                vertexPool.Add(start);
+                OnVertexCreated(start);
+            }
+            if (newEnd) {
+                vertexPool.Add(end);
+                OnVertexCreated(end);
+            }
 
             // Add Boundary
             AddBoundaryInternal(boundary);
@@ -195,8 +207,6 @@ public class IndoorTiling
             vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
 
         OnBoundaryCreated.Invoke(boundary);
-
-        Debug.Log("AddBoundary");
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)

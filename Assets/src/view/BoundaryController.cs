@@ -13,7 +13,6 @@ public class BoundaryController : MonoBehaviour
         {
             boundary = value;
             boundary.OnUpdate += updateRenderer;
-            Debug.Log("Create view of boundary");
         }
     }
 

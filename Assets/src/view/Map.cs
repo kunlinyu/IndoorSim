@@ -65,7 +65,6 @@ public class Map : MonoBehaviour
 
             var controller = obj.AddComponent<BoundaryController>();
             controller.Boundary = boundary;
-            Debug.Log("On Boundary created");
         };
         indoorTiling.OnSpaceCreated += (space) =>
         {
