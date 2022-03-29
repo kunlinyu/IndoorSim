@@ -4,6 +4,7 @@ using NetTopologySuite.Geometries;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
+[RequireComponent(typeof(SphereCollider))]
 public class VertexController : MonoBehaviour
 {
     private CellVertex vertex;
@@ -14,6 +15,8 @@ public class VertexController : MonoBehaviour
         {
             vertex = value;
             vertex.OnUpdate += updateRenderer;
+            vertex.OnUpdate += updateCollider;
+            vertex.OnUpdate += updateTransform;
         }
     }
 
@@ -33,12 +36,15 @@ public class VertexController : MonoBehaviour
         GetComponent<LineRenderer>().positionCount = 0;
         material = new Material(Shader.Find("Sprites/Default"));
         material.color = new Color(1.0f, 0.8f, 0.8f);
+        updateRenderer();
+        updateCollider();
+        updateTransform();
     }
 
     // Update is called once per frame
     void Update()
     {
-        int newHeightInt = (int) (Camera.main.transform.position.y * 0.5f);
+        int newHeightInt = (int)(Camera.main.transform.position.y * 0.5f);
         if (lastCameraHeightInt != newHeightInt)
         {
             lastCameraHeightInt = newHeightInt;
@@ -46,7 +52,19 @@ public class VertexController : MonoBehaviour
         }
     }
 
-    Vector3[] CirclePosition(Vector3 center, float radius, int step)
+    void updateCollider()
+    {
+        GetComponent<SphereCollider>().center = Vector3.zero;
+        GetComponent<SphereCollider>().radius = 0.01f;
+    }
+
+    void updateTransform()
+    {
+        transform.position = Utils.Coor2Vec(vertex.Coordinate);
+        transform.rotation = Quaternion.identity;
+    }
+
+    private static Vector3[] CirclePosition(Vector3 center, float radius, int step)
     {
         Vector3[] result = new Vector3[step];
         for (int i = 0; i < step; i++)
