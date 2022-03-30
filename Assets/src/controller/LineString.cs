@@ -11,10 +11,10 @@ public class LineString : MonoBehaviour, ITool
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
     private Point? lastPoint = null;
+    private CellVertex? lastVertex = null;
 
     void Awake()
     {
-        lastPoint = null;
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
     }
     void Update()
@@ -25,18 +25,69 @@ public class LineString : MonoBehaviour, ITool
             if (currentCoor != null)
             {
                 Point currentPoint = new GeometryFactory().CreatePoint(currentCoor);
+
+                Selectable? selectable = MousePickController.SelectedEntity;
+                CellVertex? currentVertex = null;
+                if (selectable != null && selectable.type == SelectableType.Vertex)
+                {
+                    currentVertex = ((VertexController)selectable).Vertex;
+                    currentPoint = currentVertex.Geom;
+                }
+
                 if (lastPoint != null)
                 {
                     GeometryFactory gf = new GeometryFactory();
-                    var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentPoint.Coordinate });
-                    IndoorSim.indoorTiling.AddBoundary(ls);
+
+                    if (lastVertex == null && currentVertex == null)
+                    {
+                        var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentPoint.Coordinate });
+                        CellVertex newVertexStart = new CellVertex(lastPoint);
+                        CellVertex newVertexEnd = new CellVertex(currentPoint);
+                        IndoorSim.indoorTiling.AddBoundary(ls, newVertexStart, newVertexEnd);
+                        lastVertex = newVertexEnd;
+                        lastPoint = currentPoint;
+                    }
+                    else if (lastVertex != null && currentVertex == null)
+                    {
+                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentPoint.Coordinate });
+                        CellVertex newVertex = new CellVertex(currentPoint);
+                        IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, newVertex);
+                        lastVertex = newVertex;
+                        lastPoint = currentPoint;
+                    }
+                    else if (lastVertex == null && currentVertex != null)
+                    {
+                        var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentVertex.Coordinate });
+                        CellVertex newVertex = new CellVertex(lastPoint);
+                        IndoorSim.indoorTiling.AddBoundary(ls, newVertex, currentVertex);
+                        lastVertex = currentVertex;
+                        lastPoint = currentVertex.Geom;
+                    }
+                    else if (lastVertex != null && currentVertex != null)
+                    {
+                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
+                        Debug.Log(ls.NumPoints);
+                        IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
+                        lastVertex = currentVertex;
+                        lastPoint = currentVertex.Geom;
+                    }
+                    else
+                        throw new System.Exception("Oops!");
+
                 }
-                lastPoint = currentPoint;
+                else
+                {
+                    lastPoint = currentPoint;
+                    lastVertex = currentVertex;
+                }
             }
         }
 
         if (Input.GetMouseButtonDown(1))
+        {
             lastPoint = null;
+            lastVertex = null;
+        }
 
         UpdateLineRenderer();
     }

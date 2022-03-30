@@ -9,8 +9,9 @@ public class MousePickController : MonoBehaviour
 
     public const float radiusFactor = 0.1f;
 
-    private Selectable? selectedEntity = null;
+    static private Selectable? selectedEntity = null;
 
+    static public Selectable? SelectedEntity { get => selectedEntity; }
 
     // Start is called before the first frame update
     void Start()

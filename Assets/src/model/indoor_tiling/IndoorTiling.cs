@@ -133,11 +133,13 @@ public class IndoorTiling
             // TODO new cellspace is a hole of another?
 
             // Add Vertices
-            if (newStart) {
+            if (newStart)
+            {
                 vertexPool.Add(start);
                 OnVertexCreated(start);
             }
-            if (newEnd) {
+            if (newEnd)
+            {
                 vertexPool.Add(end);
                 OnVertexCreated(end);
             }
@@ -176,11 +178,13 @@ public class IndoorTiling
         else
         {
             // Add Vertices
-            if (newStart) {
+            if (newStart)
+            {
                 vertexPool.Add(start);
                 OnVertexCreated(start);
             }
-            if (newEnd) {
+            if (newEnd)
+            {
                 vertexPool.Add(end);
                 OnVertexCreated(end);
             }
@@ -196,15 +200,13 @@ public class IndoorTiling
     {
         boundaryPool.Add(boundary);
 
-        if (vertex2Boundaries.ContainsKey(boundary.P0))
-            vertex2Boundaries[boundary.P0].Add(boundary);
-        else
+        if (!vertex2Boundaries.ContainsKey(boundary.P0))
             vertex2Boundaries[boundary.P0] = new HashSet<CellBoundary>();
+        vertex2Boundaries[boundary.P0].Add(boundary);
 
-        if (vertex2Boundaries.ContainsKey(boundary.P1))
-            vertex2Boundaries[boundary.P1].Add(boundary);
-        else
+        if (!vertex2Boundaries.ContainsKey(boundary.P1))
             vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
+        vertex2Boundaries[boundary.P1].Add(boundary);
 
         OnBoundaryCreated.Invoke(boundary);
     }
@@ -219,6 +221,7 @@ public class IndoorTiling
 
     private void AddSpaceInternal(CellSpace space)
     {
+        Debug.Log("add space");
         spacePool.Add(space);
         foreach (var vertex in space.Vertices)
             if (vertex2Spaces.ContainsKey(vertex))
