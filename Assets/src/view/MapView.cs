@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Map : MonoBehaviour
+public class MapView : MonoBehaviour
 {
     public IndoorTiling indoorTiling;
 

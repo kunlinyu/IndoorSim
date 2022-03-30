@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class env : MonoBehaviour
 {
-    IndoorSim indoorSim = new IndoorSim();
-    public Map map;
-    public SimulationController simController;
+    private IndoorSim indoorSim = new IndoorSim();  // model
+    public MapView mapView;  // view
+    public SimulationController simController;  // controller
     void OnEnable()
     {
-        map.indoorTiling = indoorSim.indoorTiling;
+        mapView.indoorTiling = indoorSim.indoorTiling;
         simController.indoorSim = indoorSim;
     }
 

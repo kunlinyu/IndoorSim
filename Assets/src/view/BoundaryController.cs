@@ -1,15 +1,16 @@
 using System.Linq;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(BoxCollider2D))]
-public class BoundaryController : MonoBehaviour
+public class BoundaryController : MonoBehaviour, Selectable
 {
     private CellBoundary boundary;
     public CellBoundary Boundary
     {
-        get { return boundary; }
+        get => boundary;
         set
         {
             boundary = value;
@@ -17,11 +18,27 @@ public class BoundaryController : MonoBehaviour
         }
     }
 
+    private bool _highLight = false;
+    private bool needUpdateRenderer = true;
+    public bool highLight
+    {
+        get => _highLight;
+        set
+        {
+            _highLight = value;
+            needUpdateRenderer = true;
+        }
+    }
+    public SelectableType type { get => SelectableType.Boundary; }
+
+    public float Distance(Vector3 vec)
+    => (float)boundary.Geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+
     // Start is called before the first frame update
     void Start()
     {
         updateRenderer();
-        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);;
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f); ;
     }
 
     // Update is called once per frame

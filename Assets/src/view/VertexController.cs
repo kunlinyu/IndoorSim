@@ -5,12 +5,12 @@ using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(SphereCollider))]
-public class VertexController : MonoBehaviour
+public class VertexController : MonoBehaviour, Selectable
 {
     private CellVertex vertex;
     public CellVertex Vertex
     {
-        get { return vertex; }
+        get => vertex;
         set
         {
             vertex = value;
@@ -27,18 +27,22 @@ public class VertexController : MonoBehaviour
     [SerializeField] public int sortingOrder = 0;
     [SerializeField] public Material material;
 
-    private bool heightLight = false;
-    public bool HeightLight
+    private bool _highLight = false;
+    private bool needUpdateRenderer = true;
+    public bool highLight
     {
-        get => heightLight;
+        get => _highLight;
         set
         {
-            heightLight = value;
+            _highLight = value;
             needUpdateRenderer = true;
         }
     }
 
-    private bool needUpdateRenderer = true;
+    public SelectableType type { get => SelectableType.Vertex; }
+
+    public float Distance(Vector3 vec)
+        => (float)vertex.Coordinate.Distance(Utils.Vec2Coor(vec));
 
     private int lastCameraHeightInt;
 
@@ -110,11 +114,12 @@ public class VertexController : MonoBehaviour
         lr.sortingLayerID = sortingLayerId;
         lr.sortingOrder = sortingOrder;
         lr.material = material;
-        if (HeightLight)
-            lr.material.color = new Color(1.0f, 0.8f, 0.8f);
+        if (highLight)
+            lr.material.color = new Color(1.0f, 0.2f, 0.2f, 0.5f);
         else
-            lr.material.color = new Color(0.8f, 1.0f, 0.6f);
+            lr.material.color = new Color(0.2f, 1.0f, 0.2f, 0.5f);
 
         needUpdateRenderer = false;
     }
+
 }
