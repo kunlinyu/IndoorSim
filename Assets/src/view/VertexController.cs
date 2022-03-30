@@ -21,7 +21,7 @@ public class VertexController : MonoBehaviour, Selectable
     }
 
     [SerializeField] public float widthFactor = 0.2f;
-    [SerializeField] public float radiusFactor = 0.1f;
+    [SerializeField] public float radiusFactor = 0.05f;
     [SerializeField] public int step = 16;
     [SerializeField] public int sortingLayerId = 0;
     [SerializeField] public int sortingOrder = 0;

@@ -9,9 +9,9 @@ public class MapView : MonoBehaviour
     public GameObject vertexParentObj;
     public GameObject boundaryParentObj;
     public GameObject spaceParentObj;
-    public Transform vertexParent;  // TODO: create it in code not in UnityEditor
-    public Transform boundaryParent;  // TODO: create it in code not in UnityEditor
-    public Transform spaceParent;  // TODO: create it in code not in UnityEditor
+    public Transform vertexParent;
+    public Transform boundaryParent;
+    public Transform spaceParent;
 
     private Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     private Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();

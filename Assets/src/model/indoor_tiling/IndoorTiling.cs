@@ -150,7 +150,7 @@ public class IndoorTiling
             // split one CellSpace to two CellSpaces
             if (path1IsCCW && path2IsCCW)
             {
-                CellSpace oldCellSpace = PickCellSpace(ls.InteriorPoint) ?? throw new ArgumentException("Oops!");
+                CellSpace oldCellSpace = PickCellSpace(MiddlePoint(ls)) ?? throw new ArgumentException("Oops!");
                 CellSpace newCellSpace1 = CreateCellSpace(path1, boundaries1, gf);
                 CellSpace newCellSpace2 = CreateCellSpace(path2, boundaries2, gf);
 
@@ -196,6 +196,15 @@ public class IndoorTiling
         // remove useless vertex
     }
 
+    private Point MiddlePoint(LineString ls)
+    {
+        if (ls.NumPoints < 2)
+            throw new ArgumentException("Empty LingString don't have middlePoint");
+        else if (ls.NumPoints == 2)
+            return new GeometryFactory().CreatePoint(new Coordinate((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f));
+        else
+            return ls.GetPointN(1);
+    }
     private void AddBoundaryInternal(CellBoundary boundary)
     {
         boundaryPool.Add(boundary);
@@ -228,6 +237,7 @@ public class IndoorTiling
                 vertex2Spaces[vertex].Add(space);
             else
                 vertex2Spaces[vertex] = new HashSet<CellSpace>();
+        OnSpaceCreated(space);
     }
 
     private void RemoveSpaceInternal(CellSpace space)
@@ -236,6 +246,7 @@ public class IndoorTiling
         spacePool.Remove(space);
         foreach (var vertex in space.Vertices)
             vertex2Spaces[vertex].Remove(space);
+        OnSpaceRemoved(space);
     }
 
     private CellSpace CreateCellSpace(List<CellVertex> path, List<CellBoundary> boundaries, GeometryFactory gf)

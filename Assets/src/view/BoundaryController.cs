@@ -29,6 +29,8 @@ public class BoundaryController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
+
+    [SerializeField] public Material material;
     public SelectableType type { get => SelectableType.Boundary; }
 
     public float Distance(Vector3 vec)
@@ -37,8 +39,10 @@ public class BoundaryController : MonoBehaviour, Selectable
     // Start is called before the first frame update
     void Start()
     {
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
+        material = new Material(Shader.Find("Sprites/Default"));
+        material.color = new Color(1.0f, 0.5f, 1.0f);
         updateRenderer();
-        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f); ;
     }
 
     // Update is called once per frame
@@ -49,7 +53,6 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     void updateRenderer()
     {
-
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.Geom.NumPoints;
         lr.SetPositions(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
@@ -60,5 +63,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.endWidth = 0.1f;
         lr.numCapVertices = 0;
         lr.numCornerVertices = 0;
+        lr.material = material;
+        lr.sortingOrder = 0;
     }
 }
