@@ -5,6 +5,8 @@ using NetTopologySuite.Geometries;
 
 using NUnit.Framework;
 
+using JumpInfo = PSLGPolygonSearcher.JumpInfo;
+
 class AdjacentFinder
 {
     private List<CellBoundary> boundaries;
@@ -13,12 +15,12 @@ class AdjacentFinder
         this.boundaries = boundaries;
     }
 
-    public List<PSLGPolygonSearcher.OutInfo> Find(CellVertex cv)
+    public List<JumpInfo> Find(CellVertex cv)
     {
-        var result = new List<PSLGPolygonSearcher.OutInfo>();
+        var result = new List<JumpInfo>();
         foreach (CellBoundary b in boundaries)
             if (b.Contains(cv))
-                result.Add(new PSLGPolygonSearcher.OutInfo() { targetCellVertex = b.Another(cv), boundary = b });
+                result.Add(new JumpInfo() { target = b.Another(cv), through = b });
         return result;
     }
 
@@ -26,11 +28,11 @@ class AdjacentFinder
 
 public class RotationNextTest
 {
-    private void AssertListCellVertex(List<CellVertex> path, params CellVertex[] expect)
+    private void AssertListCellVertex(List<JumpInfo> path, params CellVertex[] expect)
     {
         Assert.AreEqual(expect.Length, path.Count);
         for (int i = 0; i < path.Count; i++)
-            Assert.True(System.Object.ReferenceEquals(expect[i], path[i]));
+            Assert.True(System.Object.ReferenceEquals(expect[i], path[i].target));
     }
 
     [Test]
@@ -47,7 +49,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv3, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -66,7 +69,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv3, cv0, cv0.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv3, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv0, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv3, cv2, cv1, cv0);
     }
@@ -87,7 +91,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv4) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv4, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv3, cv4);
     }
@@ -108,7 +113,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv4, cv4.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv4) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv4, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv3, cv4);
     }
@@ -128,7 +134,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv3, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv3);
     }
@@ -147,7 +154,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv3, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -165,7 +173,8 @@ public class RotationNextTest
             new CellBoundary(cv2, cv3),
         };
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv3, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1, cv2, cv3);
     }
@@ -183,7 +192,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv3, cv3.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv3) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv3, cv => finder.Find(cv));
 
         Assert.IsEmpty(path);
     }
@@ -194,7 +204,8 @@ public class RotationNextTest
         CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
         CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
         var finder = new AdjacentFinder(new List<CellBoundary>());
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv1) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv1, cv => finder.Find(cv));
 
         Assert.IsEmpty(path);
     }
@@ -210,7 +221,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv1, cv1.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv1) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv1, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0, cv1);
     }
@@ -225,7 +237,8 @@ public class RotationNextTest
         };
 
         var finder = new AdjacentFinder(boundaries);
-        List<CellVertex> path = PSLGPolygonSearcher.Search(cv0, cv0, cv0.Geom, cv => finder.Find(cv), out List<CellBoundary> outBoundaries);
+        JumpInfo jumpInfo = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv1) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(jumpInfo, cv0, cv => finder.Find(cv));
 
         AssertListCellVertex(path, cv0);
     }

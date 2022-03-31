@@ -4,44 +4,58 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using UnityEngine;
 
+#nullable enable
+
 public class PSLGPolygonSearcher
 {
-    public struct OutInfo
+    public struct JumpInfo
     {
-        public CellVertex targetCellVertex;
-        public CellBoundary boundary;
+        public CellVertex target;
+        public CellBoundary through;
+
+        public LineString Geom { get => through.GeomEndWith(target); }
+
+        public bool ContentEqual(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+            JumpInfo oi = (JumpInfo)obj;
+            return System.Object.ReferenceEquals(oi.target, target) && System.Object.ReferenceEquals(oi.through, through);
+        }
     }
 
-    public static List<CellVertex> Search(CellVertex start, CellVertex end, Point startdir,
-                                          Func<CellVertex, List<OutInfo>> adjacentFinder, out List<CellBoundary> boundaries)
+    public static List<JumpInfo> Search(JumpInfo initJump,
+                                        CellVertex target,
+                                        Func<CellVertex, List<JumpInfo>> adjacentFinder)
     {
-        boundaries = new List<CellBoundary>();
-        if (System.Object.ReferenceEquals(start, end)) return new List<CellVertex>() { start };
+        List<JumpInfo> BBTs = new List<JumpInfo>() { initJump };
+        if (System.Object.ReferenceEquals(initJump.target, target)) return BBTs;
 
-        List<CellVertex> result = new List<CellVertex>();
-        result.Add(start);
+        JumpInfo currentBBT = initJump;
+        JumpInfo? lastBBT = null;
 
-        CellVertex current = start;
-        CellVertex last = null;
-
+        int loopCount = 0;
         do
         {
-            List<OutInfo> outInfos = adjacentFinder(current);
-            if (outInfos.Count == 0) return new List<CellVertex>();
-            List<CellVertex> neighbors = outInfos.Select(oi => oi.targetCellVertex).ToList();
-            List<CellBoundary> outBoundaries = outInfos.Select(oi => oi.boundary).ToList();
-            List<Point> closestPoints = outBoundaries.Select(b => b.ClosestPointTo(current)).ToList();
+            loopCount++;
+            if (loopCount > 10000000) break;
+
+            List<JumpInfo> jumpInfos = adjacentFinder(currentBBT.target);
+            if (jumpInfos.Count == 0) return new List<JumpInfo>();
+
+            List<CellBoundary> outBoundaries = jumpInfos.Select(oi => oi.through).ToList();
+            List<Point> closestPoints = outBoundaries.Where(b => b != null).Select(b => b.ClosestPointTo(currentBBT.target)).ToList();
 
             int startIndex = -1;
-            if (last == null)
+            if (lastBBT == null)
             {
-                closestPoints.Add(startdir);
+                closestPoints.Add(initJump.through.ClosestPointTo(initJump.target));
                 startIndex = closestPoints.Count - 1;
             }
             else
             {
-                for (int i = 0; i < outInfos.Count; i++)
-                    if (System.Object.ReferenceEquals(outInfos[i].targetCellVertex, last))
+                for (int i = 0; i < jumpInfos.Count; i++)
+                    if (System.Object.ReferenceEquals(jumpInfos[i].target, lastBBT.Value.target))
                     {
                         startIndex = i;
                         break;
@@ -49,33 +63,40 @@ public class PSLGPolygonSearcher
             }
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
-            Next(current.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
+            Next(currentBBT.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
 
-            last = current;
-            current = neighbors[CCWNextIndex];
-            result.Add(current);
-            boundaries.Add(outBoundaries[CCWNextIndex]);
+            lastBBT = currentBBT;
+            currentBBT = jumpInfos[CCWNextIndex];
 
             // come back to start, no path from start to end
-            if (System.Object.ReferenceEquals(current, start)) return new List<CellVertex>();
-        } while (!System.Object.ReferenceEquals(current, end));
+            if (BBTs.Any(bbt => bbt.ContentEqual(currentBBT)))
+            {
+                Debug.Log("no path");
+                return new List<JumpInfo>();
+            }
 
-        // Remove points between two same point (0 1 2 <3> 4 5 <3> 7 8 9 => 0 1 2 <3> 7 8 9)
-        List<CellVertex> temp = new List<CellVertex>();
-        for (int i = 0; i < result.Count; i++)
+            BBTs.Add(currentBBT);
+
+        } while (!System.Object.ReferenceEquals(currentBBT.target, target));
+
+        Debug.Log("debug " + BBTs.Count);
+
+        List<JumpInfo> tempBBTs = new List<JumpInfo>();
+        for (int i = 0; i < BBTs.Count; i++)
         {
-            for (int j = 0; j < temp.Count; j++)
-                if (System.Object.ReferenceEquals(temp[j], result[i]))
+            bool remove = false;
+            for (int j = 0; j < tempBBTs.Count; j++)
+                if (System.Object.ReferenceEquals(tempBBTs[j].target, BBTs[i].target))
                 {
-                    temp.RemoveRange(j, temp.Count - j);
+                    tempBBTs.RemoveRange(j + 1, tempBBTs.Count - j - 1);
+                    remove = true;
                     break;
                 }
-            temp.Add(result[i]);
+            if (!remove)
+                tempBBTs.Add(BBTs[i]);
         }
-        result = temp;
-
-        return result;
-
+        BBTs = tempBBTs;
+        return BBTs;
     }
 
     struct ThetaWithIndex

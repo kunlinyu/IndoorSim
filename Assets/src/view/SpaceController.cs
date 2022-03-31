@@ -65,6 +65,6 @@ public class SpaceController : MonoBehaviour, Selectable
         lr.numCapVertices = 0;
         lr.numCornerVertices = 0;
         lr.material = material;
-        lr.sortingOrder = 1;
+        lr.sortingOrder = 2;
     }
 }

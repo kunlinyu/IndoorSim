@@ -41,6 +41,13 @@ public class CellBoundary
         throw new ArgumentException("Don't contain vertices");
     }
 
+    public LineString GeomEndWith(CellVertex end)
+    {
+        if (Object.ReferenceEquals(end, P1)) return this.Geom;
+        if (Object.ReferenceEquals(end, P0)) return this.GeomReverse;
+        throw new ArgumentException("Don't contain end vertex");
+    }
+
     public CellBoundary(LineString ls, CellVertex p0, CellVertex p1)
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
@@ -70,6 +77,13 @@ public class CellBoundary
         if (Object.ReferenceEquals(one, P0)) return P1;
         if (Object.ReferenceEquals(one, P1)) return P0;
         throw new ArgumentException("Not any one of my CellVertex");
+    }
+
+    public bool ConnectSameVertices(CellBoundary cb)
+    {
+        if (Object.ReferenceEquals(P0, cb.P0) && Object.ReferenceEquals(P1, cb.P1)) return true;
+        if (Object.ReferenceEquals(P0, cb.P1) && Object.ReferenceEquals(P1, cb.P0)) return true;
+        return false;
     }
 
     public Point ClosestPointTo(CellVertex cv)

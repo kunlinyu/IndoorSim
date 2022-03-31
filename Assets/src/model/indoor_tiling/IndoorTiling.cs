@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 
 using UnityEngine;
 
+using JumpInfo = PSLGPolygonSearcher.JumpInfo;
+
 #nullable enable
 
 public class IndoorTiling
@@ -64,6 +66,22 @@ public class IndoorTiling
         return minDistance < radius ? boundary : null;
     }
 
+    public List<CellBoundary> VerticesPair2Boundary(CellVertex cv1, CellVertex cv2)
+    {
+        List<CellBoundary> result = new List<CellBoundary>();
+
+        if (!vertex2Boundaries.ContainsKey(cv1) || !vertex2Boundaries.ContainsKey(cv2))
+            return result;
+
+        var b1s = vertex2Boundaries[cv1];
+        var b2s = vertex2Boundaries[cv2];
+        foreach (var b1 in b1s)
+            foreach (var b2 in b2s)
+                if (System.Object.ReferenceEquals(b1, b2))
+                    result.Add(b2);
+        return result;
+    }
+
     public ICollection<CellVertex> Neighbor(CellVertex cv)
         => vertex2Boundaries[cv].Select(b => b.Another(cv)).ToList();
 
@@ -82,21 +100,16 @@ public class IndoorTiling
         return true;  // TODO
     }
 
-    private bool AnyPolygonContainNewBoundary(LineString ls)
+    private List<JumpInfo> AdjacentFinder(CellVertex cv)
     {
-        return false;  // TODO
-    }
-
-    private List<PSLGPolygonSearcher.OutInfo> AdjacentFinder(CellVertex cv)
-    {
-        var result = new List<PSLGPolygonSearcher.OutInfo>();
+        var result = new List<JumpInfo>();
 
         HashSet<CellBoundary> boundaries = vertex2Boundaries[cv];
         foreach (CellBoundary boundary in boundaries)
-            result.Add(new PSLGPolygonSearcher.OutInfo()
+            result.Add(new JumpInfo()
             {
-                targetCellVertex = boundary.Another(cv),
-                boundary = boundary
+                target = boundary.Another(cv),
+                through = boundary
             });
         return result;
     }
@@ -108,27 +121,34 @@ public class IndoorTiling
         if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
         if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
-        // TODO: Check intersection
+        foreach (CellBoundary b in boundaryPool)
+            if (b.Geom.Crosses(ls))
+                return;
 
         bool newStart = !vertexPool.Contains(start);
         bool newEnd = !vertexPool.Contains(end);
         CellBoundary boundary = new CellBoundary(ls, start, end);
 
         // create new CellSpace
-        if (!newStart && !newEnd && Reachable(start, end))
+        if (!newStart && !newEnd)
         {
-            List<CellVertex> path1 = PSLGPolygonSearcher.Search(start, end, ls.GetPointN(1), AdjacentFinder, out List<CellBoundary> boundaries1);
-            path1.Add(start);
-            boundaries1.Add(boundary);
+            if (VerticesPair2Boundary(start, end).Count > 0) return;
 
-            List<CellVertex> path2 = PSLGPolygonSearcher.Search(end, start, ls.GetPointN(ls.NumPoints - 2), AdjacentFinder, out List<CellBoundary> boundaries2);
-            path2.Add(end);
-            boundaries2.Add(boundary);
+            JumpInfo initJump1 = new JumpInfo() { target = start, through = boundary };
+            List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder);
+            Debug.Log(jumps1.Count);
+
+            JumpInfo initJump2 = new JumpInfo() { target = end, through = boundary };
+            List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder);
+            Debug.Log(jumps2.Count);
 
             var gf = new GeometryFactory();
 
-            bool path1IsCCW = gf.CreateLinearRing(path1.Select(cv => cv.Coordinate).ToArray()).IsCCW;
-            bool path2IsCCW = gf.CreateLinearRing(path2.Select(cv => cv.Coordinate).ToArray()).IsCCW;
+            var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
+            ring1.Add(initJump1.target.Coordinate);
+            var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
+            ring2.Add(initJump2.target.Coordinate);
+
 
             // TODO new cellspace is a hole of another?
 
@@ -147,12 +167,18 @@ public class IndoorTiling
             // Add Boundary
             AddBoundaryInternal(boundary);
 
+            // can not reach
+            if (ring1.Count < 2 && ring2.Count < 2) return;
+
+            bool path1IsCCW = gf.CreateLinearRing(ring1.ToArray()).IsCCW;
+            bool path2IsCCW = gf.CreateLinearRing(ring2.ToArray()).IsCCW;
+
             // split one CellSpace to two CellSpaces
             if (path1IsCCW && path2IsCCW)
             {
                 CellSpace oldCellSpace = PickCellSpace(MiddlePoint(ls)) ?? throw new ArgumentException("Oops!");
-                CellSpace newCellSpace1 = CreateCellSpace(path1, boundaries1, gf);
-                CellSpace newCellSpace2 = CreateCellSpace(path2, boundaries2, gf);
+                CellSpace newCellSpace1 = CreateCellSpace(jumps1);
+                CellSpace newCellSpace2 = CreateCellSpace(jumps2);
 
                 RemoveSpaceInternal(oldCellSpace);
 
@@ -164,16 +190,20 @@ public class IndoorTiling
             {
                 CellSpace space;
                 if (path1IsCCW)
-                    space = CreateCellSpace(path1, boundaries1, gf);
+                    space = CreateCellSpace(jumps1);
                 else
-                    space = CreateCellSpace(path2, boundaries2, gf);
+                    space = CreateCellSpace(jumps2);
 
                 // Add Space
                 AddSpaceInternal(space);
 
             }
             else
-                throw new Exception("should not get to here");
+            {
+
+
+                throw new Exception("should not get to here");  // bug (reconnect two vertices)
+            }
         }
         else
         {
@@ -249,19 +279,23 @@ public class IndoorTiling
         OnSpaceRemoved(space);
     }
 
-    private CellSpace CreateCellSpace(List<CellVertex> path, List<CellBoundary> boundaries, GeometryFactory gf)
+    private CellSpace CreateCellSpace(List<JumpInfo> bbt)
     {
         List<Coordinate> polygonPoints = new List<Coordinate>();
-        for (int i = 0; i < boundaries.Count; i++)
+        for (int i = 0; i < bbt.Count; i++)
         {
-            LineString boundaryPoints = boundaries[i].GeomOrder(path[i], path[i + 1]);
+            LineString boundaryPoints = bbt[i].Geom;
             var ignoreLastOne = new ArraySegment<Coordinate>(boundaryPoints.Coordinates, 0, boundaryPoints.NumPoints - 1).ToArray();
             polygonPoints.AddRange(ignoreLastOne);
         }
-        polygonPoints.Add(polygonPoints[0]);
-        Polygon polygon = gf.CreatePolygon(polygonPoints.ToArray());
+        polygonPoints.Add(bbt[0].Geom.StartPoint.Coordinate);
+        Polygon polygon = new GeometryFactory().CreatePolygon(polygonPoints.ToArray());
 
-        return new CellSpace(polygon, path.GetRange(0, path.Count - 1), boundaries);
+        List<CellVertex> vertices = bbt.Select(ji => ji.target).ToList();
+        List<CellBoundary> boundaries = bbt.Select(ji => ji.through).ToList();
+
+        return new CellSpace(polygon, vertices, boundaries);
+
     }
 
     public void RemoveBoundary(CellBoundary boundary)

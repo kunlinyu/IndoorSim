@@ -7,7 +7,7 @@ using UnityEngine;
 public class MousePickController : MonoBehaviour
 {
 
-    public const float radiusFactor = 0.1f;
+    public const float radiusFactor = 0.02f;
 
     static private Selectable? selectedEntity = null;
 

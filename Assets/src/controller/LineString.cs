@@ -65,11 +65,13 @@ public class LineString : MonoBehaviour, ITool
                     }
                     else if (lastVertex != null && currentVertex != null)
                     {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
-                        Debug.Log(ls.NumPoints);
-                        IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
-                        lastVertex = currentVertex;
-                        lastPoint = currentVertex.Geom;
+                        if (lastVertex != currentVertex)
+                        {
+                            var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
+                            IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
+                            lastVertex = currentVertex;
+                            lastPoint = currentVertex.Geom;
+                        }
                     }
                     else
                         throw new System.Exception("Oops!");
@@ -111,8 +113,8 @@ public class LineString : MonoBehaviour, ITool
             lr.useWorldSpace = true;
 
             lr.loop = false;
-            lr.startWidth = 0.1f;
-            lr.endWidth = 0.1f;
+            lr.startWidth = 0.02f;
+            lr.endWidth = 0.02f;
             lr.numCapVertices = 3;
 
             lr.sortingLayerID = sortingLayerId;

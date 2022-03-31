@@ -31,7 +31,11 @@ public class BoundaryController : MonoBehaviour, Selectable
     }
 
     [SerializeField] public Material material;
+
+    public float widthFactor = 0.02f;
     public SelectableType type { get => SelectableType.Boundary; }
+
+    private int lastCameraHeightInt;
 
     public float Distance(Vector3 vec)
     => (float)boundary.Geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
@@ -48,22 +52,32 @@ public class BoundaryController : MonoBehaviour, Selectable
     // Update is called once per frame
     void Update()
     {
-
+        int newHeightInt = (int)(Camera.main.transform.position.y * 0.5f);
+        if (lastCameraHeightInt != newHeightInt)
+        {
+            lastCameraHeightInt = newHeightInt;
+            needUpdateRenderer = true;
+        }
+        if (needUpdateRenderer)
+            updateRenderer();
     }
 
     void updateRenderer()
     {
+        float width = Camera.main.transform.position.y * widthFactor;
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.Geom.NumPoints;
         lr.SetPositions(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
-        lr.loop = true;
-        lr.startWidth = 0.1f;
-        lr.endWidth = 0.1f;
-        lr.numCapVertices = 0;
+        lr.loop = false;
+        lr.startWidth = width;
+        lr.endWidth = width;
+        lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
-        lr.sortingOrder = 0;
+        lr.sortingOrder = 1;
+
+        needUpdateRenderer = false;
     }
 }
