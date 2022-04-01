@@ -114,6 +114,15 @@ public class IndoorTiling
         return result;
     }
 
+    enum NewCellSpaceCase
+    {
+        NewCellSpace,  // This is a new cellspace.
+        HoleOfAnother, // This is a hole of another cellspace. We should create one cellspace and add a hole to the "another" one.
+        Split,         // Split cellspace to two. We should remove the old one and create two.
+        SplitNeedReSearch,  // Like Split, but for the two new created cellspace, one surround another. The inner one have one point common point with another
+                            // it may be define as a hole but re-search ring is easier.
+    }
+
     public void AddBoundary(LineString ls, CellVertex start, CellVertex end)
     {
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
@@ -132,25 +141,26 @@ public class IndoorTiling
         // create new CellSpace
         if (!newStart && !newEnd)
         {
-            if (VerticesPair2Boundary(start, end).Count > 0) return;
+            if (VerticesPair2Boundary(start, end).Count > 0) return;  // don't support multiple boundary between two vertices yet
+
+            CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
 
             JumpInfo initJump1 = new JumpInfo() { target = start, through = boundary };
             List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder);
-            Debug.Log(jumps1.Count);
 
             JumpInfo initJump2 = new JumpInfo() { target = end, through = boundary };
             List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder);
-            Debug.Log(jumps2.Count);
 
-            var gf = new GeometryFactory();
+            List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder, false);
+            List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder, false);
+
+            Debug.Log(jumps1.Count + " " + jumps2.Count);
+
 
             var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
             ring1.Add(initJump1.target.Coordinate);
             var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
             ring2.Add(initJump2.target.Coordinate);
-
-
-            // TODO new cellspace is a hole of another?
 
             // Add Vertices
             if (newStart)
@@ -170,39 +180,57 @@ public class IndoorTiling
             // can not reach
             if (ring1.Count < 2 && ring2.Count < 2) return;
 
+            var gf = new GeometryFactory();
             bool path1IsCCW = gf.CreateLinearRing(ring1.ToArray()).IsCCW;
             bool path2IsCCW = gf.CreateLinearRing(ring2.ToArray()).IsCCW;
 
-            // split one CellSpace to two CellSpaces
-            if (path1IsCCW && path2IsCCW)
-            {
-                CellSpace oldCellSpace = PickCellSpace(MiddlePoint(ls)) ?? throw new ArgumentException("Oops!");
-                CellSpace newCellSpace1 = CreateCellSpace(jumps1);
-                CellSpace newCellSpace2 = CreateCellSpace(jumps2);
+            CellSpace cellSpace1 = CreateCellSpace(jumps1);
+            CellSpace cellSpace2 = CreateCellSpace(jumps2);
 
-                RemoveSpaceInternal(oldCellSpace);
-
-                AddSpaceInternal(newCellSpace1);
-                AddSpaceInternal(newCellSpace2);
-            }
-            // create new CellSpace
-            else if (path1IsCCW ^ path2IsCCW)
-            {
-                CellSpace space;
-                if (path1IsCCW)
-                    space = CreateCellSpace(jumps1);
-                else
-                    space = CreateCellSpace(jumps2);
-
-                // Add Space
-                AddSpaceInternal(space);
-
-            }
+            NewCellSpaceCase ncsCase;
+            if (oldCellSpace == null)
+                ncsCase = NewCellSpaceCase.NewCellSpace;
+            else if (path1IsCCW && path2IsCCW)
+                ncsCase = NewCellSpaceCase.Split;
+            else if (oldCellSpace.Geom.Touches(start.Geom) || oldCellSpace.Geom.Touches(end.Geom))
+                ncsCase = NewCellSpaceCase.SplitNeedReSearch;
             else
+                ncsCase = NewCellSpaceCase.HoleOfAnother;
+
+            switch (ncsCase)
             {
+                case NewCellSpaceCase.NewCellSpace:
+                    if (path1IsCCW)
+                        AddSpaceInternal(cellSpace1);
+                    else
+                        AddSpaceInternal(cellSpace2);
+                    break;
 
+                case NewCellSpaceCase.Split:
+                    RemoveSpaceInternal(oldCellSpace!);
+                    AddSpaceInternal(cellSpace1);
+                    AddSpaceInternal(cellSpace2);
+                    break;
 
-                throw new Exception("should not get to here");  // bug (reconnect two vertices)
+                case NewCellSpaceCase.SplitNeedReSearch:
+                    RemoveSpaceInternal(oldCellSpace!);
+                    AddSpaceInternal(CreateCellSpace(reJumps1));
+                    AddSpaceInternal(CreateCellSpace(reJumps2));
+                    break;
+
+                case NewCellSpaceCase.HoleOfAnother:
+                    if (path1IsCCW)
+                    {
+                        AddSpaceInternal(cellSpace1);
+                        oldCellSpace!.AddHole(cellSpace1);
+                    }
+                    else
+                    {
+                        AddSpaceInternal(cellSpace2);
+                        oldCellSpace!.AddHole(cellSpace2);
+                    }
+
+                    break;
             }
         }
         else

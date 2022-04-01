@@ -46,11 +46,11 @@ public class Utils
 
     static public void TriangulatePolygon(in Polygon polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices)
     {
-        if (!polygon.IsSimple || !polygon.ExteriorRing.IsRing)
-        {
-            Debug.Log(polygon.ToText());
-            throw new ArgumentException("polygon is not simple");
-        }
+        // if (!polygon.IsSimple || !polygon.ExteriorRing.IsRing)
+        // {
+        //     Debug.Log(polygon.ToText());
+        //     throw new ArgumentException("polygon is not simple");
+        // }
 
         var triBuilder = new ConformingDelaunayTriangulationBuilder();
         triBuilder.SetSites(polygon);

@@ -6,46 +6,37 @@ using Newtonsoft.Json;
 public class CellSpace
 {
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
-    [JsonPropertyAttribute] public LinkedList<CellVertex> Vertices { get; private set; }
-    [JsonPropertyAttribute] public LinkedList<CellBoundary> Boundaries { get; private set; }
+    [JsonPropertyAttribute] public List<CellVertex> Vertices { get; private set; }
+    [JsonPropertyAttribute] public List<CellBoundary> Boundaries { get; private set; }
     [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
-    [JsonIgnore] public Action OnUpdate = () => {};
+    [JsonIgnore] public Action OnUpdate = () => { };
 
     public CellSpace(Polygon polygon, ICollection<CellVertex> vertices, ICollection<CellBoundary> boundaries)
     {
         Geom = polygon;
-        Vertices = new LinkedList<CellVertex>(vertices);
-        Boundaries = new LinkedList<CellBoundary>(boundaries);
+        Vertices = new List<CellVertex>(vertices);
+        Boundaries = new List<CellBoundary>(boundaries);
     }
 
-    public void AddNewHole(CellVertex start, CellVertex end)
+    public void AddHole(CellSpace cellSpace)
+        => AddHole(cellSpace.Geom.Shell, cellSpace.Vertices, cellSpace.Boundaries);
+
+    public void AddHole(LinearRing hole, List<CellVertex> vertices, List<CellBoundary> boundaries)
     {
-        GeometryFactory gf = new GeometryFactory();
-
-        // create hole
-        Coordinate[] cas = new Coordinate[] {start.Coordinate, end.Coordinate, start.Coordinate};
-        var hole = gf.CreateLinearRing(cas);
-
-        // add hole
-        LinearRing[] holes = new LinearRing[Geom.Holes.Length + 1];
-        Array.Copy(Geom.Holes, holes, Geom.Holes.Length);
-        holes[holes.Length - 1] = hole;
-        Geom = gf.CreatePolygon(Geom.Shell, holes);
-
-        // add vertices
-        Vertices.AddLast(start);
-        Vertices.AddLast(end);
-    }
-
-    public void ConnectTwoBoundary(CellVertex v1, CellVertex v2)
-    {
-        // TODO
-    }
-
-    public Polygon CutNewCellSpace(CellVertex v1, CellVertex v2)
-    {
-        // TODO
-        return new GeometryFactory().CreatePolygon();
+        LinearRing shell = Geom.Shell;
+        List<LinearRing> holes = new List<LinearRing>(Geom.Holes);
+        holes.Add(hole);
+        Polygon polygon = new GeometryFactory().CreatePolygon(shell, holes.ToArray());
+        if (polygon.IsSimple)
+        {
+            Geom = polygon;
+            Vertices.AddRange(vertices);
+            Boundaries.AddRange(boundaries);
+        }
+        else
+        {
+            throw new ArgumentException("Can not add the hole to get a \"Simple\" polygon");
+        }
     }
 
     public void Update()
@@ -53,18 +44,4 @@ public class CellSpace
         // TODO: vertices to geom;
     }
 
-    public void ExtendBoundary(CellVertex vertex, CellVertex newVertex)
-    {
-        LinkedListNode<CellVertex> firstNode = Vertices.Find(vertex);
-        LinkedListNode<CellVertex> lastNode = Vertices.FindLast(vertex);
-        if (firstNode == lastNode)
-        {
-            Vertices.AddAfter(firstNode, firstNode.Value);
-            Vertices.AddAfter(firstNode, newVertex);
-        }
-        else
-        {
-            throw new System.Exception("unsupported yet");
-        }
-    }
 }

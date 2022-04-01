@@ -26,7 +26,7 @@ public class PSLGPolygonSearcher
 
     public static List<JumpInfo> Search(JumpInfo initJump,
                                         CellVertex target,
-                                        Func<CellVertex, List<JumpInfo>> adjacentFinder)
+                                        Func<CellVertex, List<JumpInfo>> adjacentFinder, bool ccw = true)
     {
         List<JumpInfo> BBTs = new List<JumpInfo>() { initJump };
         if (System.Object.ReferenceEquals(initJump.target, target)) return BBTs;
@@ -63,7 +63,7 @@ public class PSLGPolygonSearcher
             }
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
-            Next(currentBBT.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
+            Next(currentBBT.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex, ccw);
 
             lastBBT = currentBBT;
             currentBBT = jumpInfos[CCWNextIndex];
@@ -81,9 +81,11 @@ public class PSLGPolygonSearcher
         {
             bool remove = false;
             for (int j = 0; j < tempBBTs.Count; j++)
-                if (System.Object.ReferenceEquals(tempBBTs[j].target, BBTs[i].target))
+                if (System.Object.ReferenceEquals(tempBBTs[j].target, BBTs[i].target) &&
+                    System.Object.ReferenceEquals(tempBBTs[j + 1].through, BBTs[i].through))
                 {
                     tempBBTs.RemoveRange(j + 1, tempBBTs.Count - j - 1);
+                    Debug.Log("debug remove count: " + (tempBBTs.Count - j - 1));
                     remove = true;
                     break;
                 }
@@ -100,7 +102,7 @@ public class PSLGPolygonSearcher
         public int index;
     }
 
-    private static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex)
+    private static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex, bool ccw)
     {
         if (startIndex >= neighbor.Count)
             throw new ArgumentException($"startIndex({startIndex}) out of range(0-{neighbor.Count - 1})");
@@ -113,7 +115,7 @@ public class PSLGPolygonSearcher
             double theta = Math.Atan2(y, x);
             thetaWithIndices.Add(new ThetaWithIndex() { theta = theta, index = i });
         }
-        thetaWithIndices.Sort((ti1, ti2) => ti1.theta.CompareTo(ti2.theta));
+        thetaWithIndices.Sort((ti1, ti2) => ti1.theta.CompareTo(ti2.theta) * (ccw ? 1 : -1));
 
         for (int i = 0; i < thetaWithIndices.Count; i++)
         {
