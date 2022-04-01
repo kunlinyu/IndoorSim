@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NetTopologySuite.Triangulate;
 using NetTopologySuite.Geometries;
@@ -14,8 +15,10 @@ public class Utils
 
         Mesh mesh = new Mesh();
         mesh.Clear();
+        mesh.subMeshCount = 2;
         mesh.SetVertices(triVertices);
         mesh.SetIndices(triIndices, MeshTopology.Triangles, 0);
+        mesh.SetIndices(lineIndices, MeshTopology.Lines, 1);
 
         return mesh;
     }
@@ -67,12 +70,17 @@ public class Utils
             throw e;
         }
 
-        triVertices = new Vector3[result.NumGeometries * 3];
-        triIndices = new int[result.NumGeometries * 3];
-        lineIndices = new int[result.NumGeometries * 6];
+        List<Geometry> insideResult = new List<Geometry>();
+        foreach (Geometry geom in result.Geometries)
+            if (polygon.Contains(geom.Centroid))
+                insideResult.Add(geom);
+
+        triVertices = new Vector3[insideResult.Count * 3];
+        triIndices = new int[insideResult.Count * 3];
+        lineIndices = new int[insideResult.Count * 6];
 
         int i = 0;
-        foreach (Geometry geom in result)
+        foreach (Geometry geom in insideResult)
         {
             // the sequence of coordinates of shapes in NTS/JTS is anti-clock-wise
             // the sequence of coordinates of mesh in Unity is clock-wise

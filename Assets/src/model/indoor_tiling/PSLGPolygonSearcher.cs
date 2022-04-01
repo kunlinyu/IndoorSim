@@ -70,16 +70,11 @@ public class PSLGPolygonSearcher
 
             // come back to start, no path from start to end
             if (BBTs.Any(bbt => bbt.ContentEqual(currentBBT)))
-            {
-                Debug.Log("no path");
                 return new List<JumpInfo>();
-            }
 
             BBTs.Add(currentBBT);
 
         } while (!System.Object.ReferenceEquals(currentBBT.target, target));
-
-        Debug.Log("debug " + BBTs.Count);
 
         List<JumpInfo> tempBBTs = new List<JumpInfo>();
         for (int i = 0; i < BBTs.Count; i++)

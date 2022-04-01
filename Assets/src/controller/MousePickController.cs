@@ -36,7 +36,7 @@ public class MousePickController : MonoBehaviour
         {
             if (hit.collider.gameObject.GetComponent<VertexController>() != null)
             {
-                VertexController vc = hit.collider.gameObject.GetComponent<VertexController>();
+                Selectable vc = hit.collider.gameObject.GetComponent<VertexController>();
                 float distance = vc.Distance(mousePositionOnGround);
                 if (NearestEntity == null || minDistance > distance || NearestEntity.type != SelectableType.Vertex)
                 {
@@ -47,7 +47,18 @@ public class MousePickController : MonoBehaviour
             if (hit.collider.gameObject.GetComponent<BoundaryController>() != null)
             {
                 if (NearestEntity != null && NearestEntity.type == SelectableType.Vertex) continue;
-                BoundaryController vc = hit.collider.gameObject.GetComponent<BoundaryController>();
+                Selectable vc = hit.collider.gameObject.GetComponent<BoundaryController>();
+                float distance = vc.Distance(mousePositionOnGround);
+                if (NearestEntity == null || minDistance > distance || NearestEntity.type == SelectableType.Space)
+                {
+                    NearestEntity = vc;
+                    minDistance = distance;
+                }
+            }
+            if (hit.collider.gameObject.GetComponent<SpaceController>() != null)
+            {
+                if (NearestEntity != null && NearestEntity.type != SelectableType.Space) continue;
+                Selectable vc = hit.collider.gameObject.GetComponent<SpaceController>();
                 float distance = vc.Distance(mousePositionOnGround);
                 if (NearestEntity == null || minDistance > distance)
                 {

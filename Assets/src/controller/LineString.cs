@@ -113,12 +113,12 @@ public class LineString : MonoBehaviour, ITool
             lr.useWorldSpace = true;
 
             lr.loop = false;
-            lr.startWidth = 0.02f;
-            lr.endWidth = 0.02f;
+            lr.startWidth = 0.05f;
+            lr.endWidth = 0.05f;
             lr.numCapVertices = 3;
 
             lr.sortingLayerID = sortingLayerId;
-            lr.sortingOrder = 0;
+            lr.sortingOrder = 10;
 
             lr.material = draftMaterial;
         }
