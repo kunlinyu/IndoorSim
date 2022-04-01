@@ -1,10 +1,10 @@
+using System;
 using System.Linq;
-using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(BoxCollider))]
 public class BoundaryController : MonoBehaviour, Selectable
 {
     private CellBoundary boundary;
@@ -15,6 +15,8 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             boundary = value;
             boundary.OnUpdate += updateRenderer;
+            boundary.OnUpdate += updateCollider;
+            boundary.OnUpdate += updateTransform;
         }
     }
 
@@ -33,6 +35,7 @@ public class BoundaryController : MonoBehaviour, Selectable
     [SerializeField] public Material material;
 
     public float widthFactor = 0.02f;
+    private float width = 0.0f;
     public SelectableType type { get => SelectableType.Boundary; }
 
     private int lastCameraHeightInt;
@@ -47,6 +50,8 @@ public class BoundaryController : MonoBehaviour, Selectable
         material = new Material(Shader.Find("Sprites/Default"));
         material.color = new Color(1.0f, 0.5f, 1.0f);
         updateRenderer();
+        updateCollider();
+        updateTransform();
     }
 
     // Update is called once per frame
@@ -57,14 +62,33 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
+            width = newHeightInt * 2.0f * widthFactor;
         }
         if (needUpdateRenderer)
             updateRenderer();
     }
 
+    void updateCollider()
+    {
+        GetComponent<BoxCollider>().center = Vector3.zero;
+        GetComponent<BoxCollider>().size = new Vector3((float)boundary.Geom.Length, 0.1f, 0.1f);
+    }
+
+    void updateTransform()
+    {
+        transform.localPosition = Utils.Coor2Vec(boundary.Geom.Centroid.Coordinate);
+
+        Coordinate start = boundary.Geom.StartPoint.Coordinate;
+        Coordinate end = boundary.Geom.EndPoint.Coordinate;
+        float x = (float)(start.X - end.X);
+        float y = (float)(start.Y - end.Y);
+        float theta = Mathf.Atan2(y, x);
+
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, theta * Mathf.Rad2Deg);
+    }
+
     void updateRenderer()
     {
-        float width = Camera.main.transform.position.y * widthFactor;
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.Geom.NumPoints;
         lr.SetPositions(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
@@ -77,6 +101,11 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.numCornerVertices = 0;
         lr.material = material;
         lr.sortingOrder = 1;
+
+        if (highLight)
+            lr.material.color = new Color(1.0f, 0.8f, 1.0f);
+        else
+            lr.material.color = new Color(1.0f, 0.5f, 1.0f);
 
         needUpdateRenderer = false;
     }

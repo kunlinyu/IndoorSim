@@ -27,6 +27,9 @@ public class VertexController : MonoBehaviour, Selectable
     [SerializeField] public int sortingOrder = 3;
     [SerializeField] public Material material;
 
+    private float radius;
+    private float width;
+
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
     public bool highLight
@@ -66,6 +69,8 @@ public class VertexController : MonoBehaviour, Selectable
         {
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
+            radius = newHeightInt * 2.0f * radiusFactor;
+            width = radius * widthFactor;
         }
         if (needUpdateRenderer)
             updateRenderer();
@@ -98,9 +103,6 @@ public class VertexController : MonoBehaviour, Selectable
 
     void updateRenderer()
     {
-        float radius = Camera.main.transform.position.y * radiusFactor;
-        float width = radius * widthFactor;
-
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = step;
         lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
