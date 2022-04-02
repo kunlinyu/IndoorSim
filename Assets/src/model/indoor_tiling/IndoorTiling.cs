@@ -143,7 +143,6 @@ public class IndoorTiling
         {
             if (VerticesPair2Boundary(start, end).Count > 0) return;  // don't support multiple boundary between two vertices yet
 
-            CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
 
             JumpInfo initJump1 = new JumpInfo() { target = start, through = boundary };
             List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder);
@@ -153,9 +152,6 @@ public class IndoorTiling
 
             List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder, false);
             List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder, false);
-
-            Debug.Log(jumps1.Count + " " + jumps2.Count);
-
 
             var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
             ring1.Add(initJump1.target.Coordinate);
@@ -186,50 +182,46 @@ public class IndoorTiling
 
             CellSpace cellSpace1 = CreateCellSpace(jumps1);
             CellSpace cellSpace2 = CreateCellSpace(jumps2);
+            CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
 
             NewCellSpaceCase ncsCase;
             if (oldCellSpace == null)
                 ncsCase = NewCellSpaceCase.NewCellSpace;
             else if (path1IsCCW && path2IsCCW)
                 ncsCase = NewCellSpaceCase.Split;
-            else if (oldCellSpace.Geom.Touches(start.Geom) || oldCellSpace.Geom.Touches(end.Geom))
+            else if (oldCellSpace.Geom.Shell.Touches(start.Geom) || oldCellSpace.Geom.Shell.Touches(end.Geom))
                 ncsCase = NewCellSpaceCase.SplitNeedReSearch;
             else
                 ncsCase = NewCellSpaceCase.HoleOfAnother;
+
+            Debug.Log(ncsCase);
 
             switch (ncsCase)
             {
                 case NewCellSpaceCase.NewCellSpace:
                     if (path1IsCCW)
-                        AddSpaceInternal(cellSpace1);
+                        AddSpaceConsiderHole(cellSpace1);
                     else
-                        AddSpaceInternal(cellSpace2);
+                        AddSpaceConsiderHole(cellSpace2);
                     break;
 
                 case NewCellSpaceCase.Split:
                     RemoveSpaceInternal(oldCellSpace!);
-                    AddSpaceInternal(cellSpace1);
-                    AddSpaceInternal(cellSpace2);
+                    AddSpaceConsiderHole(cellSpace1);
+                    AddSpaceConsiderHole(cellSpace2);
                     break;
 
                 case NewCellSpaceCase.SplitNeedReSearch:
                     RemoveSpaceInternal(oldCellSpace!);
-                    AddSpaceInternal(CreateCellSpace(reJumps1));
-                    AddSpaceInternal(CreateCellSpace(reJumps2));
+                    AddSpaceConsiderHole(CreateCellSpace(reJumps1));
+                    AddSpaceConsiderHole(CreateCellSpace(reJumps2));
                     break;
 
                 case NewCellSpaceCase.HoleOfAnother:
                     if (path1IsCCW)
-                    {
-                        AddSpaceInternal(cellSpace1);
-                        oldCellSpace!.AddHole(cellSpace1);
-                    }
+                        AddSpaceConsiderHole(cellSpace1);
                     else
-                    {
-                        AddSpaceInternal(cellSpace2);
-                        oldCellSpace!.AddHole(cellSpace2);
-                    }
-
+                        AddSpaceConsiderHole(cellSpace2);
                     break;
             }
         }
@@ -288,9 +280,8 @@ public class IndoorTiling
 
     private void AddSpaceInternal(CellSpace space)
     {
-        Debug.Log("add space");
         spacePool.Add(space);
-        foreach (var vertex in space.Vertices)
+        foreach (var vertex in space.shellVertices)
             if (vertex2Spaces.ContainsKey(vertex))
                 vertex2Spaces[vertex].Add(space);
             else
@@ -298,11 +289,37 @@ public class IndoorTiling
         OnSpaceCreated(space);
     }
 
+    private void AddSpaceConsiderHole(CellSpace current)
+    {
+        List<CellSpace> holeOfCurrent = new List<CellSpace>();
+        CellSpace? spaceContainCurrent = null;
+
+        GeometryFactory gf = new GeometryFactory();
+
+        foreach (CellSpace space in spacePool)
+        {
+            if (space.Geom.Contains(current.Geom.Shell))
+                if (spaceContainCurrent == null)
+                    spaceContainCurrent = space;
+                else
+                    throw new InvalidOperationException("more than one space contain current space");
+            if (current.Geom.Contains(space.Geom))
+                holeOfCurrent.Add(space);
+        }
+
+        if (spaceContainCurrent != null)
+            spaceContainCurrent.AddHole(current);
+        foreach (CellSpace hole in holeOfCurrent)
+            current.AddHole(hole);
+
+        AddSpaceInternal(current);
+    }
+
     private void RemoveSpaceInternal(CellSpace space)
     {
         if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
         spacePool.Remove(space);
-        foreach (var vertex in space.Vertices)
+        foreach (var vertex in space.shellVertices)
             vertex2Spaces[vertex].Remove(space);
         OnSpaceRemoved(space);
     }

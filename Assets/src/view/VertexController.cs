@@ -20,8 +20,8 @@ public class VertexController : MonoBehaviour, Selectable
         }
     }
 
-    [SerializeField] public float widthFactor = 0.5f;
-    [SerializeField] public float radiusFactor = 0.01f;
+    [SerializeField] public float widthFactor = 0.8f;
+    [SerializeField] public float radiusFactor = 0.008f;
     [SerializeField] public int step = 16;
     [SerializeField] public int sortingLayerId = 0;
     [SerializeField] public int sortingOrder = 3;
@@ -105,7 +105,6 @@ public class VertexController : MonoBehaviour, Selectable
     {
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = step;
-        lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = true;
@@ -117,9 +116,19 @@ public class VertexController : MonoBehaviour, Selectable
         lr.sortingOrder = sortingOrder;
         lr.material = material;
         if (highLight)
+        {
+            lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius * 1.5f, step));
             lr.material.color = new Color(1.0f, 0.2f, 0.2f);
+            lr.startWidth = width * 1.5f;
+            lr.endWidth = width * 1.5f;
+        }
         else
+        {
+            lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
             lr.material.color = new Color(0.2f, 1.0f, 0.2f);
+            lr.startWidth = width;
+            lr.endWidth = width;
+        }
 
         needUpdateRenderer = false;
     }

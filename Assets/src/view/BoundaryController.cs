@@ -34,7 +34,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     [SerializeField] public Material material;
 
-    public float widthFactor = 0.02f;
+    public float widthFactor = 0.01f;
     private float width = 0.0f;
     public SelectableType type { get => SelectableType.Boundary; }
 
@@ -95,17 +95,24 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = false;
-        lr.startWidth = width;
-        lr.endWidth = width;
+
         lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
         lr.sortingOrder = 1;
 
         if (highLight)
-            lr.material.color = new Color(1.0f, 0.8f, 1.0f);
+        {
+            lr.material.color = new Color(0.8f, 0.6f, 0.8f);
+            lr.startWidth = width * 2.0f;
+            lr.endWidth = width * 2.0f;
+        }
         else
-            lr.material.color = new Color(1.0f, 0.5f, 1.0f);
+        {
+            lr.material.color = new Color(0.8f, 0.3f, 0.8f);
+            lr.startWidth = width;
+            lr.endWidth = width;
+        }
 
         needUpdateRenderer = false;
     }

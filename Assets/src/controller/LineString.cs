@@ -43,7 +43,7 @@ public class LineString : MonoBehaviour, ITool
                         var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentPoint.Coordinate });
                         CellVertex newVertexStart = new CellVertex(lastPoint);
                         CellVertex newVertexEnd = new CellVertex(currentPoint);
-                        IndoorSim.indoorTiling.AddBoundary(ls, newVertexStart, newVertexEnd);
+                        IndoorSim!.indoorTiling.AddBoundary(ls, newVertexStart, newVertexEnd);
                         lastVertex = newVertexEnd;
                         lastPoint = currentPoint;
                     }
@@ -51,7 +51,7 @@ public class LineString : MonoBehaviour, ITool
                     {
                         var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentPoint.Coordinate });
                         CellVertex newVertex = new CellVertex(currentPoint);
-                        IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, newVertex);
+                        IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, newVertex);
                         lastVertex = newVertex;
                         lastPoint = currentPoint;
                     }
@@ -59,7 +59,7 @@ public class LineString : MonoBehaviour, ITool
                     {
                         var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentVertex.Coordinate });
                         CellVertex newVertex = new CellVertex(lastPoint);
-                        IndoorSim.indoorTiling.AddBoundary(ls, newVertex, currentVertex);
+                        IndoorSim!.indoorTiling.AddBoundary(ls, newVertex, currentVertex);
                         lastVertex = currentVertex;
                         lastPoint = currentVertex.Geom;
                     }
@@ -68,14 +68,13 @@ public class LineString : MonoBehaviour, ITool
                         if (lastVertex != currentVertex)
                         {
                             var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
-                            IndoorSim.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
+                            IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
                             lastVertex = currentVertex;
                             lastPoint = currentVertex.Geom;
                         }
                     }
                     else
                         throw new System.Exception("Oops!");
-
                 }
                 else
                 {

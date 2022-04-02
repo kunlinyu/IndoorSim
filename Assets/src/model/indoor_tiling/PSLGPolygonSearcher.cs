@@ -85,7 +85,6 @@ public class PSLGPolygonSearcher
                     System.Object.ReferenceEquals(tempBBTs[j + 1].through, BBTs[i].through))
                 {
                     tempBBTs.RemoveRange(j + 1, tempBBTs.Count - j - 1);
-                    Debug.Log("debug remove count: " + (tempBBTs.Count - j - 1));
                     remove = true;
                     break;
                 }
