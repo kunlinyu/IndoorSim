@@ -19,9 +19,12 @@ public class SimulationController : MonoBehaviour
     {
         if (e.type == UIEventType.ButtonClick)
         {
+            Destroy(toolObj);
+            currentTool = null;
+            UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+
             if (e.name == "line string")
             {
-                Destroy(toolObj);
                 toolObj = new GameObject("linestring");
                 toolObj.transform.SetParent(transform);
                 currentTool = toolObj.AddComponent<LineString>();
@@ -29,8 +32,7 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "select drag")
             {
-                Destroy(toolObj);
-                currentTool = null;
+
             }
         }
         else if (e.type == UIEventType.EnterUIPanel)

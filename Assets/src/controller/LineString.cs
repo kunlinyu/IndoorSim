@@ -20,6 +20,9 @@ public class LineString : MonoBehaviour, ITool
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
+
+        Sprite cursur = Resources.Load<Sprite>("cursor/cursor line");
+        UnityEngine.Cursor.SetCursor(cursur.texture, new Vector2(50, 50), CursorMode.Auto);  // TODO: magic number
     }
     void Update()
     {
