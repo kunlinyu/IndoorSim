@@ -5,12 +5,12 @@ using UnityEngine;
 
 public enum ToolType
 {
-    ViewSelect,
-    RedoUndo,
-    BasicShape,
-    ParametricShape,
-    DoAfterSelect,
-    Asset,
+    RedoUndo,    // redo, undo
+    SelectDrag,  // view, select, move
+    BasicShape,  // line string
+    ParametricShape,  // block...
+    DoAfterSelect,  // remove
+    Asset,  // save asset, load asset
 }
 
 [CreateAssetMenu]

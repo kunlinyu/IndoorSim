@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
-  m_Name: polygon
+  m_Name: save asset
   m_EditorClassIdentifier: 
-  m_ToolName: polygon
-  m_Class: 1
-  m_PortraitImage: {fileID: 21300000, guid: 9092da68b796cbb8e9bda7a4bb6cb352, type: 3}
-  m_SortingOrder: 1
+  m_ToolName: save asset
+  m_Class: 5
+  m_PortraitImage: {fileID: 21300000, guid: 19d65258415c69758bd289dfd813b840, type: 3}
+  m_SortingOrder: 0

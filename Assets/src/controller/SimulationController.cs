@@ -5,18 +5,38 @@ using UnityEngine;
 public class SimulationController : MonoBehaviour
 {
     public IndoorSim indoorSim;
-    ITool currentTool;
     GameObject toolObj;
+    ITool currentTool;
+
+    public UIEventDispatcher eventDispatcher;
 
 
 
     void Start()
     {
-        toolObj = new GameObject("linestring");
-        toolObj.transform.SetParent(transform);
-        currentTool = toolObj.AddComponent<LineString>();
-        currentTool.IndoorSim = indoorSim;
+
+
+        eventDispatcher.eventListener += EventListener;
     }
+
+    void EventListener(object sender, UIEvent e)
+    {
+        if (e.from == "line string")
+        {
+            Destroy(toolObj);
+            toolObj = new GameObject("linestring");
+            toolObj.transform.SetParent(transform);
+            currentTool = toolObj.AddComponent<LineString>();
+            currentTool.IndoorSim = indoorSim;
+        }
+        else if (e.from == "select drag")
+        {
+            Destroy(toolObj);
+            currentTool = null;
+        }
+    }
+
+
 
     // Update is called once per frame
     void Update()

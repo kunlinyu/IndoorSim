@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 public class ToolBarController : MonoBehaviour
 {
     [SerializeField] private VisualTreeAsset m_ToolBarButtonTemplate;
+    public UIEventDispatcher eventDispatcher;
 
     void OnEnable()
     {
@@ -28,6 +29,11 @@ public class ToolBarController : MonoBehaviour
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
             button.AddManipulator(new ToolTipManipulator(root));
+            button.clicked += () =>
+            {
+                eventDispatcher.Raise(button, new UIEvent() { from = tbd.m_ToolName, type = UIEventType.ButtonClick });
+                Debug.Log(tbd.m_ToolName);
+            };
 
             toolBar.Add(buttonContainer);
         }
