@@ -10,29 +10,36 @@ public class SimulationController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
 
-
-
     void Start()
     {
-
-
         eventDispatcher.eventListener += EventListener;
     }
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.from == "line string")
+        if (e.type == UIEventType.ButtonClick)
         {
-            Destroy(toolObj);
-            toolObj = new GameObject("linestring");
-            toolObj.transform.SetParent(transform);
-            currentTool = toolObj.AddComponent<LineString>();
-            currentTool.IndoorSim = indoorSim;
+            if (e.name == "line string")
+            {
+                Destroy(toolObj);
+                toolObj = new GameObject("linestring");
+                toolObj.transform.SetParent(transform);
+                currentTool = toolObj.AddComponent<LineString>();
+                currentTool.IndoorSim = indoorSim;
+            }
+            else if (e.name == "select drag")
+            {
+                Destroy(toolObj);
+                currentTool = null;
+            }
         }
-        else if (e.from == "select drag")
+        else if (e.type == UIEventType.EnterUIPanel)
         {
-            Destroy(toolObj);
-            currentTool = null;
+            if (currentTool != null)
+                if (e.name == "enter")
+                    currentTool.MouseOnUI = true;
+                else if (e.name == "leave")
+                    currentTool.MouseOnUI = false;
         }
     }
 

@@ -31,12 +31,15 @@ public class ToolBarController : MonoBehaviour
             button.AddManipulator(new ToolTipManipulator(root));
             button.clicked += () =>
             {
-                eventDispatcher.Raise(button, new UIEvent() { from = tbd.m_ToolName, type = UIEventType.ButtonClick });
+                eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ButtonClick });
                 Debug.Log(tbd.m_ToolName);
             };
 
             toolBar.Add(buttonContainer);
         }
+
+        toolBar.RegisterCallback<MouseEnterEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "enter", type = UIEventType.EnterUIPanel }); });
+        toolBar.RegisterCallback<MouseLeaveEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "leave", type = UIEventType.EnterUIPanel }); });
 
     }
 

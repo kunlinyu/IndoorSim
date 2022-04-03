@@ -5,11 +5,12 @@ using UnityEngine;
 public enum UIEventType
 {
     ButtonClick,
+    EnterUIPanel,
 }
 
 public struct UIEvent
 {
-    public string from;
+    public string name;
     public UIEventType type;
 }
 

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using UnityEngine;
+using UnityEngine.UIElements;
 #nullable enable
 
 [RequireComponent(typeof(LineRenderer))]
@@ -13,13 +14,16 @@ public class LineString : MonoBehaviour, ITool
     private Point? lastPoint = null;
     private CellVertex? lastVertex = null;
 
+    public bool MouseOnUI { set; get; }
+
     void Awake()
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
+        GetComponent<LineRenderer>().positionCount = 0;
     }
     void Update()
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
             Coordinate? currentCoor = Utils.Vec2Coor(CameraController.mousePositionOnGround());
             if (currentCoor != null)
