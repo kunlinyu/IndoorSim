@@ -11,10 +11,9 @@ public class LineString : MonoBehaviour, ITool
     public IndoorSim? IndoorSim { set; get; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
+    public bool MouseOnUI { set; get; }
     private Point? lastPoint = null;
     private CellVertex? lastVertex = null;
-
-    public bool MouseOnUI { set; get; }
 
     private Sprite? cursurSprite;
     private Texture2D? cursurTexture;
@@ -31,10 +30,10 @@ public class LineString : MonoBehaviour, ITool
     }
     void Update()
     {
-        Selectable? selectableVertex = MousePickController.SelectedEntity;
-        if (selectableVertex != null && selectableVertex.type == SelectableType.Vertex)
+        Selectable? pointedVertex = MousePickController.PointedEntity;
+        if (pointedVertex != null && pointedVertex.type == SelectableType.Vertex)
         {
-            var vertexScreenPosition3 = Utils.Coor2Screen(((VertexController)selectableVertex).Vertex.Coordinate);
+            var vertexScreenPosition3 = Utils.Coor2Screen(((VertexController)pointedVertex).Vertex.Coordinate);
             Vector2 vertexScreenPosition2 = new Vector2(vertexScreenPosition3.x, vertexScreenPosition3.y);
 
             var mousePosition = Input.mousePosition;
@@ -56,11 +55,11 @@ public class LineString : MonoBehaviour, ITool
             {
                 Point currentPoint = new GeometryFactory().CreatePoint(currentCoor);
 
-                Selectable? selectable = MousePickController.SelectedEntity;
+                Selectable? pointed = MousePickController.PointedEntity;
                 CellVertex? currentVertex = null;
-                if (selectable != null && selectable.type == SelectableType.Vertex)
+                if (pointed != null && pointed.type == SelectableType.Vertex)
                 {
-                    currentVertex = ((VertexController)selectable).Vertex;
+                    currentVertex = ((VertexController)pointed).Vertex;
                     currentPoint = currentVertex.Geom;
                 }
 
@@ -134,11 +133,11 @@ public class LineString : MonoBehaviour, ITool
         }
 
         Coordinate? mousePosition = Utils.Vec2Coor(CameraController.mousePositionOnGround());
-        Selectable? selectableVertex = MousePickController.SelectedEntity;
+        Selectable? pointedVertex = MousePickController.PointedEntity;
         if (mousePosition != null)
         {
-            if (selectableVertex != null && selectableVertex.type == SelectableType.Vertex)
-                mousePosition = ((VertexController)selectableVertex).Vertex.Coordinate;
+            if (pointedVertex != null && pointedVertex.type == SelectableType.Vertex)
+                mousePosition = ((VertexController)pointedVertex).Vertex.Coordinate;
 
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;

@@ -94,12 +94,15 @@ public class CameraController : MonoBehaviour
         transform.rotation = Quaternion.Euler(cameraEuler);
     }
 
-    public static Vector3? mousePositionOnGround()
+    public static Vector3? screenPositionOnGround(Vector3 screenPosition)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = Camera.main.ScreenPointToRay(screenPosition);
         if (ground.Raycast(ray, out float enter))
             return ray.GetPoint(enter);
 
         return null;
     }
+
+    public static Vector3? mousePositionOnGround()
+        => screenPositionOnGround(Input.mousePosition);
 }

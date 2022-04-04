@@ -31,6 +31,16 @@ public class BoundaryController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
+    private bool _selected = false;
+    public bool selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            needUpdateRenderer = true;
+        }
+    }
 
     [SerializeField] public Material material;
     [SerializeField] public Material highLightMaterial;
@@ -96,23 +106,22 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = false;
-
+        lr.startWidth = width;
+        lr.endWidth = width;
         lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
         lr.sortingOrder = 1;
 
-        if (highLight)
+        if (selected)
+        {
+            lr.material = selectedMaterial;
+        }
+        else if (highLight)
         {
             lr.material = highLightMaterial;
             lr.startWidth = width * 2.0f;
             lr.endWidth = width * 2.0f;
-        }
-        else
-        {
-            lr.material = material;
-            lr.startWidth = width;
-            lr.endWidth = width;
         }
 
         needUpdateRenderer = false;

@@ -33,7 +33,6 @@ public class VertexController : MonoBehaviour, Selectable
     private float width;
 
     private bool _highLight = false;
-    private bool needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;
@@ -43,6 +42,19 @@ public class VertexController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
+
+    private bool _selected = false;
+    public bool selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            needUpdateRenderer = true;
+        }
+    }
+
+    private bool needUpdateRenderer = true;
 
     public SelectableType type { get => SelectableType.Vertex; }
 
@@ -114,20 +126,19 @@ public class VertexController : MonoBehaviour, Selectable
         lr.numCornerVertices = 0;
         lr.sortingLayerID = sortingLayerId;
         lr.sortingOrder = sortingOrder;
+        lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
         lr.material = material;
-        if (highLight)
+
+        if (selected)
+        {
+            lr.material = selectedMaterial;
+        }
+        else if (highLight)
         {
             lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius * 1.5f, step));
             lr.material = highLightMaterial;
             lr.startWidth = width * 1.5f;
             lr.endWidth = width * 1.5f;
-        }
-        else
-        {
-            lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
-            lr.material = material;
-            lr.startWidth = width;
-            lr.endWidth = width;
         }
 
         needUpdateRenderer = false;

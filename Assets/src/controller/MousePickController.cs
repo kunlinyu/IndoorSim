@@ -9,9 +9,9 @@ public class MousePickController : MonoBehaviour
 
     public const float radiusFactor = 0.02f;
 
-    static private Selectable? selectedEntity = null;
+    static private Selectable? pointedEntity = null;
 
-    static public Selectable? SelectedEntity { get => selectedEntity; }
+    static public Selectable? PointedEntity { get => pointedEntity; }
 
     // Start is called before the first frame update
     void Start()
@@ -68,11 +68,11 @@ public class MousePickController : MonoBehaviour
             }
         }
 
-        if (NearestEntity != selectedEntity)
+        if (NearestEntity != pointedEntity)
         {
-            if (selectedEntity != null) selectedEntity.highLight = false;
+            if (pointedEntity != null) pointedEntity.highLight = false;
             if (NearestEntity != null) NearestEntity.highLight = true;
-            selectedEntity = NearestEntity;
+            pointedEntity = NearestEntity;
         }
     }
 }

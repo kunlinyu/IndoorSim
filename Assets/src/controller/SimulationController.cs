@@ -34,7 +34,12 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "select drag")
             {
-
+                toolObj = new GameObject("select drag");
+                toolObj.transform.SetParent(transform);
+                var selectDrag = toolObj.AddComponent<SelectDrag>();
+                selectDrag.draftMaterial = Resources.Load<Material>("material/tool select drag");
+                currentTool = selectDrag;
+                currentTool.IndoorSim = indoorSim;
             }
         }
         else if (e.type == UIEventType.EnterUIPanel)

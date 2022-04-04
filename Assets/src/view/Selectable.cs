@@ -14,6 +14,8 @@ public interface Selectable
 
     bool highLight { set; get; }
 
+    bool selected { set; get; }
+
     float Distance(Vector3 vec);
 
 }

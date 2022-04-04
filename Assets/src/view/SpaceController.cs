@@ -28,6 +28,17 @@ public class SpaceController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
+
+    private bool _selected = false;
+    public bool selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            needUpdateRenderer = true;
+        }
+    }
     public SelectableType type { get => SelectableType.Space; }
     [SerializeField] public Material material;
     [SerializeField] public Material highLightMaterial;
@@ -75,7 +86,9 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
         pr.enableBorder = false;
-        if (highLight)
+        if (selected)
+            pr.interiorMaterial = selectedMaterial;
+        else if (highLight)
             pr.interiorMaterial = highLightMaterial;
         else
             pr.interiorMaterial = material;
