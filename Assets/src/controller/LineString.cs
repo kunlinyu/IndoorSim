@@ -16,16 +16,39 @@ public class LineString : MonoBehaviour, ITool
 
     public bool MouseOnUI { set; get; }
 
+    private Sprite? cursurSprite;
+    private Texture2D? cursurTexture;
+    private Vector2 hotspot;
+
     void Awake()
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
 
-        Sprite cursur = Resources.Load<Sprite>("cursor/cursor line");
-        UnityEngine.Cursor.SetCursor(cursur.texture, new Vector2(50, 50), CursorMode.Auto);  // TODO: magic number
+        cursurSprite = Resources.Load<Sprite>("cursor/cursor line");
+        cursurTexture = cursurSprite.texture;
+        hotspot = new Vector2(cursurTexture.width / 2, cursurTexture.height / 2.0f);
     }
     void Update()
     {
+        Selectable? selectableVertex = MousePickController.SelectedEntity;
+        if (selectableVertex != null && selectableVertex.type == SelectableType.Vertex)
+        {
+            var vertexScreenPosition3 = Utils.Coor2Screen(((VertexController)selectableVertex).Vertex.Coordinate);
+            Vector2 vertexScreenPosition2 = new Vector2(vertexScreenPosition3.x, vertexScreenPosition3.y);
+
+            var mousePosition = Input.mousePosition;
+            Vector2 delta = mousePosition - vertexScreenPosition3;
+            delta.y = -delta.y;
+            delta += hotspot;
+
+            UnityEngine.Cursor.SetCursor(cursurSprite?.texture, delta, CursorMode.ForceSoftware);
+        }
+        else
+        {
+            UnityEngine.Cursor.SetCursor(cursurSprite?.texture, hotspot, CursorMode.ForceSoftware);
+        }
+
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
             Coordinate? currentCoor = Utils.Vec2Coor(CameraController.mousePositionOnGround());
@@ -97,6 +120,8 @@ public class LineString : MonoBehaviour, ITool
             lastVertex = null;
         }
 
+
+
         UpdateLineRenderer();
     }
 
@@ -109,8 +134,12 @@ public class LineString : MonoBehaviour, ITool
         }
 
         Coordinate? mousePosition = Utils.Vec2Coor(CameraController.mousePositionOnGround());
+        Selectable? selectableVertex = MousePickController.SelectedEntity;
         if (mousePosition != null)
         {
+            if (selectableVertex != null && selectableVertex.type == SelectableType.Vertex)
+                mousePosition = ((VertexController)selectableVertex).Vertex.Coordinate;
+
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
             lr.SetPosition(0, Utils.Coor2Vec(mousePosition));
