@@ -30,7 +30,6 @@ public class PolygonRenderer : MonoBehaviour
 
     public void UpdateRenderer()
     {
-        // GetComponent<MeshRenderer>().material = interiorMaterial;
         GetComponent<MeshRenderer>().materials = new Material[] { interiorMaterial, triangulationMaterial };
         GetComponent<MeshRenderer>().sortingLayerID = sortingLayerId;
         GetComponent<MeshRenderer>().sortingOrder = sortingOrder;

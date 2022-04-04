@@ -27,7 +27,9 @@ public class SimulationController : MonoBehaviour
             {
                 toolObj = new GameObject("linestring");
                 toolObj.transform.SetParent(transform);
-                currentTool = toolObj.AddComponent<LineString>();
+                var lineString = toolObj.AddComponent<LineString>();
+                lineString.draftMaterial = Resources.Load<Material>("material/tool linestring");
+                currentTool = lineString;
                 currentTool.IndoorSim = indoorSim;
             }
             else if (e.name == "select drag")

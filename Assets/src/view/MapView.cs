@@ -50,8 +50,9 @@ public class MapView : MonoBehaviour
 
             var controller = obj.AddComponent<VertexController>();
             controller.Vertex = vertex;
-            controller.material = new Material(Shader.Find("Sprites/Default"));
-            controller.material.color = new Color(0.5f, 0.5f, 0.9f);
+            controller.material = Resources.Load<Material>("material/vertex material");
+            controller.highLightMaterial = Resources.Load<Material>("material/vertex highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("material/vertex selected material");
             controller.sortingLayerId = SortingLayer.NameToID("traffic");
         };
         indoorTiling.OnBoundaryCreated += (boundary) =>
@@ -63,6 +64,9 @@ public class MapView : MonoBehaviour
             boundary2Obj[boundary] = obj;
 
             var controller = obj.AddComponent<BoundaryController>();
+            controller.material = Resources.Load<Material>("material/boundary material");
+            controller.highLightMaterial = Resources.Load<Material>("material/boundary highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("material/boundary selected material");
             controller.Boundary = boundary;
         };
         indoorTiling.OnSpaceCreated += (space) =>
@@ -74,6 +78,10 @@ public class MapView : MonoBehaviour
             cellspace2Obj[space] = obj;
 
             var controller = obj.AddComponent<SpaceController>();
+            controller.material = Resources.Load<Material>("material/space material");
+            controller.highLightMaterial = Resources.Load<Material>("material/space highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("material/space selected material");
+            controller.triangulationMaterial = Resources.Load<Material>("material/space triangulation material");
             controller.Space = space;
         };
         indoorTiling.OnVertexRemoved += (vertex) =>

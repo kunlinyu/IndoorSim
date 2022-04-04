@@ -33,6 +33,8 @@ public class BoundaryController : MonoBehaviour, Selectable
     }
 
     [SerializeField] public Material material;
+    [SerializeField] public Material highLightMaterial;
+    [SerializeField] public Material selectedMaterial;
 
     public float widthFactor = 0.01f;
     private float width = 0.0f;
@@ -47,8 +49,6 @@ public class BoundaryController : MonoBehaviour, Selectable
     void Start()
     {
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-        material = new Material(Shader.Find("Sprites/Default"));
-        material.color = new Color(1.0f, 0.5f, 1.0f);
         updateRenderer();
         updateCollider();
         updateTransform();
@@ -89,6 +89,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     void updateRenderer()
     {
+        // TODO use prefab
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.Geom.NumPoints;
         lr.SetPositions(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
@@ -103,13 +104,13 @@ public class BoundaryController : MonoBehaviour, Selectable
 
         if (highLight)
         {
-            lr.material.color = new Color(0.8f, 0.6f, 0.8f);
+            lr.material = highLightMaterial;
             lr.startWidth = width * 2.0f;
             lr.endWidth = width * 2.0f;
         }
         else
         {
-            lr.material.color = new Color(0.8f, 0.3f, 0.8f);
+            lr.material = material;
             lr.startWidth = width;
             lr.endWidth = width;
         }

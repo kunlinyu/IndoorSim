@@ -30,6 +30,9 @@ public class SpaceController : MonoBehaviour, Selectable
     }
     public SelectableType type { get => SelectableType.Space; }
     [SerializeField] public Material material;
+    [SerializeField] public Material highLightMaterial;
+    [SerializeField] public Material selectedMaterial;
+    [SerializeField] public Material triangulationMaterial;
 
     private GameObject polygonRenderObj;
 
@@ -39,13 +42,9 @@ public class SpaceController : MonoBehaviour, Selectable
     // Start is called before the first frame update
     void Start()
     {
-        material = new Material(Shader.Find("Sprites/Default"));
-        material.color = new Color(0.2f, 0.2f, 1.0f);
-
         polygonRenderObj = new GameObject("polygon render obj");
         polygonRenderObj.transform.SetParent(transform);
         polygonRenderObj.AddComponent<PolygonRenderer>();
-
 
         ReTriangulate();
         updateRenderer();
@@ -76,13 +75,12 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
         pr.enableBorder = false;
-        pr.interiorMaterial = new Material(Shader.Find("Sprites/Default"));
         if (highLight)
-            pr.interiorMaterial.color = new Color(0.5f, 0.5f, 1.0f, 0.3f);
+            pr.interiorMaterial = highLightMaterial;
         else
-            pr.interiorMaterial.color = new Color(0.2f, 0.2f, 1.0f, 0.3f);
-        pr.triangulationMaterial = new Material(Shader.Find("Sprites/Default"));
-        pr.triangulationMaterial.color = new Color(0.5f, 0.5f, 1.0f, 0.5f);
+            pr.interiorMaterial = material;
+
+        pr.triangulationMaterial = triangulationMaterial;
 
         pr.sortingOrder = 0;
 

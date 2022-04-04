@@ -26,6 +26,8 @@ public class VertexController : MonoBehaviour, Selectable
     [SerializeField] public int sortingLayerId = 0;
     [SerializeField] public int sortingOrder = 3;
     [SerializeField] public Material material;
+    [SerializeField] public Material highLightMaterial;
+    [SerializeField] public Material selectedMaterial;
 
     private float radius;
     private float width;
@@ -54,8 +56,6 @@ public class VertexController : MonoBehaviour, Selectable
     void Start()
     {
         GetComponent<LineRenderer>().positionCount = 0;
-        material = new Material(Shader.Find("Sprites/Default"));
-        material.color = new Color(1.0f, 0.8f, 0.8f);
         updateRenderer();
         updateCollider();
         updateTransform();
@@ -118,14 +118,14 @@ public class VertexController : MonoBehaviour, Selectable
         if (highLight)
         {
             lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius * 1.5f, step));
-            lr.material.color = new Color(1.0f, 0.2f, 0.2f);
+            lr.material = highLightMaterial;
             lr.startWidth = width * 1.5f;
             lr.endWidth = width * 1.5f;
         }
         else
         {
             lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
-            lr.material.color = new Color(0.2f, 1.0f, 0.2f);
+            lr.material = material;
             lr.startWidth = width;
             lr.endWidth = width;
         }
