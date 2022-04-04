@@ -28,13 +28,17 @@ public class PolygonRenderer : MonoBehaviour
 
     }
 
-    public Mesh UpdatePolygon(Polygon polygon)
+    public void UpdateRenderer()
     {
-        GetComponent<MeshFilter>().mesh = Utils.TriangulatePolygon2Mesh(polygon);
         // GetComponent<MeshRenderer>().material = interiorMaterial;
         GetComponent<MeshRenderer>().materials = new Material[] { interiorMaterial, triangulationMaterial };
         GetComponent<MeshRenderer>().sortingLayerID = sortingLayerId;
         GetComponent<MeshRenderer>().sortingOrder = sortingOrder;
+    }
+
+    public Mesh UpdatePolygon(Polygon polygon)
+    {
+        GetComponent<MeshFilter>().mesh = Utils.TriangulatePolygon2Mesh(polygon);
 
         if (enableBorder)
         {

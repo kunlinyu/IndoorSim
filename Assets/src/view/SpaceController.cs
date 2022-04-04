@@ -13,6 +13,7 @@ public class SpaceController : MonoBehaviour, Selectable
         set
         {
             space = value;
+            space.OnUpdate += () => { ReTriangulate(); updateRenderer(); };
         }
     }
 
@@ -38,9 +39,15 @@ public class SpaceController : MonoBehaviour, Selectable
     // Start is called before the first frame update
     void Start()
     {
-        // transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
         material = new Material(Shader.Find("Sprites/Default"));
         material.color = new Color(0.2f, 0.2f, 1.0f);
+
+        polygonRenderObj = new GameObject("polygon render obj");
+        polygonRenderObj.transform.SetParent(transform);
+        polygonRenderObj.AddComponent<PolygonRenderer>();
+
+
+        ReTriangulate();
         updateRenderer();
     }
 
@@ -49,16 +56,25 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         if (needUpdateRenderer)
             updateRenderer();
-
     }
+
+    void ReTriangulate()
+    {
+        PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
+        Mesh mesh = pr.UpdatePolygon(space.Geom);
+        Debug.Log("tri");
+        Mesh triMesh = new Mesh();
+        triMesh.Clear();
+        triMesh.subMeshCount = 1;
+        triMesh.SetVertices(mesh.vertices);
+        triMesh.SetIndices(mesh.GetIndices(0), MeshTopology.Triangles, 0);
+        GetComponent<MeshCollider>().sharedMesh = triMesh;
+    }
+
 
     void updateRenderer()
     {
-        Destroy(polygonRenderObj);
-
-        polygonRenderObj = new GameObject("polygon render obj");
-        polygonRenderObj.transform.SetParent(transform);
-        PolygonRenderer pr = polygonRenderObj.AddComponent<PolygonRenderer>();
+        PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
         pr.enableBorder = false;
         pr.interiorMaterial = new Material(Shader.Find("Sprites/Default"));
         if (highLight)
@@ -68,17 +84,9 @@ public class SpaceController : MonoBehaviour, Selectable
         pr.triangulationMaterial = new Material(Shader.Find("Sprites/Default"));
         pr.triangulationMaterial.color = new Color(0.5f, 0.5f, 1.0f, 0.5f);
 
-
-        // pr.sortingLayerId = ;
         pr.sortingOrder = 0;
 
-        Mesh mesh = pr.UpdatePolygon(space.Geom);
-        Mesh triMesh = new Mesh();
-        triMesh.Clear();
-        triMesh.subMeshCount = 1;
-        triMesh.SetVertices(mesh.vertices);
-        triMesh.SetIndices(mesh.GetIndices(0), MeshTopology.Triangles, 0);
-        GetComponent<MeshCollider>().sharedMesh = triMesh;
+        pr.UpdateRenderer();
 
         needUpdateRenderer = false;
     }

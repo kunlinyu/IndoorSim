@@ -140,6 +140,7 @@ public class CellSpace
         Holes.AddRange(holesSet);
 
         Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+        OnUpdate?.Invoke();
     }
 
     public void Update()
