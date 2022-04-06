@@ -72,7 +72,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
-            width = newHeightInt * 2.0f * widthFactor;
+            width = newHeightInt * 2.0f * widthFactor + 0.01f;
         }
         if (needUpdateRenderer)
             updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());

@@ -95,7 +95,7 @@ public class SpaceController : MonoBehaviour, Selectable
 
         pr.triangulationMaterial = triangulationMaterial;
 
-        pr.sortingOrder = 0;
+        pr.sortingOrder = 1;
 
         pr.UpdateRenderer();
 

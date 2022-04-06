@@ -81,7 +81,7 @@ public class VertexController : MonoBehaviour, Selectable
         {
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
-            radius = newHeightInt * 2.0f * radiusFactor;
+            radius = newHeightInt * 2.0f * radiusFactor + 0.01f;
             width = radius * widthFactor;
         }
         if (needUpdateRenderer)
