@@ -5,6 +5,7 @@ using UnityEngine;
 public class SimulationController : MonoBehaviour
 {
     public IndoorSim indoorSim;
+    public MapView mapView;
     GameObject toolObj;
     ITool currentTool;
 
@@ -25,22 +26,20 @@ public class SimulationController : MonoBehaviour
 
             if (e.name == "line string")
             {
-                toolObj = new GameObject("linestring");
-                toolObj.transform.SetParent(transform);
-                var lineString = toolObj.AddComponent<LineString>();
-                lineString.draftMaterial = Resources.Load<Material>("material/tool linestring");
-                currentTool = lineString;
-                currentTool.IndoorSim = indoorSim;
+                toolObj = new GameObject("lineString");
+                currentTool = toolObj.AddComponent<LineString>();
+                currentTool.draftMaterial = Resources.Load<Material>("material/tool linestring");
             }
             else if (e.name == "select drag")
             {
                 toolObj = new GameObject("select drag");
-                toolObj.transform.SetParent(transform);
-                var selectDrag = toolObj.AddComponent<SelectDrag>();
-                selectDrag.draftMaterial = Resources.Load<Material>("material/tool select drag");
-                currentTool = selectDrag;
-                currentTool.IndoorSim = indoorSim;
+                currentTool = toolObj.AddComponent<SelectDrag>();
+                currentTool.draftMaterial = Resources.Load<Material>("material/tool select drag");
             }
+
+            toolObj.transform.SetParent(transform);
+            currentTool.mapView = mapView;
+            currentTool.IndoorSim = indoorSim;
         }
         else if (e.type == UIEventType.EnterUIPanel)
         {

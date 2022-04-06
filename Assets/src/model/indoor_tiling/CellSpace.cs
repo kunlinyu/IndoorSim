@@ -16,7 +16,7 @@ public class CellSpace
     {
         get
         {
-            List<CellVertex> result = new List<CellVertex>();
+            List<CellVertex> result = new List<CellVertex>(shellVertices);
             foreach (var hole in Holes)
                 result.AddRange(hole.shellVertices);
             return result;
@@ -27,7 +27,7 @@ public class CellSpace
     {
         get
         {
-            List<CellBoundary> result = new List<CellBoundary>();
+            List<CellBoundary> result = new List<CellBoundary>(shellBoundaries);
             foreach (var hole in Holes)
                 result.AddRange(hole.shellBoundaries);
             return result;
@@ -47,6 +47,26 @@ public class CellSpace
     public CellSpace ShellCellSpace()
     {
         return new CellSpace(new GeometryFactory().CreatePolygon(Geom.Shell), shellVertices, shellBoundaries);
+    }
+
+    public void UpdateFromVertex()
+    {
+        List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);
+        shellVertices2.Add(shellVertices.First());
+        LinearRing shellRing = new GeometryFactory().CreateLinearRing(shellVertices2.Select(cv => cv.Coordinate).ToArray());
+
+        List<LinearRing> holes = new List<LinearRing>();
+        foreach (CellSpace hole in Holes)
+        {
+            List<CellVertex> shellOfHole = new List<CellVertex>(hole.shellVertices);
+            shellOfHole.Add(hole.shellVertices.First());
+            LinearRing holeRing = new GeometryFactory().CreateLinearRing(shellOfHole.Select(cv => cv.Coordinate).ToArray());
+            holes.Add(holeRing);
+        }
+
+        Geom = new GeometryFactory().CreatePolygon(shellRing, holes.ToArray());
+
+        OnUpdate?.Invoke();
     }
 
     public void AddHole(CellSpace cellSpace)
@@ -103,30 +123,30 @@ public class CellSpace
                                         if (!commonBoundaries.Contains(b))
                                             nonCommonBoundaries.Add(b);
 
-                                    // looking for vertices
-                                    HashSet<CellVertex> tempVertices = new HashSet<CellVertex>();
-                                    HashSet<CellVertex> tobeRemoveVertices = new HashSet<CellVertex>();
-                                    foreach (var b in commonBoundaries)
+                                    // Search for vertices in ring sequence from boundaries
+                                    List<CellVertex> vertices = new List<CellVertex>();
+                                    List<CellBoundary> waitingBoundaries = nonCommonBoundaries.ToList();
+
+                                    CellBoundary currentBoundary = waitingBoundaries[0];
+                                    CellVertex currentVertex = currentBoundary.P0;
+                                    waitingBoundaries.Remove(currentBoundary);
+                                    vertices.Add(currentVertex);
+                                    do
                                     {
-                                        if (tempVertices.Contains(b.P0))
-                                            tobeRemoveVertices.Add(b.P0);
-                                        else
-                                            tempVertices.Add(b.P0);
-                                        if (tempVertices.Contains(b.P1))
-                                            tobeRemoveVertices.Add(b.P1);
-                                        else
-                                            tempVertices.Add(b.P1);
-                                    }
-                                    List<CellVertex> remainVertices = new List<CellVertex>();
-                                    foreach (var v in hole1.shellVertices)
-                                        if (!tobeRemoveVertices.Contains(v))
-                                            remainVertices.Add(v);
-                                    foreach (var v in hole2.shellVertices)
-                                        if (!tobeRemoveVertices.Contains(v))
-                                            remainVertices.Add(v);
+                                        currentVertex = currentBoundary.Another(currentVertex);
+                                        currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
+                                        vertices.Add(currentVertex);
+                                        waitingBoundaries.Remove(currentBoundary);
+                                    } while (waitingBoundaries.Count == 0);
+
+                                    // check vertices CCW
+                                    List<CellVertex> tempRing = new List<CellVertex>(vertices);
+                                    tempRing.Add(vertices[0]);
+                                    if (!new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray()).IsCCW)
+                                        vertices.Reverse();
 
                                     // Add merged hole
-                                    CellSpace newHole = new CellSpace((Polygon)hole1.Geom.Union(hole2.Geom), remainVertices, nonCommonBoundaries);
+                                    CellSpace newHole = new CellSpace((Polygon)hole1.Geom.Union(hole2.Geom), vertices, nonCommonBoundaries);
                                     holesSet.Add(newHole);
 
                                     goto aftermerge;

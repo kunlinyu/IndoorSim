@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 public class LineString : MonoBehaviour, ITool
 {
     public IndoorSim? IndoorSim { set; get; }
+    public MapView? mapView { get; set; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
@@ -24,9 +25,9 @@ public class LineString : MonoBehaviour, ITool
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
 
-        cursurSprite = Resources.Load<Sprite>("cursor/cursor line");
-        cursurTexture = cursurSprite.texture;
-        hotspot = new Vector2(cursurTexture.width / 2, cursurTexture.height / 2.0f);
+        // cursurSprite = Resources.Load<Sprite>("cursor/cursor line");
+        // cursurTexture = cursurSprite.texture;
+        // hotspot = new Vector2(cursurTexture.width / 2, cursurTexture.height / 2.0f);
     }
     void Update()
     {
@@ -41,11 +42,11 @@ public class LineString : MonoBehaviour, ITool
             delta.y = -delta.y;
             delta += hotspot;
 
-            UnityEngine.Cursor.SetCursor(cursurSprite?.texture, delta, CursorMode.ForceSoftware);
+            // UnityEngine.Cursor.SetCursor(cursurSprite?.texture, delta, CursorMode.ForceSoftware);
         }
         else
         {
-            UnityEngine.Cursor.SetCursor(cursurSprite?.texture, hotspot, CursorMode.ForceSoftware);
+            // UnityEngine.Cursor.SetCursor(cursurSprite?.texture, hotspot, CursorMode.ForceSoftware);
         }
 
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)

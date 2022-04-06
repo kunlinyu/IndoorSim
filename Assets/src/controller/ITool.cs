@@ -6,6 +6,7 @@ using UnityEngine;
 public interface ITool
 {
     IndoorSim? IndoorSim { set; get; }
+    MapView? mapView { set; get; }
     int sortingLayerId { set; get; }
     Material? draftMaterial { set; get; }
     bool MouseOnUI { set; get; }

@@ -65,6 +65,15 @@ public class CellBoundary
         P1 = p1;
     }
 
+    public void UpdateFromVertex()
+    {
+        Coordinate[] coor = Geom.Coordinates;
+        coor[0] = P0.Coordinate;
+        coor[coor.Length - 1] = P1.Coordinate;
+        Geom = new GeometryFactory().CreateLineString(coor);
+        OnUpdate?.Invoke();
+    }
+
     public bool Contains(CellVertex cv)
     {
         if (Object.ReferenceEquals(cv, P0)) return true;

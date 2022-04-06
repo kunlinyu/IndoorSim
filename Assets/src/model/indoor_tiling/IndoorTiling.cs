@@ -281,11 +281,13 @@ public class IndoorTiling
     private void AddSpaceInternal(CellSpace space)
     {
         spacePool.Add(space);
-        foreach (var vertex in space.shellVertices)
-            if (vertex2Spaces.ContainsKey(vertex))
-                vertex2Spaces[vertex].Add(space);
-            else
+        foreach (var vertex in space.allVertices)
+        {
+            if (!vertex2Spaces.ContainsKey(vertex))
                 vertex2Spaces[vertex] = new HashSet<CellSpace>();
+            vertex2Spaces[vertex].Add(space);
+            Debug.Log("relate v to s");
+        }
         OnSpaceCreated(space);
     }
 
@@ -339,8 +341,36 @@ public class IndoorTiling
         List<CellVertex> vertices = bbt.Select(ji => ji.target).ToList();
         List<CellBoundary> boundaries = bbt.Select(ji => ji.through).ToList();
 
+        if (!new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW)
+        {
+            vertices.Reverse();
+            boundaries.Reverse();
+        }
+
         return new CellSpace(polygon, vertices, boundaries);
 
+    }
+
+    public void UpdateVertices(List<CellVertex> vertices)
+    {
+        HashSet<CellBoundary> boundaries = new HashSet<CellBoundary>();
+        HashSet<CellSpace> spaces = new HashSet<CellSpace>();
+        foreach (var vertex in vertices)
+            if (vertexPool.Contains(vertex))
+            {
+                vertex.OnUpdate();
+                foreach (var b in vertex2Boundaries[vertex])
+                    boundaries.Add(b);
+                foreach (var s in vertex2Spaces[vertex])
+                    spaces.Add(s);
+            }
+            else throw new ArgumentException("can not find vertex");
+        Debug.Log("related boundaries: " + boundaries.Count);
+        Debug.Log("related spaces    : " + spaces.Count);
+        foreach (var b in boundaries)
+            b.UpdateFromVertex();
+        foreach (var s in spaces)
+            s.UpdateFromVertex();
     }
 
     public void RemoveBoundary(CellBoundary boundary)

@@ -14,7 +14,7 @@ public class VertexController : MonoBehaviour, Selectable
         set
         {
             vertex = value;
-            vertex.OnUpdate += updateRenderer;
+            vertex.OnUpdate += () => { updateRenderer(Utils.Coor2Vec(vertex.Coordinate)); };
             vertex.OnUpdate += updateCollider;
             vertex.OnUpdate += updateTransform;
         }
@@ -68,7 +68,7 @@ public class VertexController : MonoBehaviour, Selectable
     void Start()
     {
         GetComponent<LineRenderer>().positionCount = 0;
-        updateRenderer();
+        updateRenderer(Utils.Coor2Vec(vertex.Coordinate));
         updateCollider();
         updateTransform();
     }
@@ -85,7 +85,7 @@ public class VertexController : MonoBehaviour, Selectable
             width = radius * widthFactor;
         }
         if (needUpdateRenderer)
-            updateRenderer();
+            updateRenderer(Utils.Coor2Vec(vertex.Coordinate));
     }
 
     void updateCollider()
@@ -113,7 +113,7 @@ public class VertexController : MonoBehaviour, Selectable
         return result;
     }
 
-    void updateRenderer()
+    public void updateRenderer(Vector3 position)
     {
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = step;
@@ -126,7 +126,7 @@ public class VertexController : MonoBehaviour, Selectable
         lr.numCornerVertices = 0;
         lr.sortingLayerID = sortingLayerId;
         lr.sortingOrder = sortingOrder;
-        lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius, step));
+        lr.SetPositions(CirclePosition(position, radius, step));
         lr.material = material;
 
         if (selected)
@@ -135,7 +135,7 @@ public class VertexController : MonoBehaviour, Selectable
         }
         else if (highLight)
         {
-            lr.SetPositions(CirclePosition(Utils.Coor2Vec(vertex.Coordinate), radius * 1.5f, step));
+            lr.SetPositions(CirclePosition(position, radius * 1.5f, step));
             lr.material = highLightMaterial;
             lr.startWidth = width * 1.5f;
             lr.endWidth = width * 1.5f;

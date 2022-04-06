@@ -16,6 +16,7 @@ public class env : MonoBehaviour
     {
         mapView.indoorTiling = indoorSim.indoorTiling;
         simController.indoorSim = indoorSim;
+        simController.mapView = mapView;
         toolBarController.eventDispatcher = eventDispatcher;
         simController.eventDispatcher = eventDispatcher;
     }

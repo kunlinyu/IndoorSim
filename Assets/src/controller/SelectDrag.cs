@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using NetTopologySuite.Geometries;
@@ -16,6 +16,7 @@ enum Status
 public class SelectDrag : MonoBehaviour, ITool
 {
     public IndoorSim? IndoorSim { get; set; }
+    public MapView? mapView { get; set; }
     public int sortingLayerId { get; set; }
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
@@ -30,10 +31,30 @@ public class SelectDrag : MonoBehaviour, ITool
 
     private Vector3? mouseDownPosition = null;
 
+    private Texture2D? selectCursurTexture;
+    private Vector2 selectHotspot;
+
+    private Texture2D? dragCursurTexture;
+    private Vector2 dragHotspot;
+
     void Start()
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
+
+        selectCursurTexture = Resources.Load<Texture2D>("cursor/select");
+        selectHotspot = new Vector2(selectCursurTexture.width / 2, selectCursurTexture.height / 2.0f);
+
+        UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
+
+        dragCursurTexture = Resources.Load<Texture2D>("cursor/drag");
+        dragHotspot = new Vector2(0, 0);
+    }
+
+    void SwitchStatus(Status status)
+    {
+        Debug.Log(status);
+        this.status = status;
     }
 
     void Update()
@@ -45,38 +66,48 @@ public class SelectDrag : MonoBehaviour, ITool
             case Status.Idle:
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
+                    // TODO: open if true branch
                     if (false && (pointedEntity != null && pointedEntity.type == SelectableType.Vertex))
                     {
                         adhoc = true;
                         selectedVertices.Add((VertexController)pointedEntity);
-                        status = Status.Dragging;
-                        Debug.Log(status);
+                        SwitchStatus(Status.Dragging);
                     }
                     else
                     {
-                        status = Status.Selecting;
+                        SwitchStatus(Status.Selecting);
                         mouseDownPosition = CameraController.mousePositionOnGround();
-                        Debug.Log(status);
                     }
                 }
                 else if (Input.GetMouseButtonUp(0))
-                    throw new System.Exception("Oops");
+                    throw new System.Exception("should not release button 0 in Idle status");
                 break;
 
             case Status.Selecting:
-                if (Input.GetMouseButtonDown(0))
-                    throw new System.Exception("Oops");
-                else if (Input.GetMouseButtonUp(0))
+                if (Input.GetMouseButtonUp(0))
                 {
-                    // TODO: detect and select
+                    // check release immediately?
+                    Vector3? currentUpPosition = CameraController.mousePositionOnGround();
+                    if (currentUpPosition != null && mouseDownPosition != null)
+                        if ((mouseDownPosition - currentUpPosition).Value.magnitude < 0.1f)
+                            break;
 
-                    if (selectedVertices.Count > 0)
-                    {
-                        status = Status.Selected;
-                        Debug.Log(status);
-                    }
+                    // use bounding box to select vertices
+                    List<Coordinate> coors = SquareFromCursor().Select(v => Utils.Vec2Coor(v)).ToList();
+                    coors.Add(coors[0]);
+                    Polygon selectBox = new GeometryFactory().CreatePolygon(coors.ToArray());
+                    foreach (var entry in mapView.vertex2Obj)
+                        if (selectBox.Contains(entry.Key.Geom))
+                        {
+                            var vc = entry.Value.GetComponent<VertexController>();
+                            vc.selected = true;
+                            if (!selectedVertices.Contains(vc))
+                                selectedVertices.Add(vc);
+                            Debug.Log("selected: " + selectedVertices.Count);
+                        }
 
-                    // TODO: notify selected entities
+                    SwitchStatus(Status.Selected);
+                    GetComponent<LineRenderer>().positionCount = 0;
                 }
                 else
                 {
@@ -102,55 +133,83 @@ public class SelectDrag : MonoBehaviour, ITool
 
             case Status.Selected:
                 if (Input.GetMouseButtonUp(0))
-                    throw new System.Exception("Oops");
+                    throw new System.Exception("should not release button 0 in Selected status");
                 else if (Input.GetMouseButtonDown(0))
                 {
-                    if (false)  // on selected entities
+                    mouseDownPosition = CameraController.mousePositionOnGround();
+                    if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
                     {
-                        // pointedEntity
-
+                        SwitchStatus(Status.Dragging);
                     }
-                    else
+                    else  // re select
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                        // no "control" key pressed, clear selected
+                        if (!Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
                         {
-                            // TODO: support hold control to select more
-
-                        }
-                        else
-                        {
+                            foreach (var vc in selectedVertices)
+                                vc.selected = false;
                             selectedVertices.Clear();
                             selectedBoundaries.Clear();
                             selectedSpaces.Clear();
-                            // TODO: notify selected entities
-
-                            status = Status.Selecting;
-                            Debug.Log(status);
                         }
+
+                        SwitchStatus(Status.Selecting);
                     }
-
-
                 }
                 else if (Input.GetMouseButtonUp(1))
                 {
+                    foreach (var vc in selectedVertices)
+                        vc.selected = false;
                     selectedVertices.Clear();
                     selectedBoundaries.Clear();
                     selectedSpaces.Clear();
-                    // TODO: notify selected entities
 
-                    status = Status.Idle;
-                    Debug.Log(status);
+                    SwitchStatus(Status.Idle);
                 }
+
+                if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
+                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.ForceSoftware);
+                else
+                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
+
+
                 break;
 
             case Status.Dragging:
+                if (Input.GetMouseButtonDown(0))
+                    throw new System.Exception("should not press button 0 in GetMouseButtonUp status");
+
+                Vector3? currentPosition = CameraController.mousePositionOnGround() ?? mouseDownPosition;
+
+                if (currentPosition != null)
+                {
+                    Vector3? delta = currentPosition - mouseDownPosition;
+                    foreach (VertexController vc in selectedVertices)
+                    {
+                        Vector3? newPosition = Utils.Coor2Vec(vc.Vertex.Coordinate) + delta;
+                        if (Input.GetMouseButtonUp(0))
+                            vc.Vertex.UpdateCoordinate(Utils.Vec2Coor(newPosition!.Value));
+                        else
+                            vc.updateRenderer(newPosition!.Value);
+                    }
+                    if (Input.GetMouseButtonUp(0))
+                    {
+                        SwitchStatus(Status.Selected);
+                        IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList());
+                    }
+                }
                 break;
         }
 
         if (Input.GetMouseButtonDown(1))
         {
             status = Status.Idle;
+            foreach (var vc in selectedVertices)
+                vc.selected = false;
             selectedVertices.Clear();
+            selectedBoundaries.Clear();
+            selectedSpaces.Clear();
+            GetComponent<LineRenderer>().positionCount = 0;
         }
 
     }

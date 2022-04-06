@@ -10,7 +10,7 @@ public class CellVertex
 
     [JsonIgnore] public Coordinate Coordinate { get => Geom.Coordinate; }
 
-    [JsonIgnore] public Action OnUpdate = () => {};
+    [JsonIgnore] public Action OnUpdate = () => { };
 
     public CellVertex(Point p, int id = 0)
     {
@@ -22,6 +22,18 @@ public class CellVertex
     {
         Geom = new GeometryFactory().CreatePoint(p);
         Id = id;
+    }
+
+    public void UpdateCoordinate(Coordinate coor)
+    {
+        Geom = new GeometryFactory().CreatePoint(coor);
+        OnUpdate?.Invoke();
+    }
+
+    public void UpdateCoordinate(Point point)
+    {
+        Geom = point;
+        OnUpdate?.Invoke();
     }
 
 }
