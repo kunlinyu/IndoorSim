@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using NetTopologySuite.Geometries;
 using UnityEngine;
@@ -14,7 +14,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         set
         {
             boundary = value;
-            boundary.OnUpdate += updateRenderer;
+            boundary.OnUpdate += () => { updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray()); };
             boundary.OnUpdate += updateCollider;
             boundary.OnUpdate += updateTransform;
         }
@@ -59,7 +59,7 @@ public class BoundaryController : MonoBehaviour, Selectable
     void Start()
     {
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-        updateRenderer();
+        updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
         updateCollider();
         updateTransform();
     }
@@ -75,7 +75,7 @@ public class BoundaryController : MonoBehaviour, Selectable
             width = newHeightInt * 2.0f * widthFactor;
         }
         if (needUpdateRenderer)
-            updateRenderer();
+            updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
     }
 
     void updateCollider()
@@ -97,12 +97,12 @@ public class BoundaryController : MonoBehaviour, Selectable
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, theta * Mathf.Rad2Deg);
     }
 
-    void updateRenderer()
+    public void updateRenderer(Vector3[] positions)
     {
         // TODO use prefab
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.Geom.NumPoints;
-        lr.SetPositions(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+        lr.SetPositions(positions);
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = false;

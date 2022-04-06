@@ -74,6 +74,7 @@ public class SelectDrag : MonoBehaviour, ITool
                         else
                         {
                             CellBoundary boundary = ((BoundaryController)pointedEntity).Boundary;
+                            selectedBoundaries.Add((BoundaryController)pointedEntity);
                             foreach (var entry in mapView.vertex2Obj)
                                 if (boundary.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
@@ -115,7 +116,14 @@ public class SelectDrag : MonoBehaviour, ITool
                             vc.selected = true;
                             if (!selectedVertices.Contains(vc))
                                 selectedVertices.Add(vc);
-                            Debug.Log("selected: " + selectedVertices.Count);
+                        }
+                    foreach (var entry in mapView.boundary2Obj)
+                        if (selectBox.Contains(entry.Key.Geom))
+                        {
+                            var bc = entry.Value.GetComponent<BoundaryController>();
+                            bc.selected = true;
+                            if (!selectedBoundaries.Contains(bc))
+                                selectedBoundaries.Add(bc);
                         }
 
                     if (selectedVertices.Count > 0)
@@ -164,6 +172,8 @@ public class SelectDrag : MonoBehaviour, ITool
                             foreach (var vc in selectedVertices)
                                 vc.selected = false;
                             selectedVertices.Clear();
+                            foreach (var bc in selectedBoundaries)
+                                bc.selected = false;
                             selectedBoundaries.Clear();
                             selectedSpaces.Clear();
                         }
@@ -176,6 +186,8 @@ public class SelectDrag : MonoBehaviour, ITool
                     foreach (var vc in selectedVertices)
                         vc.selected = false;
                     selectedVertices.Clear();
+                    foreach (var bc in selectedBoundaries)
+                        bc.selected = false;
                     selectedBoundaries.Clear();
                     selectedSpaces.Clear();
 
@@ -208,6 +220,11 @@ public class SelectDrag : MonoBehaviour, ITool
                         else
                             vc.updateRenderer(newPosition!.Value);
                     }
+                    foreach (BoundaryController bc in selectedBoundaries)
+                    {
+                        Vector3[] positions = bc.Boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta.Value).ToArray();
+                        bc.updateRenderer(positions);
+                    }
                     if (Input.GetMouseButtonUp(0))
                     {
                         IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
@@ -215,6 +232,7 @@ public class SelectDrag : MonoBehaviour, ITool
                         {
                             adhoc = false;
                             selectedVertices.Clear();
+                            selectedBoundaries.Clear();
                             SwitchStatus(Status.Idle);
                         }
                         else
@@ -231,6 +249,8 @@ public class SelectDrag : MonoBehaviour, ITool
             status = Status.Idle;
             foreach (var vc in selectedVertices)
                 vc.selected = false;
+            foreach (var bc in selectedBoundaries)
+                bc.selected = false;
             selectedVertices.Clear();
             selectedBoundaries.Clear();
             selectedSpaces.Clear();
