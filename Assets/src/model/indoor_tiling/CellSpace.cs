@@ -137,7 +137,7 @@ public class CellSpace
                                         currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
                                         vertices.Add(currentVertex);
                                         waitingBoundaries.Remove(currentBoundary);
-                                    } while (waitingBoundaries.Count == 0);
+                                    } while (waitingBoundaries.Count > 0);
 
                                     // check vertices CCW
                                     List<CellVertex> tempRing = new List<CellVertex>(vertices);

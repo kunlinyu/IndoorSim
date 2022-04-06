@@ -318,11 +318,12 @@ public class IndoorTiling
             spaceContainCurrent.AddHole(current);
             RelateVertexSpace(spaceContainCurrent);
         }
+
         foreach (CellSpace hole in holeOfCurrent)
         {
             current.AddHole(hole);
-            RelateVertexSpace(current);
         }
+        RelateVertexSpace(current);
 
         AddSpaceInternal(current);
     }
