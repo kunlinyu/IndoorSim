@@ -66,21 +66,33 @@ public class SelectDrag : MonoBehaviour, ITool
             case Status.Idle:
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
-                    // TODO: open if true branch
-                    if (false && (pointedEntity != null && pointedEntity.type == SelectableType.Vertex))
+                    if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
                     {
                         adhoc = true;
-                        selectedVertices.Add((VertexController)pointedEntity);
+                        if (pointedEntity.type == SelectableType.Vertex)
+                            selectedVertices.Add((VertexController)pointedEntity);
+                        else
+                        {
+                            CellBoundary boundary = ((BoundaryController)pointedEntity).Boundary;
+                            foreach (var entry in mapView.vertex2Obj)
+                                if (boundary.Contains(entry.Key))
+                                    selectedVertices.Add(entry.Value.GetComponent<VertexController>());
+                        }
                         SwitchStatus(Status.Dragging);
                     }
                     else
                     {
                         SwitchStatus(Status.Selecting);
-                        mouseDownPosition = CameraController.mousePositionOnGround();
                     }
+                    mouseDownPosition = CameraController.mousePositionOnGround();
                 }
                 else if (Input.GetMouseButtonUp(0))
                     throw new System.Exception("should not release button 0 in Idle status");
+
+                if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
+                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.ForceSoftware);
+                else
+                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
                 break;
 
             case Status.Selecting:
@@ -106,7 +118,10 @@ public class SelectDrag : MonoBehaviour, ITool
                             Debug.Log("selected: " + selectedVertices.Count);
                         }
 
-                    SwitchStatus(Status.Selected);
+                    if (selectedVertices.Count > 0)
+                        SwitchStatus(Status.Selected);
+                    else
+                        SwitchStatus(Status.Idle);
                     GetComponent<LineRenderer>().positionCount = 0;
                 }
                 else
@@ -195,8 +210,17 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
-                        SwitchStatus(Status.Selected);
                         IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
+                        if (adhoc)
+                        {
+                            adhoc = false;
+                            selectedVertices.Clear();
+                            SwitchStatus(Status.Idle);
+                        }
+                        else
+                        {
+                            SwitchStatus(Status.Selected);
+                        }
                     }
                 }
                 break;
