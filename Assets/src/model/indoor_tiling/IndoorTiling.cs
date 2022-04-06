@@ -281,14 +281,18 @@ public class IndoorTiling
     private void AddSpaceInternal(CellSpace space)
     {
         spacePool.Add(space);
+        RelateVertexSpace(space);
+        OnSpaceCreated(space);
+    }
+
+    private void RelateVertexSpace(CellSpace space)
+    {
         foreach (var vertex in space.allVertices)
         {
             if (!vertex2Spaces.ContainsKey(vertex))
                 vertex2Spaces[vertex] = new HashSet<CellSpace>();
             vertex2Spaces[vertex].Add(space);
-            Debug.Log("relate v to s");
         }
-        OnSpaceCreated(space);
     }
 
     private void AddSpaceConsiderHole(CellSpace current)
@@ -310,9 +314,15 @@ public class IndoorTiling
         }
 
         if (spaceContainCurrent != null)
+        {
             spaceContainCurrent.AddHole(current);
+            RelateVertexSpace(spaceContainCurrent);
+        }
         foreach (CellSpace hole in holeOfCurrent)
+        {
             current.AddHole(hole);
+            RelateVertexSpace(current);
+        }
 
         AddSpaceInternal(current);
     }
@@ -351,26 +361,64 @@ public class IndoorTiling
 
     }
 
-    public void UpdateVertices(List<CellVertex> vertices)
+    public void UpdateVertices(List<CellVertex> vertices, List<Coordinate> coors)
     {
+        if (vertices.Count != coors.Count) throw new ArgumentException("vertices count should equals to coors count");
+        List<Coordinate> oldCoors = vertices.Select(v => v.Coordinate).ToList();
+
+        for (int i = 0; i < vertices.Count; i++)
+            vertices[i].UpdateCoordinate(coors[i]);
+
         HashSet<CellBoundary> boundaries = new HashSet<CellBoundary>();
         HashSet<CellSpace> spaces = new HashSet<CellSpace>();
         foreach (var vertex in vertices)
             if (vertexPool.Contains(vertex))
             {
-                vertex.OnUpdate();
-                foreach (var b in vertex2Boundaries[vertex])
-                    boundaries.Add(b);
-                foreach (var s in vertex2Spaces[vertex])
-                    spaces.Add(s);
+                if (vertex2Boundaries.ContainsKey(vertex))
+                    foreach (var b in vertex2Boundaries[vertex])
+                        boundaries.Add(b);
+                if (vertex2Spaces.ContainsKey(vertex))
+                    foreach (var s in vertex2Spaces[vertex])
+                        spaces.Add(s);
             }
             else throw new ArgumentException("can not find vertex");
         Debug.Log("related boundaries: " + boundaries.Count);
         Debug.Log("related spaces    : " + spaces.Count);
+
         foreach (var b in boundaries)
             b.UpdateFromVertex();
-        foreach (var s in spaces)
-            s.UpdateFromVertex();
+
+        bool valid = true;
+        foreach (var b1 in boundaries)
+        {
+            foreach (var b2 in boundaryPool)
+                if (!System.Object.ReferenceEquals(b1, b2))
+                    if (b1.Geom.Crosses(b2.Geom))
+                    {
+                        valid = false;
+                        goto validresult;
+                    }
+        }
+    validresult:
+
+        if (valid)
+        {
+            vertices.ForEach(v => v.OnUpdate?.Invoke());
+            foreach (var s in spaces)
+                s.UpdateFromVertex();
+            Debug.Log("valid");
+        }
+        else
+        {
+            Debug.Log("invalid");
+            for (int i = 0; i < vertices.Count; i++)
+                vertices[i].UpdateCoordinate(oldCoors[i]);
+            foreach (var b in boundaries)
+                b.UpdateFromVertex();
+        }
+
+
+
     }
 
     public void RemoveBoundary(CellBoundary boundary)

@@ -184,18 +184,19 @@ public class SelectDrag : MonoBehaviour, ITool
                 if (currentPosition != null)
                 {
                     Vector3? delta = currentPosition - mouseDownPosition;
+                    List<Coordinate> newCoor = new List<Coordinate>();
                     foreach (VertexController vc in selectedVertices)
                     {
                         Vector3? newPosition = Utils.Coor2Vec(vc.Vertex.Coordinate) + delta;
                         if (Input.GetMouseButtonUp(0))
-                            vc.Vertex.UpdateCoordinate(Utils.Vec2Coor(newPosition!.Value));
+                            newCoor.Add(Utils.Vec2Coor(newPosition!.Value));
                         else
                             vc.updateRenderer(newPosition!.Value);
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
                         SwitchStatus(Status.Selected);
-                        IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList());
+                        IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
                     }
                 }
                 break;
