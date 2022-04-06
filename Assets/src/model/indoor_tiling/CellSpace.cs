@@ -62,6 +62,7 @@ public class CellSpace
             shellOfHole.Add(hole.shellVertices.First());
             LinearRing holeRing = new GeometryFactory().CreateLinearRing(shellOfHole.Select(cv => cv.Coordinate).ToArray());
             holes.Add(holeRing);
+            hole.UpdateFromVertex();
         }
 
         Geom = new GeometryFactory().CreatePolygon(shellRing, holes.ToArray());

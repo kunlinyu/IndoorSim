@@ -389,6 +389,7 @@ public class IndoorTiling
         foreach (var b in boundaries)
             b.UpdateFromVertex();
 
+
         bool valid = true;
         foreach (var b1 in boundaries)
         {
@@ -400,22 +401,45 @@ public class IndoorTiling
                         goto validresult;
                     }
         }
+
+        foreach (var s in spaces)
+            s.UpdateFromVertex();
+
+        foreach (var s1 in spaces)
+        {
+            foreach (var s2 in spacePool)
+                if (!System.Object.ReferenceEquals(s1, s2))
+                    if (s1.Geom.Relate(s2.Geom, "T********"))  // TODO magic string
+                    {
+                        valid = false;
+                        goto validresult;
+                    }
+
+        }
+        foreach (var s in spaces)
+        {
+            foreach (var hole in s.Holes)
+                if (!s.ShellCellSpace().Geom.Contains(hole.Geom.Shell))
+                {
+                    valid = false;
+                    goto validresult;
+                }
+        }
+
     validresult:
 
         if (valid)
         {
             vertices.ForEach(v => v.OnUpdate?.Invoke());
-            foreach (var s in spaces)
-                s.UpdateFromVertex();
-            Debug.Log("valid");
         }
         else
         {
-            Debug.Log("invalid");
             for (int i = 0; i < vertices.Count; i++)
                 vertices[i].UpdateCoordinate(oldCoors[i]);
             foreach (var b in boundaries)
                 b.UpdateFromVertex();
+            foreach (var s in spaces)
+                s.UpdateFromVertex();
         }
 
 
