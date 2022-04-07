@@ -390,7 +390,7 @@ public class IndoorTiling
     {
         if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
         spacePool.Remove(space);
-        foreach (var vertex in space.shellVertices)
+        foreach (var vertex in space.allVertices)
             vertex2Spaces[vertex].Remove(space);
         OnSpaceRemoved(space);
     }
@@ -434,11 +434,9 @@ public class IndoorTiling
             if (vertexPool.Contains(vertex))
             {
                 if (vertex2Boundaries.ContainsKey(vertex))
-                    foreach (var b in vertex2Boundaries[vertex])
-                        boundaries.Add(b);
+                    boundaries.UnionWith(vertex2Boundaries[vertex]);
                 if (vertex2Spaces.ContainsKey(vertex))
-                    foreach (var s in vertex2Spaces[vertex])
-                        spaces.Add(s);
+                    spaces.UnionWith(vertex2Spaces[vertex]);
             }
             else throw new ArgumentException("can not find vertex");
         Debug.Log("related boundaries: " + boundaries.Count);
