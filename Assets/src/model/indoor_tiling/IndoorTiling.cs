@@ -123,6 +123,64 @@ public class IndoorTiling
                             // it may be define as a hole but re-search ring is easier.
     }
 
+    private List<CellSpace> Boundary2Space(CellBoundary boundary)
+    {
+        HashSet<CellSpace> potentialSpaces = new HashSet<CellSpace>();
+        if (vertex2Spaces.ContainsKey(boundary.P0))
+            potentialSpaces.UnionWith(vertex2Spaces[boundary.P0]);
+        if (vertex2Spaces.ContainsKey(boundary.P1))
+            potentialSpaces.UnionWith(vertex2Spaces[boundary.P1]);
+
+        List<CellSpace> result = potentialSpaces.Where(space => space.allBoundaries.Contains(boundary)).ToList();
+        if (result.Count > 2)
+        {
+            string debug = "GEOMETRYCOLLECTION(";
+            foreach (var space in result) debug += space.ToString() + ", ";
+            debug += ")";
+            Debug.Log(debug);
+            throw new InvalidOperationException("The boundary have more than one related spaces");
+        }
+        return result;
+    }
+
+    public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
+        if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
+
+        CellVertex middleVertex = new CellVertex(middleCoor);
+        vertexPool.Add(middleVertex);
+        OnVertexCreated?.Invoke(middleVertex);
+
+        GeometryFactory gf = new GeometryFactory();
+
+        LineString ls1 = gf.CreateLineString(new Coordinate[] { boundary.P0.Coordinate, middleCoor });
+        LineString ls2 = gf.CreateLineString(new Coordinate[] { middleCoor, boundary.P1.Coordinate });
+        CellBoundary newBoundary1 = new CellBoundary(ls1, boundary.P0, middleVertex);
+        CellBoundary newBoundary2 = new CellBoundary(ls2, middleVertex, boundary.P1);
+
+        List<CellSpace> spaces = Boundary2Space(boundary);
+
+        foreach (var space in spaces)
+            space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
+
+        boundaryPool.Remove(boundary);
+        vertex2Boundaries[boundary.P0].Remove(boundary);
+        vertex2Boundaries[boundary.P1].Remove(boundary);
+        OnBoundaryRemoved?.Invoke(boundary);
+
+        boundaryPool.Add(newBoundary1);
+        boundaryPool.Add(newBoundary2);
+        vertex2Boundaries[middleVertex] = new HashSet<CellBoundary>() { newBoundary1, newBoundary2 };
+        vertex2Boundaries[boundary.P0].Add(newBoundary1);
+        vertex2Boundaries[boundary.P1].Add(newBoundary2);
+        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
+        OnBoundaryCreated?.Invoke(newBoundary1);
+        OnBoundaryCreated?.Invoke(newBoundary2);
+
+        return middleVertex;
+    }
+
     public void AddBoundary(LineString ls, CellVertex start, CellVertex end)
     {
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
@@ -162,12 +220,12 @@ public class IndoorTiling
             if (newStart)
             {
                 vertexPool.Add(start);
-                OnVertexCreated(start);
+                OnVertexCreated?.Invoke(start);
             }
             if (newEnd)
             {
                 vertexPool.Add(end);
-                OnVertexCreated(end);
+                OnVertexCreated?.Invoke(end);
             }
 
             // Add Boundary

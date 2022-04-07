@@ -37,10 +37,10 @@ public class CellSpace
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    public CellSpace(Polygon polygon, ICollection<CellVertex> vertices, ICollection<CellBoundary> boundaries)
+    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries)
     {
         Geom = polygon;
-        shellVertices = new List<CellVertex>(vertices);
+        shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
     }
 
@@ -68,6 +68,57 @@ public class CellSpace
         Geom = new GeometryFactory().CreatePolygon(shellRing, holes.ToArray());
 
         OnUpdate?.Invoke();
+    }
+
+    public void SplitBoundary(CellBoundary oldBoundary, CellBoundary newBoundary1, CellBoundary newBoundary2, CellVertex middleVertex)
+    {
+        HashSet<CellVertex> vertices = new HashSet<CellVertex>();
+        vertices.Add(oldBoundary.P0);
+        vertices.Add(oldBoundary.P1);
+        vertices.Add(newBoundary1.P0);
+        vertices.Add(newBoundary1.P1);
+        vertices.Add(newBoundary2.P0);
+        vertices.Add(newBoundary2.P1);
+        vertices.Add(middleVertex);
+        if (vertices.Count != 3)
+            throw new ArgumentException("the old and new boundary don't connect as a triangle");
+
+        CellSpace? target = null;
+        if (shellBoundaries.Contains(oldBoundary))
+            target = this;
+        else
+            target = Holes.FirstOrDefault(hole => hole.shellBoundaries.Contains(oldBoundary));
+        if (target == null) throw new ArgumentException("can not find this boundary");
+
+        // looking for index of two vertices in old boundary
+        int index1 = 0;
+        for (; index1 < target.shellVertices.Count; index1++)
+            if (System.Object.ReferenceEquals(target.shellVertices[index1], oldBoundary.P0))
+                break;
+        if (index1 == target.shellVertices.Count) throw new ArgumentException("can not find vertices");
+        int next = (index1 + 1) % target.shellVertices.Count;
+        int prev = (index1 - 1) % target.shellVertices.Count;
+        if (prev < 0) prev += target.shellVertices.Count;
+
+        int index2 = 0;
+        if (System.Object.ReferenceEquals(target.shellVertices[next], oldBoundary.P1))
+            index2 = next;
+        else if (System.Object.ReferenceEquals(target.shellVertices[prev], oldBoundary.P1))
+            index2 = prev;
+        else
+            throw new ArgumentException("can not find the second vertices");
+
+        // insert middleVertex into the middle of two old vertices
+        if (Math.Abs(index1 - index2) == 1)
+            target.shellVertices.Insert(Math.Min(index1, index2), middleVertex);
+        else
+            target.shellVertices.Add(middleVertex);
+
+
+        // Handle boundary
+        target.shellBoundaries.Remove(oldBoundary);
+        target.shellBoundaries.Add(newBoundary1);
+        target.shellBoundaries.Add(newBoundary2);
     }
 
     public void AddHole(CellSpace cellSpace)

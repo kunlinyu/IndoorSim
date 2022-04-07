@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Distance;
 using UnityEngine;
 using UnityEngine.UIElements;
 #nullable enable
@@ -13,7 +14,7 @@ public class LineString : MonoBehaviour, ITool
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
-    private Point? lastPoint = null;
+    private Coordinate? lastCoor = null;
     private CellVertex? lastVertex = null;
 
     private Sprite? cursurSprite;
@@ -51,47 +52,65 @@ public class LineString : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
-            Coordinate? currentCoor = Utils.Vec2Coor(CameraController.mousePositionOnGround());
-            if (currentCoor != null)
+            Coordinate? currentCoor_ = Utils.Vec2Coor(CameraController.mousePositionOnGround());
+            if (currentCoor_ != null)
             {
-                Point currentPoint = new GeometryFactory().CreatePoint(currentCoor);
-
+                Coordinate currentCoor = currentCoor_;
                 Selectable? pointed = MousePickController.PointedEntity;
+
+                if (lastCoor == null && pointed != null && pointed.type == SelectableType.Boundary) return;
+
+                // snap to vertex
                 CellVertex? currentVertex = null;
+                CellBoundary? currentBoundary = null;
                 if (pointed != null && pointed.type == SelectableType.Vertex)
                 {
                     currentVertex = ((VertexController)pointed).Vertex;
-                    currentPoint = currentVertex.Geom;
+                    currentCoor = currentVertex.Coordinate;
                 }
 
-                if (lastPoint != null)
+                // handle split boundary
+                bool splitBoundary = false;
+                if (lastCoor != null && pointed != null && pointed.type == SelectableType.Boundary)
+                {
+                    splitBoundary = true;
+                    currentBoundary = ((BoundaryController)pointed).Boundary;
+
+                    Coordinate[] nearestCoor = DistanceOp.NearestPoints(currentBoundary.Geom, new GeometryFactory().CreatePoint(currentCoor));
+                    currentCoor = nearestCoor[0];
+                }
+
+                if (lastCoor != null)
                 {
                     GeometryFactory gf = new GeometryFactory();
 
+                    if (splitBoundary)
+                        currentVertex = IndoorSim!.indoorTiling.SplitBoundary(currentBoundary!, currentCoor);
+
                     if (lastVertex == null && currentVertex == null)
                     {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentPoint.Coordinate });
-                        CellVertex newVertexStart = new CellVertex(lastPoint);
-                        CellVertex newVertexEnd = new CellVertex(currentPoint);
+                        var ls = gf.CreateLineString(new Coordinate[] { lastCoor, currentCoor });
+                        CellVertex newVertexStart = new CellVertex(lastCoor);
+                        CellVertex newVertexEnd = new CellVertex(currentCoor);
                         IndoorSim!.indoorTiling.AddBoundary(ls, newVertexStart, newVertexEnd);
                         lastVertex = newVertexEnd;
-                        lastPoint = currentPoint;
+                        lastCoor = currentCoor;
                     }
                     else if (lastVertex != null && currentVertex == null)
                     {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentPoint.Coordinate });
-                        CellVertex newVertex = new CellVertex(currentPoint);
+                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentCoor });
+                        CellVertex newVertex = new CellVertex(currentCoor);
                         IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, newVertex);
                         lastVertex = newVertex;
-                        lastPoint = currentPoint;
+                        lastCoor = currentCoor;
                     }
                     else if (lastVertex == null && currentVertex != null)
                     {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastPoint.Coordinate, currentVertex.Coordinate });
-                        CellVertex newVertex = new CellVertex(lastPoint);
+                        var ls = gf.CreateLineString(new Coordinate[] { lastCoor, currentVertex.Coordinate });
+                        CellVertex newVertex = new CellVertex(lastCoor);
                         IndoorSim!.indoorTiling.AddBoundary(ls, newVertex, currentVertex);
                         lastVertex = currentVertex;
-                        lastPoint = currentVertex.Geom;
+                        lastCoor = currentVertex.Coordinate;
                     }
                     else if (lastVertex != null && currentVertex != null)
                     {
@@ -100,7 +119,7 @@ public class LineString : MonoBehaviour, ITool
                             var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
                             IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
                             lastVertex = currentVertex;
-                            lastPoint = currentVertex.Geom;
+                            lastCoor = currentVertex.Coordinate;
                         }
                     }
                     else
@@ -108,7 +127,7 @@ public class LineString : MonoBehaviour, ITool
                 }
                 else
                 {
-                    lastPoint = currentPoint;
+                    lastCoor = currentCoor;
                     lastVertex = currentVertex;
                 }
             }
@@ -116,7 +135,7 @@ public class LineString : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(1))
         {
-            lastPoint = null;
+            lastCoor = null;
             lastVertex = null;
         }
 
@@ -127,7 +146,7 @@ public class LineString : MonoBehaviour, ITool
 
     void UpdateLineRenderer()
     {
-        if (lastPoint == null)
+        if (lastCoor == null)
         {
             GetComponent<LineRenderer>().positionCount = 0;
             return;
@@ -143,7 +162,7 @@ public class LineString : MonoBehaviour, ITool
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
             lr.SetPosition(0, Utils.Coor2Vec(mousePosition));
-            lr.SetPosition(1, Utils.Coor2Vec(lastPoint.Coordinate));
+            lr.SetPosition(1, Utils.Coor2Vec(lastCoor));
             lr.alignment = LineAlignment.TransformZ;    // border should face to sky
             lr.useWorldSpace = true;
 

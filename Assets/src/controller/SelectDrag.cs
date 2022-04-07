@@ -146,6 +146,7 @@ public class SelectDrag : MonoBehaviour, ITool
                         lr.startWidth = 0.1f;
                         lr.endWidth = 0.1f;
                         lr.material = draftMaterial;
+                        lr.sortingOrder = 1;
                     }
                     else
                     {
