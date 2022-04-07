@@ -45,7 +45,7 @@ public class SelectDrag : MonoBehaviour, ITool
         selectCursurTexture = Resources.Load<Texture2D>("cursor/select");
         selectHotspot = new Vector2(selectCursurTexture.width / 2, selectCursurTexture.height / 2.0f);
 
-        UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
+        UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.Auto);
 
         dragCursurTexture = Resources.Load<Texture2D>("cursor/drag");
         dragHotspot = new Vector2(0, 0);
@@ -91,9 +91,9 @@ public class SelectDrag : MonoBehaviour, ITool
                     throw new System.Exception("should not release button 0 in Idle status");
 
                 if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
-                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.ForceSoftware);
+                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.Auto);
                 else
-                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
+                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.Auto);
                 break;
 
             case Status.Selecting:
@@ -196,9 +196,9 @@ public class SelectDrag : MonoBehaviour, ITool
                 }
 
                 if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
-                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.ForceSoftware);
+                    UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.Auto);
                 else
-                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.ForceSoftware);
+                    UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.Auto);
 
 
                 break;

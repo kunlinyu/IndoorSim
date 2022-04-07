@@ -1,9 +1,6 @@
-using System.Linq;
-using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Distance;
 using UnityEngine;
-using UnityEngine.UIElements;
 #nullable enable
 
 [RequireComponent(typeof(LineRenderer))]
@@ -17,7 +14,6 @@ public class LineString : MonoBehaviour, ITool
     private Coordinate? lastCoor = null;
     private CellVertex? lastVertex = null;
 
-    private Sprite? cursurSprite;
     private Texture2D? cursurTexture;
     private Vector2 hotspot;
 
@@ -26,29 +22,13 @@ public class LineString : MonoBehaviour, ITool
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
 
-        // cursurSprite = Resources.Load<Sprite>("cursor/cursor line");
-        // cursurTexture = cursurSprite.texture;
-        // hotspot = new Vector2(cursurTexture.width / 2, cursurTexture.height / 2.0f);
+        cursurTexture = Resources.Load<Texture2D>("cursor/pen");
+        hotspot = new Vector2(0.0f, 0.0f);
+        UnityEngine.Cursor.SetCursor(cursurTexture, hotspot, CursorMode.Auto);
     }
     void Update()
     {
         Selectable? pointedVertex = MousePickController.PointedEntity;
-        if (pointedVertex != null && pointedVertex.type == SelectableType.Vertex)
-        {
-            var vertexScreenPosition3 = Utils.Coor2Screen(((VertexController)pointedVertex).Vertex.Coordinate);
-            Vector2 vertexScreenPosition2 = new Vector2(vertexScreenPosition3.x, vertexScreenPosition3.y);
-
-            var mousePosition = Input.mousePosition;
-            Vector2 delta = mousePosition - vertexScreenPosition3;
-            delta.y = -delta.y;
-            delta += hotspot;
-
-            // UnityEngine.Cursor.SetCursor(cursurSprite?.texture, delta, CursorMode.ForceSoftware);
-        }
-        else
-        {
-            // UnityEngine.Cursor.SetCursor(cursurSprite?.texture, hotspot, CursorMode.ForceSoftware);
-        }
 
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {

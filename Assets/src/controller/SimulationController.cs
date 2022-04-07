@@ -36,6 +36,11 @@ public class SimulationController : MonoBehaviour
                 currentTool = toolObj.AddComponent<SelectDrag>();
                 currentTool.draftMaterial = Resources.Load<Material>("material/tool select drag");
             }
+            else if (e.name == "delete")
+            {
+                toolObj = new GameObject("delete");
+                currentTool = toolObj.AddComponent<Deleter>();
+            }
 
             toolObj.transform.SetParent(transform);
             currentTool.mapView = mapView;
