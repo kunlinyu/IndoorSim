@@ -119,6 +119,59 @@ public class CellSpace
         target.shellBoundaries.Remove(oldBoundary);
         target.shellBoundaries.Add(newBoundary1);
         target.shellBoundaries.Add(newBoundary2);
+        UpdateFromVertex();
+    }
+
+    public static CellSpace MergeCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)
+    {
+        // looking for nonCommonBoundaries
+        HashSet<CellBoundary> commonBoundaries = new HashSet<CellBoundary>();
+        foreach (var boundary1 in cellSpace1.shellBoundaries)
+            foreach (var boundary2 in cellSpace2.shellBoundaries)
+                if (System.Object.ReferenceEquals(boundary1, boundary2))
+                    commonBoundaries.Add(boundary1);
+        if (commonBoundaries.Count == 0)
+            throw new ArgumentException("can not merget the two cellSpaces because they don't have common boundaries");
+
+        HashSet<CellBoundary> nonCommonBoundaries = new HashSet<CellBoundary>();
+        foreach (var b in cellSpace1.shellBoundaries)
+            if (!commonBoundaries.Contains(b))
+                nonCommonBoundaries.Add(b);
+        foreach (var b in cellSpace2.shellBoundaries)
+            if (!commonBoundaries.Contains(b))
+                nonCommonBoundaries.Add(b);
+
+        // Search for vertices in ring sequence from boundaries
+        List<CellVertex> vertices = new List<CellVertex>();
+        List<CellBoundary> waitingBoundaries = nonCommonBoundaries.ToList();
+
+        CellBoundary currentBoundary = waitingBoundaries[0];
+        CellVertex currentVertex = currentBoundary.P0;
+        waitingBoundaries.Remove(currentBoundary);
+        vertices.Add(currentVertex);
+        do
+        {
+            currentVertex = currentBoundary.Another(currentVertex);
+            currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
+            vertices.Add(currentVertex);
+            waitingBoundaries.Remove(currentBoundary);
+        } while (waitingBoundaries.Count > 0);
+
+        // check vertices CCW
+        List<CellVertex> tempRing = new List<CellVertex>(vertices);
+        tempRing.Add(vertices[0]);
+        if (!new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray()).IsCCW)
+            vertices.Reverse();
+
+        Geometry unionPolygon = cellSpace1.Geom.Union(cellSpace2.Geom);
+        if (unionPolygon.OgcGeometryType != OgcGeometryType.Polygon)
+        {
+            Debug.Log(unionPolygon.ToString());
+            throw new Exception("Can not union two cellspace to be one polygon");
+        }
+
+        // Add merged hole
+        return new CellSpace((Polygon)unionPolygon, vertices, nonCommonBoundaries);
     }
 
     public void AddHole(CellSpace cellSpace)
@@ -148,6 +201,7 @@ public class CellSpace
             merge = false;
 
             foreach (var hole1 in holesSet)
+            {
                 foreach (var hole2 in holesSet)
                     if (!System.Object.ReferenceEquals(hole1, hole2))  // generate pair of hole
 
@@ -156,55 +210,14 @@ public class CellSpace
                                 if (System.Object.ReferenceEquals(b1, b2))  // adjacent holes have common boundary, lets merge them
                                 {
                                     merge = true;
-
-                                    // remove them
                                     holesSet.Remove(hole1);
                                     holesSet.Remove(hole2);
-
-                                    // looking for nonCommonBoundaries
-                                    HashSet<CellBoundary> commonBoundaries = new HashSet<CellBoundary>();
-                                    HashSet<CellBoundary> nonCommonBoundaries = new HashSet<CellBoundary>();
-                                    foreach (var boundary1 in hole1.shellBoundaries)
-                                        foreach (var boundary2 in hole2.shellBoundaries)
-                                            if (System.Object.ReferenceEquals(boundary1, boundary2))
-                                                commonBoundaries.Add(boundary1);
-                                    foreach (var b in hole1.shellBoundaries)
-                                        if (!commonBoundaries.Contains(b))
-                                            nonCommonBoundaries.Add(b);
-                                    foreach (var b in hole2.shellBoundaries)
-                                        if (!commonBoundaries.Contains(b))
-                                            nonCommonBoundaries.Add(b);
-
-                                    // Search for vertices in ring sequence from boundaries
-                                    List<CellVertex> vertices = new List<CellVertex>();
-                                    List<CellBoundary> waitingBoundaries = nonCommonBoundaries.ToList();
-
-                                    CellBoundary currentBoundary = waitingBoundaries[0];
-                                    CellVertex currentVertex = currentBoundary.P0;
-                                    waitingBoundaries.Remove(currentBoundary);
-                                    vertices.Add(currentVertex);
-                                    do
-                                    {
-                                        currentVertex = currentBoundary.Another(currentVertex);
-                                        currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
-                                        vertices.Add(currentVertex);
-                                        waitingBoundaries.Remove(currentBoundary);
-                                    } while (waitingBoundaries.Count > 0);
-
-                                    // check vertices CCW
-                                    List<CellVertex> tempRing = new List<CellVertex>(vertices);
-                                    tempRing.Add(vertices[0]);
-                                    if (!new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray()).IsCCW)
-                                        vertices.Reverse();
-
-                                    // Add merged hole
-                                    CellSpace newHole = new CellSpace((Polygon)hole1.Geom.Union(hole2.Geom), vertices, nonCommonBoundaries);
-                                    holesSet.Add(newHole);
-
+                                    holesSet.Add(MergeCellSpace(hole1, hole2));
                                     goto aftermerge;
                                 }
+            }
 
-                            aftermerge:;
+        aftermerge:;
 
         } while (merge);
 

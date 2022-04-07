@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,6 +60,8 @@ public class SelectDrag : MonoBehaviour, ITool
 
     void Update()
     {
+        if (mapView == null) throw new InvalidOperationException("mapView null");
+        if (IndoorSim == null) throw new InvalidOperationException("IndoorSim null");
         Selectable? pointedEntity = MousePickController.PointedEntity;
 
         switch (status)
@@ -223,7 +226,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     foreach (BoundaryController bc in selectedBoundaries)
                     {
-                        Vector3[] positions = bc.Boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta.Value).ToArray();
+                        Vector3[] positions = bc.Boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta!.Value).ToArray();
                         bc.updateRenderer(positions);
                     }
                     if (Input.GetMouseButtonUp(0))

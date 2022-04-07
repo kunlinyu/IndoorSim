@@ -111,7 +111,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
-        lr.sortingOrder = 1;
+        lr.sortingOrder = 2;
 
         if (selected)
         {

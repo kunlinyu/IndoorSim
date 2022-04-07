@@ -8,7 +8,7 @@ public class ToolBarController : MonoBehaviour
     [SerializeField] private VisualTreeAsset m_ToolBarButtonTemplate;
     public UIEventDispatcher eventDispatcher;
 
-    void OnEnable()
+    void Start()
     {
         var uiDocument = GetComponent<UIDocument>();
         VisualElement root = uiDocument.rootVisualElement;
@@ -40,11 +40,6 @@ public class ToolBarController : MonoBehaviour
 
         toolBar.RegisterCallback<MouseEnterEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "enter", type = UIEventType.EnterUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "leave", type = UIEventType.EnterUIPanel }); });
-
-    }
-
-    void Start()
-    {
 
     }
 

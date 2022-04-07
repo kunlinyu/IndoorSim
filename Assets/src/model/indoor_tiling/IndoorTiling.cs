@@ -163,6 +163,7 @@ public class IndoorTiling
 
         foreach (var space in spaces)
             space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
+        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
 
         boundaryPool.Remove(boundary);
         vertex2Boundaries[boundary.P0].Remove(boundary);
@@ -174,7 +175,6 @@ public class IndoorTiling
         vertex2Boundaries[middleVertex] = new HashSet<CellBoundary>() { newBoundary1, newBoundary2 };
         vertex2Boundaries[boundary.P0].Add(newBoundary1);
         vertex2Boundaries[boundary.P1].Add(newBoundary2);
-        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
         OnBoundaryCreated?.Invoke(newBoundary1);
         OnBoundaryCreated?.Invoke(newBoundary2);
 
@@ -326,14 +326,6 @@ public class IndoorTiling
         vertex2Boundaries[boundary.P1].Add(boundary);
 
         OnBoundaryCreated.Invoke(boundary);
-    }
-
-    private void RemoveBoundaryInternal(CellBoundary boundary)
-    {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("Can not find the boundary");
-        boundaryPool.Remove(boundary);
-        vertex2Boundaries[boundary.P0].Remove(boundary);
-        vertex2Boundaries[boundary.P1].Remove(boundary);
     }
 
     private void AddSpaceInternal(CellSpace space)
@@ -507,12 +499,60 @@ public class IndoorTiling
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("can not find cell boundary");
 
         // Remove Boundary only
-        RemoveBoundaryInternal(boundary);
-        // Or remove polygon
-        // Or merge polygon
-        // Remove Vertex
+        boundaryPool.Remove(boundary);
+        OnBoundaryRemoved?.Invoke(boundary);
 
         // update lookup tables
+        vertex2Boundaries[boundary.P0].Remove(boundary);
+        vertex2Boundaries[boundary.P1].Remove(boundary);
+
+        // Remove Vertex
+        if (vertex2Boundaries[boundary.P0].Count == 0)
+        {
+            vertexPool.Remove(boundary.P0);
+            OnVertexRemoved?.Invoke(boundary.P0);
+        }
+        if (vertex2Boundaries[boundary.P1].Count == 0)
+        {
+            vertexPool.Remove(boundary.P1);
+            OnVertexRemoved?.Invoke(boundary.P1);
+        }
+
+        // space
+        List<CellSpace> spaces = Boundary2Space(boundary);
+        if (spaces.Count == 0)  // no cellspace related
+        {
+            // nothing
+        }
+        else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
+        {
+            spacePool.Remove(spaces[0]);
+            foreach (var vertex in spaces[0].allVertices)
+                vertex2Spaces[vertex].Remove(spaces[0]);
+        }
+        else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
+                 spaces[1].ShellCellSpace().Geom.Contains(spaces[0].ShellCellSpace().Geom))  // one in the hole of another
+        {
+            CellSpace parent, child;
+            if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom))
+            {
+                parent = spaces[0];
+                child = spaces[1];
+            }
+            else
+            {
+                parent = spaces[1];
+                child = spaces[0];
+            }
+
+            // TODO
+
+        }
+        else  // Two parallel cellspace. merge them
+        {
+
+        }
+
     }
 
     public void RemoveSpace(CellSpace cs)
