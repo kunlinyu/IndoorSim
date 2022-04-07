@@ -110,7 +110,7 @@ public class CellSpace
 
         // insert middleVertex into the middle of two old vertices
         if (Math.Abs(index1 - index2) == 1)
-            target.shellVertices.Insert(Math.Min(index1, index2), middleVertex);
+            target.shellVertices.Insert(Math.Max(index1, index2), middleVertex);
         else
             target.shellVertices.Add(middleVertex);
 
