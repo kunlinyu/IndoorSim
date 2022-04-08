@@ -16,10 +16,10 @@ public class CellSpace
     {
         get
         {
-            List<CellVertex> result = new List<CellVertex>(shellVertices);
+            HashSet<CellVertex> result = new HashSet<CellVertex>(shellVertices);
             foreach (var hole in Holes)
-                result.AddRange(hole.shellVertices);
-            return result;
+                result.UnionWith(hole.shellVertices);
+            return result.ToList();
         }
     }
     [JsonIgnore]
@@ -27,10 +27,10 @@ public class CellSpace
     {
         get
         {
-            List<CellBoundary> result = new List<CellBoundary>(shellBoundaries);
+            HashSet<CellBoundary> result = new HashSet<CellBoundary>(shellBoundaries);
             foreach (var hole in Holes)
-                result.AddRange(hole.shellBoundaries);
-            return result;
+                result.UnionWith(hole.shellBoundaries);
+            return result.ToList();
         }
     }
 
@@ -131,7 +131,7 @@ public class CellSpace
                 if (System.Object.ReferenceEquals(boundary1, boundary2))
                     commonBoundaries.Add(boundary1);
         if (commonBoundaries.Count == 0)
-            throw new ArgumentException("can not merget the two cellSpaces because they don't have common boundaries");
+            throw new ArgumentException("can not merge the two cellSpaces because they don't have common boundaries");
 
         HashSet<CellBoundary> nonCommonBoundaries = new HashSet<CellBoundary>();
         foreach (var b in cellSpace1.shellBoundaries)
@@ -203,18 +203,21 @@ public class CellSpace
             foreach (var hole1 in holesSet)
             {
                 foreach (var hole2 in holesSet)
-                    if (!System.Object.ReferenceEquals(hole1, hole2))  // generate pair of hole
+                {
+                    if (System.Object.ReferenceEquals(hole1, hole2)) continue;  // generate pair of hole
+                    foreach (var b1 in hole1.shellBoundaries)
+                    {
+                        var b2 = hole2.shellBoundaries.FirstOrDefault(b2 => System.Object.ReferenceEquals(b1, b2));
+                        if (b2 == null) continue;
 
-                        foreach (var b1 in hole1.shellBoundaries)
-                            foreach (var b2 in hole2.shellBoundaries)
-                                if (System.Object.ReferenceEquals(b1, b2))  // adjacent holes have common boundary, lets merge them
-                                {
-                                    merge = true;
-                                    holesSet.Remove(hole1);
-                                    holesSet.Remove(hole2);
-                                    holesSet.Add(MergeCellSpace(hole1, hole2));
-                                    goto aftermerge;
-                                }
+                        // adjacent holes have common boundary, lets merge them
+                        merge = true;
+                        holesSet.Remove(hole1);
+                        holesSet.Remove(hole2);
+                        holesSet.Add(MergeCellSpace(hole1, hole2));
+                        goto aftermerge;
+                    }
+                }
             }
 
         aftermerge:;

@@ -337,7 +337,11 @@ public class IndoorTiling
 
     private void RelateVertexSpace(CellSpace space)
     {
-        foreach (var vertex in space.allVertices)
+        var allVertices = space.allVertices;
+        foreach (var entry in vertex2Spaces)
+            if (entry.Value.Contains(space) && !allVertices.Contains(entry.Key))
+                vertex2Spaces[entry.Key].Remove(space);
+        foreach (var vertex in allVertices)
         {
             if (!vertex2Spaces.ContainsKey(vertex))
                 vertex2Spaces[vertex] = new HashSet<CellSpace>();
@@ -384,7 +388,7 @@ public class IndoorTiling
         spacePool.Remove(space);
         foreach (var vertex in space.allVertices)
             vertex2Spaces[vertex].Remove(space);
-        OnSpaceRemoved(space);
+        OnSpaceRemoved?.Invoke(space);
     }
 
     private CellSpace CreateCellSpace(List<JumpInfo> bbt)
