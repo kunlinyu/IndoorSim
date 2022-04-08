@@ -401,7 +401,7 @@ public class IndoorTiling
             polygonPoints.AddRange(ignoreLastOne);
         }
         polygonPoints.Add(bbt[0].Geom.StartPoint.Coordinate);
-        Polygon polygon = new GeometryFactory().CreatePolygon(polygonPoints.ToArray());
+        // Polygon polygon = new GeometryFactory().CreatePolygon(polygonPoints.ToArray());
 
         List<CellVertex> vertices = bbt.Select(ji => ji.target).ToList();
         List<CellBoundary> boundaries = bbt.Select(ji => ji.through).ToList();
@@ -412,7 +412,7 @@ public class IndoorTiling
             boundaries.Reverse();
         }
 
-        return new CellSpace(polygon, vertices, boundaries);
+        return new CellSpace(vertices, boundaries);
 
     }
 
@@ -455,7 +455,10 @@ public class IndoorTiling
         }
 
         foreach (var s in spaces)
+        {
             s.UpdateFromVertex();
+            s.OnUpdate?.Invoke();
+        }
 
         foreach (var s1 in spaces)
         {
@@ -491,7 +494,10 @@ public class IndoorTiling
             foreach (var b in boundaries)
                 b.UpdateFromVertex();
             foreach (var s in spaces)
+            {
                 s.UpdateFromVertex();
+                s.OnUpdate?.Invoke();
+            }
         }
 
 
@@ -530,9 +536,7 @@ public class IndoorTiling
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
         {
-            spacePool.Remove(spaces[0]);
-            foreach (var vertex in spaces[0].allVertices)
-                vertex2Spaces[vertex].Remove(spaces[0]);
+            RemoveSpaceInternal(spaces[0]);
         }
         else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
                  spaces[1].ShellCellSpace().Geom.Contains(spaces[0].ShellCellSpace().Geom))  // one in the hole of another
@@ -549,12 +553,17 @@ public class IndoorTiling
                 child = spaces[0];
             }
 
-            // TODO
+            parent.RemoveHole(child);
+            RelateVertexSpace(parent);
+            RemoveSpaceInternal(child);
 
         }
         else  // Two parallel cellspace. merge them
         {
-
+            CellSpace newCellSpace = CellSpace.MergeOrMinusCellSpace(spaces[0], spaces[1]);
+            RemoveSpaceInternal(spaces[0]);
+            RemoveSpaceInternal(spaces[1]);
+            AddSpaceConsiderHole(newCellSpace);
         }
 
     }

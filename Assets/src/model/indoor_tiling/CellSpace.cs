@@ -44,30 +44,29 @@ public class CellSpace
         shellBoundaries = new List<CellBoundary>(boundaries);
     }
 
+    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries)
+    {
+        shellVertices = new List<CellVertex>(sortedVertices);
+        shellBoundaries = new List<CellBoundary>(boundaries);
+        Geom = UpdateFromVertex();
+    }
+
     public CellSpace ShellCellSpace()
     {
         return new CellSpace(new GeometryFactory().CreatePolygon(Geom.Shell), shellVertices, shellBoundaries);
     }
 
-    public void UpdateFromVertex()
+    public Polygon UpdateFromVertex()
     {
         List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);
         shellVertices2.Add(shellVertices.First());
         LinearRing shellRing = new GeometryFactory().CreateLinearRing(shellVertices2.Select(cv => cv.Coordinate).ToArray());
 
-        List<LinearRing> holes = new List<LinearRing>();
-        foreach (CellSpace hole in Holes)
-        {
-            List<CellVertex> shellOfHole = new List<CellVertex>(hole.shellVertices);
-            shellOfHole.Add(hole.shellVertices.First());
-            LinearRing holeRing = new GeometryFactory().CreateLinearRing(shellOfHole.Select(cv => cv.Coordinate).ToArray());
-            holes.Add(holeRing);
-            hole.UpdateFromVertex();
-        }
+        Holes.ForEach(hole => hole.UpdateFromVertex());
 
-        Geom = new GeometryFactory().CreatePolygon(shellRing, holes.ToArray());
+        Geom = new GeometryFactory().CreatePolygon(shellRing, Holes.Select(h => h.Geom.Shell).ToArray());
 
-        OnUpdate?.Invoke();
+        return Geom;
     }
 
     public void SplitBoundary(CellBoundary oldBoundary, CellBoundary newBoundary1, CellBoundary newBoundary2, CellVertex middleVertex)
@@ -120,10 +119,15 @@ public class CellSpace
         target.shellBoundaries.Add(newBoundary1);
         target.shellBoundaries.Add(newBoundary2);
         UpdateFromVertex();
+        OnUpdate?.Invoke();
     }
 
-    public static CellSpace MergeCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)
+    public static CellSpace MergeOrMinusCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)
     {
+        // If the two arguments touches with each other, this function will merge them.
+        // If one argument contain another, this function will minus the inner one from the outter one.
+        // And there is no need to distinguish with case we need to solve because the code are same for both cases.
+
         // looking for nonCommonBoundaries
         HashSet<CellBoundary> commonBoundaries = new HashSet<CellBoundary>();
         foreach (var boundary1 in cellSpace1.shellBoundaries)
@@ -131,7 +135,7 @@ public class CellSpace
                 if (System.Object.ReferenceEquals(boundary1, boundary2))
                     commonBoundaries.Add(boundary1);
         if (commonBoundaries.Count == 0)
-            throw new ArgumentException("can not merge the two cellSpaces because they don't have common boundaries");
+            throw new ArgumentException("can not merge or minus the two cellSpaces because they don't have common boundaries");
 
         HashSet<CellBoundary> nonCommonBoundaries = new HashSet<CellBoundary>();
         foreach (var b in cellSpace1.shellBoundaries)
@@ -163,15 +167,8 @@ public class CellSpace
         if (!new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray()).IsCCW)
             vertices.Reverse();
 
-        Geometry unionPolygon = cellSpace1.Geom.Union(cellSpace2.Geom);
-        if (unionPolygon.OgcGeometryType != OgcGeometryType.Polygon)
-        {
-            Debug.Log(unionPolygon.ToString());
-            throw new Exception("Can not union two cellspace to be one polygon");
-        }
-
         // Add merged hole
-        return new CellSpace((Polygon)unionPolygon, vertices, nonCommonBoundaries);
+        return new CellSpace(vertices, nonCommonBoundaries);
     }
 
     public void AddHole(CellSpace cellSpace)
@@ -214,7 +211,7 @@ public class CellSpace
                         merge = true;
                         holesSet.Remove(hole1);
                         holesSet.Remove(hole2);
-                        holesSet.Add(MergeCellSpace(hole1, hole2));
+                        holesSet.Add(MergeOrMinusCellSpace(hole1, hole2));
                         goto aftermerge;
                     }
                 }
@@ -226,6 +223,37 @@ public class CellSpace
 
         Holes.Clear();
         Holes.AddRange(holesSet);
+
+        Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+        OnUpdate?.Invoke();
+    }
+
+    public void RemoveHole(CellSpace cellspace)
+    {
+        if (Holes.Contains(cellspace))  // Remove whole hole
+        {
+            Holes.Remove(cellspace);
+            Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+            OnUpdate?.Invoke();
+            return;
+        }
+
+        CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.EqualsTopologically(cellspace.Geom));
+
+        if (hole != null)
+        {
+            Holes.Remove(hole);
+            Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+            OnUpdate?.Invoke();
+            return;
+        }
+
+        hole = Holes.FirstOrDefault(hole => hole.Geom.Contains(cellspace.Geom));
+        if (hole == null)
+            throw new ArgumentException("No hole contain the hole to be remove");
+
+        Holes.Remove(hole);
+        Holes.Add(MergeOrMinusCellSpace(hole, cellspace));
 
         Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
         OnUpdate?.Invoke();
