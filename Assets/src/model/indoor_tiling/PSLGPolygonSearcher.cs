@@ -156,6 +156,13 @@ public class PSLGPolygonSearcher
 
         var result = jumps.ToList();
         result.Reverse();
+
+        // while (result.First().ReverseEqual(result.Last()))
+        // {
+        //     result.RemoveAt(0);
+        //     result.RemoveAt(result.Count - 1);
+        // }
+
         return result;
     }
 

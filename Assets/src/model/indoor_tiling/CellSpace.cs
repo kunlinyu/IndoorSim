@@ -228,6 +228,17 @@ public class CellSpace
         OnUpdate?.Invoke();
     }
 
+    public CellSpace FindHole(CellSpace cellspace)
+    {
+        if (Holes.Contains(cellspace))
+            return cellspace;
+        else
+        {
+            CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.EqualsTopologically(cellspace.Geom));
+            return hole;
+        }
+    }
+
     public void RemoveHole(CellSpace cellspace)
     {
         if (Holes.Contains(cellspace))  // Remove whole hole
@@ -238,25 +249,18 @@ public class CellSpace
             return;
         }
 
-        CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.EqualsTopologically(cellspace.Geom));
-
-        if (hole != null)
+        CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.Contains(cellspace.Geom));
+        if (hole == null)
+        {
+            throw new ArgumentException("No hole contain the hole to be remove");
+        }
+        else
         {
             Holes.Remove(hole);
             Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
             OnUpdate?.Invoke();
             return;
         }
-
-        hole = Holes.FirstOrDefault(hole => hole.Geom.Contains(cellspace.Geom));
-        if (hole == null)
-            throw new ArgumentException("No hole contain the hole to be remove");
-
-        Holes.Remove(hole);
-        Holes.Add(MergeOrMinusCellSpace(hole, cellspace));
-
-        Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
-        OnUpdate?.Invoke();
     }
 
     public void Update()

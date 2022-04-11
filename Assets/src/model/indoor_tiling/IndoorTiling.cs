@@ -548,17 +548,51 @@ public class IndoorTiling
                 child = spaces[0];
             }
 
-            parent.RemoveHole(child);  // BUG: remove hole may create two new hole
-            RelateVertexSpace(parent);
-            RemoveSpaceInternal(child);
+            CellSpace? hole = parent.FindHole(child);
+            if (hole != null)
+            {
+                parent.RemoveHole(child);
+                RelateVertexSpace(parent);
+                RemoveSpaceInternal(child);
+            }
+            else
+            {
+                List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
+                List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
 
+                parent.RemoveHole(child);
+
+                foreach (List<JumpInfo> jumps in rings)
+                {
+                    var newCellSpace = CreateCellSpace(jumps);
+                    Debug.Log(newCellSpace.Geom);
+                    parent.AddHole(newCellSpace);
+                }
+
+                RelateVertexSpace(parent);
+                RemoveSpaceInternal(child);
+            }
         }
         else  // Two parallel cellspace. merge them
         {
-            CellSpace newCellSpace = CellSpace.MergeOrMinusCellSpace(spaces[0], spaces[1]);  // BUG: merge may creates two new hole
+            List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
+            List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
+            List<CellSpace> cellSpaces = rings.Select(ring => CreateCellSpace(ring)).Where(cs => cs.Geom.Area > 0.0f).ToList();
+
+            double area = 0.0f;
+            CellSpace? shell = null;
+            foreach (var cellspace in cellSpaces)
+            {
+                if (shell == null || cellspace.Geom.Area > area)
+                {
+                    area = cellspace.Geom.Area;
+                    shell = cellspace;
+                }
+            }
+
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
-            AddSpaceConsiderHole(newCellSpace);
+            AddSpaceConsiderHole(shell!);
         }
 
     }

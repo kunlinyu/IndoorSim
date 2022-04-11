@@ -340,4 +340,59 @@ public class RotationNextTest
         AssertListCellVertex(result[0], cv0, cv1, cv2, cv3);
         AssertListCellVertex(result[1], cv6, cv7, cv4, cv5);
     }
+
+    [Test]
+    public void TwoSquareConnectOneBoundaryReverse()
+    {
+        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
+        CellVertex cv1 = new CellVertex(new Point(0.0d, 1.0d), 1);
+        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
+        CellVertex cv3 = new CellVertex(new Point(1.0d, 0.0d), 3);
+        CellVertex cv4 = new CellVertex(new Point(2.0d, 0.0d), 4);
+        CellVertex cv5 = new CellVertex(new Point(2.0d, 1.0d), 5);
+        CellVertex cv6 = new CellVertex(new Point(3.0d, 1.0d), 6);
+        CellVertex cv7 = new CellVertex(new Point(3.0d, 0.0d), 7);
+        List<CellBoundary> boundaries = new List<CellBoundary> {
+            new CellBoundary(cv0, cv1),
+            new CellBoundary(cv1, cv2),
+            new CellBoundary(cv2, cv3),
+            new CellBoundary(cv3, cv0),
+            new CellBoundary(cv3, cv4),
+            new CellBoundary(cv4, cv5),
+            new CellBoundary(cv5, cv6),
+            new CellBoundary(cv6, cv7),
+            new CellBoundary(cv7, cv4),
+        };
+        var finder = new AdjacentFinder(boundaries);
+        JumpInfo initJump = new JumpInfo() { target = cv2, through = new CellBoundary(cv2, cv5) };
+        List<JumpInfo> path = PSLGPolygonSearcher.Search(initJump, cv2, finder.Find);
+
+        AssertListCellVertex(path, cv2, cv3, cv4, cv5, cv6, cv7, cv4, cv3, cv0, cv1, cv2);
+
+        var result = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedBoundary);
+
+        Assert.AreEqual(2, result.Count);
+        AssertListCellVertex(result[0], cv5, cv6, cv7, cv4);
+        AssertListCellVertex(result[1], cv3, cv0, cv1, cv2);
+    }
+
+    // [Test]
+    // public void SquareWithOneInnerBoundary()
+    // {
+    //     CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
+    //     CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+    //     CellVertex cv2 = new CellVertex(new Point(-1.0d, 1.0d), 2);
+    //     CellVertex cv3 = new CellVertex(new Point(-1.0d, -1.0d), 3);
+    //     List<CellBoundary> boundaries = new List<CellBoundary> {
+    //         new CellBoundary(cv0, cv1),
+    //         new CellBoundary(cv1, cv2),
+    //         new CellBoundary(cv2, cv3),
+    //         new CellBoundary(cv3, cv1),
+    //     };
+    //     var finder = new AdjacentFinder(boundaries);
+    //     JumpInfo initJump = new JumpInfo() { target = cv2, through = new CellBoundary(cv2, cv0) };
+    //     List<JumpInfo> path = PSLGPolygonSearcher.Search(initJump, cv2, finder.Find);
+
+    //     AssertListCellVertex(path, cv1, cv2, cv3, cv1);
+    // }
 }
