@@ -202,19 +202,15 @@ public class IndoorTiling
             if (VerticesPair2Boundary(start, end).Count > 0) return;  // don't support multiple boundary between two vertices yet
 
 
-            JumpInfo initJump1 = new JumpInfo() { target = start, through = boundary };
-            List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder);
-
-            JumpInfo initJump2 = new JumpInfo() { target = end, through = boundary };
-            List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder);
-
-            List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(initJump1, end, AdjacentFinder, false);
-            List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(initJump2, start, AdjacentFinder, false);
+            List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
+            List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder);
+            List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder, false);
+            List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder, false);
 
             var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
-            ring1.Add(initJump1.target.Coordinate);
+            ring1.Add(start.Coordinate);
             var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
-            ring2.Add(initJump2.target.Coordinate);
+            ring2.Add(end.Coordinate);
 
             // Add Vertices
             if (newStart)
@@ -391,20 +387,19 @@ public class IndoorTiling
         OnSpaceRemoved?.Invoke(space);
     }
 
-    private CellSpace CreateCellSpace(List<JumpInfo> bbt)
+    private CellSpace CreateCellSpace(List<JumpInfo> jumps)
     {
         List<Coordinate> polygonPoints = new List<Coordinate>();
-        for (int i = 0; i < bbt.Count; i++)
+        for (int i = 0; i < jumps.Count; i++)
         {
-            LineString boundaryPoints = bbt[i].Geom;
+            LineString boundaryPoints = jumps[i].Geom;
             var ignoreLastOne = new ArraySegment<Coordinate>(boundaryPoints.Coordinates, 0, boundaryPoints.NumPoints - 1).ToArray();
             polygonPoints.AddRange(ignoreLastOne);
         }
-        polygonPoints.Add(bbt[0].Geom.StartPoint.Coordinate);
-        // Polygon polygon = new GeometryFactory().CreatePolygon(polygonPoints.ToArray());
+        polygonPoints.Add(jumps[0].Geom.StartPoint.Coordinate);
 
-        List<CellVertex> vertices = bbt.Select(ji => ji.target).ToList();
-        List<CellBoundary> boundaries = bbt.Select(ji => ji.through).ToList();
+        List<CellVertex> vertices = jumps.Select(ji => ji.target).ToList();
+        List<CellBoundary> boundaries = jumps.Select(ji => ji.through).ToList();
 
         if (!new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW)
         {
@@ -553,14 +548,14 @@ public class IndoorTiling
                 child = spaces[0];
             }
 
-            parent.RemoveHole(child);
+            parent.RemoveHole(child);  // BUG: remove hole may create two new hole
             RelateVertexSpace(parent);
             RemoveSpaceInternal(child);
 
         }
         else  // Two parallel cellspace. merge them
         {
-            CellSpace newCellSpace = CellSpace.MergeOrMinusCellSpace(spaces[0], spaces[1]);
+            CellSpace newCellSpace = CellSpace.MergeOrMinusCellSpace(spaces[0], spaces[1]);  // BUG: merge may creates two new hole
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
             AddSpaceConsiderHole(newCellSpace);

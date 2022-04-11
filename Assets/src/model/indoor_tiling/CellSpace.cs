@@ -149,7 +149,7 @@ public class CellSpace
         List<CellVertex> vertices = new List<CellVertex>();
         List<CellBoundary> waitingBoundaries = nonCommonBoundaries.ToList();
 
-        CellBoundary currentBoundary = waitingBoundaries[0];
+        CellBoundary? currentBoundary = waitingBoundaries[0];
         CellVertex currentVertex = currentBoundary.P0;
         waitingBoundaries.Remove(currentBoundary);
         vertices.Add(currentVertex);

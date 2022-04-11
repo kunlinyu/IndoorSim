@@ -28,11 +28,11 @@ public class PSLGPolygonSearcher
                                         CellVertex target,
                                         Func<CellVertex, List<JumpInfo>> adjacentFinder, bool ccw = true)
     {
-        List<JumpInfo> BBTs = new List<JumpInfo>() { initJump };
-        if (System.Object.ReferenceEquals(initJump.target, target)) return BBTs;
+        List<JumpInfo> jumps = new List<JumpInfo>() { initJump };
+        if (System.Object.ReferenceEquals(initJump.target, target)) return jumps;
 
-        JumpInfo currentBBT = initJump;
-        JumpInfo? lastBBT = null;
+        JumpInfo currentJump = initJump;
+        JumpInfo? lastJump = null;
 
         int loopCount = 0;
         do
@@ -40,14 +40,14 @@ public class PSLGPolygonSearcher
             loopCount++;
             if (loopCount > 10000000) break;
 
-            List<JumpInfo> jumpInfos = adjacentFinder(currentBBT.target);
+            List<JumpInfo> jumpInfos = adjacentFinder(currentJump.target);
             if (jumpInfos.Count == 0) return new List<JumpInfo>();
 
             List<CellBoundary> outBoundaries = jumpInfos.Select(oi => oi.through).ToList();
-            List<Point> closestPoints = outBoundaries.Where(b => b != null).Select(b => b.ClosestPointTo(currentBBT.target)).ToList();
+            List<Point> closestPoints = outBoundaries.Where(b => b != null).Select(b => b.ClosestPointTo(currentJump.target)).ToList();
 
             int startIndex = -1;
-            if (lastBBT == null)
+            if (lastJump == null)
             {
                 closestPoints.Add(initJump.through.ClosestPointTo(initJump.target));
                 startIndex = closestPoints.Count - 1;
@@ -55,7 +55,7 @@ public class PSLGPolygonSearcher
             else
             {
                 for (int i = 0; i < jumpInfos.Count; i++)
-                    if (System.Object.ReferenceEquals(jumpInfos[i].target, lastBBT.Value.target))
+                    if (System.Object.ReferenceEquals(jumpInfos[i].target, lastJump.Value.target))
                     {
                         startIndex = i;
                         break;
@@ -63,36 +63,36 @@ public class PSLGPolygonSearcher
             }
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
-            Next(currentBBT.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex, ccw);
+            Next(currentJump.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex, ccw);
 
-            lastBBT = currentBBT;
-            currentBBT = jumpInfos[CCWNextIndex];
+            lastJump = currentJump;
+            currentJump = jumpInfos[CCWNextIndex];
 
             // come back to start, no path from start to end
-            if (BBTs.Any(bbt => bbt.ContentEqual(currentBBT)))
+            if (jumps.Any(jump => jump.ContentEqual(currentJump)))
                 return new List<JumpInfo>();
 
-            BBTs.Add(currentBBT);
+            jumps.Add(currentJump);
 
-        } while (!System.Object.ReferenceEquals(currentBBT.target, target));
+        } while (!System.Object.ReferenceEquals(currentJump.target, target));
 
-        List<JumpInfo> tempBBTs = new List<JumpInfo>();
-        for (int i = 0; i < BBTs.Count; i++)
+        List<JumpInfo> tempJumps = new List<JumpInfo>();
+        for (int i = 0; i < jumps.Count; i++)
         {
             bool remove = false;
-            for (int j = 0; j < tempBBTs.Count; j++)
-                if (System.Object.ReferenceEquals(tempBBTs[j].target, BBTs[i].target) &&
-                    System.Object.ReferenceEquals(tempBBTs[j + 1].through, BBTs[i].through))
+            for (int j = 0; j < tempJumps.Count; j++)
+                if (System.Object.ReferenceEquals(tempJumps[j].target, jumps[i].target) &&
+                    System.Object.ReferenceEquals(tempJumps[j + 1].through, jumps[i].through))
                 {
-                    tempBBTs.RemoveRange(j + 1, tempBBTs.Count - j - 1);
+                    tempJumps.RemoveRange(j + 1, tempJumps.Count - j - 1);
                     remove = true;
                     break;
                 }
             if (!remove)
-                tempBBTs.Add(BBTs[i]);
+                tempJumps.Add(jumps[i]);
         }
-        BBTs = tempBBTs;
-        return BBTs;
+        jumps = tempJumps;
+        return jumps;
     }
 
     struct ThetaWithIndex
