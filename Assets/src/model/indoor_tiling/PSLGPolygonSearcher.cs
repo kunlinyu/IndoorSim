@@ -6,6 +6,12 @@ using UnityEngine;
 
 #nullable enable
 
+public enum SplitRingType
+{
+    SplitByRepeatedVertex,
+    SplitByRepeatedBoundary,
+}
+
 public class PSLGPolygonSearcher
 {
     public struct JumpInfo
@@ -15,6 +21,8 @@ public class PSLGPolygonSearcher
 
         public LineString Geom { get => through.GeomEndWith(target); }
 
+        public CellVertex Another() => through.Another(target);
+
         public bool ContentEqual(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -22,14 +30,77 @@ public class PSLGPolygonSearcher
             JumpInfo oi = (JumpInfo)obj;
             return System.Object.ReferenceEquals(oi.target, target) && System.Object.ReferenceEquals(oi.through, through);
         }
+
+        public bool ReverseEqual(JumpInfo jump)
+        {
+            return System.Object.ReferenceEquals(jump.through, through) && System.Object.ReferenceEquals(jump.Another(), target);
+        }
+    }
+
+    public static List<List<JumpInfo>> Jumps2Rings(List<JumpInfo> jumps, SplitRingType splitRingType)
+    {
+        List<List<JumpInfo>> result = new List<List<JumpInfo>>();
+        List<JumpInfo> stack = new List<JumpInfo>();
+
+        foreach (JumpInfo jump in jumps)
+        {
+            bool newRing = false;
+            if (splitRingType == SplitRingType.SplitByRepeatedVertex)
+            {
+                for (int i = 0; i < stack.Count; i++)
+                    if (System.Object.ReferenceEquals(stack[i].target, jump.target))
+                    {
+                        List<JumpInfo> ring = new List<JumpInfo>();
+                        for (int j = i + 1; j < stack.Count; j++)
+                            ring.Add(stack[j]);
+                        stack.RemoveRange(i + 1, stack.Count - (i + 1));
+                        ring.Add(jump);
+                        result.Add(ring);
+                        newRing = true;
+                        break;
+                    }
+                if (!newRing)
+                    stack.Add(jump);
+            }
+            else if (splitRingType == SplitRingType.SplitByRepeatedBoundary)
+            {
+                for (int i = 0; i < stack.Count; i++)
+                    if (stack[i].ReverseEqual(jump))
+                    {
+                        List<JumpInfo> ring = new List<JumpInfo>();
+                        for (int j = i + 1; j < stack.Count; j++)
+                            ring.Add(stack[j]);
+                        stack.RemoveRange(i + 0, stack.Count - (i + 0));
+                        // ring.Add(jump);
+                        result.Add(ring);
+                        newRing = true;
+                        break;
+                    }
+                if (!newRing)
+                    stack.Add(jump);
+            }
+            else
+            {
+                throw new ArgumentException("unknown split ring type");
+            }
+        }
+
+        if (splitRingType == SplitRingType.SplitByRepeatedBoundary)
+        {
+            stack.RemoveAt(0);
+            result.Add(stack);
+        }
+
+        return result;
     }
 
     public static List<JumpInfo> Search(JumpInfo initJump,
                                         CellVertex target,
                                         Func<CellVertex, List<JumpInfo>> adjacentFinder, bool ccw = true)
     {
-        List<JumpInfo> jumps = new List<JumpInfo>() { initJump };
-        if (System.Object.ReferenceEquals(initJump.target, target)) return jumps;
+        Stack<JumpInfo> jumps = new Stack<JumpInfo>();
+        jumps.Push(initJump);
+        List<JumpInfo> jumpsHistory = new List<JumpInfo>(jumps);
 
         JumpInfo currentJump = initJump;
         JumpInfo? lastJump = null;
@@ -38,7 +109,7 @@ public class PSLGPolygonSearcher
         do
         {
             loopCount++;
-            if (loopCount > 10000000) break;
+            if (loopCount > 100000) throw new Exception("dead loop");
 
             List<JumpInfo> jumpInfos = adjacentFinder(currentJump.target);
             if (jumpInfos.Count == 0) return new List<JumpInfo>();
@@ -69,30 +140,23 @@ public class PSLGPolygonSearcher
             currentJump = jumpInfos[CCWNextIndex];
 
             // come back to start, no path from start to end
-            if (jumps.Any(jump => jump.ContentEqual(currentJump)))
+            if (jumpsHistory.Any(jump => jump.ContentEqual(currentJump)))
                 return new List<JumpInfo>();
 
-            jumps.Add(currentJump);
-
+            if (jumps.Count > 0 && jumps.Peek().ReverseEqual(currentJump))
+            {
+                jumps.Pop();
+            }
+            else
+            {
+                jumps.Push(currentJump);
+                jumpsHistory.Add(currentJump);
+            }
         } while (!System.Object.ReferenceEquals(currentJump.target, target));
 
-        List<JumpInfo> tempJumps = new List<JumpInfo>();
-        for (int i = 0; i < jumps.Count; i++)
-        {
-            bool remove = false;
-            for (int j = 0; j < tempJumps.Count; j++)
-                if (System.Object.ReferenceEquals(tempJumps[j].target, jumps[i].target) &&
-                    System.Object.ReferenceEquals(tempJumps[j + 1].through, jumps[i].through))
-                {
-                    tempJumps.RemoveRange(j + 1, tempJumps.Count - j - 1);
-                    remove = true;
-                    break;
-                }
-            if (!remove)
-                tempJumps.Add(jumps[i]);
-        }
-        jumps = tempJumps;
-        return jumps;
+        var result = jumps.ToList();
+        result.Reverse();
+        return result;
     }
 
     struct ThetaWithIndex
