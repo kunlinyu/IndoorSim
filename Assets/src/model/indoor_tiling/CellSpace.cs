@@ -7,7 +7,7 @@ using UnityEngine;
 #nullable enable
 public class CellSpace
 {
-    [JsonPropertyAttribute] public string Id { get; private set; }
+    [JsonPropertyAttribute] public string Id { get; set; }
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; }
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; }
@@ -56,7 +56,7 @@ public class CellSpace
 
     public CellSpace ShellCellSpace()
     {
-        return new CellSpace(new GeometryFactory().CreatePolygon(Geom.Shell), shellVertices, shellBoundaries);
+        return new CellSpace(new GeometryFactory().CreatePolygon(Geom.Shell), shellVertices, shellBoundaries, "shell cell space");
     }
 
     public Polygon UpdateFromVertex()
@@ -171,7 +171,7 @@ public class CellSpace
             vertices.Reverse();
 
         // Add merged hole
-        return new CellSpace(vertices, nonCommonBoundaries);
+        return new CellSpace(vertices, nonCommonBoundaries, "generated temp cellspace");
     }
 
     public void AddHole(CellSpace cellSpace)

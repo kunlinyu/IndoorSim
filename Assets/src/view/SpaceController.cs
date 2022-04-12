@@ -50,13 +50,16 @@ public class SpaceController : MonoBehaviour, Selectable
     public float Distance(Vector3 vec)
     => (float)space.Geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         polygonRenderObj = new GameObject("polygon render obj");
         polygonRenderObj.transform.SetParent(transform);
         polygonRenderObj.AddComponent<PolygonRenderer>();
+    }
 
+    // Start is called before the first frame update
+    void Start()
+    {
         ReTriangulate();
         updateRenderer();
     }

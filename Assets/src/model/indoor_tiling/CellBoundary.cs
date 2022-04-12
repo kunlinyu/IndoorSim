@@ -49,7 +49,7 @@ public class CellBoundary
         throw new ArgumentException("Don't contain end vertex");
     }
 
-    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id = "null")
+    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id)
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");

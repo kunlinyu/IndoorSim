@@ -15,13 +15,13 @@ public class CellVertex
     static public CellVertex Instantiate(Point p, IDGenInterface gen) => new CellVertex(p, gen.Gen());
     static public CellVertex Instantiate(Coordinate coor, IDGenInterface gen) => new CellVertex(coor, gen.Gen());
 
-    private CellVertex(Point p, string id = "null")
+    private CellVertex(Point p, string id)
     {
         Geom = p;
         Id = id;
     }
 
-    private CellVertex(Coordinate p, string id = "null")
+    private CellVertex(Coordinate p, string id)
     {
         Geom = new GeometryFactory().CreatePoint(p);
         Id = id;

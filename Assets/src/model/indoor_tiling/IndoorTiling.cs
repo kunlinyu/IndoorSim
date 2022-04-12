@@ -12,7 +12,6 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 public class IndoorTiling
 {
-    public const double RemainSpaceSize = 10000.0d;
     [JsonPropertyAttribute] private ICollection<CellVertex> vertexPool = new List<CellVertex>();
     [JsonPropertyAttribute] private ICollection<CellBoundary> boundaryPool = new List<CellBoundary>();
     [JsonPropertyAttribute] private ICollection<CellSpace> spacePool = new List<CellSpace>();
@@ -155,8 +154,8 @@ public class IndoorTiling
 
         LineString ls1 = gf.CreateLineString(new Coordinate[] { boundary.P0.Coordinate, middleCoor });
         LineString ls2 = gf.CreateLineString(new Coordinate[] { middleCoor, boundary.P1.Coordinate });
-        CellBoundary newBoundary1 = new CellBoundary(ls1, boundary.P0, middleVertex);
-        CellBoundary newBoundary2 = new CellBoundary(ls2, middleVertex, boundary.P1);
+        CellBoundary newBoundary1 = new CellBoundary(ls1, boundary.P0, middleVertex, IdGenBoundary.Gen());
+        CellBoundary newBoundary2 = new CellBoundary(ls2, middleVertex, boundary.P1, IdGenBoundary.Gen());
 
         List<CellSpace> spaces = Boundary2Space(boundary);
 
@@ -198,7 +197,7 @@ public class IndoorTiling
         vertexPool.Add(end);
         OnVertexCreated(end);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end);
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
 
         return boundary;
@@ -221,7 +220,7 @@ public class IndoorTiling
         vertexPool.Add(end);
         OnVertexCreated(end);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end);
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
 
         return boundary;
@@ -244,7 +243,7 @@ public class IndoorTiling
         vertexPool.Add(start);
         OnVertexCreated(start);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end);
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
 
         return boundary;
@@ -267,7 +266,7 @@ public class IndoorTiling
                 return null;
         if (VerticesPair2Boundary(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
-        CellBoundary boundary = new CellBoundary(ls, start, end);
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
 
         // create new CellSpace
         List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
@@ -364,9 +363,10 @@ public class IndoorTiling
 
     private void AddSpaceInternal(CellSpace space)
     {
+        space.Id = IdGenSpace.Gen();
         spacePool.Add(space);
         RelateVertexSpace(space);
-        OnSpaceCreated(space);
+        OnSpaceCreated?.Invoke(space);
     }
 
     private void RelateVertexSpace(CellSpace space)
