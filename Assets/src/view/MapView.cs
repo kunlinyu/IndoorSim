@@ -42,7 +42,7 @@ public class MapView : MonoBehaviour
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
-            var obj = new GameObject("vertex");
+            var obj = new GameObject(vertex.Id);
             obj.transform.SetParent(vertexParent);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
@@ -57,7 +57,7 @@ public class MapView : MonoBehaviour
         };
         indoorTiling.OnBoundaryCreated += (boundary) =>
         {
-            var obj = new GameObject("boundary");
+            var obj = new GameObject(boundary.Id);
             obj.transform.SetParent(boundaryParent);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
@@ -71,7 +71,7 @@ public class MapView : MonoBehaviour
         };
         indoorTiling.OnSpaceCreated += (space) =>
         {
-            var obj = new GameObject("space");
+            var obj = new GameObject(space.Id);
             obj.transform.SetParent(spaceParent);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;

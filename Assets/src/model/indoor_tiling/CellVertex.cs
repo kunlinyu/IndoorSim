@@ -5,20 +5,23 @@ using Newtonsoft.Json;
 
 public class CellVertex
 {
+    [JsonPropertyAttribute] public string Id { get; private set; }
     [JsonPropertyAttribute] public Point Geom { get; private set; }
-    [JsonPropertyAttribute] public int Id { get; private set; } = 0;
 
     [JsonIgnore] public Coordinate Coordinate { get => Geom.Coordinate; }
 
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    public CellVertex(Point p, int id = 0)
+    static public CellVertex Instantiate(Point p, IDGenInterface gen) => new CellVertex(p, gen.Gen());
+    static public CellVertex Instantiate(Coordinate coor, IDGenInterface gen) => new CellVertex(coor, gen.Gen());
+
+    private CellVertex(Point p, string id = "null")
     {
         Geom = p;
         Id = id;
     }
 
-    public CellVertex(Coordinate p, int id = 0)
+    private CellVertex(Coordinate p, string id = "null")
     {
         Geom = new GeometryFactory().CreatePoint(p);
         Id = id;

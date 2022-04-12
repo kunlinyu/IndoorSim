@@ -7,6 +7,7 @@ using UnityEngine;
 #nullable enable
 public class CellSpace
 {
+    [JsonPropertyAttribute] public string Id { get; private set; }
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; }
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; }
@@ -37,18 +38,20 @@ public class CellSpace
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries)
+    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null")
     {
         Geom = polygon;
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
+        Id = id;
     }
 
-    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries)
+    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null")
     {
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
         Geom = UpdateFromVertex();
+        Id = id;
     }
 
     public CellSpace ShellCellSpace()

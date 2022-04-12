@@ -4,17 +4,10 @@ using UnityEngine;
 
 public class IndoorSim
 {
-    [SerializeField] public IndoorTiling indoorTiling = new IndoorTiling();
+    [SerializeField] public IndoorTiling indoorTiling;
 
-    // Start is called before the first frame update
-    void Start()
+    public IndoorSim(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        indoorTiling = new IndoorTiling(IdGenVertex, IdGenBoundary, IdGenSpace);
     }
 }

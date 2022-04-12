@@ -18,6 +18,10 @@ public class IndoorTiling
     [JsonPropertyAttribute] private ICollection<CellSpace> spacePool = new List<CellSpace>();
     [JsonPropertyAttribute] private ICollection<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
 
+    [JsonIgnore] private IDGenInterface IdGenVertex;
+    [JsonIgnore] private IDGenInterface IdGenBoundary;
+    [JsonIgnore] private IDGenInterface IdGenSpace;
+
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
     [JsonIgnore] private Dictionary<CellSpace, HashSet<RepresentativeLine>> space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
@@ -88,16 +92,11 @@ public class IndoorTiling
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
         => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
 
-    public IndoorTiling()
+    public IndoorTiling(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
-    }
-
-    public void AddBoundary(LineString ls)
-        => AddBoundary(ls, new CellVertex(ls.StartPoint), new CellVertex(ls.EndPoint));
-
-    private bool Reachable(CellVertex start, CellVertex end)
-    {
-        return true;  // TODO
+        this.IdGenVertex = IdGenVertex;
+        this.IdGenBoundary = IdGenBoundary;
+        this.IdGenSpace = IdGenSpace;
     }
 
     private List<JumpInfo> AdjacentFinder(CellVertex cv)
@@ -148,7 +147,7 @@ public class IndoorTiling
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
         if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
 
-        CellVertex middleVertex = new CellVertex(middleCoor);
+        CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
         vertexPool.Add(middleVertex);
         OnVertexCreated?.Invoke(middleVertex);
 
@@ -181,123 +180,162 @@ public class IndoorTiling
         return middleVertex;
     }
 
-    public void AddBoundary(LineString ls, CellVertex start, CellVertex end)
+    public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {
+        LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
+
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+
+        foreach (CellBoundary b in boundaryPool)
+            if (b.Geom.Crosses(ls))
+                return null;
+
+        var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
+        vertexPool.Add(start);
+        OnVertexCreated(start);
+
+        var end = CellVertex.Instantiate(ls.EndPoint, IdGenVertex);
+        vertexPool.Add(end);
+        OnVertexCreated(end);
+
+        CellBoundary boundary = new CellBoundary(ls, start, end);
+        AddBoundaryInternal(boundary);
+
+        return boundary;
+    }
+
+    public CellBoundary? AddBoundary(CellVertex start, Coordinate endCoor)
+    {
+        LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, endCoor });
+
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
+        if (endCoor.Distance(ls.GetPointN(ls.NumPoints - 1).Coordinate) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
+
+        foreach (CellBoundary b in boundaryPool)
+            if (b.Geom.Crosses(ls))
+                return null;
+
+        var end = CellVertex.Instantiate(endCoor, IdGenVertex);
+        vertexPool.Add(end);
+        OnVertexCreated(end);
+
+        CellBoundary boundary = new CellBoundary(ls, start, end);
+        AddBoundaryInternal(boundary);
+
+        return boundary;
+    }
+
+    public CellBoundary? AddBoundary(Coordinate startCoor, CellVertex end)
+    {
+        LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, end.Coordinate });
+
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
+        if (startCoor.Distance(ls.GetPointN(0).Coordinate) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
+        if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
+
+        foreach (CellBoundary b in boundaryPool)
+            if (b.Geom.Crosses(ls))
+                return null;
+
+        var start = CellVertex.Instantiate(startCoor, IdGenVertex);
+        vertexPool.Add(start);
+        OnVertexCreated(start);
+
+        CellBoundary boundary = new CellBoundary(ls, start, end);
+        AddBoundaryInternal(boundary);
+
+        return boundary;
+    }
+
+
+    public CellBoundary? AddBoundary(CellVertex start, CellVertex end)
+    {
+        LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, end.Coordinate });
+
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
         if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
         if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
         if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
         foreach (CellBoundary b in boundaryPool)
             if (b.Geom.Crosses(ls))
-                return;
+                return null;
+        if (VerticesPair2Boundary(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
-        bool newStart = !vertexPool.Contains(start);
-        bool newEnd = !vertexPool.Contains(end);
         CellBoundary boundary = new CellBoundary(ls, start, end);
 
         // create new CellSpace
-        if (!newStart && !newEnd)
-        {
-            if (VerticesPair2Boundary(start, end).Count > 0) return;  // don't support multiple boundary between two vertices yet
+        List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
+        List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder);
+        List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder, false);
+        List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder, false);
 
+        var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
+        ring1.Add(start.Coordinate);
+        var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
+        ring2.Add(end.Coordinate);
 
-            List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
-            List<JumpInfo> jumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder);
-            List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder, false);
-            List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder, false);
+        // Add Boundary
+        AddBoundaryInternal(boundary);
 
-            var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
-            ring1.Add(start.Coordinate);
-            var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
-            ring2.Add(end.Coordinate);
+        // can not reach
+        if (ring1.Count < 2 && ring2.Count < 2) return boundary;
 
-            // Add Vertices
-            if (newStart)
-            {
-                vertexPool.Add(start);
-                OnVertexCreated?.Invoke(start);
-            }
-            if (newEnd)
-            {
-                vertexPool.Add(end);
-                OnVertexCreated?.Invoke(end);
-            }
+        var gf = new GeometryFactory();
+        bool path1IsCCW = gf.CreateLinearRing(ring1.ToArray()).IsCCW;
+        bool path2IsCCW = gf.CreateLinearRing(ring2.ToArray()).IsCCW;
 
-            // Add Boundary
-            AddBoundaryInternal(boundary);
+        CellSpace cellSpace1 = CreateCellSpace(jumps1);
+        CellSpace cellSpace2 = CreateCellSpace(jumps2);
+        CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
 
-            // can not reach
-            if (ring1.Count < 2 && ring2.Count < 2) return;
-
-            var gf = new GeometryFactory();
-            bool path1IsCCW = gf.CreateLinearRing(ring1.ToArray()).IsCCW;
-            bool path2IsCCW = gf.CreateLinearRing(ring2.ToArray()).IsCCW;
-
-            CellSpace cellSpace1 = CreateCellSpace(jumps1);
-            CellSpace cellSpace2 = CreateCellSpace(jumps2);
-            CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
-
-            NewCellSpaceCase ncsCase;
-            if (oldCellSpace == null)
-                ncsCase = NewCellSpaceCase.NewCellSpace;
-            else if (path1IsCCW && path2IsCCW)
-                ncsCase = NewCellSpaceCase.Split;
-            else if (oldCellSpace.Geom.Shell.Touches(start.Geom) || oldCellSpace.Geom.Shell.Touches(end.Geom))
-                ncsCase = NewCellSpaceCase.SplitNeedReSearch;
-            else
-                ncsCase = NewCellSpaceCase.HoleOfAnother;
-
-            Debug.Log(ncsCase);
-
-            switch (ncsCase)
-            {
-                case NewCellSpaceCase.NewCellSpace:
-                    if (path1IsCCW)
-                        AddSpaceConsiderHole(cellSpace1);
-                    else
-                        AddSpaceConsiderHole(cellSpace2);
-                    break;
-
-                case NewCellSpaceCase.Split:
-                    RemoveSpaceInternal(oldCellSpace!);
-                    AddSpaceConsiderHole(cellSpace1);
-                    AddSpaceConsiderHole(cellSpace2);
-                    break;
-
-                case NewCellSpaceCase.SplitNeedReSearch:
-                    RemoveSpaceInternal(oldCellSpace!);
-                    AddSpaceConsiderHole(CreateCellSpace(reJumps1));
-                    AddSpaceConsiderHole(CreateCellSpace(reJumps2));
-                    break;
-
-                case NewCellSpaceCase.HoleOfAnother:
-                    if (path1IsCCW)
-                        AddSpaceConsiderHole(cellSpace1);
-                    else
-                        AddSpaceConsiderHole(cellSpace2);
-                    break;
-            }
-        }
+        NewCellSpaceCase ncsCase;
+        if (oldCellSpace == null)
+            ncsCase = NewCellSpaceCase.NewCellSpace;
+        else if (path1IsCCW && path2IsCCW)
+            ncsCase = NewCellSpaceCase.Split;
+        else if (oldCellSpace.Geom.Shell.Touches(start.Geom) || oldCellSpace.Geom.Shell.Touches(end.Geom))
+            ncsCase = NewCellSpaceCase.SplitNeedReSearch;
         else
-        {
-            // Add Vertices
-            if (newStart)
-            {
-                vertexPool.Add(start);
-                OnVertexCreated(start);
-            }
-            if (newEnd)
-            {
-                vertexPool.Add(end);
-                OnVertexCreated(end);
-            }
+            ncsCase = NewCellSpaceCase.HoleOfAnother;
 
-            // Add Boundary
-            AddBoundaryInternal(boundary);
+        Debug.Log(ncsCase);
+
+        switch (ncsCase)
+        {
+            case NewCellSpaceCase.NewCellSpace:
+                if (path1IsCCW)
+                    AddSpaceConsiderHole(cellSpace1);
+                else
+                    AddSpaceConsiderHole(cellSpace2);
+                break;
+
+            case NewCellSpaceCase.Split:
+                RemoveSpaceInternal(oldCellSpace!);
+                AddSpaceConsiderHole(cellSpace1);
+                AddSpaceConsiderHole(cellSpace2);
+                break;
+
+            case NewCellSpaceCase.SplitNeedReSearch:
+                RemoveSpaceInternal(oldCellSpace!);
+                AddSpaceConsiderHole(CreateCellSpace(reJumps1));
+                AddSpaceConsiderHole(CreateCellSpace(reJumps2));
+                break;
+
+            case NewCellSpaceCase.HoleOfAnother:
+                if (path1IsCCW)
+                    AddSpaceConsiderHole(cellSpace1);
+                else
+                    AddSpaceConsiderHole(cellSpace2);
+                break;
         }
 
-        // remove useless vertex
+        return boundary;
     }
 
     private Point MiddlePoint(LineString ls)

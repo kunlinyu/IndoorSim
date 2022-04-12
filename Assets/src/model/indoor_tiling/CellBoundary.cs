@@ -9,6 +9,7 @@ struct BoundaryType
 }
 public class CellBoundary
 {
+    [JsonPropertyAttribute] public string Id { get; private set; }
     [JsonPropertyAttribute] public LineString Geom { get; private set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
@@ -48,21 +49,23 @@ public class CellBoundary
         throw new ArgumentException("Don't contain end vertex");
     }
 
-    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1)
+    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id = "null")
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
         if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
         Geom = ls;
         P0 = p0;
         P1 = p1;
+        Id = id;
     }
 
-    public CellBoundary(CellVertex p0, CellVertex p1)
+    public CellBoundary(CellVertex p0, CellVertex p1, string id = "null")
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
         Geom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate});
         P0 = p0;
         P1 = p1;
+        Id = id;
     }
 
     public void UpdateFromVertex()

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class env : MonoBehaviour
 {
-    private IndoorSim indoorSim = new IndoorSim();  // model
+    private IndoorSim indoorSim = new IndoorSim(new SimpleIDGenerator("VTX"), new SimpleIDGenerator("BDR"), new SimpleIDGenerator("SPC"));  // model
     public MapView mapView;  // view
 
     public SimulationController simController;  // controller

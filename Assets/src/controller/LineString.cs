@@ -63,47 +63,28 @@ public class LineString : MonoBehaviour, ITool
                 if (lastCoor != null)
                 {
                     GeometryFactory gf = new GeometryFactory();
+                    CellBoundary? boundary = null;
 
                     if (splitBoundary)
                         currentVertex = IndoorSim!.indoorTiling.SplitBoundary(currentBoundary!, currentCoor);
 
-                    if (lastVertex == null && currentVertex == null)
+                    if (lastVertex == null && currentVertex == null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastCoor, currentCoor);
+                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastVertex, currentCoor);
+                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastCoor, currentVertex);
+                    else if (lastVertex != null && currentVertex != null)
+                        if (lastVertex != currentVertex)
+                            boundary = IndoorSim!.indoorTiling.AddBoundary(lastVertex, currentVertex);
+
+                    if (boundary != null)
                     {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastCoor, currentCoor });
-                        CellVertex newVertexStart = new CellVertex(lastCoor);
-                        CellVertex newVertexEnd = new CellVertex(currentCoor);
-                        IndoorSim!.indoorTiling.AddBoundary(ls, newVertexStart, newVertexEnd);
-                        lastVertex = newVertexEnd;
-                        lastCoor = currentCoor;
-                    }
-                    else if (lastVertex != null && currentVertex == null)
-                    {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentCoor });
-                        CellVertex newVertex = new CellVertex(currentCoor);
-                        IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, newVertex);
-                        lastVertex = newVertex;
-                        lastCoor = currentCoor;
-                    }
-                    else if (lastVertex == null && currentVertex != null)
-                    {
-                        var ls = gf.CreateLineString(new Coordinate[] { lastCoor, currentVertex.Coordinate });
-                        CellVertex newVertex = new CellVertex(lastCoor);
-                        IndoorSim!.indoorTiling.AddBoundary(ls, newVertex, currentVertex);
-                        lastVertex = currentVertex;
-                        lastCoor = currentVertex.Coordinate;
+                        lastVertex = boundary.P1;
+                        lastCoor = boundary.P1.Coordinate;
                     }
                     else if (lastVertex != null && currentVertex != null)
                     {
-                        if (lastVertex != currentVertex)
-                        {
-                            var ls = gf.CreateLineString(new Coordinate[] { lastVertex.Coordinate, currentVertex.Coordinate });
-                            IndoorSim!.indoorTiling.AddBoundary(ls, lastVertex, currentVertex);
-                            lastVertex = currentVertex;
-                            lastCoor = currentVertex.Coordinate;
-                        }
+                        lastVertex = currentVertex;
+                        lastCoor = lastVertex.Coordinate;
                     }
-                    else
-                        throw new System.Exception("Oops!");
                 }
                 else
                 {

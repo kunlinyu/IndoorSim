@@ -24,7 +24,22 @@ class AdjacentFinder
                 result.Add(new JumpInfo() { target = b.Another(cv), through = b });
         return result;
     }
+}
 
+public class TestIDGenerator : IDGenInterface
+{
+    private int number = 0;
+
+    public string Prefix { get; private set; }
+    public string Suffix { get; private set; }
+    public string Gen() => "" + number++;
+
+    public int Compare(string id1, string id2) => throw new NotImplementedException();
+    public void Reset() => throw new NotImplementedException();
+    public void Reset(int next) => throw new NotImplementedException();
+    public void Reset(string next) => throw new NotImplementedException();
+    public void ReverseGen() => throw new NotImplementedException();
+    public bool valid(string id) => throw new NotImplementedException();
 }
 
 public class RotationNextTest
@@ -44,13 +59,15 @@ public class RotationNextTest
 
     }
 
+    IDGenInterface gen = new TestIDGenerator();
+
     [Test]
     public void SimpleRectangle()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -67,10 +84,10 @@ public class RotationNextTest
     [Test]
     public void SimpleRectangleReverse()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -87,11 +104,11 @@ public class RotationNextTest
     [Test]
     public void RectangleWithExtraSegment()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(2.0d, 0.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -109,11 +126,11 @@ public class RotationNextTest
     [Test]
     public void RectangleWithExtraInnerSegment()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(0.5d, 0.5d), 2);
-        CellVertex cv3 = new CellVertex(new Point(1.0d, 1.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(0.0d, 1.0d), 4);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(0.5d, 0.5d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -131,10 +148,10 @@ public class RotationNextTest
     [Test]
     public void SimpleRectangleMergeByTwoTriangle()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -152,10 +169,10 @@ public class RotationNextTest
     [Test]
     public void SnakeLeft()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(3.0d, 0.1d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(2.0d, 0.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(3.0d, 0.1d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -172,10 +189,10 @@ public class RotationNextTest
     [Test]
     public void SnakeRight()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(2.0d, 0.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(3.0d, -0.1d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(2.0d, 0.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(3.0d, -0.1d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -191,10 +208,10 @@ public class RotationNextTest
     [Test]
     public void TwoSeparateSegment()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(0.0d, 1.0d), 3);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv2, cv3),
@@ -210,8 +227,8 @@ public class RotationNextTest
     [Test]
     public void TwoSeparateVertex()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
         var finder = new AdjacentFinder(new List<CellBoundary>());
         JumpInfo initJump = new JumpInfo() { target = cv0, through = new CellBoundary(cv0, cv1) };
         List<JumpInfo> path = PSLGPolygonSearcher.Search(initJump, cv1, finder.Find);
@@ -223,8 +240,8 @@ public class RotationNextTest
     [Test]
     public void OneSegment()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
         };
@@ -239,8 +256,8 @@ public class RotationNextTest
     [Test]
     public void StartEqualsEnd()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
         };
@@ -255,11 +272,11 @@ public class RotationNextTest
     [Test]
     public void TwoTriangle()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(-1.0d, 1.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(-1.0d, 0.0d), 4);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(-1.0d, 1.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(-1.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -282,11 +299,11 @@ public class RotationNextTest
     [Test]
     public void TwoTriangleReverse()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(-1.0d, 1.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(-1.0d, 0.0d), 4);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(-1.0d, 1.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(-1.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -309,14 +326,14 @@ public class RotationNextTest
     [Test]
     public void TwoSquareConnectOneBoundary()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(0.0d, 1.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(1.0d, 0.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(2.0d, 0.0d), 4);
-        CellVertex cv5 = new CellVertex(new Point(2.0d, 1.0d), 5);
-        CellVertex cv6 = new CellVertex(new Point(3.0d, 1.0d), 6);
-        CellVertex cv7 = new CellVertex(new Point(3.0d, 0.0d), 7);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(2.0d, 0.0d), gen);
+        CellVertex cv5 = CellVertex.Instantiate(new Point(2.0d, 1.0d), gen);
+        CellVertex cv6 = CellVertex.Instantiate(new Point(3.0d, 1.0d), gen);
+        CellVertex cv7 = CellVertex.Instantiate(new Point(3.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -344,14 +361,14 @@ public class RotationNextTest
     [Test]
     public void TwoSquareConnectOneBoundaryReverse()
     {
-        CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-        CellVertex cv1 = new CellVertex(new Point(0.0d, 1.0d), 1);
-        CellVertex cv2 = new CellVertex(new Point(1.0d, 1.0d), 2);
-        CellVertex cv3 = new CellVertex(new Point(1.0d, 0.0d), 3);
-        CellVertex cv4 = new CellVertex(new Point(2.0d, 0.0d), 4);
-        CellVertex cv5 = new CellVertex(new Point(2.0d, 1.0d), 5);
-        CellVertex cv6 = new CellVertex(new Point(3.0d, 1.0d), 6);
-        CellVertex cv7 = new CellVertex(new Point(3.0d, 0.0d), 7);
+        CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), gen);
+        CellVertex cv1 = CellVertex.Instantiate(new Point(0.0d, 1.0d), gen);
+        CellVertex cv2 = CellVertex.Instantiate(new Point(1.0d, 1.0d), gen);
+        CellVertex cv3 = CellVertex.Instantiate(new Point(1.0d, 0.0d), gen);
+        CellVertex cv4 = CellVertex.Instantiate(new Point(2.0d, 0.0d), gen);
+        CellVertex cv5 = CellVertex.Instantiate(new Point(2.0d, 1.0d), gen);
+        CellVertex cv6 = CellVertex.Instantiate(new Point(3.0d, 1.0d), gen);
+        CellVertex cv7 = CellVertex.Instantiate(new Point(3.0d, 0.0d), gen);
         List<CellBoundary> boundaries = new List<CellBoundary> {
             new CellBoundary(cv0, cv1),
             new CellBoundary(cv1, cv2),
@@ -379,10 +396,10 @@ public class RotationNextTest
     // [Test]
     // public void SquareWithOneInnerBoundary()
     // {
-    //     CellVertex cv0 = new CellVertex(new Point(0.0d, 0.0d), 0);
-    //     CellVertex cv1 = new CellVertex(new Point(1.0d, 0.0d), 1);
-    //     CellVertex cv2 = new CellVertex(new Point(-1.0d, 1.0d), 2);
-    //     CellVertex cv3 = new CellVertex(new Point(-1.0d, -1.0d), 3);
+    //     CellVertex cv0 = CellVertex.Instantiate(new Point(0.0d, 0.0d), 0);
+    //     CellVertex cv1 = CellVertex.Instantiate(new Point(1.0d, 0.0d), 1);
+    //     CellVertex cv2 = CellVertex.Instantiate(new Point(-1.0d, 1.0d), 2);
+    //     CellVertex cv3 = CellVertex.Instantiate(new Point(-1.0d, -1.0d), 3);
     //     List<CellBoundary> boundaries = new List<CellBoundary> {
     //         new CellBoundary(cv0, cv1),
     //         new CellBoundary(cv1, cv2),
