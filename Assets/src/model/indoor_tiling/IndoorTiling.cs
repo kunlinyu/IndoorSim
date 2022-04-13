@@ -34,149 +34,11 @@ public class IndoorTiling
     [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
     [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
 
-    public CellSpace? PickCellSpace(Point point)
-        => spacePool.FirstOrDefault(cs => cs.Geom.Contains(point));
-
-    public CellVertex? PickCellVertex(Point point, double radius)
-    {
-        double minDistance = Double.MaxValue;
-        CellVertex? vertex = null;
-        foreach (CellVertex cv in vertexPool)
-        {
-            double distance = cv.Geom.Distance(point);
-            if (minDistance > distance)
-            {
-                minDistance = distance;
-                vertex = cv;
-            }
-        }
-        return minDistance < radius ? vertex : null;
-    }
-
-    public CellBoundary? PickCellBoundary(Point point, double radius)
-    {
-        double minDistance = Double.MaxValue;
-        CellBoundary? boundary = null;
-        foreach (CellBoundary cb in boundaryPool)
-        {
-            double distance = cb.Geom.Distance(point);
-            if (minDistance > distance)
-            {
-                minDistance = distance;
-                boundary = cb;
-            }
-        }
-        return minDistance < radius ? boundary : null;
-    }
-
-    public List<CellBoundary> VerticesPair2Boundary(CellVertex cv1, CellVertex cv2)
-    {
-        List<CellBoundary> result = new List<CellBoundary>();
-
-        if (!vertex2Boundaries.ContainsKey(cv1) || !vertex2Boundaries.ContainsKey(cv2))
-            return result;
-
-        var b1s = vertex2Boundaries[cv1];
-        var b2s = vertex2Boundaries[cv2];
-        foreach (var b1 in b1s)
-            foreach (var b2 in b2s)
-                if (System.Object.ReferenceEquals(b1, b2))
-                    result.Add(b2);
-        return result;
-    }
-
-    public ICollection<CellVertex> Neighbor(CellVertex cv)
-        => vertex2Boundaries[cv].Select(b => b.Another(cv)).ToList();
-
-    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
-        => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
-
     public IndoorTiling(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
         this.IdGenVertex = IdGenVertex;
         this.IdGenBoundary = IdGenBoundary;
         this.IdGenSpace = IdGenSpace;
-    }
-
-    private List<JumpInfo> AdjacentFinder(CellVertex cv)
-    {
-        var result = new List<JumpInfo>();
-
-        HashSet<CellBoundary> boundaries = vertex2Boundaries[cv];
-        foreach (CellBoundary boundary in boundaries)
-            result.Add(new JumpInfo()
-            {
-                target = boundary.Another(cv),
-                through = boundary
-            });
-        return result;
-    }
-
-    enum NewCellSpaceCase
-    {
-        NewCellSpace,  // This is a new cellspace.
-        HoleOfAnother, // This is a hole of another cellspace. We should create one cellspace and add a hole to the "another" one.
-        Split,         // Split cellspace to two. We should remove the old one and create two.
-        SplitNeedReSearch,  // Like Split, but for the two new created cellspace, one surround another. The inner one have one point common point with another
-                            // it may be define as a hole but re-search ring is easier.
-    }
-
-    private List<CellSpace> Boundary2Space(CellBoundary boundary)
-    {
-        HashSet<CellSpace> potentialSpaces = new HashSet<CellSpace>();
-        if (vertex2Spaces.ContainsKey(boundary.P0))
-            potentialSpaces.UnionWith(vertex2Spaces[boundary.P0]);
-        if (vertex2Spaces.ContainsKey(boundary.P1))
-            potentialSpaces.UnionWith(vertex2Spaces[boundary.P1]);
-
-        List<CellSpace> result = potentialSpaces.Where(space => space.allBoundaries.Contains(boundary)).ToList();
-        if (result.Count > 2)
-        {
-            string debug = "GEOMETRYCOLLECTION(";
-            foreach (var space in result) debug += space.ToString() + ", ";
-            debug += ")";
-            Debug.Log(debug);
-            throw new InvalidOperationException("The boundary have more than one related spaces");
-        }
-        return result;
-    }
-
-    public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
-    {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
-        if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
-
-        CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
-        vertexPool.Add(middleVertex);
-        OnVertexCreated?.Invoke(middleVertex);
-
-        GeometryFactory gf = new GeometryFactory();
-
-        LineString ls1 = gf.CreateLineString(new Coordinate[] { boundary.P0.Coordinate, middleCoor });
-        LineString ls2 = gf.CreateLineString(new Coordinate[] { middleCoor, boundary.P1.Coordinate });
-        CellBoundary newBoundary1 = new CellBoundary(ls1, boundary.P0, middleVertex, IdGenBoundary.Gen());
-        CellBoundary newBoundary2 = new CellBoundary(ls2, middleVertex, boundary.P1, IdGenBoundary.Gen());
-
-        List<CellSpace> spaces = Boundary2Space(boundary);
-
-        foreach (var space in spaces)
-            space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
-        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
-
-        boundaryPool.Remove(boundary);
-        vertex2Boundaries[boundary.P0].Remove(boundary);
-        vertex2Boundaries[boundary.P1].Remove(boundary);
-        OnBoundaryRemoved?.Invoke(boundary);
-
-        boundaryPool.Add(newBoundary1);
-        boundaryPool.Add(newBoundary2);
-        vertex2Boundaries[middleVertex] = new HashSet<CellBoundary>() { newBoundary1, newBoundary2 };
-        vertex2Boundaries[boundary.P0].Add(newBoundary1);
-        vertex2Boundaries[boundary.P1].Add(newBoundary2);
-        OnBoundaryCreated?.Invoke(newBoundary1);
-        OnBoundaryCreated?.Invoke(newBoundary2);
-
-        return middleVertex;
     }
 
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
@@ -190,12 +52,10 @@ public class IndoorTiling
                 return null;
 
         var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
-        vertexPool.Add(start);
-        OnVertexCreated(start);
+        AddVertexInternal(start);
 
         var end = CellVertex.Instantiate(ls.EndPoint, IdGenVertex);
-        vertexPool.Add(end);
-        OnVertexCreated(end);
+        AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
@@ -217,8 +77,7 @@ public class IndoorTiling
                 return null;
 
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
-        vertexPool.Add(end);
-        OnVertexCreated(end);
+        AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
@@ -240,8 +99,7 @@ public class IndoorTiling
                 return null;
 
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
-        vertexPool.Add(start);
-        OnVertexCreated(start);
+        AddVertexInternal(start);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
@@ -249,7 +107,14 @@ public class IndoorTiling
         return boundary;
     }
 
-
+    enum NewCellSpaceCase
+    {
+        NewCellSpace,  // This is a new cellspace.
+        HoleOfAnother, // This is a hole of another cellspace. We should create one cellspace and add a hole to the "another" one.
+        Split,         // Split cellspace to two. We should remove the old one and create two.
+        SplitNeedReSearch,  // Like Split, but for the two new created cellspace, one surround another. The inner one have one point common point with another
+                            // it may be define as a hole but re-search ring is easier.
+    }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end)
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, end.Coordinate });
@@ -264,7 +129,7 @@ public class IndoorTiling
         foreach (CellBoundary b in boundaryPool)
             if (b.Geom.Crosses(ls))
                 return null;
-        if (VerticesPair2Boundary(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
+        if (VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
 
@@ -291,7 +156,7 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpace(jumps1);
         CellSpace cellSpace2 = CreateCellSpace(jumps2);
-        CellSpace? oldCellSpace = PickCellSpace(MiddlePoint(ls));
+        CellSpace? oldCellSpace = spacePool.FirstOrDefault(cs => cs.Geom.Contains(MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
@@ -337,116 +202,31 @@ public class IndoorTiling
         return boundary;
     }
 
-    private Point MiddlePoint(LineString ls)
+    public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
-        if (ls.NumPoints < 2)
-            throw new ArgumentException("Empty LingString don't have middlePoint");
-        else if (ls.NumPoints == 2)
-            return new GeometryFactory().CreatePoint(new Coordinate((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f));
-        else
-            return ls.GetPointN(1);
-    }
-    private void AddBoundaryInternal(CellBoundary boundary)
-    {
-        boundaryPool.Add(boundary);
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
+        if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
 
-        if (!vertex2Boundaries.ContainsKey(boundary.P0))
-            vertex2Boundaries[boundary.P0] = new HashSet<CellBoundary>();
-        vertex2Boundaries[boundary.P0].Add(boundary);
+        // Create vertex
+        CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
+        AddVertexInternal(middleVertex);
 
-        if (!vertex2Boundaries.ContainsKey(boundary.P1))
-            vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
-        vertex2Boundaries[boundary.P1].Add(boundary);
+        // Remove old boundary
+        RemoveBoundaryInternal(boundary);
 
-        OnBoundaryCreated.Invoke(boundary);
-    }
+        // Create and add new boundary
+        CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary.Gen());
+        CellBoundary newBoundary2 = new CellBoundary(middleVertex, boundary.P1, IdGenBoundary.Gen());
+        AddBoundaryInternal(newBoundary1);
+        AddBoundaryInternal(newBoundary2);
 
-    private void AddSpaceInternal(CellSpace space)
-    {
-        space.Id = IdGenSpace.Gen();
-        spacePool.Add(space);
-        RelateVertexSpace(space);
-        OnSpaceCreated?.Invoke(space);
-    }
+        // update space and vertex2space indices
+        List<CellSpace> spaces = Boundary2Space(boundary);
+        foreach (var space in spaces)
+            space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
+        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
 
-    private void RelateVertexSpace(CellSpace space)
-    {
-        var allVertices = space.allVertices;
-        foreach (var entry in vertex2Spaces)
-            if (entry.Value.Contains(space) && !allVertices.Contains(entry.Key))
-                vertex2Spaces[entry.Key].Remove(space);
-        foreach (var vertex in allVertices)
-        {
-            if (!vertex2Spaces.ContainsKey(vertex))
-                vertex2Spaces[vertex] = new HashSet<CellSpace>();
-            vertex2Spaces[vertex].Add(space);
-        }
-    }
-
-    private void AddSpaceConsiderHole(CellSpace current)
-    {
-        List<CellSpace> holeOfCurrent = new List<CellSpace>();
-        CellSpace? spaceContainCurrent = null;
-
-        GeometryFactory gf = new GeometryFactory();
-
-        foreach (CellSpace space in spacePool)
-        {
-            if (space.Geom.Contains(current.Geom.Shell))
-                if (spaceContainCurrent == null)
-                    spaceContainCurrent = space;
-                else
-                    throw new InvalidOperationException("more than one space contain current space");
-            if (current.Geom.Contains(space.Geom))
-                holeOfCurrent.Add(space);
-        }
-
-        if (spaceContainCurrent != null)
-        {
-            spaceContainCurrent.AddHole(current);
-            RelateVertexSpace(spaceContainCurrent);
-        }
-
-        foreach (CellSpace hole in holeOfCurrent)
-        {
-            current.AddHole(hole);
-        }
-        RelateVertexSpace(current);
-
-        AddSpaceInternal(current);
-    }
-
-    private void RemoveSpaceInternal(CellSpace space)
-    {
-        if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
-        spacePool.Remove(space);
-        foreach (var vertex in space.allVertices)
-            vertex2Spaces[vertex].Remove(space);
-        OnSpaceRemoved?.Invoke(space);
-    }
-
-    private CellSpace CreateCellSpace(List<JumpInfo> jumps)
-    {
-        List<Coordinate> polygonPoints = new List<Coordinate>();
-        for (int i = 0; i < jumps.Count; i++)
-        {
-            LineString boundaryPoints = jumps[i].Geom;
-            var ignoreLastOne = new ArraySegment<Coordinate>(boundaryPoints.Coordinates, 0, boundaryPoints.NumPoints - 1).ToArray();
-            polygonPoints.AddRange(ignoreLastOne);
-        }
-        polygonPoints.Add(jumps[0].Geom.StartPoint.Coordinate);
-
-        List<CellVertex> vertices = jumps.Select(ji => ji.target).ToList();
-        List<CellBoundary> boundaries = jumps.Select(ji => ji.through).ToList();
-
-        if (!new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW)
-        {
-            vertices.Reverse();
-            boundaries.Reverse();
-        }
-
-        return new CellSpace(vertices, boundaries);
-
+        return middleVertex;
     }
 
     public void UpdateVertices(List<CellVertex> vertices, List<Coordinate> coors)
@@ -532,36 +312,19 @@ public class IndoorTiling
                 s.OnUpdate?.Invoke();
             }
         }
-
-
-
     }
 
     public void RemoveBoundary(CellBoundary boundary)
     {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("can not find cell boundary");
+        RemoveBoundaryInternal(boundary);
 
-        // Remove Boundary only
-        boundaryPool.Remove(boundary);
-        OnBoundaryRemoved?.Invoke(boundary);
-
-        // update lookup tables
-        vertex2Boundaries[boundary.P0].Remove(boundary);
-        vertex2Boundaries[boundary.P1].Remove(boundary);
-
-        // Remove Vertex
+        // Remove Vertex if no boundary connect to it
         if (vertex2Boundaries[boundary.P0].Count == 0)
-        {
-            vertexPool.Remove(boundary.P0);
-            OnVertexRemoved?.Invoke(boundary.P0);
-        }
+            RemoveVertexInternal(boundary.P0);
         if (vertex2Boundaries[boundary.P1].Count == 0)
-        {
-            vertexPool.Remove(boundary.P1);
-            OnVertexRemoved?.Invoke(boundary.P1);
-        }
+            RemoveVertexInternal(boundary.P1);
 
-        // space
+        // Remove space
         List<CellSpace> spaces = Boundary2Space(boundary);
         if (spaces.Count == 0)  // no cellspace related
         {
@@ -599,6 +362,7 @@ public class IndoorTiling
                 List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
 
                 parent.RemoveHole(child);
+                RelateVertexSpace(parent);
 
                 foreach (List<JumpInfo> jumps in rings)
                 {
@@ -607,7 +371,6 @@ public class IndoorTiling
                     parent.AddHole(newCellSpace);
                 }
 
-                RelateVertexSpace(parent);
                 RemoveSpaceInternal(child);
             }
         }
@@ -635,16 +398,6 @@ public class IndoorTiling
 
     }
 
-    public void RemoveSpace(CellSpace cs)
-    {
-        if (!spacePool.Contains(cs)) throw new ArgumentException("can not find cell space");
-
-        // Remove cellspace
-        // Remove representativeLine
-
-        // update lookup tables
-    }
-
     public void AddRepresentativeLine(LineString ls, CellBoundary from, CellBoundary to, CellSpace through)
     {
         // new RepresentativeLine(ls, from, to, through);
@@ -653,6 +406,162 @@ public class IndoorTiling
     public void RemoveRepresentativeLine(RepresentativeLine rLine)
     {
 
+    }
+
+    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
+        => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
+    private List<JumpInfo> AdjacentFinder(CellVertex cv)
+        => vertex2Boundaries[cv].Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
+
+    private List<CellSpace> Boundary2Space(CellBoundary boundary)
+    {
+        HashSet<CellSpace> potentialSpaces = new HashSet<CellSpace>();
+        if (vertex2Spaces.ContainsKey(boundary.P0))
+            potentialSpaces.UnionWith(vertex2Spaces[boundary.P0]);
+        if (vertex2Spaces.ContainsKey(boundary.P1))
+            potentialSpaces.UnionWith(vertex2Spaces[boundary.P1]);
+
+        List<CellSpace> result = potentialSpaces.Where(space => space.allBoundaries.Contains(boundary)).ToList();
+        if (result.Count > 2)
+        {
+            string debug = "GEOMETRYCOLLECTION(";
+            foreach (var space in result) debug += space.ToString() + ", ";
+            debug += ")";
+            Debug.Log(debug);
+            throw new InvalidOperationException("The boundary have more than one related spaces");
+        }
+        return result;
+    }
+
+    private Point MiddlePoint(LineString ls)
+    {
+        if (ls.NumPoints < 2)
+            throw new ArgumentException("Empty LingString don't have middlePoint");
+        else if (ls.NumPoints == 2)
+            return new GeometryFactory().CreatePoint(new Coordinate((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f));
+        else
+            return ls.GetPointN(1);
+    }
+
+    private void AddVertexInternal(CellVertex vertex)
+    {
+        vertexPool.Add(vertex);
+        vertex2Boundaries[vertex] = new HashSet<CellBoundary>();
+        vertex2Spaces[vertex] = new HashSet<CellSpace>();
+        OnVertexCreated?.Invoke(vertex);
+    }
+
+    private void RemoveVertexInternal(CellVertex vertex)
+    {
+        vertexPool.Remove(vertex);
+        vertex2Boundaries.Remove(vertex);
+        vertex2Spaces.Remove(vertex);
+        OnVertexRemoved?.Invoke(vertex);
+    }
+
+    private void AddBoundaryInternal(CellBoundary boundary)
+    {
+        if (boundaryPool.Contains(boundary)) throw new ArgumentException("add redundant cell boundary");
+
+        boundaryPool.Add(boundary);
+
+        vertex2Boundaries[boundary.P0].Add(boundary);
+        vertex2Boundaries[boundary.P1].Add(boundary);
+
+        OnBoundaryCreated.Invoke(boundary);
+    }
+
+    private void RemoveBoundaryInternal(CellBoundary boundary)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("can not find cell boundary");
+
+        // Remove Boundary only
+        boundaryPool.Remove(boundary);
+
+        // update lookup tables
+        vertex2Boundaries[boundary.P0].Remove(boundary);
+        vertex2Boundaries[boundary.P1].Remove(boundary);
+
+        OnBoundaryRemoved?.Invoke(boundary);
+    }
+
+    private void AddSpaceInternal(CellSpace space)
+    {
+        if (spacePool.Contains(space)) throw new ArgumentException("add redundant space");
+        space.Id = IdGenSpace.Gen();
+        spacePool.Add(space);
+        RelateVertexSpace(space);
+        OnSpaceCreated?.Invoke(space);
+    }
+
+    private void RemoveSpaceInternal(CellSpace space)
+    {
+        if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
+        spacePool.Remove(space);
+        foreach (var vertex in space.allVertices)
+            vertex2Spaces[vertex].Remove(space);
+        OnSpaceRemoved?.Invoke(space);
+    }
+
+    private void RelateVertexSpace(CellSpace space)
+    {
+        var allVertices = space.allVertices;
+        foreach (var entry in vertex2Spaces)
+            if (entry.Value.Contains(space) && !allVertices.Contains(entry.Key))
+                vertex2Spaces[entry.Key].Remove(space);
+        foreach (var vertex in allVertices)
+            vertex2Spaces[vertex].Add(space);
+    }
+
+    private void AddSpaceConsiderHole(CellSpace current)
+    {
+        CellSpace? spaceContainCurrent = null;
+        List<CellSpace> holeOfCurrent = new List<CellSpace>();
+
+        foreach (CellSpace space in spacePool)
+        {
+            if (space.Geom.Contains(current.Geom.Shell))
+                if (spaceContainCurrent == null)
+                    spaceContainCurrent = space;
+                else
+                    throw new InvalidOperationException("more than one space contain current space");
+            if (current.Geom.Contains(space.Geom))
+                holeOfCurrent.Add(space);
+        }
+
+        if (spaceContainCurrent != null)
+        {
+            spaceContainCurrent.AddHole(current);
+            RelateVertexSpace(spaceContainCurrent);
+        }
+
+        foreach (CellSpace hole in holeOfCurrent)
+            current.AddHole(hole);
+
+        AddSpaceInternal(current);
+    }
+
+    private CellSpace CreateCellSpace(List<JumpInfo> jumps)
+    {
+        List<CellVertex> vertices = jumps.Select(ji => ji.target).ToList();
+        List<CellBoundary> boundaries = jumps.Select(ji => ji.through).ToList();
+
+        // should reverse or not
+        List<Coordinate> polygonPoints = new List<Coordinate>();
+        for (int i = 0; i < jumps.Count; i++)
+        {
+            LineString boundaryPoints = jumps[i].Geom;
+            var ignoreLastOne = new ArraySegment<Coordinate>(boundaryPoints.Coordinates, 0, boundaryPoints.NumPoints - 1).ToArray();
+            polygonPoints.AddRange(ignoreLastOne);
+        }
+        polygonPoints.Add(jumps[0].Geom.StartPoint.Coordinate);
+        if (!new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW)
+        {
+            vertices.Reverse();
+            boundaries.Reverse();
+        }
+
+        return new CellSpace(vertices, boundaries);
     }
 
 
