@@ -188,6 +188,11 @@ public class CellSpace
                 independentHole.Add(hole);
         Holes = independentHole;
 
+        if (!Geom.Contains(cellSpace.Geom.Shell)) {
+            Debug.Log(Geom);
+            Debug.Log(cellSpace.Geom);
+        }
+
         if (!Geom.Contains(cellSpace.Geom.Shell)) throw new ArgumentException("the polygon should contain the new hole.");
 
 
@@ -252,6 +257,7 @@ public class CellSpace
             return;
         }
 
+        // TODO: this code may work but we should change the name of the method (P.S. we remove the hole contain the argument)
         CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.Contains(cellspace.Geom));
         if (hole == null)
         {

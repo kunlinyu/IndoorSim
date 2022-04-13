@@ -73,6 +73,14 @@ public class MousePickController : MonoBehaviour
             if (pointedEntity != null) pointedEntity.highLight = false;
             if (NearestEntity != null) NearestEntity.highLight = true;
             pointedEntity = NearestEntity;
+            if (pointedEntity != null)
+            {
+                if (pointedEntity.type == SelectableType.Space)
+                {
+                    SpaceController sc = (SpaceController)pointedEntity;
+                    Debug.Log($"hole: {sc.Space.Geom.Holes.Length}, {sc.Space.Holes.Count}, shell.numpoints: {sc.Space.Geom.Shell.NumPoints}, boundaries: {sc.Space.allBoundaries.Count}");
+                }
+            }
         }
     }
 }

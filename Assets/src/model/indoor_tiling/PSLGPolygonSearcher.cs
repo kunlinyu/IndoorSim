@@ -39,6 +39,8 @@ public class PSLGPolygonSearcher
 
     public static List<List<JumpInfo>> Jumps2Rings(List<JumpInfo> jumps, SplitRingType splitRingType)
     {
+        bool outsideInit = System.Object.ReferenceEquals(jumps.First().target, jumps.Last().target);
+
         List<List<JumpInfo>> result = new List<List<JumpInfo>>();
         List<JumpInfo> stack = new List<JumpInfo>();
 
@@ -55,7 +57,8 @@ public class PSLGPolygonSearcher
                             ring.Add(stack[j]);
                         stack.RemoveRange(i + 1, stack.Count - (i + 1));
                         ring.Add(jump);
-                        result.Add(ring);
+                        if (ring.Count > 2)
+                            result.Add(ring);
                         newRing = true;
                         break;
                     }
@@ -72,7 +75,8 @@ public class PSLGPolygonSearcher
                             ring.Add(stack[j]);
                         stack.RemoveRange(i + 0, stack.Count - (i + 0));
                         // ring.Add(jump);
-                        result.Add(ring);
+                        if (ring.Count > 2)
+                            result.Add(ring);
                         newRing = true;
                         break;
                     }
@@ -85,11 +89,12 @@ public class PSLGPolygonSearcher
             }
         }
 
-        if (splitRingType == SplitRingType.SplitByRepeatedBoundary)
-        {
+
+        if (outsideInit)
             stack.RemoveAt(0);
+
+        if (stack.Count > 2)
             result.Add(stack);
-        }
 
         return result;
     }

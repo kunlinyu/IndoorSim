@@ -33,9 +33,7 @@ public class Deleter : MonoBehaviour, ITool
             UnityEngine.Cursor.SetCursor(null, hotspot, CursorMode.Auto);
 
         if (Input.GetMouseButtonUp(0) && MousePickController.PointedEntity != null && MousePickController.PointedEntity.type == SelectableType.Boundary)
-        {
             IndoorSim.indoorTiling.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);
-        }
 
     }
 }

@@ -139,6 +139,8 @@ public class IndoorTiling
         List<JumpInfo> reJumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder, false);
         List<JumpInfo> reJumps2 = PSLGPolygonSearcher.Search(new JumpInfo() { target = end, through = boundary }, start, AdjacentFinder, false);
 
+        // List<List<JumpInfo>> rings1 = PSLGPolygonSearcher.Jumps2Rings(jumps1, SplitRingType.SplitByRepeatedVertex);
+
         var ring1 = jumps1.Select(ji => ji.target.Coordinate).ToList();
         ring1.Add(start.Coordinate);
         var ring2 = jumps2.Select(ji => ji.target.Coordinate).ToList();
@@ -154,8 +156,8 @@ public class IndoorTiling
         bool path1IsCCW = gf.CreateLinearRing(ring1.ToArray()).IsCCW;
         bool path2IsCCW = gf.CreateLinearRing(ring2.ToArray()).IsCCW;
 
-        CellSpace cellSpace1 = CreateCellSpace(jumps1);
-        CellSpace cellSpace2 = CreateCellSpace(jumps2);
+        CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
+        CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
         CellSpace? oldCellSpace = spacePool.FirstOrDefault(cs => cs.Geom.Contains(MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
@@ -174,21 +176,21 @@ public class IndoorTiling
         {
             case NewCellSpaceCase.NewCellSpace:
                 if (path1IsCCW)
-                    AddSpaceConsiderHole(cellSpace1);
+                    AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
                 else
-                    AddSpaceConsiderHole(cellSpace2);
+                    AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
                 break;
 
             case NewCellSpaceCase.Split:
                 RemoveSpaceInternal(oldCellSpace!);
-                AddSpaceConsiderHole(cellSpace1);
-                AddSpaceConsiderHole(cellSpace2);
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
                 break;
 
             case NewCellSpaceCase.SplitNeedReSearch:
                 RemoveSpaceInternal(oldCellSpace!);
-                AddSpaceConsiderHole(CreateCellSpace(reJumps1));
-                AddSpaceConsiderHole(CreateCellSpace(reJumps2));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps1));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps2));
                 break;
 
             case NewCellSpaceCase.HoleOfAnother:
@@ -328,10 +330,13 @@ public class IndoorTiling
         List<CellSpace> spaces = Boundary2Space(boundary);
         if (spaces.Count == 0)  // no cellspace related
         {
+            Debug.Log($"spaces.Count: {spaces.Count}");
             // nothing
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
         {
+            Debug.Log($"spaces.Count: {spaces.Count}");
+            // if (!spaces[0].Geom.Contains(MiddlePoint(boundary.Geom)))
             RemoveSpaceInternal(spaces[0]);
         }
         else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
@@ -359,17 +364,11 @@ public class IndoorTiling
             else
             {
                 List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
-                List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
-
+                List<CellSpace> holes = CreateCellSpaceMulti(path);
                 parent.RemoveHole(child);
+                foreach (var newHole in holes)
+                    parent.AddHole(newHole);
                 RelateVertexSpace(parent);
-
-                foreach (List<JumpInfo> jumps in rings)
-                {
-                    var newCellSpace = CreateCellSpace(jumps);
-                    Debug.Log(newCellSpace.Geom);
-                    parent.AddHole(newCellSpace);
-                }
 
                 RemoveSpaceInternal(child);
             }
@@ -377,23 +376,10 @@ public class IndoorTiling
         else  // Two parallel cellspace. merge them
         {
             List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
-            List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
-            List<CellSpace> cellSpaces = rings.Select(ring => CreateCellSpace(ring)).Where(cs => cs.Geom.Area > 0.0f).ToList();
-
-            double area = 0.0f;
-            CellSpace? shell = null;
-            foreach (var cellspace in cellSpaces)
-            {
-                if (shell == null || cellspace.Geom.Area > area)
-                {
-                    area = cellspace.Geom.Area;
-                    shell = cellspace;
-                }
-            }
 
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
-            AddSpaceConsiderHole(shell!);
+            AddSpaceConsiderHole(CreateCellSpaceWithHole(path));
         }
 
     }
@@ -541,7 +527,33 @@ public class IndoorTiling
         AddSpaceInternal(current);
     }
 
-    private CellSpace CreateCellSpace(List<JumpInfo> jumps)
+    private List<CellSpace> CreateCellSpaceMulti(List<JumpInfo> path)
+    {
+        List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
+
+        return rings.Select(ring => CreateCellSpaceInternal(ring)).ToList();
+    }
+
+    private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path)
+    {
+        List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedBoundary);
+
+        List<CellSpace> cellSpaces = rings.Select(ring => CreateCellSpaceInternal(ring)).ToList();
+
+        double area = 0.0f;
+        CellSpace shell = cellSpaces.First();
+        foreach (var cellspace in cellSpaces)
+            if (cellspace.Geom.Area > area)
+            {
+                area = cellspace.Geom.Area;
+                shell = cellspace;
+            }
+        foreach (var cellspace in cellSpaces)
+            if (cellspace != shell)
+                shell.AddHole(cellspace);
+        return shell;
+    }
+    private CellSpace CreateCellSpaceInternal(List<JumpInfo> jumps, bool CCW = true)
     {
         List<CellVertex> vertices = jumps.Select(ji => ji.target).ToList();
         List<CellBoundary> boundaries = jumps.Select(ji => ji.through).ToList();
@@ -555,7 +567,8 @@ public class IndoorTiling
             polygonPoints.AddRange(ignoreLastOne);
         }
         polygonPoints.Add(jumps[0].Geom.StartPoint.Coordinate);
-        if (!new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW)
+        bool isCCW = new GeometryFactory().CreateLinearRing(polygonPoints.ToArray()).IsCCW;
+        if (isCCW != CCW)
         {
             vertices.Reverse();
             boundaries.Reverse();

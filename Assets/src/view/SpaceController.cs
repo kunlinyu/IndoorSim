@@ -75,7 +75,6 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
         Mesh mesh = pr.UpdatePolygon(space.Geom);
-        Debug.Log("tri " + space.Geom.Shell.NumPoints);
         Mesh triMesh = new Mesh();
         triMesh.Clear();
         triMesh.subMeshCount = 1;
