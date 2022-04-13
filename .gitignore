@@ -53,6 +53,9 @@ ExportedObj/
 *.pdb.meta
 *.mdb.meta
 
+# unity coverage test file
+coverage/
+
 # Unity3D generated file on crash reports
 sysinfo.txt
 
