@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
-  m_Name: load asset
+  m_Name: save
   m_EditorClassIdentifier: 
-  m_ToolName: load asset
-  m_Class: 6
-  m_PortraitImage: {fileID: 21300000, guid: 927a259abe41bb5d6b410a1c09abafab, type: 3}
-  m_SortingOrder: 1
+  m_ToolName: save
+  m_Class: 0
+  m_PortraitImage: {fileID: 21300000, guid: a3199bf16974d73b1ab3be08e432b06b, type: 3}
+  m_SortingOrder: 0

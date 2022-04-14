@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// using Gtk;
 
 public class SimulationController : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class SimulationController : MonoBehaviour
         if (e.type == UIEventType.ButtonClick)
         {
             Destroy(toolObj);
+            toolObj = null;
             currentTool = null;
             UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
@@ -42,10 +44,21 @@ public class SimulationController : MonoBehaviour
                 toolObj = new GameObject("delete");
                 currentTool = toolObj.AddComponent<Deleter>();
             }
+            else if (e.name == "save")
+            {
+                SaveToFile(indoorSim.indoorTiling.Serialize());
+            }
+            else if (e.name == "load")
+            {
+                Debug.Log("Load sth");
+            }
 
-            toolObj.transform.SetParent(transform);
-            currentTool.mapView = mapView;
-            currentTool.IndoorSim = indoorSim;
+            toolObj?.transform.SetParent(transform);
+            if (currentTool != null)
+            {
+                currentTool.mapView = mapView;
+                currentTool.IndoorSim = indoorSim;
+            }
         }
         else if (e.type == UIEventType.EnterUIPanel)
         {
@@ -55,6 +68,26 @@ public class SimulationController : MonoBehaviour
                 else if (e.name == "leave")
                     currentTool.MouseOnUI = false;
         }
+    }
+
+    void SaveToFile(string content)
+    {
+        Debug.Log(content);
+        Debug.Log(UnityEngine.Application.platform);
+
+        if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
+        {
+            // var dialog = new Gtk.FileChooserDialog("save map", null, FileChooserAction.Save,
+            //                         "Cancel", ResponseType.Cancel,
+            //                         "Save", ResponseType.Accept);
+            // // Gtk.ResponseType response = (Gtk.ResponseType)dialog.Run();
+            // // if (response == Gtk.ResponseType.Accept)
+            // //     Debug.Log(dialog.Filename);
+            // // else
+            // //     Debug.Log(response);
+            // dialog.Destroy();
+        }
+
     }
 
 

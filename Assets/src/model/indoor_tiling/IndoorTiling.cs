@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using UnityEngine;
+using UnityEditor;
 
 using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
@@ -109,8 +111,11 @@ public class IndoorTiling
     public string Serialize()
     {
         JsonConvert.DefaultSettings = ()
-            => new JsonSerializerSettings { PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-                                            Formatting = Newtonsoft.Json.Formatting.Indented };
+            => new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            };
         return JsonConvert.SerializeObject(this, new WKTConverter());
     }
 
@@ -757,12 +762,13 @@ public class IndoorTiling
         return result;
     }
 
-
     [JsonIgnore] private static bool consistencyChecking = false;
     private void ConsistencyCheck()
     {
+
         if (consistencyChecking) return;
         Debug.Log(Serialize());
+
         consistencyChecking = true;
 
         string before = Digest();

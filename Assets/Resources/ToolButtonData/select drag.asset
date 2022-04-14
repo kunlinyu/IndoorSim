@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: select drag
   m_EditorClassIdentifier: 
   m_ToolName: select drag
-  m_Class: 1
+  m_Class: 2
   m_PortraitImage: {fileID: 21300000, guid: 1e4232214f1df1272ba58829109c9d7e, type: 3}
   m_SortingOrder: 0

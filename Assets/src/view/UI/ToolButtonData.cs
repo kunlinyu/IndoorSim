@@ -5,6 +5,7 @@ using UnityEngine;
 
 public enum ToolType
 {
+    SaveLoad,
     RedoUndo,    // redo, undo
     SelectDrag,  // view, select, move
     BasicShape,  // line string
