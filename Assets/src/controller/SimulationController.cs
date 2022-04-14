@@ -1,7 +1,8 @@
-using System.Collections;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-// using Gtk;
+
+using SFB;
 
 public class SimulationController : MonoBehaviour
 {
@@ -77,15 +78,9 @@ public class SimulationController : MonoBehaviour
 
         if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
         {
-            // var dialog = new Gtk.FileChooserDialog("save map", null, FileChooserAction.Save,
-            //                         "Cancel", ResponseType.Cancel,
-            //                         "Save", ResponseType.Accept);
-            // // Gtk.ResponseType response = (Gtk.ResponseType)dialog.Run();
-            // // if (response == Gtk.ResponseType.Accept)
-            // //     Debug.Log(dialog.Filename);
-            // // else
-            // //     Debug.Log(response);
-            // dialog.Destroy();
+            string path = StandaloneFileBrowser.SaveFilePanel("Save File", "", "unnamed_map.indoor.json", "indoor.json");
+            Debug.Log("save file to: " + path);
+            File.WriteAllText(path, content);
         }
 
     }
