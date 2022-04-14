@@ -75,6 +75,97 @@ public class IndoorTiling
         }
     }
 
+    private CellVertex? FindVertexId(string id)
+        => vertexPool.FirstOrDefault(vertex => vertex.Id == id);
+
+    private CellBoundary? FindBoundaryId(string id)
+        => boundaryPool.FirstOrDefault(boundary => boundary.Id == id);
+
+    private void InterpretInstruction(ReducedInstruction instruction)
+    {
+        switch (instruction.subject)
+        {
+            case SubjectType.Vertex:
+                switch (instruction.predicate)
+                {
+                    case Predicate.Add:
+                        {
+                            CellVertex vertex = CellVertex.Instantiate(instruction.param.coordinate, IdGenVertex);
+                            if (vertex.Id != instruction.postCond.id0)
+                                throw new Exception("ID generate error in instruction interpretation: " + vertex.Id + ", " + instruction.postCond.id0);
+                            vertexPool.Add(vertex);
+                            OnVertexCreated?.Invoke(vertex);
+                            break;
+                        }
+                    case Predicate.Remove:
+                        {
+                            CellVertex? vertex = FindVertexId(instruction.param.id0);
+                            if (vertex != null)
+                            {
+                                vertexPool.Remove(vertex);
+                                OnVertexRemoved?.Invoke(vertex);
+                            }
+                            else
+                                throw new ArgumentException("can not find the vertex to be removed: " + instruction.param.id0);
+                            break;
+                        }
+                    case Predicate.Move:
+                        // TODO: move multiple vetices in one instruction
+                        {
+                            CellVertex? vertex = FindVertexId(instruction.param.id0);
+                            if (vertex != null)
+                            {
+                                vertexPool.Remove(vertex);
+                                UpdateVertices(new List<CellVertex>() { vertex }, new List<Coordinate>() { instruction.postCond.coordinate });
+                            }
+                            else
+                                throw new ArgumentException("can not find the vertex to be removed: " + instruction.param.id0);
+                            break;
+                        }
+                    default:
+                        throw new InvalidCastException("Unknown predicate");
+                }
+                break;
+            case SubjectType.Boundary:
+                switch (instruction.predicate)
+                {
+                    case Predicate.Add:
+                        {
+                            CellVertex? start = FindVertexId(instruction.param.id0);
+                            if (start == null)
+                                throw new ArgumentException("can not find vertex id: " + instruction.param.id0);
+                            CellVertex? end = FindVertexId(instruction.param.id1);
+                            if (end == null)
+                                throw new ArgumentException("can not find vertex id: " + instruction.param.id1);
+                            CellBoundary? boundary = AddBoundary(start, end);
+                            if (boundary == null)
+                                throw new InvalidOperationException("add boundary failed:");
+                            if (boundary.Id != instruction.postCond.id0)
+                                throw new Exception("ID generate error in instruction interpretation: " + boundary.Id);
+                        }
+                        break;
+                    case Predicate.Remove:
+                        {
+                            CellBoundary? boundary = FindBoundaryId(instruction.param.id0);
+                            if (boundary == null)
+                                throw new ArgumentException("can not find boundary id: " + instruction.param.id0);
+                            if (boundary.P0.Id == instruction.preCond.id0 && boundary.P1.Id == instruction.preCond.id1 ||
+                                boundary.P0.Id == instruction.preCond.id1 && boundary.P1.Id == instruction.preCond.id0)
+                                RemoveBoundary(boundary);
+                            else
+                                throw new ArgumentException("precondition of remove boundary mismatch");
+                        }
+                        break;
+                    case Predicate.Move:
+                        throw new ArgumentException("move boundary is invalid");
+                    default:
+                        throw new ArgumentException("Unknown predicate");
+                }
+                break;
+            default:
+                throw new ArgumentException("Unknown subject type");
+        }
+    }
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
@@ -87,7 +178,6 @@ public class IndoorTiling
 
         var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
         AddVertexInternal(start);
-
         var end = CellVertex.Instantiate(ls.EndPoint, IdGenVertex);
         AddVertexInternal(end);
 
