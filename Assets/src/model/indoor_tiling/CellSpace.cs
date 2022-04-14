@@ -12,6 +12,7 @@ public class CellSpace
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; }
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; }
     [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
+
     [JsonIgnore]
     public List<CellVertex> allVertices
     {
@@ -188,7 +189,8 @@ public class CellSpace
                 independentHole.Add(hole);
         Holes = independentHole;
 
-        if (!Geom.Contains(cellSpace.Geom.Shell)) {
+        if (!Geom.Contains(cellSpace.Geom.Shell))
+        {
             Debug.Log(Geom);
             Debug.Log(cellSpace.Geom);
         }
@@ -272,9 +274,16 @@ public class CellSpace
         }
     }
 
-    public void Update()
+
+    public string Digest()
     {
-        // TODO: vertices to geom;
+        return "{" +
+            $"Geom.Area:{Geom.Area}," +
+            $"Geom.Shell.NumPoints:{Geom.Shell.NumPoints}," +
+            $"Holes.Count:{Holes.Count}," +
+            $"allVertices.Count:{allVertices.Count}," +
+            $"allBoundaries.Count:{allBoundaries.Count}" +
+            "}";
     }
 
 }

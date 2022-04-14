@@ -12,10 +12,10 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 public class IndoorTiling
 {
-    [JsonPropertyAttribute] private ICollection<CellVertex> vertexPool = new List<CellVertex>();
-    [JsonPropertyAttribute] private ICollection<CellBoundary> boundaryPool = new List<CellBoundary>();
-    [JsonPropertyAttribute] private ICollection<CellSpace> spacePool = new List<CellSpace>();
-    [JsonPropertyAttribute] private ICollection<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
+    [JsonPropertyAttribute] private List<CellVertex> vertexPool = new List<CellVertex>();
+    [JsonPropertyAttribute] private List<CellBoundary> boundaryPool = new List<CellBoundary>();
+    [JsonPropertyAttribute] private List<CellSpace> spacePool = new List<CellSpace>();
+    [JsonPropertyAttribute] private List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
 
     [JsonIgnore] private IDGenInterface IdGenVertex;
     [JsonIgnore] private IDGenInterface IdGenBoundary;
@@ -41,6 +41,40 @@ public class IndoorTiling
         this.IdGenSpace = IdGenSpace;
     }
 
+    public IndoorTiling(IndoorTiling another)
+    {
+
+        this.boundaryPool.AddRange(another.boundaryPool);
+        this.spacePool.AddRange(another.spacePool);
+        this.vertexPool.AddRange(another.vertexPool);
+        this.rLinePool.AddRange(another.rLinePool);
+
+        this.IdGenVertex = another.IdGenVertex.clone();
+        this.IdGenBoundary = another.IdGenBoundary.clone();
+        this.IdGenSpace = another.IdGenSpace.clone();
+
+        foreach (var entry in another.vertex2Boundaries)
+        {
+            this.vertex2Boundaries[entry.Key] = new HashSet<CellBoundary>();
+            this.vertex2Boundaries[entry.Key].UnionWith(entry.Value);
+        }
+        foreach (var entry in another.vertex2Spaces)
+        {
+            this.vertex2Spaces[entry.Key] = new HashSet<CellSpace>();
+            this.vertex2Spaces[entry.Key].UnionWith(entry.Value);
+        }
+        foreach (var entry in another.space2RLines)
+        {
+            this.space2RLines[entry.Key] = new HashSet<RepresentativeLine>();
+            this.space2RLines[entry.Key].UnionWith(entry.Value);
+        }
+        foreach (var entry in another.boundary2RLines)
+        {
+            this.boundary2RLines[entry.Key] = new HashSet<RepresentativeLine>();
+            this.boundary2RLines[entry.Key].UnionWith(entry.Value);
+        }
+    }
+
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
@@ -59,7 +93,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
-
+        ConsistencyCheck();
         return boundary;
     }
 
@@ -81,7 +115,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
-
+        ConsistencyCheck();
         return boundary;
     }
 
@@ -103,7 +137,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
         AddBoundaryInternal(boundary);
-
+        ConsistencyCheck();
         return boundary;
     }
 
@@ -200,7 +234,7 @@ public class IndoorTiling
                     AddSpaceConsiderHole(cellSpace2);
                 break;
         }
-
+        // ConsistencyCheck();
         return boundary;
     }
 
@@ -330,13 +364,10 @@ public class IndoorTiling
         List<CellSpace> spaces = Boundary2Space(boundary);
         if (spaces.Count == 0)  // no cellspace related
         {
-            Debug.Log($"spaces.Count: {spaces.Count}");
             // nothing
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
         {
-            Debug.Log($"spaces.Count: {spaces.Count}");
-            // if (!spaces[0].Geom.Contains(MiddlePoint(boundary.Geom)))
             RemoveSpaceInternal(spaces[0]);
         }
         else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
@@ -397,7 +428,17 @@ public class IndoorTiling
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
         => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
     private List<JumpInfo> AdjacentFinder(CellVertex cv)
-        => vertex2Boundaries[cv].Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
+    {
+        if (vertex2Boundaries.ContainsKey(cv))
+            return vertex2Boundaries[cv].Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
+        else
+        {
+            Debug.LogError(cv.Id);
+            foreach (var entry in vertex2Boundaries)
+                Debug.LogError(entry.Key.Id);
+            throw new Exception(cv.Id);
+        }
+    }
 
     private List<CellSpace> Boundary2Space(CellBoundary boundary)
     {
@@ -575,6 +616,68 @@ public class IndoorTiling
         }
 
         return new CellSpace(vertices, boundaries);
+    }
+
+    private string Digest()
+    {
+        string result = "";
+        spacePool.Sort((space1, space2) => Math.Sign(space1.Geom.Area - space2.Geom.Area));
+        foreach (var cellspace in spacePool)
+            result += cellspace.Digest() + ",\n";
+        return result;
+    }
+
+
+    [JsonIgnore] private static bool consistencyChecking = false;
+    private void ConsistencyCheck()
+    {
+        if (consistencyChecking) return;
+        consistencyChecking = true;
+
+        string before = Digest();
+
+        List<CellBoundary> boundaries = new List<CellBoundary>(boundaryPool);
+        bool valid = true;
+        IndoorTiling? tempIndoorTiling = null;
+        foreach (var boundary in boundaries)
+        {
+            tempIndoorTiling = new IndoorTiling(this);
+
+            Debug.Log("try remove " + boundary.Id);
+            tempIndoorTiling.RemoveBoundary(boundary);
+
+            Debug.Log("try add back");
+            if (tempIndoorTiling.vertexPool.Contains(boundary.P0))
+            {
+                if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
+                    tempIndoorTiling.AddBoundary(boundary.P0, boundary.P1);
+                else
+                    tempIndoorTiling.AddBoundary(boundary.P0, boundary.P1.Coordinate);
+            }
+            else
+            {
+                if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
+                    tempIndoorTiling.AddBoundary(boundary.P0.Coordinate, boundary.P1);
+                else
+                    tempIndoorTiling.AddBoundary(boundary.P0.Coordinate, boundary.P1.Coordinate);
+            }
+
+            string after = tempIndoorTiling.Digest();
+            if (before != after)
+            {
+                Debug.LogError(boundary.Id);
+                Debug.LogError(boundary.Geom);
+                Debug.LogError(before);
+                Debug.LogError(after);
+                valid = false;
+            }
+            tempIndoorTiling = null;
+        }
+
+        if (valid)
+            Debug.Log($"ConsistencyCheck OK after try remove {boundaries.Count} boundaries");
+
+        consistencyChecking = false;
     }
 
 

@@ -16,4 +16,6 @@ public interface IDGenInterface
     bool valid(string id);
 
     int Compare(string id1, string id2);
+
+    IDGenInterface clone();
 }

@@ -14,8 +14,16 @@ public class SimpleIDGenerator : IDGenInterface
         Prefix = prefix;
         Suffix = suffix;
     }
+
+    public SimpleIDGenerator(SimpleIDGenerator another)
+    {
+        number = another.number;
+        Prefix = "P" + another.Prefix;
+        Suffix = another.Suffix;
+    }
+
     public string Gen() => Prefix + number++ + Suffix;
-    public void ReverseGen() => number --;
+    public void ReverseGen() => number--;
 
     public bool valid(string id)
         => id.StartsWith(Prefix) &&
@@ -36,4 +44,6 @@ public class SimpleIDGenerator : IDGenInterface
     public void Reset(int next) => number = next;
 
     public void Reset(string next) => number = Number(next);
+
+    public IDGenInterface clone() => new SimpleIDGenerator(this);
 }

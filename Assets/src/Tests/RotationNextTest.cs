@@ -40,6 +40,7 @@ public class TestIDGenerator : IDGenInterface
     public void Reset(string next) => throw new NotImplementedException();
     public void ReverseGen() => throw new NotImplementedException();
     public bool valid(string id) => throw new NotImplementedException();
+    public IDGenInterface clone() => throw new NotImplementedException();
 }
 
 public class RotationNextTest
