@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 using UnityEngine;
 
@@ -10,6 +11,7 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
 
+[Serializable]
 public class IndoorTiling
 {
     [JsonPropertyAttribute] private List<CellVertex> vertexPool = new List<CellVertex>();
@@ -75,12 +77,50 @@ public class IndoorTiling
         }
     }
 
+    public void UpdateIndices()
+    {
+        vertex2Boundaries.Clear();
+        foreach (CellBoundary boundary in boundaryPool)
+        {
+            if (!vertex2Boundaries.ContainsKey(boundary.P0))
+                vertex2Boundaries[boundary.P0] = new HashSet<CellBoundary>();
+            vertex2Boundaries[boundary.P0].Add(boundary);
+            if (!vertex2Boundaries.ContainsKey(boundary.P1))
+                vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
+            vertex2Boundaries[boundary.P1].Add(boundary);
+        }
+
+        vertex2Spaces.Clear();
+        foreach (CellSpace space in spacePool)
+        {
+            foreach (CellVertex vertex in space.allVertices)
+            {
+                if (!vertex2Spaces.ContainsKey(vertex))
+                    vertex2Spaces[vertex] = new HashSet<CellSpace>();
+                vertex2Spaces[vertex].Add(space);
+            }
+        }
+
+        // TODO:
+        // space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
+        // boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
+    }
+
+    public string Serialize()
+    {
+        JsonConvert.DefaultSettings = ()
+            => new JsonSerializerSettings { PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                                            Formatting = Newtonsoft.Json.Formatting.Indented };
+        return JsonConvert.SerializeObject(this, new WKTConverter());
+    }
+
     private CellVertex? FindVertexId(string id)
         => vertexPool.FirstOrDefault(vertex => vertex.Id == id);
 
     private CellBoundary? FindBoundaryId(string id)
         => boundaryPool.FirstOrDefault(boundary => boundary.Id == id);
 
+    // TODO: consider id generator when interpret reverse instruction
     private void InterpretInstruction(ReducedInstruction instruction)
     {
         switch (instruction.subject)
@@ -324,7 +364,7 @@ public class IndoorTiling
                     AddSpaceConsiderHole(cellSpace2);
                 break;
         }
-        // ConsistencyCheck();
+        ConsistencyCheck();
         return boundary;
     }
 
@@ -722,6 +762,7 @@ public class IndoorTiling
     private void ConsistencyCheck()
     {
         if (consistencyChecking) return;
+        Debug.Log(Serialize());
         consistencyChecking = true;
 
         string before = Digest();
@@ -732,11 +773,8 @@ public class IndoorTiling
         foreach (var boundary in boundaries)
         {
             tempIndoorTiling = new IndoorTiling(this);
-
-            Debug.Log("try remove " + boundary.Id);
             tempIndoorTiling.RemoveBoundary(boundary);
 
-            Debug.Log("try add back");
             if (tempIndoorTiling.vertexPool.Contains(boundary.P0))
             {
                 if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
