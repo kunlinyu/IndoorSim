@@ -25,15 +25,33 @@ public class CellBoundary
 
     // navigable: at least one of two boolean variables below are true
     // non-navigable: both of these two boolean variables below are false
-    [JsonPropertyAttribute] public bool Right2Left { get; set; }= true;
+    [JsonPropertyAttribute] public bool Right2Left { get; set; } = true;
     [JsonPropertyAttribute] public bool Left2Right { get; set; } = true;
 
     // left/right Functional == true means agents may stop at the left/right side of this boundary to do something
     [JsonPropertyAttribute] public bool LeftFunctional { get; set; } = false;
-    [JsonPropertyAttribute] public bool RightFunctional { get; set; }= false;
-    [JsonIgnore] public Action OnUpdate = () => {};
+    [JsonPropertyAttribute] public bool RightFunctional { get; set; } = false;
+    [JsonIgnore] public Action OnUpdate = () => { };
 
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
+
+    private CellBoundary()  // for deserialization
+    {
+        Id = "";
+        Geom = new LineString(new Coordinate[0]);
+        P0 = new CellVertex();
+        P1 = new CellVertex();
+    }
+
+    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id)
+    {
+        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
+        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
+        Geom = ls;
+        P0 = p0;
+        P1 = p1;
+        Id = id;
+    }
 
     public LineString GeomOrder(CellVertex start, CellVertex end)
     {
@@ -49,20 +67,10 @@ public class CellBoundary
         throw new ArgumentException("Don't contain end vertex");
     }
 
-    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id)
-    {
-        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
-        Geom = ls;
-        P0 = p0;
-        P1 = p1;
-        Id = id;
-    }
-
     public CellBoundary(CellVertex p0, CellVertex p1, string id = "null")
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
-        Geom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate});
+        Geom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate });
         P0 = p0;
         P1 = p1;
         Id = id;

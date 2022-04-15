@@ -9,8 +9,8 @@ public class CellSpace
 {
     [JsonPropertyAttribute] public string Id { get; set; }
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
-    [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; }
-    [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; }
+    [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
+    [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
 
     [JsonIgnore]
@@ -38,6 +38,12 @@ public class CellSpace
 
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonIgnore] public Action OnUpdate = () => { };
+
+    private CellSpace()
+    {
+        Id = "";
+        Geom = new GeometryFactory().CreatePolygon();
+    }
 
     public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null")
     {

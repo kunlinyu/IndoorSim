@@ -21,9 +21,9 @@ public class IndoorTiling
     [JsonPropertyAttribute] private List<CellSpace> spacePool = new List<CellSpace>();
     [JsonPropertyAttribute] private List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
 
-    [JsonIgnore] private IDGenInterface IdGenVertex;
-    [JsonIgnore] private IDGenInterface IdGenBoundary;
-    [JsonIgnore] private IDGenInterface IdGenSpace;
+    [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
+    [JsonIgnore] public IDGenInterface? IdGenBoundary { get; private set; }
+    [JsonIgnore] public IDGenInterface? IdGenSpace { get; private set; }
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
@@ -38,6 +38,8 @@ public class IndoorTiling
     [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
     [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
 
+    public IndoorTiling()
+    { }
     public IndoorTiling(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
         this.IdGenVertex = IdGenVertex;
@@ -53,9 +55,9 @@ public class IndoorTiling
         this.vertexPool.AddRange(another.vertexPool);
         this.rLinePool.AddRange(another.rLinePool);
 
-        this.IdGenVertex = another.IdGenVertex.clone();
-        this.IdGenBoundary = another.IdGenBoundary.clone();
-        this.IdGenSpace = another.IdGenSpace.clone();
+        this.IdGenVertex = another.IdGenVertex?.clone();
+        this.IdGenBoundary = another.IdGenBoundary?.clone();
+        this.IdGenSpace = another.IdGenSpace?.clone();
 
         foreach (var entry in another.vertex2Boundaries)
         {
@@ -77,6 +79,29 @@ public class IndoorTiling
             this.boundary2RLines[entry.Key] = new HashSet<RepresentativeLine>();
             this.boundary2RLines[entry.Key].UnionWith(entry.Value);
         }
+    }
+
+    public string Serialize()
+    {
+        JsonConvert.DefaultSettings = ()
+            => new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            };
+        return JsonConvert.SerializeObject(this, new WKTConverter());
+    }
+
+    public static IndoorTiling? Deserialize(string json, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
+    {
+        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter());
+        if (indoorTiling != null)
+        {
+            indoorTiling.IdGenVertex = IdGenVertex;
+            indoorTiling.IdGenBoundary = IdGenBoundary;
+            indoorTiling.IdGenSpace = IdGenSpace;
+        }
+        return indoorTiling;
     }
 
     public void UpdateIndices()
@@ -106,17 +131,6 @@ public class IndoorTiling
         // TODO:
         // space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
         // boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
-    }
-
-    public string Serialize()
-    {
-        JsonConvert.DefaultSettings = ()
-            => new JsonSerializerSettings
-            {
-                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-                Formatting = Newtonsoft.Json.Formatting.Indented
-            };
-        return JsonConvert.SerializeObject(this, new WKTConverter());
     }
 
     private CellVertex? FindVertexId(string id)
@@ -226,7 +240,7 @@ public class IndoorTiling
         var end = CellVertex.Instantiate(ls.EndPoint, IdGenVertex);
         AddVertexInternal(end);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ConsistencyCheck();
         return boundary;
@@ -248,7 +262,7 @@ public class IndoorTiling
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
         AddVertexInternal(end);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ConsistencyCheck();
         return boundary;
@@ -270,7 +284,7 @@ public class IndoorTiling
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
         AddVertexInternal(start);
 
-        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ConsistencyCheck();
         return boundary;
@@ -300,7 +314,7 @@ public class IndoorTiling
                 return null;
         if (VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
-        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary.Gen());
+        CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
 
         // create new CellSpace
         List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
@@ -386,8 +400,8 @@ public class IndoorTiling
         RemoveBoundaryInternal(boundary);
 
         // Create and add new boundary
-        CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary.Gen());
-        CellBoundary newBoundary2 = new CellBoundary(middleVertex, boundary.P1, IdGenBoundary.Gen());
+        CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary newBoundary2 = new CellBoundary(middleVertex, boundary.P1, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
@@ -650,7 +664,7 @@ public class IndoorTiling
     private void AddSpaceInternal(CellSpace space)
     {
         if (spacePool.Contains(space)) throw new ArgumentException("add redundant space");
-        space.Id = IdGenSpace.Gen();
+        space.Id = IdGenSpace?.Gen() ?? "no id";
         spacePool.Add(space);
         RelateVertexSpace(space);
         OnSpaceCreated?.Invoke(space);
@@ -753,13 +767,10 @@ public class IndoorTiling
         return new CellSpace(vertices, boundaries);
     }
 
-    private string Digest()
+    public string Digest()
     {
-        string result = "";
         spacePool.Sort((space1, space2) => Math.Sign(space1.Geom.Area - space2.Geom.Area));
-        foreach (var cellspace in spacePool)
-            result += cellspace.Digest() + ",\n";
-        return result;
+        return String.Join(",\n", spacePool.Select(space => space.Digest()));
     }
 
     [JsonIgnore] private static bool consistencyChecking = false;

@@ -12,8 +12,10 @@ public class CellVertex
 
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    static public CellVertex Instantiate(Point p, IDGenInterface gen) => new CellVertex(p, gen.Gen());
-    static public CellVertex Instantiate(Coordinate coor, IDGenInterface gen) => new CellVertex(coor, gen.Gen());
+    static public CellVertex Instantiate(Point p, IDGenInterface? gen) => new CellVertex(p, gen?.Gen() ?? "no id");
+    static public CellVertex Instantiate(Coordinate coor, IDGenInterface? gen) => new CellVertex(coor, gen?.Gen() ?? "no id");
+
+    public CellVertex() { Id = ""; Geom = new Point(new Coordinate(0.0f, 0.0f)); }  // for deserialization
 
     private CellVertex(Point p, string id)
     {
