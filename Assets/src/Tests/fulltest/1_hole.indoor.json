@@ -285,7 +285,7 @@
     }
   ],
   "rLinePool": [],
-  "digestCache": "{vertexPool.Count: 8, boundaryPool digest: {0.865928794274588, 0.866199088639962, 1.30756601990418, 1.74975664294909, 3.05451101221219, 3.18665922501475, 3.7186000058166, 4.5828110855992}, spacePool digest: {{Area:1.2783687319, Shell.Length:4.78945054576782, Holes.Length:0}, {Area:11.5426302348, Shell.Length:14.5425813286427, Holes.Length:1}}}",
+  "digestCache": "{vertexPool.Count: 8, boundaryPool digest: {0.865928794274588, 0.866199088639962, 1.30756601990418, 1.74975664294909, 3.05451101221219, 3.18665922501475, 3.7186000058166, 4.5828110855992}, spacePool digest: {{Area:1.2783687319, Shell.Length:4.7894505458, Holes.Length:0}, {Area:11.5426302348, Shell.Length:14.5425813286, Holes.Length:1}}}",
   "history": [
     {
       "$id": "22",

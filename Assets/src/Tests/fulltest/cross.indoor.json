@@ -268,7 +268,7 @@
     }
   ],
   "rLinePool": [],
-  "digestCache": "{vertexPool.Count: 5, boundaryPool digest: {2.33734334370253, 2.52024827421164, 3.02695960013327, 3.23188014352155, 3.48698493894293, 3.60128664059245, 3.89471853182817, 4.67951421077844}, spacePool digest: {{Area:2.8234657322, Shell.Length:8.75231014974235, Holes.Length:0}, {Area:3.5132014061, Shell.Length:8.96558958442825, Holes.Length:0}, {Area:3.9040489539, Shell.Length:9.23911335667611, Holes.Length:0}, {Area:4.8577569466, Shell.Length:10.9383539544333, Holes.Length:0}}}",
+  "digestCache": "{vertexPool.Count: 5, boundaryPool digest: {2.33734334370253, 2.52024827421164, 3.02695960013327, 3.23188014352155, 3.48698493894293, 3.60128664059245, 3.89471853182817, 4.67951421077844}, spacePool digest: {{Area:2.8234657322, Shell.Length:8.7523101497, Holes.Length:0}, {Area:3.5132014061, Shell.Length:8.9655895844, Holes.Length:0}, {Area:3.9040489539, Shell.Length:9.2391133567, Holes.Length:0}, {Area:4.8577569466, Shell.Length:10.9383539544, Holes.Length:0}}}",
   "history": [
     {
       "$id": "19",

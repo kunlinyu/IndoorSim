@@ -1,0 +1,262 @@
+{
+  "$id": "1",
+  "vertexPool": [
+    {
+      "$id": "2",
+      "Id": "VTX0",
+      "Geom": "POINT (-2.0439527034759521 2.4749066829681396)"
+    },
+    {
+      "$id": "3",
+      "Id": "VTX1",
+      "Geom": "POINT (2.14245867729187 0.80034136772155762)"
+    },
+    {
+      "$id": "4",
+      "Id": "VTX2",
+      "Geom": "POINT (-0.76340377330780029 0.75108981132507324)"
+    },
+    {
+      "$id": "5",
+      "Id": "VTX3",
+      "Geom": "POINT (-0.49251866340637207 0.23394505679607391)"
+    },
+    {
+      "$id": "6",
+      "Id": "VTX4",
+      "Geom": "POINT (-1.9208228588104248 -1.2682379484176636)"
+    }
+  ],
+  "boundaryPool": [
+    {
+      "$id": "7",
+      "Id": "BDR2",
+      "Geom": "LINESTRING (2.14245867729187 0.80034136772155762, -0.49251866340637207 0.23394505679607391)",
+      "P0": {
+        "$ref": "3"
+      },
+      "P1": {
+        "$ref": "5"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "8",
+      "Id": "BDR1",
+      "Geom": "LINESTRING (2.14245867729187 0.80034136772155762, -0.76340377330780029 0.75108981132507324)",
+      "P0": {
+        "$ref": "3"
+      },
+      "P1": {
+        "$ref": "4"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "9",
+      "Id": "BDR4",
+      "Geom": "LINESTRING (-1.9208228588104248 -1.2682379484176636, -2.0439527034759521 2.4749066829681396)",
+      "P0": {
+        "$ref": "6"
+      },
+      "P1": {
+        "$ref": "2"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "10",
+      "Id": "BDR0",
+      "Geom": "LINESTRING (-2.0439527034759521 2.4749066829681396, 2.14245867729187 0.80034136772155762)",
+      "P0": {
+        "$ref": "2"
+      },
+      "P1": {
+        "$ref": "3"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "11",
+      "Id": "BDR3",
+      "Geom": "LINESTRING (2.14245867729187 0.80034136772155762, -1.9208228588104248 -1.2682379484176636)",
+      "P0": {
+        "$ref": "3"
+      },
+      "P1": {
+        "$ref": "6"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    }
+  ],
+  "spacePool": [
+    {
+      "$id": "12",
+      "Id": "SPC0",
+      "Geom": "POLYGON ((-1.9208228588104248 -1.2682379484176636, 2.14245867729187 0.80034136772155762, -2.0439527034759521 2.4749066829681396, -1.9208228588104248 -1.2682379484176636))",
+      "shellVertices": [
+        {
+          "$ref": "6"
+        },
+        {
+          "$ref": "3"
+        },
+        {
+          "$ref": "2"
+        }
+      ],
+      "shellBoundaries": [
+        {
+          "$ref": "9"
+        },
+        {
+          "$ref": "11"
+        },
+        {
+          "$ref": "10"
+        }
+      ],
+      "Navigable": false,
+      "Holes": []
+    }
+  ],
+  "rLinePool": [],
+  "digestCache": "{vertexPool.Count: 5, boundaryPool digest: {2.69516425603769, 2.90627980373752, 3.74516924719294, 4.5089033305283, 4.55952598729175}, spacePool digest: {{Area:7.7320771588, Shell.Length:12.813598565, Holes.Length:0}}}",
+  "history": [
+    {
+      "$id": "13",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "14",
+        "newCoor": "POINT (-2.0439527034759521 2.4749066829681396)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "15",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "16",
+        "newCoor": "POINT (2.14245867729187 0.80034136772155762)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "17",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "18",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (-2.0439527034759521 2.4749066829681396, 2.14245867729187 0.80034136772155762)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "19",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "20",
+        "newCoor": "POINT (-0.76340377330780029 0.75108981132507324)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "21",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "22",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (2.14245867729187 0.80034136772155762, -0.76340377330780029 0.75108981132507324)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "23",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "24",
+        "newCoor": "POINT (-0.49251866340637207 0.23394505679607391)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "25",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "26",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (2.14245867729187 0.80034136772155762, -0.49251866340637207 0.23394505679607391)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "27",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "28",
+        "newCoor": "POINT (-1.9208228588104248 -1.2682379484176636)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "29",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "30",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (2.14245867729187 0.80034136772155762, -1.9208228588104248 -1.2682379484176636)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "31",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "32",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (-1.9208228588104248 -1.2682379484176636, -2.0439527034759521 2.4749066829681396)",
+        "oldLineString": null
+      }
+    }
+  ]
+}

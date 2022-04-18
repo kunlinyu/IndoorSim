@@ -48,6 +48,7 @@ public class SimulationController : MonoBehaviour
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());
+                // Debug.Log(indoorSim.indoorTiling.Serialize());
             }
             else if (e.name == "load")
             {
