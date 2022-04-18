@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,11 +49,10 @@ public class SimulationController : MonoBehaviour
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());
-                // Debug.Log(indoorSim.indoorTiling.Serialize());
             }
             else if (e.name == "load")
             {
-                LoadFromFile();
+                indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile());
             }
 
             toolObj?.transform.SetParent(transform);
@@ -72,15 +72,14 @@ public class SimulationController : MonoBehaviour
         }
     }
 
-    void LoadFromFile()
+    string LoadFromFile()
     {
         if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
         {
             string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
-            Debug.Log("load from: " + path);
-            string json = File.ReadAllText(path[0]);
-            indoorSim.indoorTiling.DeserializeInPlace(json);
+            return File.ReadAllText(path[0]);
         }
+        return "";
     }
 
     void SaveToFile(string content)
@@ -94,7 +93,6 @@ public class SimulationController : MonoBehaviour
             Debug.Log("save file to: " + path);
             File.WriteAllText(path, content);
         }
-
     }
 
 

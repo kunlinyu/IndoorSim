@@ -42,18 +42,19 @@ public class ConsistencyTest
     }
 
     public void FullTest(string caseName)
-        => GenericCase("fulltest", caseName, true);
+        => GenericCase("full_test", caseName, true);
 
-    [Test] public void fulltest_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_cross() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_hole_connect_shell() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_hole_connect_shell2() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_2_in_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_2_hole_split_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_2_holes_split_boundary_make_3rd() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_1_hole_connect_1_hole_not_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
-    [Test] public void fulltest_3_holes_remove_1() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_cross() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_hole_connect_shell() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_hole_connect_shell2() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_2_in_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_2_hole_split_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_2_holes_split_boundary_make_3rd() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_1_hole_connect_1_hole_not_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_3_holes_remove_1() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_3_holes_remove_middle_tri() => FullTest(MethodBase.GetCurrentMethod().Name);
 }
