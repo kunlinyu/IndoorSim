@@ -12,9 +12,9 @@ public class IdGenerator : IDGenInterface
 
     public int Compare(string id1, string id2) => throw new NotImplementedException();
     public void Reset() => throw new NotImplementedException();
-    public void Reset(int next) => throw new NotImplementedException();
     public void Reset(string next) => throw new NotImplementedException();
     public void ReverseGen() => throw new NotImplementedException();
+    public void Reset(ICollection<string> allHistory) => throw new NotImplementedException();
     public bool valid(string id) => throw new NotImplementedException();
     public IDGenInterface clone() => throw new NotImplementedException();
 }

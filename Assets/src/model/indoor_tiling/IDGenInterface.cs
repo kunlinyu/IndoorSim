@@ -4,14 +4,10 @@ using UnityEngine;
 
 public interface IDGenInterface
 {
-    string Prefix { get; }
-    string Suffix { get; }
-
     string Gen();
-    void ReverseGen();
     void Reset();
-    void Reset(int next);
-    void Reset(string next);
+    void Reset(string last);
+    void Reset(ICollection<string> allHistory);
 
     bool valid(string id);
 

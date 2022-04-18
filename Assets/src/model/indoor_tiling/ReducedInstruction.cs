@@ -1,10 +1,11 @@
 using System;
 using NetTopologySuite.Geometries;
+using Newtonsoft.Json;
 
 public enum Predicate
 {
     Add,
-    Move,
+    Update,
     Remove
 }
 
@@ -12,92 +13,92 @@ public enum SubjectType
 {
     Vertex,
     Boundary,
+    // TODO: vertices
 }
 
+[Serializable]
 public struct Parameters
 {
-    public Coordinate coordinate { get; set; }
-    public string id0 { get; set; }
-    public string id1 { get; set; }
+    [JsonPropertyAttribute] public Point newCoor;
+    [JsonPropertyAttribute] public Point oldCoor;
+    [JsonPropertyAttribute] public LineString newLineString;
+    [JsonPropertyAttribute] public LineString oldLineString;
 }
 
+
+[Serializable]
 public class ReducedInstruction
 {
-    public SubjectType subject { get; set; }
-    public Predicate predicate { get; set; }
-    public Parameters param { get; set; } = new Parameters();
-    public Parameters preCond { get; set; } = new Parameters();
-    public Parameters postCond { get; set; } = new Parameters();
+    [JsonPropertyAttribute] public SubjectType subject { get; set; }
+    [JsonPropertyAttribute] public Predicate predicate { get; set; }
+    [JsonPropertyAttribute] public Parameters param { get; set; } = new Parameters();
 
-    static ReducedInstruction AddVertex(CellVertex vertex)
-    {
-        return AddVertex(vertex.Id, vertex.Coordinate);
-    }
+    ReducedInstruction()
+    { }
 
-    static ReducedInstruction AddVertex(string id, Coordinate coor)
+    public static ReducedInstruction AddVertex(CellVertex vertex)
+        => AddVertex(vertex.Geom);
+
+    public static ReducedInstruction AddVertex(Point coor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
         ri.predicate = Predicate.Add;
-        ri.param = new Parameters() { coordinate = coor };
-        ri.postCond = new Parameters() { id0 = id };
+        ri.param = new Parameters() { newCoor = coor };
         return ri;
     }
 
-    static ReducedInstruction RemoveVertex(CellVertex vertex)
-    {
-        return RemoveVertex(vertex.Id, vertex.Coordinate);
-    }
+    public static ReducedInstruction RemoveVertex(CellVertex vertex)
+        => RemoveVertex(vertex.Geom);
 
-    static ReducedInstruction RemoveVertex(string id, Coordinate coor)
+    public static ReducedInstruction RemoveVertex(Point coor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
         ri.predicate = Predicate.Remove;
-        ri.param = new Parameters() { id0 = id };
-        ri.preCond = new Parameters() { coordinate = coor };
+        ri.param = new Parameters() { oldCoor = coor };
         return ri;
     }
 
-
-    static ReducedInstruction MoveVertex(string id, Coordinate preCoor, Coordinate postCoor)
+    public static ReducedInstruction UpdateVertex(Point oldCoor, Point newCoor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
-        ri.predicate = Predicate.Move;
-        ri.param = new Parameters() { id0 = id };
-        ri.preCond = new Parameters() { coordinate = preCoor };
-        ri.postCond = new Parameters() { coordinate = postCoor };
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldCoor = oldCoor, newCoor = newCoor };
         return ri;
     }
 
-    static ReducedInstruction AddBoundary(CellBoundary boundary)
-    {
-        return AddBoundary(boundary.P0.Id, boundary.P1.Id, boundary.Id);
-    }
+    public static ReducedInstruction AddBoundary(CellBoundary boundary)
+        => AddBoundary(boundary.Geom);
 
-    static ReducedInstruction AddBoundary(string vertexId0, string vertexId1, string boundaryId)
+    public static ReducedInstruction AddBoundary(LineString ls)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
-        ri.param = new Parameters() { id0 = vertexId0, id1 = vertexId1 };
-        ri.postCond = new Parameters() { id0 = boundaryId };
+        ri.param = new Parameters() { newLineString = ls };
         return ri;
     }
 
-    static ReducedInstruction RemoveBoundary(CellBoundary boundary)
-    {
-        return RemoveBoundary(boundary.P0.Id, boundary.P1.Id, boundary.Id);
-    }
+    public static ReducedInstruction RemoveBoundary(CellBoundary boundary)
+        => RemoveBoundary(boundary.Geom);
 
-    static ReducedInstruction RemoveBoundary(string vertexId0, string vertexId1, string boundaryId)
+    public static ReducedInstruction RemoveBoundary(LineString ls)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
-        ri.param = new Parameters() { id0 = boundaryId };
-        ri.preCond = new Parameters() { id0 = vertexId0, id1 = vertexId1 };
+        ri.param = new Parameters() { oldLineString = ls };
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateBoundary(LineString oldLineString, LineString newLineString)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.Boundary;
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldLineString = oldLineString, newLineString = newLineString };
         return ri;
     }
 
@@ -109,11 +110,11 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveVertex(postCond.id0, param.coordinate);
+                        return RemoveVertex(param.newCoor);
                     case Predicate.Remove:
-                        return AddVertex(param.id0, preCond.coordinate);
-                    case Predicate.Move:
-                        return MoveVertex(param.id0, postCond.coordinate, preCond.coordinate);
+                        return AddVertex(param.oldCoor);
+                    case Predicate.Update:
+                        return UpdateVertex(param.newCoor, param.oldCoor);
                     default:
                         throw new InvalidCastException("Unknown predicate");
                 }
@@ -121,11 +122,11 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveBoundary(param.id0, param.id1, postCond.id0);
+                        return RemoveBoundary(param.newLineString);
                     case Predicate.Remove:
-                        return AddBoundary(preCond.id0, preCond.id1, param.id0);
-                    case Predicate.Move:
-                        throw new InvalidOperationException("No move boundary instruction");
+                        return AddBoundary(param.oldLineString);
+                    case Predicate.Update:
+                        return UpdateBoundary(param.newLineString, param.oldLineString);
                     default:
                         throw new InvalidCastException("Unknown predicate");
                 }

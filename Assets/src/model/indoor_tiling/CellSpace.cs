@@ -280,16 +280,4 @@ public class CellSpace
         }
     }
 
-
-    public string Digest()
-    {
-        return "{" +
-            $"Geom.Area:{Geom.Area}," +
-            $"Geom.Shell.NumPoints:{Geom.Shell.NumPoints}," +
-            $"Holes.Count:{Holes.Count}," +
-            $"allVertices.Count:{allVertices.Count}," +
-            $"allBoundaries.Count:{allBoundaries.Count}" +
-            "}";
-    }
-
 }

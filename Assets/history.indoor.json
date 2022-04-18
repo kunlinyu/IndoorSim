@@ -1,0 +1,174 @@
+{
+  "$id": "1",
+  "vertexPool": [
+    {
+      "$id": "2",
+      "Id": "VTX0",
+      "Geom": "POINT (-2.7143259048461914 3.4374029636383057)"
+    },
+    {
+      "$id": "3",
+      "Id": "VTX1",
+      "Geom": "POINT (-3.1370487213134766 1.3682856559753418)"
+    },
+    {
+      "$id": "4",
+      "Id": "VTX2",
+      "Geom": "POINT (-1.6241453886032104 2.0802404880523682)"
+    }
+  ],
+  "boundaryPool": [
+    {
+      "$id": "5",
+      "Id": "BDR0",
+      "Geom": "LINESTRING (-2.7143259048461914 3.4374029636383057, -3.1370487213134766 1.3682856559753418)",
+      "P0": {
+        "$ref": "2"
+      },
+      "P1": {
+        "$ref": "3"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "6",
+      "Id": "BDR1",
+      "Geom": "LINESTRING (-3.1370487213134766 1.3682856559753418, -1.6241453886032104 2.0802404880523682)",
+      "P0": {
+        "$ref": "3"
+      },
+      "P1": {
+        "$ref": "4"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "7",
+      "Id": "BDR2",
+      "Geom": "LINESTRING (-1.6241453886032104 2.0802404880523682, -2.7143259048461914 3.4374029636383057)",
+      "P0": {
+        "$ref": "4"
+      },
+      "P1": {
+        "$ref": "2"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    }
+  ],
+  "spacePool": [
+    {
+      "$id": "8",
+      "Id": "SPC0",
+      "Geom": "POLYGON ((-2.7143259048461914 3.4374029636383057, -3.1370487213134766 1.3682856559753418, -1.6241453886032104 2.0802404880523682, -2.7143259048461914 3.4374029636383057))",
+      "shellVertices": [
+        {
+          "$ref": "2"
+        },
+        {
+          "$ref": "3"
+        },
+        {
+          "$ref": "4"
+        }
+      ],
+      "shellBoundaries": [
+        {
+          "$ref": "7"
+        },
+        {
+          "$ref": "5"
+        },
+        {
+          "$ref": "6"
+        }
+      ],
+      "Navigable": false,
+      "Holes": []
+    }
+  ],
+  "rLinePool": [],
+  "digestCache": "{vertexPool.Count: 3,boundaryPool.Count: 3,spacePool digest: {Area:1.41470745935935,Shell.Length:5.5247084149479,Holes.Length:0},}",
+  "history": [
+    {
+      "$id": "9",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "10",
+        "newCoor": "POINT (-2.7143259048461914 3.4374029636383057)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "11",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "12",
+        "newCoor": "POINT (-3.1370487213134766 1.3682856559753418)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "13",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "14",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (-2.7143259048461914 3.4374029636383057, -3.1370487213134766 1.3682856559753418)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "15",
+      "subject": 0,
+      "predicate": 0,
+      "param": {
+        "$id": "16",
+        "newCoor": "POINT (-1.6241453886032104 2.0802404880523682)",
+        "oldCoor": null,
+        "newLineString": null,
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "17",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "18",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (-3.1370487213134766 1.3682856559753418, -1.6241453886032104 2.0802404880523682)",
+        "oldLineString": null
+      }
+    },
+    {
+      "$id": "19",
+      "subject": 1,
+      "predicate": 0,
+      "param": {
+        "$id": "20",
+        "newCoor": null,
+        "oldCoor": null,
+        "newLineString": "LINESTRING (-1.6241453886032104 2.0802404880523682, -2.7143259048461914 3.4374029636383057)",
+        "oldLineString": null
+      }
+    }
+  ]
+}

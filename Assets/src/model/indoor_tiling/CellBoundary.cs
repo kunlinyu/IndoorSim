@@ -85,6 +85,14 @@ public class CellBoundary
         OnUpdate?.Invoke();
     }
 
+    public void UpdateGeom(LineString ls)
+    {
+        if (ls.StartPoint.Distance(P0.Geom) > 1e-4f) throw new ArgumentException("the geom of boundary should connect vertices.");
+        if (ls.EndPoint.Distance(P1.Geom) > 1e-4f) throw new ArgumentException("the geom of boundary should connect vertices.");
+        Geom = ls;
+        OnUpdate?.Invoke();
+    }
+
     public bool Contains(CellVertex cv)
     {
         if (Object.ReferenceEquals(cv, P0)) return true;
