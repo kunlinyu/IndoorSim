@@ -7,7 +7,7 @@ public class Digest
 {
     public static string Polygon(Polygon polygon)
         => "{" +
-            $"Area:{polygon.Area}, " +
+            $"Area:{polygon.Area.ToString("0.##########")}, " +
             $"Shell.Length:{polygon.Shell.Length}, " +
             $"Holes.Length:{polygon.Holes.Length}" +
             "}";

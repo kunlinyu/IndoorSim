@@ -26,6 +26,9 @@ public class ConsistencyTest
             newIndoorTiling.InterpretInstruction(instruction);
 
         string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(indoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        Debug.Log(expectDigest);
+        Debug.Log("---");
+        Debug.Log(indoorTiling.digestCache);
         if (fulltest)
         {
             Assert.AreEqual(expectDigest, indoorTiling.digestCache);      // old cache
@@ -43,4 +46,10 @@ public class ConsistencyTest
 
     [Test] public void fulltest_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void fulltest_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_cross() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_hole_connect_shell() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_hole_connect_shell2() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_2_in_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void fulltest_2_hole_split_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
 }

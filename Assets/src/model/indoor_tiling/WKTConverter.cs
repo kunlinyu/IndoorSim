@@ -16,5 +16,7 @@ public class WKTConverter : JsonConverter<Geometry>
     }
 
     public override void WriteJson(JsonWriter writer, Geometry value, JsonSerializer serializer)
-        => writer.WriteValue(value.AsText());
+    {
+        writer.WriteValue(value.AsText());
+    }
 }

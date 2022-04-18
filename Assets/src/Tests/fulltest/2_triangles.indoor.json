@@ -160,7 +160,7 @@
     }
   ],
   "rLinePool": [],
-  "digestCache": "{vertexPool.Count: 4, boundaryPool digest: {2.02437769459004, 2.27066491840504, 2.41834960136761, 2.60225712450263, 2.84261513491056}, spacePool digest: {{Area:2.21297691557552, Shell.Length:6.89729973749771, Holes.Length:0}, {Area:2.64653997689893, Shell.Length:7.53162965468321, Holes.Length:0}}}",
+  "digestCache": "{vertexPool.Count: 4, boundaryPool digest: {2.02437769459004, 2.27066491840504, 2.41834960136761, 2.60225712450263, 2.84261513491056}, spacePool digest: {{Area:2.2129769156, Shell.Length:6.89729973749771, Holes.Length:0}, {Area:2.6465399769, Shell.Length:7.53162965468321, Holes.Length:0}}}",
   "history": [
     {
       "$id": "13",

@@ -219,8 +219,6 @@ public class IndoorTiling
     // TODO: consider id generator when interpret reverse instruction
     public void InterpretInstruction(ReducedInstruction instruction)
     {
-        Debug.Log(instruction.subject);
-        Debug.Log(instruction.predicate);
         switch (instruction.subject)
         {
             case SubjectType.Vertex:
@@ -859,7 +857,7 @@ public class IndoorTiling
         $"spacePool digest: {spacesDigest}" +
         "}";
 
-    [JsonIgnore] private static bool consistencyChecking = false;
+    [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()
     {
 
