@@ -1,20 +1,25 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public enum UIEventType
 {
     ButtonClick,
     EnterUIPanel,
+    Tip,
 }
 
+[Serializable]
 public struct UIEvent
 {
     public string name;
+    public string message;
     public UIEventType type;
 }
 
-public class UIEventDispatcher
+[Serializable]
+public class UIEventDispatcher : MonoBehaviour
 {
     public delegate void EventListener(object sender, UIEvent e);
 

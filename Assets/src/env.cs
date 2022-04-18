@@ -10,15 +10,15 @@ public class env : MonoBehaviour
     public SimulationController simController;  // controller
     public ToolBarController toolBarController;
 
-    private UIEventDispatcher eventDispatcher = new UIEventDispatcher();
+    public UIEventDispatcher eventDispatcher;
 
     void OnEnable()
     {
         mapView.indoorTiling = indoorSim.indoorTiling;
         simController.indoorSim = indoorSim;
         simController.mapView = mapView;
-        toolBarController.eventDispatcher = eventDispatcher;
-        simController.eventDispatcher = eventDispatcher;
+        // toolBarController.eventDispatcher = eventDispatcher;
+        // simController.eventDispatcher = eventDispatcher;
     }
 
     // Update is called once per frame

@@ -19,11 +19,11 @@ public class SimulationController : MonoBehaviour
         eventDispatcher.eventListener += EventListener;
     }
 
-
     void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.ButtonClick)
         {
+            string oldToolName = toolObj != null ? toolObj.name : "";
             Destroy(toolObj);
             toolObj = null;
             currentTool = null;
@@ -31,20 +31,29 @@ public class SimulationController : MonoBehaviour
 
             if (e.name == "line string")
             {
-                toolObj = new GameObject("lineString");
-                currentTool = toolObj.AddComponent<LineString>();
-                currentTool.draftMaterial = Resources.Load<Material>("material/tool linestring");
+                if (oldToolName != "lineString")
+                {
+                    toolObj = new GameObject("lineString");
+                    currentTool = toolObj.AddComponent<LineString>();
+                    currentTool.draftMaterial = Resources.Load<Material>("material/tool linestring");
+                }
             }
             else if (e.name == "select drag")
             {
-                toolObj = new GameObject("select drag");
-                currentTool = toolObj.AddComponent<SelectDrag>();
-                currentTool.draftMaterial = Resources.Load<Material>("material/tool select drag");
+                if (oldToolName != "select drag")
+                {
+                    toolObj = new GameObject("select drag");
+                    currentTool = toolObj.AddComponent<SelectDrag>();
+                    currentTool.draftMaterial = Resources.Load<Material>("material/tool select drag");
+                }
             }
             else if (e.name == "delete")
             {
-                toolObj = new GameObject("delete");
-                currentTool = toolObj.AddComponent<Deleter>();
+                if (oldToolName != "delete")
+                {
+                    toolObj = new GameObject("delete");
+                    currentTool = toolObj.AddComponent<Deleter>();
+                }
             }
             else if (e.name == "save")
             {
@@ -54,6 +63,8 @@ public class SimulationController : MonoBehaviour
             {
                 indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile());
             }
+
+
 
             toolObj?.transform.SetParent(transform);
             if (currentTool != null)
