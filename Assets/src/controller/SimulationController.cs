@@ -23,11 +23,16 @@ public class SimulationController : MonoBehaviour
     {
         if (e.type == UIEventType.ButtonClick)
         {
-            string oldToolName = toolObj != null ? toolObj.name : "";
-            Destroy(toolObj);
-            toolObj = null;
-            currentTool = null;
-            UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            string oldToolName = "";
+            if (toolObj != null)
+            {
+                oldToolName = toolObj.name;
+                Debug.Log("Disable tool " + toolObj.name);
+                Destroy(toolObj);
+                toolObj = null;
+                currentTool = null;
+                UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            }
 
             if (e.name == "line string")
             {
@@ -36,6 +41,7 @@ public class SimulationController : MonoBehaviour
                     toolObj = new GameObject("lineString");
                     currentTool = toolObj.AddComponent<LineString>();
                     currentTool.draftMaterial = Resources.Load<Material>("material/tool linestring");
+                    Debug.Log("Switch to tool lineString");
                 }
             }
             else if (e.name == "select drag")
@@ -45,6 +51,7 @@ public class SimulationController : MonoBehaviour
                     toolObj = new GameObject("select drag");
                     currentTool = toolObj.AddComponent<SelectDrag>();
                     currentTool.draftMaterial = Resources.Load<Material>("material/tool select drag");
+                    Debug.Log("Switch to tool select drag");
                 }
             }
             else if (e.name == "delete")
@@ -53,6 +60,7 @@ public class SimulationController : MonoBehaviour
                 {
                     toolObj = new GameObject("delete");
                     currentTool = toolObj.AddComponent<Deleter>();
+                    Debug.Log("Switch to tool deleter");
                 }
             }
             else if (e.name == "save")
