@@ -7,50 +7,90 @@ using UnityEngine;
 [Serializable]
 public class InstructionHistory
 {
-    [JsonPropertyAttribute] private Stack<ReducedInstruction> history = new Stack<ReducedInstruction>();
-    [JsonPropertyAttribute] private Stack<ReducedInstruction> future = new Stack<ReducedInstruction>();
+    [JsonPropertyAttribute] private Stack<List<ReducedInstruction>> history = new Stack<List<ReducedInstruction>>();
+    [JsonPropertyAttribute] private Stack<List<ReducedInstruction>> future = new Stack<List<ReducedInstruction>>();
+
+    [JsonIgnore] private List<ReducedInstruction>? uncommittedInstruction = null;
 
     public bool IgnoreDo { get; set; } = false;
 
-    public void Do(ReducedInstruction instruction)
+    public void SessionStart()
     {
         if (!IgnoreDo)
         {
-            Debug.Log("do history: " + history.Count + " future: " + future.Count);
-            history.Push(instruction);
-            future.Clear();
+            if (uncommittedInstruction != null)
+                throw new InvalidOperationException("There are some uncommitted instruction. Should not start again.");
+            uncommittedInstruction = new List<ReducedInstruction>();
         }
     }
 
-    public ReducedInstruction? Undo()
+    public void SessionCommit()
     {
+        if (!IgnoreDo)
+        {
+            if (uncommittedInstruction == null)
+                throw new InvalidOperationException("You should start session first.");
+            if (uncommittedInstruction.Count == 0)
+                throw new InvalidOperationException("Nothing can be commit.");
+            history.Push(uncommittedInstruction);
+            future.Clear();
+            uncommittedInstruction = null;
+        }
+    }
+
+    public void DoStep(ReducedInstruction instruction)
+    {
+        if (!IgnoreDo)
+        {
+            if (uncommittedInstruction == null)
+                throw new InvalidCastException("Can not do anything before session start.");
+            uncommittedInstruction.Add(instruction);
+        }
+    }
+
+    public void DoCommit(ReducedInstruction instruction)
+    {
+        if (!IgnoreDo)
+        {
+            SessionStart();
+            DoStep(instruction);
+            SessionCommit();
+        }
+    }
+
+    public List<ReducedInstruction> Undo()
+    {
+        if (uncommittedInstruction != null)
+            throw new InvalidOperationException("There are some uncommitted instruction. Should not undo.");
         Debug.Log("undo history: " + history.Count + " future: " + future.Count);
         if (history.Count > 0)
         {
-            ReducedInstruction last = history.Peek();
+            var last = history.Peek();
             history.Pop();
             future.Push(last);
             return last;
         }
         else
         {
-            return null;
+            return new List<ReducedInstruction>();
         }
     }
 
-    public ReducedInstruction? Redo()
+    public List<ReducedInstruction> Redo()
     {
+        if (uncommittedInstruction != null)
+            throw new InvalidOperationException("There are some uncommitted instruction. Should not redo.");
         Debug.Log("redo history: " + history.Count + " future: " + future.Count);
         if (future.Count > 0)
         {
-            ReducedInstruction next = future.Peek();
+            var next = future.Peek();
             future.Pop();
             history.Push(next);
             return next;
         }
         else
         {
-            return null;
+            return new List<ReducedInstruction>();
         }
     }
 

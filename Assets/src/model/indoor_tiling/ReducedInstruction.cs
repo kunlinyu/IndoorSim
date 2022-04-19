@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
@@ -6,14 +7,15 @@ using Newtonsoft.Json;
 
 public enum Predicate
 {
-    Add,
-    Update,
-    Remove
+    Add,  // TODO, Remove?
+    Update,  // TODO, Update multiple vertices?
+    Remove  // TODO, Remove?
 }
 
 public enum SubjectType
 {
     Vertex,
+    Vertices,
     Boundary,
     // TODO: vertices
 }
@@ -21,13 +23,15 @@ public enum SubjectType
 [Serializable]
 public struct Parameters
 {
-    [JsonPropertyAttribute] public Point? newCoor;
-    [JsonPropertyAttribute] public Point? oldCoor;
+    [JsonPropertyAttribute] public Coordinate? newCoor;
+    [JsonPropertyAttribute] public Coordinate? oldCoor;
+    [JsonPropertyAttribute] public List<Coordinate>? oldCoors;
+    [JsonPropertyAttribute] public List<Coordinate>? newCoors;
     [JsonPropertyAttribute] public LineString? newLineString;
     [JsonPropertyAttribute] public LineString? oldLineString;
 
     public override string ToString()
-        => oldCoor?.ToString() + " " + newCoor?.ToString() + " " + oldLineString?.ToString() + " " + newLineString?.ToString();
+        => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
 }
 
 
@@ -45,9 +49,9 @@ public class ReducedInstruction
         => predicate + " " + subject + " " + param.ToString();
 
     public static ReducedInstruction AddVertex(CellVertex vertex)
-        => AddVertex(vertex.Geom);
+        => AddVertex(vertex.Coordinate);
 
-    public static ReducedInstruction AddVertex(Point coor)
+    public static ReducedInstruction AddVertex(Coordinate coor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
@@ -57,9 +61,9 @@ public class ReducedInstruction
     }
 
     public static ReducedInstruction RemoveVertex(CellVertex vertex)
-        => RemoveVertex(vertex.Geom);
+        => RemoveVertex(vertex.Coordinate);
 
-    public static ReducedInstruction RemoveVertex(Point coor)
+    public static ReducedInstruction RemoveVertex(Coordinate coor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
@@ -68,12 +72,21 @@ public class ReducedInstruction
         return ri;
     }
 
-    public static ReducedInstruction UpdateVertex(Point oldCoor, Point newCoor)
+    public static ReducedInstruction UpdateVertex(Coordinate oldCoor, Coordinate newCoor)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertex;
         ri.predicate = Predicate.Update;
         ri.param = new Parameters() { oldCoor = oldCoor, newCoor = newCoor };
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateVertices(List<Coordinate> oldCoors, List<Coordinate> newCoors)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.Vertices;
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldCoors = oldCoors, newCoors = newCoors };
         return ri;
     }
 
@@ -110,6 +123,14 @@ public class ReducedInstruction
         return ri;
     }
 
+    static public List<ReducedInstruction> Reverse(List<ReducedInstruction> instructions)
+    {
+        var result = new List<ReducedInstruction>();
+        for (int i = instructions.Count - 1; i >= 0; i--)
+            result.Add(instructions[i].Reverse());
+        return result;
+    }
+
     public ReducedInstruction Reverse()
     {
         switch (subject)
@@ -123,6 +144,14 @@ public class ReducedInstruction
                         return AddVertex(param.oldCoor);
                     case Predicate.Update:
                         return UpdateVertex(param.newCoor, param.oldCoor);
+                    default:
+                        throw new InvalidCastException("Unknown predicate");
+                }
+            case SubjectType.Vertices:
+                switch (predicate)
+                {
+                    case Predicate.Update:
+                        return UpdateVertices(param.newCoors, param.oldCoors);
                     default:
                         throw new InvalidCastException("Unknown predicate");
                 }
