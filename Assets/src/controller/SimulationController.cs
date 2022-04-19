@@ -71,6 +71,14 @@ public class SimulationController : MonoBehaviour
             {
                 indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile());
             }
+            else if (e.name == "redo")
+            {
+                indoorSim.indoorTiling.Redo();
+            }
+            else if (e.name == "undo")
+            {
+                indoorSim.indoorTiling.Undo();
+            }
 
 
 

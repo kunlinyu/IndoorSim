@@ -22,7 +22,8 @@ public class IndoorTiling
     [JsonPropertyAttribute] public List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
     [JsonPropertyAttribute] public string digestCache = "";
 
-    [JsonPropertyAttribute] public List<ReducedInstruction> history = new List<ReducedInstruction>();
+    // [JsonPropertyAttribute] public List<ReducedInstruction> history = new List<ReducedInstruction>();
+    [JsonPropertyAttribute] public InstructionHistory history = new InstructionHistory();
 
     [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
     [JsonIgnore] public IDGenInterface? IdGenBoundary { get; private set; }
@@ -103,7 +104,7 @@ public class IndoorTiling
         return JsonConvert.SerializeObject(this, new WKTConverter());
     }
 
-    public bool DeserializeInPlace(string json)
+    public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
         foreach (var v in vertexPool)
             OnVertexRemoved?.Invoke(v);
@@ -121,26 +122,36 @@ public class IndoorTiling
         IndoorTiling? indoorTiling = Deserialize(json);
         if (indoorTiling == null) return false;
 
-        vertexPool = indoorTiling.vertexPool;
-        boundaryPool = indoorTiling.boundaryPool;
-        spacePool = indoorTiling.spacePool;
-        rLinePool = indoorTiling.rLinePool;
-        history = indoorTiling.history;
+        if (historyOnly)
+        {
+            history = indoorTiling.history;
+            IdGenVertex?.Reset();
+            IdGenBoundary?.Reset();
+            IdGenSpace?.Reset();
+        }
+        else
+        {
+            vertexPool = indoorTiling.vertexPool;
+            boundaryPool = indoorTiling.boundaryPool;
+            spacePool = indoorTiling.spacePool;
+            rLinePool = indoorTiling.rLinePool;
+            history = indoorTiling.history;
 
-        // TODO: rline?
+            // TODO: rline?
 
-        UpdateIndices();
+            UpdateIndices();
 
-        foreach (var v in vertexPool)
-            OnVertexCreated?.Invoke(v);
-        foreach (var b in boundaryPool)
-            OnBoundaryCreated?.Invoke(b);
-        foreach (var s in spacePool)
-            OnSpaceCreated?.Invoke(s);
+            foreach (var v in vertexPool)
+                OnVertexCreated?.Invoke(v);
+            foreach (var b in boundaryPool)
+                OnBoundaryCreated?.Invoke(b);
+            foreach (var s in spacePool)
+                OnSpaceCreated?.Invoke(s);
 
-        IdGenVertex?.Reset(vertexPool.Select(v => v.Id).ToList());
-        IdGenBoundary?.Reset(boundaryPool.Select(b => b.Id).ToList());
-        IdGenSpace?.Reset(spacePool.Select(s => s.Id).ToList());
+            IdGenVertex?.Reset(vertexPool.Select(v => v.Id).ToList());
+            IdGenBoundary?.Reset(boundaryPool.Select(b => b.Id).ToList());
+            IdGenSpace?.Reset(spacePool.Select(s => s.Id).ToList());
+        }
 
         return true;
     }
@@ -162,9 +173,7 @@ public class IndoorTiling
         return indoorTiling;
     }
     public static IndoorTiling? Deserialize(string json)
-    {
-        return JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter());
-    }
+        => JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter());
 
     public void UpdateIndices()
     {
@@ -191,8 +200,8 @@ public class IndoorTiling
         }
 
         // TODO:
-        // space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
-        // boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
+        // space2RLines
+        // boundary2RLines
     }
 
     private CellVertex? FindVertexId(string id)
@@ -203,6 +212,9 @@ public class IndoorTiling
 
     private CellVertex? FindVertexCoor(Point coor)
         => vertexPool.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < 1e-4f);
+
+    private CellVertex? FindVertexCoor(Coordinate coor)
+=> vertexPool.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < 1e-4f);
 
     private CellBoundary? FindBoundaryGeom(LineString ls)
     {
@@ -216,9 +228,29 @@ public class IndoorTiling
         return boundaries.FirstOrDefault(b => b.Geom.Contains(MiddlePoint(ls)));
     }
 
-    // TODO: consider id generator when interpret reverse instruction
-    public void InterpretInstruction(ReducedInstruction instruction)
+    public void Undo()
     {
+        ReducedInstruction? instruction = history.Undo();
+        if (instruction != null)
+            InterpretInstruction(instruction.Reverse());
+        else
+            Debug.LogWarning("can not undo");
+    }
+
+    public void Redo()
+    {
+        ReducedInstruction? instruction = history.Redo();
+        if (instruction != null)
+            InterpretInstruction(instruction);
+        else
+            Debug.LogWarning("can not redo");
+    }
+
+    // TODO: consider id generator when interpret reverse instruction
+    private void InterpretInstruction(ReducedInstruction instruction)
+    {
+        Debug.Log("interpret instruction: " + instruction);
+        history.IgnoreDo = true;
         switch (instruction.subject)
         {
             case SubjectType.Vertex:
@@ -257,13 +289,20 @@ public class IndoorTiling
                 {
                     case Predicate.Add:
                         {
-                            CellVertex? start = FindVertexCoor(instruction.param.newLineString.StartPoint);
-                            if (start == null)
-                                throw new ArgumentException("can not find vertex as start point of line string: " + instruction.param.newLineString.StartPoint);
-                            CellVertex? end = FindVertexCoor(instruction.param.newLineString.EndPoint);
-                            if (end == null)
-                                throw new ArgumentException("can not find vertex as end point of line string: " + instruction.param.newLineString.EndPoint);
-                            CellBoundary? boundary = AddBoundary(start, end);
+                            Coordinate startCoor = instruction.param.newLineString.StartPoint.Coordinate;
+                            CellVertex? start = FindVertexCoor(startCoor);
+                            Coordinate endCoor = instruction.param.newLineString.EndPoint.Coordinate;
+                            CellVertex? end = FindVertexCoor(endCoor);
+
+                            CellBoundary? boundary = null;
+                            if (start == null && end == null)
+                                boundary = AddBoundary(startCoor, endCoor);
+                            else if (start != null && end == null)
+                                boundary = AddBoundary(start, endCoor);
+                            else if (start == null && end != null)
+                                boundary = AddBoundary(startCoor, end);
+                            else if (start != null && end != null)
+                                boundary = AddBoundary(start, end);
                             if (boundary == null)
                                 throw new InvalidOperationException("add boundary failed:");
                         }
@@ -291,12 +330,11 @@ public class IndoorTiling
             default:
                 throw new ArgumentException("Unknown subject type: " + instruction.subject);
         }
+        history.IgnoreDo = false;
     }
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
-
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
 
         foreach (CellBoundary b in boundaryPool)
             if (b.Geom.Crosses(ls))
@@ -317,10 +355,7 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, endCoor });
 
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
         if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
-        if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
-        if (endCoor.Distance(ls.GetPointN(ls.NumPoints - 1).Coordinate) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
 
         foreach (CellBoundary b in boundaryPool)
             if (b.Geom.Crosses(ls))
@@ -339,10 +374,7 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, end.Coordinate });
 
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
         if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
-        if (startCoor.Distance(ls.GetPointN(0).Coordinate) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
-        if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
 
         foreach (CellBoundary b in boundaryPool)
             if (b.Geom.Crosses(ls))
@@ -369,11 +401,8 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, end.Coordinate });
 
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
         if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
         if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
-        if (start.Geom.Distance(ls.GetPointN(0)) > 1e-3) throw new ArgumentException("The first point of ling string should equal to coordinate of start");
-        if (end.Geom.Distance(ls.GetPointN(ls.NumPoints - 1)) > 1e-3) throw new ArgumentException("The last point of ling string should equal to coordinate of end");
         if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
         foreach (CellBoundary b in boundaryPool)
@@ -494,8 +523,8 @@ public class IndoorTiling
 
         for (int i = 0; i < vertices.Count; i++)
         {
+            history.Do(ReducedInstruction.UpdateVertex(vertices[i].Geom, new GeometryFactory().CreatePoint(coors[i])));
             vertices[i].UpdateCoordinate(coors[i]);
-            history.Add(ReducedInstruction.UpdateVertex(vertices[i].Geom, new GeometryFactory().CreatePoint(coors[i])));
         }
 
         HashSet<CellBoundary> boundaries = new HashSet<CellBoundary>();
@@ -702,7 +731,7 @@ public class IndoorTiling
         vertex2Spaces[vertex] = new HashSet<CellSpace>();
         OnVertexCreated?.Invoke(vertex);
 
-        history.Add(ReducedInstruction.AddVertex(vertex));
+        // history.Do(ReducedInstruction.AddVertex(vertex));
     }
 
     private void RemoveVertexInternal(CellVertex vertex)
@@ -712,7 +741,7 @@ public class IndoorTiling
         vertex2Spaces.Remove(vertex);
         OnVertexRemoved?.Invoke(vertex);
 
-        history.Add(ReducedInstruction.RemoveVertex(vertex));
+        // history.Do(ReducedInstruction.RemoveVertex(vertex));
     }
 
     private void AddBoundaryInternal(CellBoundary boundary)
@@ -726,7 +755,7 @@ public class IndoorTiling
 
         OnBoundaryCreated.Invoke(boundary);
 
-        history.Add(ReducedInstruction.AddBoundary(boundary));
+        history.Do(ReducedInstruction.AddBoundary(boundary));
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)
@@ -742,7 +771,7 @@ public class IndoorTiling
 
         OnBoundaryRemoved?.Invoke(boundary);
 
-        history.Add(ReducedInstruction.RemoveBoundary(boundary));
+        history.Do(ReducedInstruction.RemoveBoundary(boundary));
     }
 
     private string AddSpaceInternal(CellSpace space)
@@ -861,7 +890,7 @@ public class IndoorTiling
         $"spacePool digest: {spacesDigest}" +
         "}";
 
-    [JsonIgnore] private static bool consistencyChecking = false;
+    [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()
     {
         if (consistencyChecking) return;

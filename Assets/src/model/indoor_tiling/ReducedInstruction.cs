@@ -2,6 +2,8 @@ using System;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
+#nullable enable
+
 public enum Predicate
 {
     Add,
@@ -19,10 +21,13 @@ public enum SubjectType
 [Serializable]
 public struct Parameters
 {
-    [JsonPropertyAttribute] public Point newCoor;
-    [JsonPropertyAttribute] public Point oldCoor;
-    [JsonPropertyAttribute] public LineString newLineString;
-    [JsonPropertyAttribute] public LineString oldLineString;
+    [JsonPropertyAttribute] public Point? newCoor;
+    [JsonPropertyAttribute] public Point? oldCoor;
+    [JsonPropertyAttribute] public LineString? newLineString;
+    [JsonPropertyAttribute] public LineString? oldLineString;
+
+    public override string ToString()
+        => oldCoor?.ToString() + " " + newCoor?.ToString() + " " + oldLineString?.ToString() + " " + newLineString?.ToString();
 }
 
 
@@ -35,6 +40,9 @@ public class ReducedInstruction
 
     ReducedInstruction()
     { }
+
+    public override string ToString()
+        => predicate + " " + subject + " " + param.ToString();
 
     public static ReducedInstruction AddVertex(CellVertex vertex)
         => AddVertex(vertex.Geom);
