@@ -861,7 +861,7 @@ public class IndoorTiling
         $"spacePool digest: {spacesDigest}" +
         "}";
 
-    [JsonIgnore] private static bool consistencyChecking = true;
+    [JsonIgnore] private static bool consistencyChecking = false;
     private void ConsistencyCheck()
     {
         if (consistencyChecking) return;

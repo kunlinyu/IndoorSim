@@ -48,6 +48,7 @@ public class ConsistencyTest
     => GenericCase("badcase", caseName, false);
 
     [Test] public void badcase_split_hole_one_branch_remove() => BadCase(MethodBase.GetCurrentMethod().Name);
+    [Test] public void badcase_hole_branch_outside_split() => BadCase(MethodBase.GetCurrentMethod().Name);
 
     [Test] public void full_test_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
