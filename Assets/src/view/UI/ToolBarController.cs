@@ -32,7 +32,7 @@ public class ToolBarController : MonoBehaviour
             button.clicked += () =>
             {
                 eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ButtonClick });
-                Debug.Log(tbd.m_ToolName);
+                Debug.Log("Switch to tool " + tbd.m_ToolName);
             };
 
             toolBar.Add(buttonContainer);

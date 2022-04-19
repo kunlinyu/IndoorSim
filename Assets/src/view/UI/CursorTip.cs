@@ -13,7 +13,6 @@ public class CursorTip : MonoBehaviour
     {
         Label tip = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Tip");
         tip.text = "xxx";
-        // tip.visible = false;
 
         eventDispatcher.eventListener += EventListener;
     }

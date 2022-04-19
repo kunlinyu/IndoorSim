@@ -420,8 +420,6 @@ public class IndoorTiling
         else
             ncsCase = NewCellSpaceCase.HoleOfAnother;
 
-        Debug.Log(ncsCase);
-
         switch (ncsCase)
         {
             case NewCellSpaceCase.NewCellSpace:
@@ -429,18 +427,21 @@ public class IndoorTiling
                     AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
                 else
                     AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
+                Debug.Log("create new cellspace");
                 break;
 
             case NewCellSpaceCase.Split:
                 RemoveSpaceInternal(oldCellSpace!);
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
+                Debug.Log("split cellspace");
                 break;
 
             case NewCellSpaceCase.SplitNeedReSearch:
                 RemoveSpaceInternal(oldCellSpace!);
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps1));
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps2));
+                Debug.Log("split cellspace");
                 break;
 
             case NewCellSpaceCase.HoleOfAnother:
@@ -448,6 +449,7 @@ public class IndoorTiling
                     AddSpaceConsiderHole(cellSpace1);
                 else
                     AddSpaceConsiderHole(cellSpace2);
+                Debug.Log("add hole to cellspace");
                 break;
         }
         ConsistencyCheck();
@@ -458,6 +460,7 @@ public class IndoorTiling
     {
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
         if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
+        Debug.Log("split boundary");
 
         // Create vertex
         CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
@@ -742,13 +745,14 @@ public class IndoorTiling
         history.Add(ReducedInstruction.RemoveBoundary(boundary));
     }
 
-    private void AddSpaceInternal(CellSpace space)
+    private string AddSpaceInternal(CellSpace space)
     {
         if (spacePool.Contains(space)) throw new ArgumentException("add redundant space");
         space.Id = IdGenSpace?.Gen() ?? "no id";
         spacePool.Add(space);
         RelateVertexSpace(space);
         OnSpaceCreated?.Invoke(space);
+        return space.Id;
     }
 
     private void RemoveSpaceInternal(CellSpace space)
@@ -770,7 +774,7 @@ public class IndoorTiling
             vertex2Spaces[vertex].Add(space);
     }
 
-    private void AddSpaceConsiderHole(CellSpace current)
+    private string AddSpaceConsiderHole(CellSpace current)
     {
         CellSpace? spaceContainCurrent = null;
         List<CellSpace> holeOfCurrent = new List<CellSpace>();
@@ -795,7 +799,7 @@ public class IndoorTiling
         foreach (CellSpace hole in holeOfCurrent)
             current.AddHole(hole);
 
-        AddSpaceInternal(current);
+        return AddSpaceInternal(current);
     }
 
     private List<CellSpace> CreateCellSpaceMulti(List<JumpInfo> path)
