@@ -103,9 +103,6 @@ public class SimulationController : MonoBehaviour
 
     void SaveToFile(string content)
     {
-        Debug.Log(content);
-        Debug.Log(UnityEngine.Application.platform);
-
         if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
         {
             string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");

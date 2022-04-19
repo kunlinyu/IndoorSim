@@ -864,7 +864,6 @@ public class IndoorTiling
     [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()
     {
-
         if (consistencyChecking) return;
         Debug.Log("Polygonizer().Count, spacePoll.count " + Polygonizer().Count + " " + spacePool.Count);
 

@@ -44,6 +44,11 @@ public class ConsistencyTest
     public void FullTest(string caseName)
         => GenericCase("full_test", caseName, true);
 
+    public void BadCase(string caseName)
+    => GenericCase("badcase", caseName, false);
+
+    [Test] public void badcase_split_hole_one_branch_remove() => BadCase(MethodBase.GetCurrentMethod().Name);
+
     [Test] public void full_test_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
@@ -57,4 +62,6 @@ public class ConsistencyTest
     [Test] public void full_test_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_3_holes_remove_1() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_3_holes_remove_middle_tri() => FullTest(MethodBase.GetCurrentMethod().Name);
+
+
 }
