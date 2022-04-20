@@ -7,18 +7,23 @@ using Newtonsoft.Json;
 
 public enum Predicate
 {
-    Add,  // TODO, Remove?
-    Update,  // TODO, Update multiple vertices?
-    Remove  // TODO, Remove?
+    Add,
+    Update,
+    Remove
 }
 
 public enum SubjectType
 {
-    Vertex,
-    Vertices,
     Boundary,
+    Vertices,
     // TODO: vertices
 }
+
+// Following instructions are valid:
+// 1. Add Boundary
+// 2. Update Boundary
+// 3. Remove Boundary
+// 4. Update Vertices
 
 [Serializable]
 public struct Parameters
@@ -47,39 +52,6 @@ public class ReducedInstruction
 
     public override string ToString()
         => predicate + " " + subject + " " + param.ToString();
-
-    public static ReducedInstruction AddVertex(CellVertex vertex)
-        => AddVertex(vertex.Coordinate);
-
-    public static ReducedInstruction AddVertex(Coordinate coor)
-    {
-        ReducedInstruction ri = new ReducedInstruction();
-        ri.subject = SubjectType.Vertex;
-        ri.predicate = Predicate.Add;
-        ri.param = new Parameters() { newCoor = coor };
-        return ri;
-    }
-
-    public static ReducedInstruction RemoveVertex(CellVertex vertex)
-        => RemoveVertex(vertex.Coordinate);
-
-    public static ReducedInstruction RemoveVertex(Coordinate coor)
-    {
-        ReducedInstruction ri = new ReducedInstruction();
-        ri.subject = SubjectType.Vertex;
-        ri.predicate = Predicate.Remove;
-        ri.param = new Parameters() { oldCoor = coor };
-        return ri;
-    }
-
-    public static ReducedInstruction UpdateVertex(Coordinate oldCoor, Coordinate newCoor)
-    {
-        ReducedInstruction ri = new ReducedInstruction();
-        ri.subject = SubjectType.Vertex;
-        ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldCoor = oldCoor, newCoor = newCoor };
-        return ri;
-    }
 
     public static ReducedInstruction UpdateVertices(List<Coordinate> oldCoors, List<Coordinate> newCoors)
     {
@@ -135,18 +107,6 @@ public class ReducedInstruction
     {
         switch (subject)
         {
-            case SubjectType.Vertex:
-                switch (predicate)
-                {
-                    case Predicate.Add:
-                        return RemoveVertex(param.newCoor);
-                    case Predicate.Remove:
-                        return AddVertex(param.oldCoor);
-                    case Predicate.Update:
-                        return UpdateVertex(param.newCoor, param.oldCoor);
-                    default:
-                        throw new InvalidCastException("Unknown predicate");
-                }
             case SubjectType.Vertices:
                 switch (predicate)
                 {

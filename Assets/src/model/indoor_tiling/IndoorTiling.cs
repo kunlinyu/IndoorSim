@@ -20,7 +20,7 @@ public class IndoorTiling
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
-    [JsonPropertyAttribute] public InstructionHistory history = new InstructionHistory();
+    [JsonPropertyAttribute] public InstructionHistory instructionHistory = new InstructionHistory();
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
@@ -99,7 +99,7 @@ public class IndoorTiling
                 PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
                 Formatting = Newtonsoft.Json.Formatting.Indented
             };
-        return JsonConvert.SerializeObject(this, new WKTConverter());
+        return JsonConvert.SerializeObject(this, new WKTConverter(), new CoorConverter());
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
@@ -114,15 +114,15 @@ public class IndoorTiling
             OnSpaceRemoved?.Invoke(s);
         spacePool.Clear();
 
-        history.Clear();
+        instructionHistory.Clear();
 
 
-        IndoorTiling? indoorTiling = Deserialize(json);
+        IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
         if (indoorTiling == null) return false;
 
         if (historyOnly)
         {
-            history = indoorTiling.history;
+            instructionHistory = indoorTiling.instructionHistory;
             IdGenVertex?.Reset();
             IdGenBoundary?.Reset();
             IdGenSpace?.Reset();
@@ -133,7 +133,7 @@ public class IndoorTiling
             boundaryPool = indoorTiling.boundaryPool;
             spacePool = indoorTiling.spacePool;
             rLinePool = indoorTiling.rLinePool;
-            history = indoorTiling.history;
+            instructionHistory = indoorTiling.instructionHistory;
 
             // TODO: rline?
 
@@ -154,24 +154,19 @@ public class IndoorTiling
         return true;
     }
 
-    public static IndoorTiling? Deserialize(string json, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
+    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)
     {
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new StackConverter());
-        if (indoorTiling != null)
+        if (indoorTiling != null && historyOnly)
         {
-            indoorTiling.IdGenVertex = IdGenVertex;
-            indoorTiling.IdGenVertex.Reset(indoorTiling.vertexPool.Select(v => v.Id).ToList());
-
-            indoorTiling.IdGenBoundary = IdGenBoundary;
-            indoorTiling.IdGenBoundary.Reset(indoorTiling.boundaryPool.Select(b => b.Id).ToList());
-
-            indoorTiling.IdGenSpace = IdGenSpace;
-            indoorTiling.IdGenSpace.Reset(indoorTiling.spacePool.Select(s => s.Id).ToList());
+            indoorTiling.vertexPool.Clear();
+            indoorTiling.boundaryPool.Clear();
+            indoorTiling.spacePool.Clear();
+            indoorTiling.rLinePool.Clear();
+            indoorTiling.instructionHistory.Uuundo();
         }
         return indoorTiling;
     }
-    public static IndoorTiling? Deserialize(string json)
-        => JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new StackConverter());
 
     public void UpdateIndices()
     {
@@ -226,22 +221,34 @@ public class IndoorTiling
         return boundaries.FirstOrDefault(b => b.Geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
     }
 
-    public void Undo()
+    public bool Undo()
     {
-        var instructions = history.Undo();
+        var instructions = instructionHistory.Undo();
         if (instructions.Count > 0)
+        {
             InterpretInstruction(ReducedInstruction.Reverse(instructions));
+            return true;
+        }
         else
+        {
             Debug.LogWarning("can not undo");
+            return false;
+        }
     }
 
-    public void Redo()
+    public bool Redo()
     {
-        var instructions = history.Redo();
+        var instructions = instructionHistory.Redo();
         if (instructions.Count > 0)
+        {
             InterpretInstruction(instructions);
+            return true;
+        }
         else
+        {
             Debug.LogWarning("can not redo");
+            return false;
+        }
     }
 
     // TODO: consider id generator when interpret reverse instruction
@@ -255,40 +262,9 @@ public class IndoorTiling
     private void InterpretInstruction(ReducedInstruction instruction)
     {
         Debug.Log("interpret instruction: " + instruction);
-        history.IgnoreDo = true;
+        instructionHistory.IgnoreDo = true;
         switch (instruction.subject)
         {
-            case SubjectType.Vertex:
-                switch (instruction.predicate)
-                {
-                    case Predicate.Add:
-                        {
-                            AddVertexInternal(CellVertex.Instantiate(instruction.param.newCoor, IdGenVertex));
-                            break;
-                        }
-                    case Predicate.Remove:
-                        {
-                            CellVertex? vertex = FindVertexCoor(instruction.param.oldCoor);
-                            if (vertex != null)
-                                RemoveVertexInternal(vertex);
-                            else
-                                throw new ArgumentException("can not find the vertex to be removed: " + instruction.param.oldCoor);
-                            break;
-                        }
-                    case Predicate.Update:
-                        // TODO: move multiple vetices in one instruction
-                        {
-                            CellVertex? vertex = FindVertexCoor(instruction.param.oldCoor);
-                            if (vertex != null)
-                                UpdateVertices(new List<CellVertex>() { vertex }, new List<Coordinate>() { instruction.param.newCoor });
-                            else
-                                throw new ArgumentException("can not find the vertex to be removed: " + instruction.param.newCoor);
-                            break;
-                        }
-                    default:
-                        throw new ArgumentException("Unknown predicate: " + instruction.predicate);
-                }
-                break;
             case SubjectType.Vertices:
                 switch (instruction.predicate)
                 {
@@ -356,7 +332,7 @@ public class IndoorTiling
             default:
                 throw new ArgumentException("Unknown subject type: " + instruction.subject);
         }
-        history.IgnoreDo = false;
+        instructionHistory.IgnoreDo = false;
     }
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {
@@ -372,9 +348,9 @@ public class IndoorTiling
         AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
-        history.SessionStart();
+        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
         ConsistencyCheck();
         return boundary;
     }
@@ -393,9 +369,9 @@ public class IndoorTiling
         AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
-        history.SessionStart();
+        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
         ConsistencyCheck();
         return boundary;
     }
@@ -414,9 +390,9 @@ public class IndoorTiling
         AddVertexInternal(start);
 
         CellBoundary boundary = new CellBoundary(ls, start, end, IdGenBoundary?.Gen() ?? "no id");
-        history.SessionStart();
+        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
         ConsistencyCheck();
         return boundary;
     }
@@ -458,9 +434,9 @@ public class IndoorTiling
         ring2.Add(end.Coordinate);
 
         // Add Boundary
-        history.SessionStart();
+        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
 
         // can not reach
         if (ring1.Count < 2 && ring2.Count < 2) return boundary;
@@ -524,7 +500,7 @@ public class IndoorTiling
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
         if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
         Debug.Log("split boundary");
-        history.SessionStart();
+        instructionHistory.SessionStart();
 
         // Create vertex
         CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
@@ -539,7 +515,7 @@ public class IndoorTiling
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
 
         // update space and vertex2space indices
         List<CellSpace> spaces = Boundary2Space(boundary);
@@ -621,7 +597,7 @@ public class IndoorTiling
         if (valid)
         {
             vertices.ForEach(v => v.OnUpdate?.Invoke());
-            history.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
+            instructionHistory.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
         }
         else
         {
@@ -639,9 +615,9 @@ public class IndoorTiling
 
     public void RemoveBoundary(CellBoundary boundary)
     {
-        history.SessionStart();
+        instructionHistory.SessionStart();
         RemoveBoundaryInternal(boundary);
-        history.SessionCommit();
+        instructionHistory.SessionCommit();
 
         // Remove Vertex if no boundary connect to it
         if (vertex2Boundaries[boundary.P0].Count == 0)
@@ -790,7 +766,7 @@ public class IndoorTiling
 
         OnBoundaryCreated.Invoke(boundary);
 
-        history.DoStep(ReducedInstruction.AddBoundary(boundary));
+        instructionHistory.DoStep(ReducedInstruction.AddBoundary(boundary));
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)
@@ -806,7 +782,7 @@ public class IndoorTiling
 
         OnBoundaryRemoved?.Invoke(boundary);
 
-        history.DoStep(ReducedInstruction.RemoveBoundary(boundary));
+        instructionHistory.DoStep(ReducedInstruction.RemoveBoundary(boundary));
     }
 
     private string AddSpaceInternal(CellSpace space)

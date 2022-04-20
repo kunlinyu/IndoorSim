@@ -9,7 +9,7 @@ using NetTopologySuite.Geometries;
 
 public class ConsistencyTest
 {
-    private string extension = ".indoor.json";
+    // private string extension = ".indoor.json";
 
     // public void GenericCase(string prefix, string caseName, bool fulltest)
     // {
@@ -19,20 +19,19 @@ public class ConsistencyTest
     //     string filePath = $"Assets/src/Tests/{prefix}/" + caseName.Substring((prefix + "_").Length) + extension;
     //     string json = File.ReadAllText(filePath);
 
-    //     IndoorTiling indoorTiling = IndoorTiling.Deserialize(json);
+    //     IndoorTiling offlineIndoorTiling = IndoorTiling.Deserialize(json);
 
-    //     IndoorTiling newIndoorTiling = new IndoorTiling();
-    //     foreach (ReducedInstruction instruction in indoorTiling.history)
-    //         newIndoorTiling.InterpretInstruction(instruction);
+    //     IndoorTiling newIndoorTiling = IndoorTiling.Deserialize(json, true);
+    //     do {} while (newIndoorTiling.Redo());
 
-    //     string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(indoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+    //     string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(offlineIndoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
     //     Debug.Log(expectDigest);
     //     Debug.Log("---");
-    //     Debug.Log(indoorTiling.digestCache);
+    //     Debug.Log(offlineIndoorTiling.digestCache);
     //     if (fulltest)
     //     {
-    //         Assert.AreEqual(expectDigest, indoorTiling.digestCache);      // old cache
-    //         Assert.AreEqual(expectDigest, indoorTiling.CalcDigest());     // old calc
+    //         Assert.AreEqual(expectDigest, offlineIndoorTiling.digestCache);      // old cache
+    //         Assert.AreEqual(expectDigest, offlineIndoorTiling.CalcDigest());     // old calc
     //         Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
     //     }
     //     else
