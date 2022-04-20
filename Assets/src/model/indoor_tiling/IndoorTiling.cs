@@ -156,7 +156,7 @@ public class IndoorTiling
 
     public static IndoorTiling? Deserialize(string json, bool historyOnly = false)
     {
-        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new StackConverter());
+        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
         if (indoorTiling != null && historyOnly)
         {
             indoorTiling.vertexPool.Clear();
@@ -352,6 +352,7 @@ public class IndoorTiling
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
         ConsistencyCheck();
+        FullPolygonizerCheck();
         return boundary;
     }
 
@@ -373,6 +374,7 @@ public class IndoorTiling
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
         ConsistencyCheck();
+        FullPolygonizerCheck();
         return boundary;
     }
 
@@ -394,6 +396,7 @@ public class IndoorTiling
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
         ConsistencyCheck();
+        FullPolygonizerCheck();
         return boundary;
     }
 
@@ -492,6 +495,7 @@ public class IndoorTiling
                 break;
         }
         ConsistencyCheck();
+        FullPolygonizerCheck();
         return boundary;
     }
 
@@ -523,6 +527,7 @@ public class IndoorTiling
             space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
         vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
 
+        FullPolygonizerCheck();
         return middleVertex;
     }
 
@@ -598,6 +603,7 @@ public class IndoorTiling
         {
             vertices.ForEach(v => v.OnUpdate?.Invoke());
             instructionHistory.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
+            FullPolygonizerCheck();
         }
         else
         {
@@ -901,6 +907,14 @@ public class IndoorTiling
         $"spacePool digest: {spacesDigest}" +
         "}";
 
+
+    private void FullPolygonizerCheck()
+    {
+        string expectDigest = CalcDigest(Digest.PolygonList(Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        string increaseDigest = CalcDigest();
+        if (expectDigest != increaseDigest)
+            throw new Exception("full Polygonizer mistmatch");
+    }
     [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()
     {
