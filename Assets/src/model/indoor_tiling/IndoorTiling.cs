@@ -913,7 +913,11 @@ public class IndoorTiling
         string expectDigest = CalcDigest(Digest.PolygonList(Polygonizer().Select(geom => (Polygon)geom).ToList()));
         string increaseDigest = CalcDigest();
         if (expectDigest != increaseDigest)
+        {
+            Debug.Log(expectDigest);
+            Debug.Log(increaseDigest);
             throw new Exception("full Polygonizer mistmatch");
+        }
     }
     [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()

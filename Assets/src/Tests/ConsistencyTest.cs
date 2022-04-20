@@ -9,59 +9,61 @@ using NetTopologySuite.Geometries;
 
 public class ConsistencyTest
 {
-    // private string extension = ".indoor.json";
+    private string extension = ".indoor.json";
 
-    // public void GenericCase(string prefix, string caseName, bool fulltest)
-    // {
-    //     if (!caseName.StartsWith(prefix + "_"))
-    //         throw new ArgumentException($"case name should starts with \"{prefix}\"");
+    public void GenericCase(string prefix, string caseName, bool fulltest)
+    {
+        if (!caseName.StartsWith(prefix + "_"))
+            throw new ArgumentException($"case name should starts with \"{prefix}\"");
 
-    //     string filePath = $"Assets/src/Tests/{prefix}/" + caseName.Substring((prefix + "_").Length) + extension;
-    //     string json = File.ReadAllText(filePath);
+        string filePath = $"Assets/src/Tests/{prefix}/" + caseName.Substring((prefix + "_").Length) + extension;
+        string json = File.ReadAllText(filePath);
 
-    //     IndoorTiling offlineIndoorTiling = IndoorTiling.Deserialize(json);
+        IndoorTiling offlineIndoorTiling = IndoorTiling.Deserialize(json);
 
-    //     IndoorTiling newIndoorTiling = IndoorTiling.Deserialize(json, true);
-    //     do {} while (newIndoorTiling.Redo());
+        IndoorTiling newIndoorTiling = IndoorTiling.Deserialize(json, true);
+        do {} while (newIndoorTiling.Redo());
 
-    //     string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(offlineIndoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
-    //     Debug.Log(expectDigest);
-    //     Debug.Log("---");
-    //     Debug.Log(offlineIndoorTiling.digestCache);
-    //     if (fulltest)
-    //     {
-    //         Assert.AreEqual(expectDigest, offlineIndoorTiling.digestCache);      // old cache
-    //         Assert.AreEqual(expectDigest, offlineIndoorTiling.CalcDigest());     // old calc
-    //         Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
-    //     }
-    //     else
-    //     {
-    //         Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
-    //     }
-    // }
+        string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(offlineIndoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        Debug.Log(expectDigest);
+        Debug.Log("---");
+        Debug.Log(offlineIndoorTiling.digestCache);
+        if (fulltest)
+        {
+            Assert.AreEqual(expectDigest, offlineIndoorTiling.digestCache);      // old cache
+            Assert.AreEqual(expectDigest, offlineIndoorTiling.CalcDigest());     // old calc
+            Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
+        }
+        else
+        {
+            Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
+        }
+    }
 
-    // public void FullTest(string caseName)
-    //     => GenericCase("full_test", caseName, true);
+    public void FullTest(string caseName)
+        => GenericCase("full_test", caseName, true);
 
-    // public void BadCase(string caseName)
-    // => GenericCase("badcase", caseName, false);
+    public void BadCase(string caseName)
+    => GenericCase("badcase", caseName, false);
 
-    // [Test] public void badcase_split_hole_one_branch_remove() => BadCase(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void badcase_hole_branch_outside_split() => BadCase(MethodBase.GetCurrentMethod().Name);
+    [Test] public void badcase_C_hole() => BadCase(MethodBase.GetCurrentMethod().Name);
+    [Test] public void badcase_hole_split_boundary_and_branch() => BadCase(MethodBase.GetCurrentMethod().Name);
+    [Test] public void badcase_mani_cell_one_C_move() => BadCase(MethodBase.GetCurrentMethod().Name);
+    [Test] public void badcase_three_cell_in_to_out() => BadCase(MethodBase.GetCurrentMethod().Name);
 
-    // [Test] public void full_test_segments() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_2_triangles() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_cross() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_hole_connect_shell() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_hole_connect_shell2() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_2_in_1_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_2_hole_split_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_2_holes_split_boundary_make_3rd() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_1_hole_connect_1_hole_not_remove() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_3_holes_remove_1() => FullTest(MethodBase.GetCurrentMethod().Name);
-    // [Test] public void full_test_3_holes_remove_middle_tri() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_C_hole_both_CCW() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_one_hole_cut() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_one_hole_in_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_one_hole_split() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_split_two_boundaries() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_square() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_in_one_hole_remove_middle_boundary() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_in_one_hole_remove_middle_triangle_boundary() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_two_holes_cut() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_two_holes_in_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_two_holes_merge_to_one() => FullTest(MethodBase.GetCurrentMethod().Name);
+
 
 
 }
