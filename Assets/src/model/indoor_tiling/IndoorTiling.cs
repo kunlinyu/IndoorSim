@@ -857,7 +857,7 @@ public class IndoorTiling
 
     private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path)
     {
-        List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedBoundary);
+        List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
 
         List<CellSpace> cellSpaces = rings.Select(ring => CreateCellSpaceInternal(ring)).ToList();
 
