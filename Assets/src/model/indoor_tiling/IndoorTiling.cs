@@ -930,15 +930,18 @@ public class IndoorTiling
         consistencyChecking = true;
 
         string before = CalcDigest();
+        string beforeAll = Serialize();
 
         List<CellBoundary> boundaries = new List<CellBoundary>(boundaryPool);
         bool valid = true;
         IndoorTiling? tempIndoorTiling = null;
         foreach (var boundary in boundaries)
         {
+            Debug.Log("Remove " + boundary.Id);
             tempIndoorTiling = new IndoorTiling(this);
             tempIndoorTiling.RemoveBoundary(boundary);
 
+            Debug.Log("Add back " + boundary.Id);
             if (tempIndoorTiling.vertexPool.Contains(boundary.P0))
             {
                 if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
@@ -964,7 +967,16 @@ public class IndoorTiling
                 valid = false;
             }
             tempIndoorTiling = null;
+
+            string afterAll = Serialize();
+            if (beforeAll != afterAll)
+            {
+                Debug.LogError(beforeAll);
+                Debug.LogError(afterAll);
+                throw new Exception("Oops");
+            }
         }
+
 
         if (valid)
             Debug.Log($"ConsistencyCheck OK after try remove {boundaries.Count} boundaries");
