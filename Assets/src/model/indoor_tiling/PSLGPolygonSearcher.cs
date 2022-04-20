@@ -101,7 +101,10 @@ public class PSLGPolygonSearcher
 
     public static List<JumpInfo> Search(JumpInfo initJump,
                                         CellVertex target,
-                                        Func<CellVertex, List<JumpInfo>> adjacentFinder, bool ccw = true)
+                                        Func<CellVertex, List<JumpInfo>> adjacentFinder,
+                                        bool ccw = true,
+                                        bool forceComebackDirection = false
+                                        )
     {
         Stack<JumpInfo> jumps = new Stack<JumpInfo>();
         jumps.Push(initJump);
@@ -110,7 +113,26 @@ public class PSLGPolygonSearcher
         JumpInfo currentJump = initJump;
         JumpInfo? lastJump = null;
 
+        CellBoundary? combackBoundary = null;
+
+        if (forceComebackDirection)
+        {
+            List<JumpInfo> jumpInfos = adjacentFinder(currentJump.target);
+            if (jumpInfos.Count == 0) return new List<JumpInfo>();
+
+            List<CellBoundary> outBoundaries = jumpInfos.Select(ji => ji.through).ToList();
+            List<Point> closestPoints = outBoundaries.Where(b => b != null).Select(b => b.ClosestPointTo(currentJump.target)).ToList();
+
+            closestPoints.Add(initJump.through.ClosestPointTo(initJump.target));
+            int startIndex = closestPoints.Count - 1;
+
+            Next(currentJump.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
+
+            combackBoundary = ccw ? jumpInfos[CWNextIndex].through : jumpInfos[CCWNextIndex].through;
+        }
+
         int loopCount = 0;
+        bool finish;
         do
         {
             loopCount++;
@@ -139,10 +161,10 @@ public class PSLGPolygonSearcher
             }
             if (startIndex == -1) throw new Exception("Oops! startIndex == -1 ");
 
-            Next(currentJump.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex, ccw);
+            Next(currentJump.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
 
             lastJump = currentJump;
-            currentJump = jumpInfos[CCWNextIndex];
+            currentJump = ccw ? jumpInfos[CCWNextIndex] : jumpInfos[CWNextIndex];
 
             // come back to start, no path from start to end
             if (jumpsHistory.Any(jump => jump.ContentEqual(currentJump)))
@@ -157,7 +179,17 @@ public class PSLGPolygonSearcher
                 jumps.Push(currentJump);
                 jumpsHistory.Add(currentJump);
             }
-        } while (!System.Object.ReferenceEquals(currentJump.target, target));
+
+            if (forceComebackDirection)
+            {
+                finish = System.Object.ReferenceEquals(currentJump.target, target)  &&
+                         System.Object.ReferenceEquals(currentJump.through, combackBoundary);
+            }
+            else
+            {
+                finish = System.Object.ReferenceEquals(currentJump.target, target);
+            }
+        } while (!finish);
 
         var result = jumps.ToList();
         result.Reverse();
@@ -177,7 +209,7 @@ public class PSLGPolygonSearcher
         public int index;
     }
 
-    private static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex, bool ccw)
+    private static void Next(Point center, List<Point> neighbor, int startIndex, out int CWNextIndex, out int CCWNextIndex)
     {
         if (startIndex >= neighbor.Count)
             throw new ArgumentException($"startIndex({startIndex}) out of range(0-{neighbor.Count - 1})");
@@ -190,7 +222,7 @@ public class PSLGPolygonSearcher
             double theta = Math.Atan2(y, x);
             thetaWithIndices.Add(new ThetaWithIndex() { theta = theta, index = i });
         }
-        thetaWithIndices.Sort((ti1, ti2) => ti1.theta.CompareTo(ti2.theta) * (ccw ? 1 : -1));
+        thetaWithIndices.Sort((ti1, ti2) => ti1.theta.CompareTo(ti2.theta));
 
         for (int i = 0; i < thetaWithIndices.Count; i++)
         {

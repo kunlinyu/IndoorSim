@@ -46,13 +46,13 @@ public class ConsistencyTest
     public void BadCase(string caseName)
     => GenericCase("badcase", caseName, false);
 
-    [Test] public void badcase_hole_split_two_remove_one_of_them() => BadCase(MethodBase.GetCurrentMethod().Name);
     [Test] public void badcase_mani_cell_one_C_move() => BadCase(MethodBase.GetCurrentMethod().Name);
 
     [Test] public void full_test_C_hole_both_CCW() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_C_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_hole_split_boundary_and_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_hole_split_two_remove_one_of_them() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_one_hole_cut() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_one_hole_in_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_one_hole_split() => FullTest(MethodBase.GetCurrentMethod().Name);

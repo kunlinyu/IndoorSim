@@ -639,11 +639,13 @@ public class IndoorTiling
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
         {
+            Debug.Log("remove cellspace because the shell broke.");
             RemoveSpaceInternal(spaces[0]);
         }
         else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
                  spaces[1].ShellCellSpace().Geom.Contains(spaces[0].ShellCellSpace().Geom))  // one in the hole of another
         {
+            Debug.Log("merge hole into parent");
             CellSpace parent, child;
             if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom))
             {
@@ -677,7 +679,7 @@ public class IndoorTiling
         }
         else  // Two parallel cellspace. merge them
         {
-            List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
+            List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder, true, true);
 
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
