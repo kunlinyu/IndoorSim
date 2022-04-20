@@ -4,10 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] public const float KeyboardMoveSpeed = 0.1f;
+    [SerializeField] public const float KeyboardMoveSpeed = 0.02f;
     [SerializeField] public const float dragSpeed = 0.001f;
     [SerializeField] public const float rotationSpeed = 0.05f;
-    [SerializeField] public const float mouseScrollSpeed = 1.0f;
+    [SerializeField] public const float mouseScrollSpeed = 10.0f;
     [SerializeField] public const float minHeight = 1.0f;
 
     private static Plane ground = new Plane(Vector3.up, Vector3.zero);
@@ -41,8 +41,9 @@ public class CameraController : MonoBehaviour
         if (Input.mouseScrollDelta.y != 0)
             move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
 
+        float move_space = transform.position.y * KeyboardMoveSpeed;
         if (move.magnitude > 0.0)
-            MoveCameraXZ(transform.position, KeyboardMoveSpeed * move);
+            MoveCameraXZ(transform.position, move_space * move);
 
         if (Input.GetMouseButtonDown(1))
         {
