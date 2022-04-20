@@ -50,6 +50,14 @@ public class ReducedInstruction
     ReducedInstruction()
     { }
 
+    public static LineString Clone(LineString ls)
+    {
+        Coordinate[] coors = new Coordinate[ls.NumPoints];
+        for (int i = 0; i < ls.NumPoints; i++)
+            coors[i] = ls.GetCoordinateN(i);
+        return new LineString(coors);
+    }
+
     public override string ToString()
         => predicate + " " + subject + " " + param.ToString();
 
@@ -70,7 +78,7 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
-        ri.param = new Parameters() { newLineString = ls };
+        ri.param = new Parameters() { newLineString = Clone(ls) };
         return ri;
     }
 
@@ -82,7 +90,7 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
-        ri.param = new Parameters() { oldLineString = ls };
+        ri.param = new Parameters() { oldLineString = Clone(ls) };
         return ri;
     }
 
@@ -91,7 +99,7 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldLineString = oldLineString, newLineString = newLineString };
+        ri.param = new Parameters() { oldLineString = Clone(oldLineString), newLineString = Clone(newLineString) };
         return ri;
     }
 
