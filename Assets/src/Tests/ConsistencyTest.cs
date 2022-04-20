@@ -48,7 +48,6 @@ public class ConsistencyTest
 
     [Test] public void badcase_hole_split_two_remove_one_of_them() => BadCase(MethodBase.GetCurrentMethod().Name);
     [Test] public void badcase_mani_cell_one_C_move() => BadCase(MethodBase.GetCurrentMethod().Name);
-    [Test] public void badcase_three_cell_in_to_out() => BadCase(MethodBase.GetCurrentMethod().Name);
 
     [Test] public void full_test_C_hole_both_CCW() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_C_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
@@ -59,6 +58,10 @@ public class ConsistencyTest
     [Test] public void full_test_one_hole_split() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_split_two_boundaries() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_square() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_cell_in_out_middle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_cell_in_to_out() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_cell_out_in_middle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_three_cell_out_to_in() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_three_in_one_hole_remove_middle_boundary() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_three_in_one_hole_remove_middle_triangle_boundary() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_two_holes_cut() => FullTest(MethodBase.GetCurrentMethod().Name);

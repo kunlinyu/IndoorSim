@@ -191,7 +191,7 @@ public class CellSpace
         // new hole eat some hole
         List<CellSpace> independentHole = new List<CellSpace>();
         foreach (var hole in Holes)
-            if (!cellSpace.Geom.Contains(hole.Geom))
+            if (!cellSpace.ShellCellSpace().Geom.Contains(hole.Geom))
                 independentHole.Add(hole);
         Holes = independentHole;
 

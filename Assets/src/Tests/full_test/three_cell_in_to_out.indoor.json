@@ -1,0 +1,891 @@
+{
+  "$id": "1",
+  "vertexPool": [
+    {
+      "$id": "2",
+      "Id": "VTX0",
+      "Geom": "POINT (0.83871793746948242 1.1312930583953857)"
+    },
+    {
+      "$id": "3",
+      "Id": "VTX1",
+      "Geom": "POINT (-1.5018916130065918 0.91673773527145386)"
+    },
+    {
+      "$id": "4",
+      "Id": "VTX2",
+      "Geom": "POINT (-1.3068404197692871 -0.70218449831008911)"
+    },
+    {
+      "$id": "5",
+      "Id": "VTX3",
+      "Geom": "POINT (1.2678298950195313 -0.44861844182014465)"
+    },
+    {
+      "$id": "6",
+      "Id": "VTX4",
+      "Geom": "POINT (-0.78020292520523071 2.9257609844207764)"
+    },
+    {
+      "$id": "7",
+      "Id": "VTX5",
+      "Geom": "POINT (-3.5499253273010254 0.39009985327720642)"
+    },
+    {
+      "$id": "8",
+      "Id": "VTX6",
+      "Geom": "POINT (-2.0285284519195557 -2.6331872940063477)"
+    },
+    {
+      "$id": "9",
+      "Id": "VTX7",
+      "Geom": "POINT (2.0285282135009766 -2.2625908851623535)"
+    },
+    {
+      "$id": "10",
+      "Id": "VTX8",
+      "Geom": "POINT (2.6917026042938232 0.331585168838501)"
+    },
+    {
+      "$id": "11",
+      "Id": "VTX9",
+      "Geom": "POINT (1.3653552532196045 2.3796186447143555)"
+    },
+    {
+      "$id": "12",
+      "Id": "VTX10",
+      "Geom": "POINT (-0.667809247970581 4.0953116416931152)"
+    },
+    {
+      "$id": "13",
+      "Id": "VTX11",
+      "Geom": "POINT (-3.2812023162841797 3.8387880325317383)"
+    },
+    {
+      "$id": "14",
+      "Id": "VTX12",
+      "Geom": "POINT (-4.8578896522521973 0.98925864696502686)"
+    },
+    {
+      "$id": "15",
+      "Id": "VTX13",
+      "Geom": "POINT (-4.2095193862915039 -3.1645925045013428)"
+    },
+    {
+      "$id": "16",
+      "Id": "VTX14",
+      "Geom": "POINT (0.14088582992553711 -3.8423454761505127)"
+    },
+    {
+      "$id": "17",
+      "Id": "VTX15",
+      "Geom": "POINT (3.4557321071624756 -2.9413585662841797)"
+    },
+    {
+      "$id": "18",
+      "Id": "VTX16",
+      "Geom": "POINT (3.5497243404388428 0.17956332862377167)"
+    },
+    {
+      "$id": "19",
+      "Id": "VTX17",
+      "Geom": "POINT (2.4146549701690674 3.5136489868164063)"
+    }
+  ],
+  "boundaryPool": [
+    {
+      "$id": "20",
+      "Id": "BDR1",
+      "Geom": "LINESTRING (-1.5018916130065918 0.91673773527145386, -1.3068404197692871 -0.70218449831008911)",
+      "P0": {
+        "$ref": "3"
+      },
+      "P1": {
+        "$ref": "4"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "21",
+      "Id": "BDR3",
+      "Geom": "LINESTRING (1.2678298950195313 -0.44861844182014465, 0.83871793746948242 1.1312930583953857)",
+      "P0": {
+        "$ref": "5"
+      },
+      "P1": {
+        "$ref": "2"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "22",
+      "Id": "BDR9",
+      "Geom": "LINESTRING (1.3653552532196045 2.3796186447143555, -0.78020292520523071 2.9257609844207764)",
+      "P0": {
+        "$ref": "11"
+      },
+      "P1": {
+        "$ref": "6"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "23",
+      "Id": "BDR0",
+      "Geom": "LINESTRING (0.83871793746948242 1.1312930583953857, -1.5018916130065918 0.91673773527145386)",
+      "P0": {
+        "$ref": "2"
+      },
+      "P1": {
+        "$ref": "3"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "24",
+      "Id": "BDR8",
+      "Geom": "LINESTRING (2.6917026042938232 0.331585168838501, 1.3653552532196045 2.3796186447143555)",
+      "P0": {
+        "$ref": "10"
+      },
+      "P1": {
+        "$ref": "11"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "25",
+      "Id": "BDR2",
+      "Geom": "LINESTRING (-1.3068404197692871 -0.70218449831008911, 1.2678298950195313 -0.44861844182014465)",
+      "P0": {
+        "$ref": "4"
+      },
+      "P1": {
+        "$ref": "5"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "26",
+      "Id": "BDR10",
+      "Geom": "LINESTRING (-0.667809247970581 4.0953116416931152, -3.2812023162841797 3.8387880325317383)",
+      "P0": {
+        "$ref": "12"
+      },
+      "P1": {
+        "$ref": "13"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "27",
+      "Id": "BDR7",
+      "Geom": "LINESTRING (2.0285282135009766 -2.2625908851623535, 2.6917026042938232 0.331585168838501)",
+      "P0": {
+        "$ref": "9"
+      },
+      "P1": {
+        "$ref": "10"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "28",
+      "Id": "BDR15",
+      "Geom": "LINESTRING (3.4557321071624756 -2.9413585662841797, 3.5497243404388428 0.17956332862377167)",
+      "P0": {
+        "$ref": "17"
+      },
+      "P1": {
+        "$ref": "18"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "29",
+      "Id": "BDR17",
+      "Geom": "LINESTRING (2.4146549701690674 3.5136489868164063, -0.667809247970581 4.0953116416931152)",
+      "P0": {
+        "$ref": "19"
+      },
+      "P1": {
+        "$ref": "12"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "30",
+      "Id": "BDR11",
+      "Geom": "LINESTRING (-3.2812023162841797 3.8387880325317383, -4.8578896522521973 0.98925864696502686)",
+      "P0": {
+        "$ref": "13"
+      },
+      "P1": {
+        "$ref": "14"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "31",
+      "Id": "BDR5",
+      "Geom": "LINESTRING (-3.5499253273010254 0.39009985327720642, -2.0285284519195557 -2.6331872940063477)",
+      "P0": {
+        "$ref": "7"
+      },
+      "P1": {
+        "$ref": "8"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "32",
+      "Id": "BDR14",
+      "Geom": "LINESTRING (0.14088582992553711 -3.8423454761505127, 3.4557321071624756 -2.9413585662841797)",
+      "P0": {
+        "$ref": "16"
+      },
+      "P1": {
+        "$ref": "17"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "33",
+      "Id": "BDR16",
+      "Geom": "LINESTRING (3.5497243404388428 0.17956332862377167, 2.4146549701690674 3.5136489868164063)",
+      "P0": {
+        "$ref": "18"
+      },
+      "P1": {
+        "$ref": "19"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "34",
+      "Id": "BDR4",
+      "Geom": "LINESTRING (-0.78020292520523071 2.9257609844207764, -3.5499253273010254 0.39009985327720642)",
+      "P0": {
+        "$ref": "6"
+      },
+      "P1": {
+        "$ref": "7"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "35",
+      "Id": "BDR6",
+      "Geom": "LINESTRING (-2.0285284519195557 -2.6331872940063477, 2.0285282135009766 -2.2625908851623535)",
+      "P0": {
+        "$ref": "8"
+      },
+      "P1": {
+        "$ref": "9"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "36",
+      "Id": "BDR12",
+      "Geom": "LINESTRING (-4.8578896522521973 0.98925864696502686, -4.2095193862915039 -3.1645925045013428)",
+      "P0": {
+        "$ref": "14"
+      },
+      "P1": {
+        "$ref": "15"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    },
+    {
+      "$id": "37",
+      "Id": "BDR13",
+      "Geom": "LINESTRING (-4.2095193862915039 -3.1645925045013428, 0.14088582992553711 -3.8423454761505127)",
+      "P0": {
+        "$ref": "15"
+      },
+      "P1": {
+        "$ref": "16"
+      },
+      "Right2Left": true,
+      "Left2Right": true,
+      "LeftFunctional": false,
+      "RightFunctional": false
+    }
+  ],
+  "spacePool": [
+    {
+      "$id": "38",
+      "Id": "SPC0",
+      "Geom": "POLYGON ((0.83871793746948242 1.1312930583953857, -1.5018916130065918 0.91673773527145386, -1.3068404197692871 -0.70218449831008911, 1.2678298950195313 -0.44861844182014465, 0.83871793746948242 1.1312930583953857))",
+      "shellVertices": [
+        {
+          "$ref": "2"
+        },
+        {
+          "$ref": "3"
+        },
+        {
+          "$ref": "4"
+        },
+        {
+          "$ref": "5"
+        }
+      ],
+      "shellBoundaries": [
+        {
+          "$ref": "21"
+        },
+        {
+          "$ref": "23"
+        },
+        {
+          "$ref": "20"
+        },
+        {
+          "$ref": "25"
+        }
+      ],
+      "Navigable": false,
+      "Holes": []
+    },
+    {
+      "$id": "39",
+      "Id": "SPC1",
+      "Geom": "POLYGON ((-0.78020292520523071 2.9257609844207764, -3.5499253273010254 0.39009985327720642, -2.0285284519195557 -2.6331872940063477, 2.0285282135009766 -2.2625908851623535, 2.6917026042938232 0.331585168838501, 1.3653552532196045 2.3796186447143555, -0.78020292520523071 2.9257609844207764), (0.83871793746948242 1.1312930583953857, -1.5018916130065918 0.91673773527145386, -1.3068404197692871 -0.70218449831008911, 1.2678298950195313 -0.44861844182014465, 0.83871793746948242 1.1312930583953857))",
+      "shellVertices": [
+        {
+          "$ref": "6"
+        },
+        {
+          "$ref": "7"
+        },
+        {
+          "$ref": "8"
+        },
+        {
+          "$ref": "9"
+        },
+        {
+          "$ref": "10"
+        },
+        {
+          "$ref": "11"
+        }
+      ],
+      "shellBoundaries": [
+        {
+          "$ref": "22"
+        },
+        {
+          "$ref": "34"
+        },
+        {
+          "$ref": "31"
+        },
+        {
+          "$ref": "35"
+        },
+        {
+          "$ref": "27"
+        },
+        {
+          "$ref": "24"
+        }
+      ],
+      "Navigable": false,
+      "Holes": [
+        {
+          "$id": "40",
+          "Id": "shell cell space",
+          "Geom": "POLYGON ((0.83871793746948242 1.1312930583953857, -1.5018916130065918 0.91673773527145386, -1.3068404197692871 -0.70218449831008911, 1.2678298950195313 -0.44861844182014465, 0.83871793746948242 1.1312930583953857))",
+          "shellVertices": [
+            {
+              "$ref": "2"
+            },
+            {
+              "$ref": "3"
+            },
+            {
+              "$ref": "4"
+            },
+            {
+              "$ref": "5"
+            }
+          ],
+          "shellBoundaries": [
+            {
+              "$ref": "21"
+            },
+            {
+              "$ref": "23"
+            },
+            {
+              "$ref": "20"
+            },
+            {
+              "$ref": "25"
+            }
+          ],
+          "Navigable": false,
+          "Holes": []
+        }
+      ]
+    },
+    {
+      "$id": "41",
+      "Id": "SPC2",
+      "Geom": "POLYGON ((-0.667809247970581 4.0953116416931152, -3.2812023162841797 3.8387880325317383, -4.8578896522521973 0.98925864696502686, -4.2095193862915039 -3.1645925045013428, 0.14088582992553711 -3.8423454761505127, 3.4557321071624756 -2.9413585662841797, 3.5497243404388428 0.17956332862377167, 2.4146549701690674 3.5136489868164063, -0.667809247970581 4.0953116416931152), (-0.78020292520523071 2.9257609844207764, -3.5499253273010254 0.39009985327720642, -2.0285284519195557 -2.6331872940063477, 2.0285282135009766 -2.2625908851623535, 2.6917026042938232 0.331585168838501, 1.3653552532196045 2.3796186447143555, -0.78020292520523071 2.9257609844207764))",
+      "shellVertices": [
+        {
+          "$ref": "12"
+        },
+        {
+          "$ref": "13"
+        },
+        {
+          "$ref": "14"
+        },
+        {
+          "$ref": "15"
+        },
+        {
+          "$ref": "16"
+        },
+        {
+          "$ref": "17"
+        },
+        {
+          "$ref": "18"
+        },
+        {
+          "$ref": "19"
+        }
+      ],
+      "shellBoundaries": [
+        {
+          "$ref": "29"
+        },
+        {
+          "$ref": "26"
+        },
+        {
+          "$ref": "30"
+        },
+        {
+          "$ref": "36"
+        },
+        {
+          "$ref": "37"
+        },
+        {
+          "$ref": "32"
+        },
+        {
+          "$ref": "28"
+        },
+        {
+          "$ref": "33"
+        }
+      ],
+      "Navigable": false,
+      "Holes": [
+        {
+          "$id": "42",
+          "Id": "shell cell space",
+          "Geom": "POLYGON ((-0.78020292520523071 2.9257609844207764, -3.5499253273010254 0.39009985327720642, -2.0285284519195557 -2.6331872940063477, 2.0285282135009766 -2.2625908851623535, 2.6917026042938232 0.331585168838501, 1.3653552532196045 2.3796186447143555, -0.78020292520523071 2.9257609844207764))",
+          "shellVertices": [
+            {
+              "$ref": "6"
+            },
+            {
+              "$ref": "7"
+            },
+            {
+              "$ref": "8"
+            },
+            {
+              "$ref": "9"
+            },
+            {
+              "$ref": "10"
+            },
+            {
+              "$ref": "11"
+            }
+          ],
+          "shellBoundaries": [
+            {
+              "$ref": "22"
+            },
+            {
+              "$ref": "34"
+            },
+            {
+              "$ref": "31"
+            },
+            {
+              "$ref": "35"
+            },
+            {
+              "$ref": "27"
+            },
+            {
+              "$ref": "24"
+            }
+          ],
+          "Navigable": false,
+          "Holes": []
+        }
+      ]
+    }
+  ],
+  "rLinePool": [],
+  "instructionHistory": {
+    "$id": "43",
+    "history": [
+      [
+        {
+          "$id": "44",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "45",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (2.4146549701690674 3.5136489868164063, -0.667809247970581 4.0953116416931152)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "46",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "47",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (3.5497243404388428 0.17956332862377167, 2.4146549701690674 3.5136489868164063)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "48",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "49",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (3.4557321071624756 -2.9413585662841797, 3.5497243404388428 0.17956332862377167)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "50",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "51",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (0.14088582992553711 -3.8423454761505127, 3.4557321071624756 -2.9413585662841797)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "52",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "53",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-4.2095193862915039 -3.1645925045013428, 0.14088582992553711 -3.8423454761505127)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "54",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "55",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-4.8578896522521973 0.98925864696502686, -4.2095193862915039 -3.1645925045013428)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "56",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "57",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-3.2812023162841797 3.8387880325317383, -4.8578896522521973 0.98925864696502686)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "58",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "59",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-0.667809247970581 4.0953116416931152, -3.2812023162841797 3.8387880325317383)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "60",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "61",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (1.3653552532196045 2.3796186447143555, -0.78020292520523071 2.9257609844207764)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "62",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "63",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (2.6917026042938232 0.331585168838501, 1.3653552532196045 2.3796186447143555)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "64",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "65",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (2.0285282135009766 -2.2625908851623535, 2.6917026042938232 0.331585168838501)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "66",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "67",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-2.0285284519195557 -2.6331872940063477, 2.0285282135009766 -2.2625908851623535)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "68",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "69",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-3.5499253273010254 0.39009985327720642, -2.0285284519195557 -2.6331872940063477)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "70",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "71",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-0.78020292520523071 2.9257609844207764, -3.5499253273010254 0.39009985327720642)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "72",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "73",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (1.2678298950195313 -0.44861844182014465, 0.83871793746948242 1.1312930583953857)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "74",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "75",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-1.3068404197692871 -0.70218449831008911, 1.2678298950195313 -0.44861844182014465)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "76",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "77",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (-1.5018916130065918 0.91673773527145386, -1.3068404197692871 -0.70218449831008911)",
+            "oldLineString": null
+          }
+        }
+      ],
+      [
+        {
+          "$id": "78",
+          "subject": 0,
+          "predicate": 0,
+          "param": {
+            "$id": "79",
+            "newCoor": null,
+            "oldCoor": null,
+            "oldCoors": null,
+            "newCoors": null,
+            "newLineString": "LINESTRING (0.83871793746948242 1.1312930583953857, -1.5018916130065918 0.91673773527145386)",
+            "oldLineString": null
+          }
+        }
+      ]
+    ],
+    "future": [],
+    "IgnoreDo": false
+  },
+  "digestCache": "{vertexPool.Count: 18, boundaryPool digest: {1.63062999063796, 1.63714917482364, 2.21397636668184, 2.35042273952169, 2.44000787171061, 2.58712639329017, 2.62595272074094, 2.67760147739631, 3.1223369475494, 3.13686421449662, 3.25664868762508, 3.38451084018805, 3.43511036990983, 3.52200364160664, 3.75512177654248, 4.07394777638119, 4.20414835493711, 4.40288253714174}, spacePool digest: {{Area:4.0038367898, Shell.Length:8.2053282983, Holes.Length:0}, {Area:20.3555041857, Shell.Length:18.5451661089, Holes.Length:1}, {Area:30.9574624877, Shell.Length:27.705947474, Holes.Length:1}}}"
+}
