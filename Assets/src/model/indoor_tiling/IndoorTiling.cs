@@ -20,10 +20,8 @@ public class IndoorTiling
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
-    [JsonPropertyAttribute] public string digestCache = "";
-
-    // [JsonPropertyAttribute] public List<ReducedInstruction> history = new List<ReducedInstruction>();
     [JsonPropertyAttribute] public InstructionHistory history = new InstructionHistory();
+    [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
     [JsonIgnore] public IDGenInterface? IdGenBoundary { get; private set; }
@@ -158,7 +156,7 @@ public class IndoorTiling
 
     public static IndoorTiling? Deserialize(string json, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
-        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter());
+        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new StackConverter());
         if (indoorTiling != null)
         {
             indoorTiling.IdGenVertex = IdGenVertex;
@@ -173,7 +171,7 @@ public class IndoorTiling
         return indoorTiling;
     }
     public static IndoorTiling? Deserialize(string json)
-        => JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter());
+        => JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new StackConverter());
 
     public void UpdateIndices()
     {
