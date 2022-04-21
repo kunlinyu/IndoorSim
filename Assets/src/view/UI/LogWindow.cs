@@ -9,7 +9,16 @@ public class LogWindow : MonoBehaviour
     private StyleColor logColor;
     private StyleColor warningColor;
     private StyleColor errorColor;
+
+    private const int kMaxLogCount = 20;
+    public UIEventDispatcher eventDispatcher;
+
     void OnEnable()
+    {
+
+    }
+
+    void Start()
     {
         Application.logMessageReceived += HandleLog;
         logColor = GetComponent<UIDocument>().rootVisualElement.Q<Label>("LogBackground").resolvedStyle.backgroundColor;
@@ -34,5 +43,8 @@ public class LogWindow : MonoBehaviour
         else if (type == LogType.Error)
             label.style.backgroundColor = errorColor;
         listView.hierarchy.Add(label);
+        while (listView.hierarchy.childCount > kMaxLogCount)
+            listView.hierarchy.RemoveAt(0);
     }
 }
+

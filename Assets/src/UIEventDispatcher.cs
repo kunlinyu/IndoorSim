@@ -6,8 +6,9 @@ using UnityEngine;
 public enum UIEventType
 {
     ButtonClick,
-    EnterUIPanel,
-    Tip,
+    EnterLeaveUIPanel,
+    SceneTip,
+    UITip,
 }
 
 [Serializable]

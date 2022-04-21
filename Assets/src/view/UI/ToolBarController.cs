@@ -37,8 +37,10 @@ public class ToolBarController : MonoBehaviour
             toolBar.Add(buttonContainer);
         }
 
-        toolBar.RegisterCallback<MouseEnterEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "enter", type = UIEventType.EnterUIPanel }); });
-        toolBar.RegisterCallback<MouseLeaveEvent>(e => { eventDispatcher.Raise(toolBar, new UIEvent() { name = "leave", type = UIEventType.EnterUIPanel }); });
+        toolBar.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        toolBar.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
 
     }
 

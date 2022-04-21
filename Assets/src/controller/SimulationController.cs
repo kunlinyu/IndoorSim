@@ -89,12 +89,12 @@ public class SimulationController : MonoBehaviour
                 currentTool.IndoorSim = indoorSim;
             }
         }
-        else if (e.type == UIEventType.EnterUIPanel)
+        else if (e.type == UIEventType.EnterLeaveUIPanel)
         {
             if (currentTool != null)
-                if (e.name == "enter")
+                if (e.message == "enter")
                     currentTool.MouseOnUI = true;
-                else if (e.name == "leave")
+                else if (e.message == "leave")
                     currentTool.MouseOnUI = false;
         }
     }

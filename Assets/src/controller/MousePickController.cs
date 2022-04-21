@@ -15,10 +15,11 @@ public class MousePickController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
 
+    private bool MouseOnUI = false;
+
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -75,6 +76,7 @@ public class MousePickController : MonoBehaviour
             if (pointedEntity != null) pointedEntity.highLight = false;
             if (NearestEntity != null) NearestEntity.highLight = true;
             pointedEntity = NearestEntity;
+
             if (pointedEntity != null && pointedEntity.type == SelectableType.Space)
             {
 
@@ -83,12 +85,12 @@ public class MousePickController : MonoBehaviour
                              $"Holes.Count: {sc.Space.Holes.Count}\n" +
                              $"Geom.Shell.NumPoints: {sc.Space.Geom.Shell.NumPoints}\n" +
                              $"allBoundaries.Count: {sc.Space.allBoundaries.Count}";
-                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.Tip, message = msg });
+                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = msg });
 
             }
             else
             {
-                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.Tip, message = "" });
+                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = "" });
             }
         }
     }
