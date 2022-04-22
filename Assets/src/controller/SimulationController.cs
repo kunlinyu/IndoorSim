@@ -63,6 +63,15 @@ public class SimulationController : MonoBehaviour
                     Debug.Log("Switch to tool deleter");
                 }
             }
+            else if (e.name == "navigable")
+            {
+                if (oldToolName != "navigable")
+                {
+                    toolObj = new GameObject("navigable");
+                    currentTool = toolObj.AddComponent<NavigableEditor>();
+                    Debug.Log("Switch to tool navigable");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());

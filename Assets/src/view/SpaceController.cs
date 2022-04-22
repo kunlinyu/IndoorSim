@@ -1,5 +1,4 @@
-using System.Linq;
-using System.Collections.Generic;
+using System;
 using NetTopologySuite.Geometries;
 using UnityEngine;
 
@@ -19,6 +18,7 @@ public class SpaceController : MonoBehaviour, Selectable
 
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
+    public void ReRender() => needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;
@@ -41,6 +41,8 @@ public class SpaceController : MonoBehaviour, Selectable
     }
     public SelectableType type { get => SelectableType.Space; }
     [SerializeField] public Material material;
+    [SerializeField] public Material logNonNaviMat;
+    [SerializeField] public Material phyNonNaviMat;
     [SerializeField] public Material highLightMaterial;
     [SerializeField] public Material selectedMaterial;
     [SerializeField] public Material triangulationMaterial;
@@ -90,8 +92,14 @@ public class SpaceController : MonoBehaviour, Selectable
             pr.interiorMaterial = selectedMaterial;
         else if (highLight)
             pr.interiorMaterial = highLightMaterial;
-        else
+        else if (space.Navigable == Navigable.Navigable)
             pr.interiorMaterial = material;
+        else if (space.Navigable == Navigable.PhysicallyNavigableLogicallyNonNavigable)
+            pr.interiorMaterial = logNonNaviMat;
+        else if (space.Navigable == Navigable.PhysicallyNonNavigable)
+            pr.interiorMaterial = phyNonNaviMat;
+        else
+            throw new Exception("unknown navigable enum: " + space.Navigable);
 
         pr.triangulationMaterial = triangulationMaterial;
 
@@ -112,6 +120,8 @@ public class SpaceController : MonoBehaviour, Selectable
 
     public string Tip()
     {
-        return DebugTip() + "\n" + $"navigable: {space.Navigable}";
+        return DebugTip() + "\n" +
+                $"id: {space.Id}\n" +
+                $"navigable: {space.Navigable}";
     }
 }

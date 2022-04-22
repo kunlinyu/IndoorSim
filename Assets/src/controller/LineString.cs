@@ -28,8 +28,6 @@ public class LineString : MonoBehaviour, ITool
     }
     void Update()
     {
-        Selectable? pointedVertex = MousePickController.PointedEntity;
-
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
             Coordinate? currentCoor_ = Utils.Vec2Coor(CameraController.mousePositionOnGround());
