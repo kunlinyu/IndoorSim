@@ -79,6 +79,8 @@ public class MapView : MonoBehaviour
 
             var controller = obj.AddComponent<SpaceController>();
             controller.material = Resources.Load<Material>("material/space material");
+            // controller.material = Resources.Load<Material>("material/non navigable space");
+
             controller.highLightMaterial = Resources.Load<Material>("material/space highlight material");
             controller.selectedMaterial = Resources.Load<Material>("material/space selected material");
             controller.triangulationMaterial = Resources.Load<Material>("material/space triangulation material");

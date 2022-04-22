@@ -20,6 +20,11 @@ public class Utils
         mesh.SetIndices(triIndices, MeshTopology.Triangles, 0);
         mesh.SetIndices(lineIndices, MeshTopology.Lines, 1);
 
+        Vector2[] uv = new Vector2[triVertices.Length];
+        for(int i = 0; i < uv.Length; i++)
+            uv[i] = new Vector2(triVertices[i].x, triVertices[i].z);
+        mesh.SetUVs(0, uv);
+
         return mesh;
     }
 

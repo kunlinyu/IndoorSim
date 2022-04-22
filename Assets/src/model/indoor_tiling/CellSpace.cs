@@ -11,7 +11,9 @@ public class CellSpace
     [JsonPropertyAttribute] public Polygon Geom { get; private set; }
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
-    [JsonPropertyAttribute] public bool Navigable { get; set; } = false;
+    [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
+    [JsonPropertyAttribute] private Navigable Navigable { get; set; } = Navigable.Navigable;
+    // [JsonPropertyAttribute] private Dictionary<CellBoundary, List<>> ???
 
     [JsonIgnore]
     public List<CellVertex> allVertices
@@ -36,7 +38,6 @@ public class CellSpace
         }
     }
 
-    [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonIgnore] public Action OnUpdate = () => { };
 
     private CellSpace()
