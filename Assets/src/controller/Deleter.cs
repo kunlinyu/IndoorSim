@@ -11,8 +11,6 @@ public class Deleter : MonoBehaviour, ITool
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
-    private Coordinate? lastCoor = null;
-    private CellVertex? lastVertex = null;
 
     private Texture2D? cursurTexture;
     private Vector2 hotspot;
@@ -33,7 +31,7 @@ public class Deleter : MonoBehaviour, ITool
             UnityEngine.Cursor.SetCursor(null, hotspot, CursorMode.Auto);
 
         if (Input.GetMouseButtonUp(0) && MousePickController.PointedEntity != null && MousePickController.PointedEntity.type == SelectableType.Boundary)
-            IndoorSim.indoorTiling.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);
+            IndoorSim!.indoorTiling.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);
 
     }
 }

@@ -1,7 +1,9 @@
 {
     "name": "indoor_tiling",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:f2b4874a3a7f52f47bf05c75e8e32df2"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

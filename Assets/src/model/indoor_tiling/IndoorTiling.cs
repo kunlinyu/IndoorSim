@@ -135,7 +135,7 @@ public class IndoorTiling
             rLinePool = indoorTiling.rLinePool;
             instructionHistory = indoorTiling.instructionHistory;
 
-            // TODO: rline?
+            // TODO: r-line?
 
             UpdateIndices();
 
@@ -450,14 +450,14 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
         CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
-        CellSpace? oldCellSpace = spacePool.FirstOrDefault(cs => cs.Geom.Contains(MiddlePoint(ls)));
+        CellSpace? oldCellSpace = spacePool.FirstOrDefault(cs => cs.Polygon.Contains(MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
             ncsCase = NewCellSpaceCase.NewCellSpace;
         else if (path1IsCCW && path2IsCCW)
             ncsCase = NewCellSpaceCase.Split;
-        else if (oldCellSpace.Geom.Shell.Touches(start.Geom) || oldCellSpace.Geom.Shell.Touches(end.Geom))
+        else if (oldCellSpace.Polygon.Shell.Touches(start.Geom) || oldCellSpace.Polygon.Shell.Touches(end.Geom))
             ncsCase = NewCellSpaceCase.SplitNeedReSearch;
         else
             ncsCase = NewCellSpaceCase.HoleOfAnother;
@@ -580,7 +580,7 @@ public class IndoorTiling
         {
             foreach (var s2 in spacePool)
                 if (!System.Object.ReferenceEquals(s1, s2))
-                    if (s1.Geom.Relate(s2.Geom, "T********"))  // TODO magic string
+                    if (s1.Polygon.Relate(s2.Geom, "T********"))  // TODO magic string
                     {
                         valid = false;
                         goto validresult;
@@ -590,7 +590,7 @@ public class IndoorTiling
         foreach (var s in spaces)
         {
             foreach (var hole in s.Holes)
-                if (!s.ShellCellSpace().Geom.Contains(hole.Geom.Shell))
+                if (!s.ShellCellSpace().Polygon.Contains(hole.Polygon.Shell))
                 {
                     valid = false;
                     goto validresult;
@@ -642,12 +642,12 @@ public class IndoorTiling
             Debug.Log("remove cellspace because the shell broke.");
             RemoveSpaceInternal(spaces[0]);
         }
-        else if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom) ||
-                 spaces[1].ShellCellSpace().Geom.Contains(spaces[0].ShellCellSpace().Geom))  // one in the hole of another
+        else if (spaces[0].ShellCellSpace().Polygon.Contains(spaces[1].ShellCellSpace().Polygon) ||
+                 spaces[1].ShellCellSpace().Polygon.Contains(spaces[0].ShellCellSpace().Polygon))  // one in the hole of another
         {
             Debug.Log("merge hole into parent");
             CellSpace parent, child;
-            if (spaces[0].ShellCellSpace().Geom.Contains(spaces[1].ShellCellSpace().Geom))
+            if (spaces[0].ShellCellSpace().Polygon.Contains(spaces[1].ShellCellSpace().Polygon))
             {
                 parent = spaces[0];
                 child = spaces[1];
@@ -829,12 +829,12 @@ public class IndoorTiling
 
         foreach (CellSpace space in spacePool)
         {
-            if (space.Geom.Contains(current.Geom.Shell))
+            if (space.Polygon.Contains(current.Polygon.Shell))
                 if (spaceContainCurrent == null)
                     spaceContainCurrent = space;
                 else
                     throw new InvalidOperationException("more than one space contain current space");
-            if (current.Geom.Contains(space.Geom))
+            if (current.Polygon.Contains(space.Geom))
                 holeOfCurrent.Add(space);
         }
 
@@ -866,9 +866,9 @@ public class IndoorTiling
         double area = 0.0f;
         CellSpace shell = cellSpaces.First();
         foreach (var cellspace in cellSpaces)
-            if (cellspace.Geom.Area > area)
+            if (cellspace.Polygon.Area > area)
             {
-                area = cellspace.Geom.Area;
+                area = cellspace.Polygon.Area;
                 shell = cellspace;
             }
         foreach (var cellspace in cellSpaces)

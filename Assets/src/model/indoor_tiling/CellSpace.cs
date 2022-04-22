@@ -5,15 +5,17 @@ using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using UnityEngine;
 #nullable enable
-public class CellSpace
+
+
+public class CellSpace : Container
 {
-    [JsonPropertyAttribute] public string Id { get; set; }
-    [JsonPropertyAttribute] public Polygon Geom { get; private set; }
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] private Navigable Navigable { get; set; } = Navigable.Navigable;
-    // [JsonPropertyAttribute] private Dictionary<CellBoundary, List<>> ???
+
+    [JsonIgnore] public Polygon Polygon { get => (Polygon)Geom!; }
+
 
     [JsonIgnore]
     public List<CellVertex> allVertices
@@ -40,31 +42,28 @@ public class CellSpace
 
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    private CellSpace()
+    private CellSpace() : base("")
     {
-        Id = "";
         Geom = new GeometryFactory().CreatePolygon();
     }
 
-    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null")
+    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null") : base(id)
     {
         Geom = polygon;
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
-        Id = id;
     }
 
-    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null")
+    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null") : base(id)
     {
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
         Geom = UpdateFromVertex();
-        Id = id;
     }
 
     public CellSpace ShellCellSpace()
     {
-        return new CellSpace(new GeometryFactory().CreatePolygon(Geom.Shell), shellVertices, shellBoundaries, "shell cell space");
+        return new CellSpace(new GeometryFactory().CreatePolygon(Polygon.Shell), shellVertices, shellBoundaries, "shell cell space");
     }
 
     public Polygon UpdateFromVertex()
@@ -75,9 +74,9 @@ public class CellSpace
 
         Holes.ForEach(hole => hole.UpdateFromVertex());
 
-        Geom = new GeometryFactory().CreatePolygon(shellRing, Holes.Select(h => h.Geom.Shell).ToArray());
+        Geom = new GeometryFactory().CreatePolygon(shellRing, Holes.Select(h => h.Polygon.Shell).ToArray());
 
-        return Geom;
+        return Polygon;
     }
 
     public void SplitBoundary(CellBoundary oldBoundary, CellBoundary newBoundary1, CellBoundary newBoundary2, CellVertex middleVertex)
@@ -186,23 +185,23 @@ public class CellSpace
     {
         // Add hole into another hole, ignore
         foreach (var hole in Holes)
-            if (hole.Geom.Contains(cellSpace.Geom))
+            if (Polygon.Contains(cellSpace.Geom))
                 return;
 
         // new hole eat some hole
         List<CellSpace> independentHole = new List<CellSpace>();
         foreach (var hole in Holes)
-            if (!cellSpace.ShellCellSpace().Geom.Contains(hole.Geom))
+            if (!cellSpace.ShellCellSpace().Polygon.Contains(hole.Geom))
                 independentHole.Add(hole);
         Holes = independentHole;
 
-        if (!Geom.Contains(cellSpace.Geom.Shell))
+        if (!Polygon.Contains(cellSpace.Polygon.Shell))
         {
             Debug.Log(Geom);
             Debug.Log(cellSpace.Geom);
         }
 
-        if (!Geom.Contains(cellSpace.Geom.Shell)) throw new ArgumentException("the polygon should contain the new hole.");
+        if (!Polygon.Contains(cellSpace.Polygon.Shell)) throw new ArgumentException("the polygon should contain the new hole.");
 
 
         Holes.Add(cellSpace.ShellCellSpace());
@@ -241,7 +240,7 @@ public class CellSpace
         Holes.Clear();
         Holes.AddRange(holesSet);
 
-        Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+        Geom = new GeometryFactory().CreatePolygon(Polygon.Shell, Holes.Select(h => h.Polygon.Shell).ToArray());
         OnUpdate?.Invoke();
     }
 
@@ -251,7 +250,7 @@ public class CellSpace
             return cellspace;
         else
         {
-            CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.EqualsTopologically(cellspace.Geom));
+            CellSpace? hole = Holes.FirstOrDefault(hole => hole.Polygon.EqualsTopologically(cellspace.Geom));
             return hole;
         }
     }
@@ -261,13 +260,13 @@ public class CellSpace
         if (Holes.Contains(cellspace))  // Remove whole hole
         {
             Holes.Remove(cellspace);
-            Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+            Geom = new GeometryFactory().CreatePolygon(Polygon.Shell, Holes.Select(h => h.Polygon.Shell).ToArray());
             OnUpdate?.Invoke();
             return;
         }
 
         // TODO: this code may work but we should change the name of the method (P.S. we remove the hole contain the argument)
-        CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom.Contains(cellspace.Geom));
+        CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom!.Contains(cellspace.Geom));
         if (hole == null)
         {
             throw new ArgumentException("No hole contain the hole to be remove");
@@ -275,7 +274,7 @@ public class CellSpace
         else
         {
             Holes.Remove(hole);
-            Geom = new GeometryFactory().CreatePolygon(Geom.Shell, Holes.Select(h => h.Geom.Shell).ToArray());
+            Geom = new GeometryFactory().CreatePolygon(Polygon.Shell, Holes.Select(h => h.Polygon.Shell).ToArray());
             OnUpdate?.Invoke();
             return;
         }

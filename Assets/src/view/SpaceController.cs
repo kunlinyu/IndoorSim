@@ -48,7 +48,7 @@ public class SpaceController : MonoBehaviour, Selectable
     private GameObject polygonRenderObj;
 
     public float Distance(Vector3 vec)
-    => (float)space.Geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+    => (float)space.Polygon.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
 
     void Awake()
     {
@@ -74,7 +74,7 @@ public class SpaceController : MonoBehaviour, Selectable
     void ReTriangulate()
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
-        Mesh mesh = pr.UpdatePolygon(space.Geom);
+        Mesh mesh = pr.UpdatePolygon(space.Polygon);
         Mesh triMesh = new Mesh();
         triMesh.Clear();
         triMesh.subMeshCount = 1;

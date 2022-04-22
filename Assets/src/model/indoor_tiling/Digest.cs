@@ -19,7 +19,7 @@ public class Digest
     }
 
     public static string CellSpace(CellSpace space)
-        => Digest.Polygon(space.Geom);
+        => Digest.Polygon(space.Polygon);
 
     public static string CellBoundaryList(List<CellBoundary> boundaries)
     {

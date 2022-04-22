@@ -13,9 +13,7 @@ public class MousePickController : MonoBehaviour
 
     static public Selectable? PointedEntity { get => pointedEntity; }
 
-    public UIEventDispatcher eventDispatcher;
-
-    private bool MouseOnUI = false;
+    public UIEventDispatcher? eventDispatcher;
 
     // Start is called before the first frame update
     void Start()
@@ -81,16 +79,16 @@ public class MousePickController : MonoBehaviour
             {
 
                 SpaceController sc = (SpaceController)pointedEntity;
-                string msg = $"Geom.Holes.Length: {sc.Space.Geom.Holes.Length}\n" +
+                string msg = $"Geom.Holes.Length: {sc.Space.Polygon.Holes.Length}\n" +
                              $"Holes.Count: {sc.Space.Holes.Count}\n" +
-                             $"Geom.Shell.NumPoints: {sc.Space.Geom.Shell.NumPoints}\n" +
+                             $"Geom.Shell.NumPoints: {sc.Space.Polygon.Shell.NumPoints}\n" +
                              $"allBoundaries.Count: {sc.Space.allBoundaries.Count}";
-                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = msg });
+                eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = msg });
 
             }
             else
             {
-                eventDispatcher.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = "" });
+                eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = "" });
             }
         }
     }
