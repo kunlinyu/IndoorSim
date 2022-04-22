@@ -57,14 +57,12 @@ public class SpaceController : MonoBehaviour, Selectable
         polygonRenderObj.AddComponent<PolygonRenderer>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         ReTriangulate();
         updateRenderer();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (needUpdateRenderer)
@@ -102,5 +100,18 @@ public class SpaceController : MonoBehaviour, Selectable
         pr.UpdateRenderer();
 
         needUpdateRenderer = false;
+    }
+
+    public string DebugTip()
+    {
+        return $"Geom.Holes.Length: {space.Polygon.Holes.Length}\n" +
+               $"Holes.Count: {space.Holes.Count}\n" +
+               $"Geom.Shell.NumPoints: {space.Polygon.Shell.NumPoints}\n" +
+               $"allBoundaries.Count: {space.allBoundaries.Count}";
+    }
+
+    public string Tip()
+    {
+        return DebugTip() + "\n" + $"navigable: {space.Navigable}";
     }
 }

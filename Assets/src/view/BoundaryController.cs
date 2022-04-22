@@ -126,4 +126,6 @@ public class BoundaryController : MonoBehaviour, Selectable
 
         needUpdateRenderer = false;
     }
+
+    public string Tip() => boundary.Id;
 }

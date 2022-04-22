@@ -75,21 +75,7 @@ public class MousePickController : MonoBehaviour
             if (NearestEntity != null) NearestEntity.highLight = true;
             pointedEntity = NearestEntity;
 
-            if (pointedEntity != null && pointedEntity.type == SelectableType.Space)
-            {
-
-                SpaceController sc = (SpaceController)pointedEntity;
-                string msg = $"Geom.Holes.Length: {sc.Space.Polygon.Holes.Length}\n" +
-                             $"Holes.Count: {sc.Space.Holes.Count}\n" +
-                             $"Geom.Shell.NumPoints: {sc.Space.Polygon.Shell.NumPoints}\n" +
-                             $"allBoundaries.Count: {sc.Space.allBoundaries.Count}";
-                eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = msg });
-
-            }
-            else
-            {
-                eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = "" });
-            }
+            eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = pointedEntity == null ? "" : pointedEntity.Tip() });
         }
     }
 }

@@ -18,4 +18,5 @@ public interface Selectable
 
     float Distance(Vector3 vec);
 
+    string Tip();
 }

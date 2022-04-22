@@ -144,4 +144,6 @@ public class VertexController : MonoBehaviour, Selectable
         needUpdateRenderer = false;
     }
 
+    public string Tip() => vertex.Id;
+
 }
