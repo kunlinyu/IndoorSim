@@ -106,8 +106,8 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = false;
-        lr.startWidth = width;
-        lr.endWidth = width;
+        lr.startWidth = width * 2.0f;
+        lr.endWidth = width / 2.0f;
         lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
@@ -127,5 +127,10 @@ public class BoundaryController : MonoBehaviour, Selectable
         needUpdateRenderer = false;
     }
 
-    public string Tip() => boundary.Id;
+    public string Tip()
+        => $"Id: {boundary.Id}\n" +
+           $"P0: {boundary.P0.Id}\n" +
+           $"P1: {boundary.P1.Id}\n" +
+           $"left:  {boundary.leftSpace?.Id}\n" +
+           $"right: {boundary.rightSpace?.Id}";
 }

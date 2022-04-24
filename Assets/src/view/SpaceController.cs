@@ -94,7 +94,7 @@ public class SpaceController : MonoBehaviour, Selectable
             pr.interiorMaterial = highLightMaterial;
         else if (space.Navigable == Navigable.Navigable)
             pr.interiorMaterial = material;
-        else if (space.Navigable == Navigable.PhysicallyNavigableLogicallyNonNavigable)
+        else if (space.Navigable == Navigable.LogicallyNonNavigable)
             pr.interiorMaterial = logNonNaviMat;
         else if (space.Navigable == Navigable.PhysicallyNonNavigable)
             pr.interiorMaterial = phyNonNaviMat;

@@ -5,7 +5,7 @@ using UnityEngine;
 public enum Navigable
 {
     PhysicallyNonNavigable,
-    PhysicallyNavigableLogicallyNonNavigable,
+    LogicallyNonNavigable,
     Navigable,
 }
 
@@ -28,6 +28,6 @@ public enum NaviDirection
 // | left-cellspace   | right cellspace  | boundary            |
 // | -----------------+------------------+---------------------|
 // | PhyNonNavi       |    *             | PhyNonNavi          |
-// | PhyNaviLogNonNav | PhyNaviLogNonNav | PhyNaviLogNonNav    |
-// | PhyNaviLogNonNav | Navigable        | PhyNaviLogNonNav    |
+// | LogNonNav        | LogNonNav        | LogNonNav           |
+// | LogNonNav        | Navigable        | LogNonNav           |
 // | Navigable        | Navigable        | Navigable           |

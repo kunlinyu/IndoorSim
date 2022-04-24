@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 #nullable enable
@@ -14,8 +15,24 @@ public class CellBoundary
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
     [JsonPropertyAttribute] private NaviDirection NaviDirection { set; get; } = NaviDirection.BiDirection;
+    [JsonIgnore] public CellSpace? leftSpace;
+    [JsonIgnore] public CellSpace? rightSpace;
     [JsonIgnore] public Action OnUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
+
+    public Navigable Navigable()
+    {
+        if (leftSpace == null || rightSpace == null)
+            return global::Navigable.PhysicallyNonNavigable;
+        else if (leftSpace.Navigable == global::Navigable.PhysicallyNonNavigable ||
+                 rightSpace.Navigable == global::Navigable.PhysicallyNonNavigable)
+            return global::Navigable.PhysicallyNonNavigable;
+        else if (leftSpace.Navigable == global::Navigable.LogicallyNonNavigable ||
+                 rightSpace.Navigable == global::Navigable.LogicallyNonNavigable)
+            return global::Navigable.LogicallyNonNavigable;
+        else
+            return global::Navigable.Navigable;
+    }
 
     private CellBoundary()  // for deserialization
     {
@@ -101,5 +118,45 @@ public class CellBoundary
         if (Object.ReferenceEquals(cv, P0)) return Geom.GetPointN(1);
         if (Object.ReferenceEquals(cv, P1)) return Geom.GetPointN(Geom.NumPoints - 2);
         throw new ArgumentException("Not any one of my CellVertex");
+    }
+
+    public void PartialBound(CellSpace space)
+    {
+        if (!space.allBoundaries.Contains(this)) throw new ArgumentException("the space don't contain this boundary");
+
+        bool partOfShell = true;
+        if (!space.shellBoundaries.Contains(this))
+            partOfShell = false;
+
+        CellSpace? target = null;
+        if (!partOfShell)  // looking for the hole contain the boundary
+            target = space.Holes.FirstOrDefault(hole => hole.shellBoundaries.Contains(this));
+        else
+            target = space;
+        if (target == null) throw new Exception("neither shell nor hole contain this boundary");
+
+        int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => System.Object.ReferenceEquals(cv, P0));
+        int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => System.Object.ReferenceEquals(cv, P1));
+
+        bool leftside = P0Index < P1Index;
+        if (Math.Abs(P0Index - P1Index) != 1)
+            leftside = !leftside;
+        if (!partOfShell)
+            leftside = !leftside;
+
+        if (leftside)
+            leftSpace = space;
+        else
+            rightSpace = space;
+    }
+
+    public void PartialUnBound(CellSpace space)
+    {
+        if (leftSpace == space)
+            leftSpace = null;
+        else if (rightSpace == space)
+            rightSpace = null;
+        else
+            throw new ArgumentException("no space found to be unbound");
     }
 }

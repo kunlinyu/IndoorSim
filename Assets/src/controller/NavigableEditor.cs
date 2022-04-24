@@ -24,9 +24,9 @@ public class NavigableEditor : MonoBehaviour, ITool
             switch (sc.Space.Navigable)
             {
                 case Navigable.PhysicallyNonNavigable:
-                    sc.Space.Navigable = Navigable.PhysicallyNavigableLogicallyNonNavigable;
+                    sc.Space.Navigable = Navigable.LogicallyNonNavigable;
                     break;
-                case Navigable.PhysicallyNavigableLogicallyNonNavigable:
+                case Navigable.LogicallyNonNavigable:
                     sc.Space.Navigable = Navigable.Navigable;
                     break;
                 case Navigable.Navigable:

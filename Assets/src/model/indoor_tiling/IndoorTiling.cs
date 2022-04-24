@@ -192,6 +192,9 @@ public class IndoorTiling
             }
         }
 
+        spacePool.ForEach(space => space.allBoundaries.ForEach(b => b.PartialBound(space)));
+
+
         // TODO:
         // space2RLines
         // boundary2RLines
@@ -799,6 +802,7 @@ public class IndoorTiling
         space.Id = IdGenSpace?.Gen() ?? "no id";
         spacePool.Add(space);
         RelateVertexSpace(space);
+        space.allBoundaries.ForEach(b => b.PartialBound(space));
         OnSpaceCreated?.Invoke(space);
         return space.Id;
     }
@@ -809,6 +813,7 @@ public class IndoorTiling
         spacePool.Remove(space);
         foreach (var vertex in space.allVertices)
             vertex2Spaces[vertex].Remove(space);
+        space.allBoundaries.ForEach(b => b.PartialUnBound(space));
         OnSpaceRemoved?.Invoke(space);
     }
 
