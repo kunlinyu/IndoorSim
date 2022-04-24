@@ -189,7 +189,7 @@ public class CellSpace : Container
     {
         // Add hole into another hole, ignore
         foreach (var hole in Holes)
-            if (Polygon.Contains(cellSpace.Geom))
+            if (hole.Polygon.Contains(cellSpace.Geom))
                 return;
 
         List<CellBoundary> oldAllBoundaries = new List<CellBoundary>(allBoundaries);
