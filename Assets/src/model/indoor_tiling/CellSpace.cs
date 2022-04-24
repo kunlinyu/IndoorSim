@@ -129,9 +129,6 @@ public class CellSpace : Container
         target.shellBoundaries.Add(newBoundary1);
         target.shellBoundaries.Add(newBoundary2);
 
-        newBoundary1.PartialBound(this);
-        newBoundary2.PartialBound(this);
-
         UpdateFromVertex();
         OnUpdate?.Invoke();
     }
@@ -192,8 +189,6 @@ public class CellSpace : Container
             if (hole.Polygon.Contains(cellSpace.Geom))
                 return;
 
-        List<CellBoundary> oldAllBoundaries = new List<CellBoundary>(allBoundaries);
-
         // new hole eat some hole
         List<CellSpace> independentHole = new List<CellSpace>();
         foreach (var hole in Holes)
@@ -203,8 +198,8 @@ public class CellSpace : Container
 
         if (!Polygon.Contains(cellSpace.Polygon.Shell))
         {
-            Debug.Log(Geom);
-            Debug.Log(cellSpace.Geom);
+            Debug.Log(Polygon);
+            Debug.Log(cellSpace.Polygon.Shell);
         }
 
         if (!Polygon.Contains(cellSpace.Polygon.Shell)) throw new ArgumentException("the polygon should contain the new hole.");
@@ -245,14 +240,6 @@ public class CellSpace : Container
 
         Holes.Clear();
         Holes.AddRange(holesSet);
-
-        List<CellBoundary> newAllBoundaries = new List<CellBoundary>(allBoundaries);
-        foreach (var b in oldAllBoundaries)
-            if (!newAllBoundaries.Contains(b))
-                b.PartialUnBound(this);
-        foreach (var b in newAllBoundaries)
-            if (!oldAllBoundaries.Contains(b))
-                b.PartialBound(this);
 
         Geom = new GeometryFactory().CreatePolygon(Polygon.Shell, Holes.Select(h => h.Polygon.Shell).ToArray());
         OnUpdate?.Invoke();

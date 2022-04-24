@@ -517,8 +517,10 @@ public class IndoorTiling
         CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
         AddVertexInternal(middleVertex);
 
+
         // Remove old boundary
         RemoveBoundaryInternal(boundary);
+
 
         // Create and add new boundary
         CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
@@ -526,14 +528,19 @@ public class IndoorTiling
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
+
         instructionHistory.SessionCommit();
+
 
         // update space and vertex2space indices
         List<CellSpace> spaces = Boundary2Space(boundary);
         foreach (var space in spaces)
+        {
             space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
+            newBoundary1.PartialBound(space);
+            newBoundary2.PartialBound(space);
+        }
         vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
-
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return middleVertex;
@@ -670,7 +677,7 @@ public class IndoorTiling
             CellSpace? hole = parent.FindHole(child);
             if (hole != null)
             {
-                parent.RemoveHole(child);
+                UpdateSpaceInternal(parent, child, new List<CellSpace>());
                 RelateVertexSpace(parent);
                 RemoveSpaceInternal(child);
             }
@@ -678,9 +685,7 @@ public class IndoorTiling
             {
                 List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
                 List<CellSpace> holes = CreateCellSpaceMulti(path);
-                parent.RemoveHole(child);
-                foreach (var newHole in holes)
-                    parent.AddHole(newHole);
+                UpdateSpaceInternal(parent, child, holes);
                 RelateVertexSpace(parent);
                 RemoveSpaceInternal(child);
             }
@@ -693,7 +698,9 @@ public class IndoorTiling
             RemoveSpaceInternal(spaces[1]);
             AddSpaceConsiderHole(CreateCellSpaceWithHole(path));
         }
-
+        ConsistencyCheck();
+        FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
     }
 
     public void AddRepresentativeLine(LineString ls, CellBoundary from, CellBoundary to, CellSpace through)
@@ -822,6 +829,23 @@ public class IndoorTiling
         OnSpaceRemoved?.Invoke(space);
     }
 
+    private void UpdateSpaceInternal(CellSpace space, CellSpace? removeHoleContainThisHole, List<CellSpace> addHoles)
+    {
+        List<CellBoundary> oldAllBoundaries = new List<CellBoundary>(space.allBoundaries);
+
+        if (removeHoleContainThisHole != null)
+            space.RemoveHole(removeHoleContainThisHole);
+        addHoles.ForEach(hole => space.AddHole(hole));
+
+        List<CellBoundary> newAllBoundaries = new List<CellBoundary>(space.allBoundaries);
+        foreach (var b in oldAllBoundaries)
+            if (!newAllBoundaries.Contains(b))
+                b.PartialUnBound(space);
+        foreach (var b in newAllBoundaries)
+            if (!oldAllBoundaries.Contains(b))
+                b.PartialBound(space);
+    }
+
     private void RelateVertexSpace(CellSpace space)
     {
         var allVertices = space.allVertices;
@@ -850,21 +874,43 @@ public class IndoorTiling
 
         if (spaceContainCurrent != null)
         {
-            spaceContainCurrent.AddHole(current);
+            UpdateSpaceInternal(spaceContainCurrent, null, new List<CellSpace>() { current });
             RelateVertexSpace(spaceContainCurrent);
         }
 
-        foreach (CellSpace hole in holeOfCurrent)
-            current.AddHole(hole);
+        UpdateSpaceInternal(current, null, holeOfCurrent);
 
         return AddSpaceInternal(current);
     }
 
+    // we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
     private List<CellSpace> CreateCellSpaceMulti(List<JumpInfo> path)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
 
-        return rings.Select(ring => CreateCellSpaceInternal(ring)).ToList();
+        List<CellSpace> result = rings.Select(ring => CreateCellSpaceInternal(ring)).ToList();
+
+        double area = 0.0f;
+        CellSpace shell = result.First();
+        foreach (var cellspace in result)
+            if (cellspace.Polygon.Area > area)
+            {
+                area = cellspace.Polygon.Area;
+                shell = cellspace;
+            }
+
+        bool realShell = true;
+        foreach (var cellspace in result)
+            if (cellspace != shell && !shell.Polygon.Contains(cellspace.Geom))
+            {
+                realShell = false;
+                break;
+            }
+
+        if (realShell)
+            result.Remove(shell);
+
+        return result;
     }
 
     private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path)
@@ -881,9 +927,7 @@ public class IndoorTiling
                 area = cellspace.Polygon.Area;
                 shell = cellspace;
             }
-        foreach (var cellspace in cellSpaces)
-            if (cellspace != shell)
-                shell.AddHole(cellspace);
+        UpdateSpaceInternal(shell, null, cellSpaces.Where(cs => cs != shell).ToList());
         return shell;
     }
     private CellSpace CreateCellSpaceInternal(List<JumpInfo> jumps, bool CCW = true)
@@ -938,11 +982,12 @@ public class IndoorTiling
         boundaryPool.ForEach(b => sideCount.Add(b, 0));
 
         spacePool.ForEach(space => space.allBoundaries.ForEach(b
-            => {
-                    if (b.leftSpace != space && b.rightSpace != space)
-                        throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");
-                    sideCount[b] ++;
-            }));
+            =>
+        {
+            if (b.leftSpace != space && b.rightSpace != space)
+                throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");
+            sideCount[b]++;
+        }));
         foreach (var pair in sideCount)
         {
             if (pair.Value == 0)
@@ -963,7 +1008,7 @@ public class IndoorTiling
             {
                 if (pair.Key.leftSpace == null)
                     throw new Exception($"left space of boundary({pair.Key.Id}) should not be null");
-                if (pair.Key.rightSpace== null)
+                if (pair.Key.rightSpace == null)
                     throw new Exception($"right space of boundary({pair.Key.Id}) should not be null");
             }
             else

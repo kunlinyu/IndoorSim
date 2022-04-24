@@ -50,6 +50,7 @@ public class ConsistencyTest
     [Test] public void full_test_C_hole_both_CCW() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_C_hole() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_circle() => FullTest(MethodBase.GetCurrentMethod().Name);
+    [Test] public void full_test_glasses() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_hole_split_boundary_and_branch() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_hole_split_two_remove_one_of_them() => FullTest(MethodBase.GetCurrentMethod().Name);
     [Test] public void full_test_mani_cell_one_C_move() => FullTest(MethodBase.GetCurrentMethod().Name);

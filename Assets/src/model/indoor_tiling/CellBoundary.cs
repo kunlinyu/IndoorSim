@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+
 #nullable enable
 
 struct BoundaryType
@@ -122,7 +123,7 @@ public class CellBoundary
 
     public void PartialBound(CellSpace space)
     {
-        if (!space.allBoundaries.Contains(this)) throw new ArgumentException("the space don't contain this boundary");
+        if (!space.allBoundaries.Contains(this)) throw new ArgumentException($"the space({space.Id}) don't contain this boundary({Id})");
 
         bool partOfShell = true;
         if (!space.shellBoundaries.Contains(this))
@@ -135,8 +136,8 @@ public class CellBoundary
             target = space;
         if (target == null) throw new Exception("neither shell nor hole contain this boundary");
 
-        int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => System.Object.ReferenceEquals(cv, P0));
-        int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => System.Object.ReferenceEquals(cv, P1));
+        int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P0));
+        int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P1));
 
         bool leftside = P0Index < P1Index;
         if (Math.Abs(P0Index - P1Index) != 1)
