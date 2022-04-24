@@ -156,7 +156,5 @@ public class CellBoundary
             leftSpace = null;
         else if (rightSpace == space)
             rightSpace = null;
-        else
-            throw new ArgumentException("no space found to be unbound");
     }
 }

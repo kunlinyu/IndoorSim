@@ -356,6 +356,7 @@ public class IndoorTiling
         instructionHistory.SessionCommit();
         ConsistencyCheck();
         FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
         return boundary;
     }
 
@@ -378,6 +379,7 @@ public class IndoorTiling
         instructionHistory.SessionCommit();
         ConsistencyCheck();
         FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
         return boundary;
     }
 
@@ -400,6 +402,7 @@ public class IndoorTiling
         instructionHistory.SessionCommit();
         ConsistencyCheck();
         FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
         return boundary;
     }
 
@@ -499,6 +502,7 @@ public class IndoorTiling
         }
         ConsistencyCheck();
         FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
         return boundary;
     }
 
@@ -531,6 +535,7 @@ public class IndoorTiling
         vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
 
         FullPolygonizerCheck();
+        BoundaryLeftRightCheck();
         return middleVertex;
     }
 
@@ -607,6 +612,7 @@ public class IndoorTiling
             vertices.ForEach(v => v.OnUpdate?.Invoke());
             instructionHistory.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
             FullPolygonizerCheck();
+            BoundaryLeftRightCheck();
         }
         else
         {
@@ -676,7 +682,6 @@ public class IndoorTiling
                 foreach (var newHole in holes)
                     parent.AddHole(newHole);
                 RelateVertexSpace(parent);
-
                 RemoveSpaceInternal(child);
             }
         }
@@ -926,6 +931,46 @@ public class IndoorTiling
             throw new Exception("full Polygonizer mistmatch");
         }
     }
+
+    private void BoundaryLeftRightCheck()
+    {
+        Dictionary<CellBoundary, int> sideCount = new Dictionary<CellBoundary, int>();
+        boundaryPool.ForEach(b => sideCount.Add(b, 0));
+
+        spacePool.ForEach(space => space.allBoundaries.ForEach(b
+            => {
+                    if (b.leftSpace != space && b.rightSpace != space)
+                        throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");
+                    sideCount[b] ++;
+            }));
+        foreach (var pair in sideCount)
+        {
+            if (pair.Value == 0)
+            {
+                if (pair.Key.leftSpace != null)
+                    throw new Exception($"left space of boundary({pair.Key.Id}) should be null but it is space({pair.Key.leftSpace.Id})");
+                if (pair.Key.rightSpace != null)
+                    throw new Exception($"right space of boundary({pair.Key.Id}) should be null but it is space({pair.Key.rightSpace.Id})");
+            }
+            else if (pair.Value == 1)
+            {
+                if (pair.Key.leftSpace == null && pair.Key.rightSpace == null)
+                    throw new Exception($"boundary({pair.Key.Id}) there should be one side space but have no one");
+                if (pair.Key.leftSpace != null && pair.Key.rightSpace != null)
+                    throw new Exception($"boundary({pair.Key.Id}) should have only 1 side space but have two: {pair.Key.leftSpace.Id}, {pair.Key.rightSpace.Id}");
+            }
+            else if (pair.Value == 2)
+            {
+                if (pair.Key.leftSpace == null)
+                    throw new Exception($"left space of boundary({pair.Key.Id}) should not be null");
+                if (pair.Key.rightSpace== null)
+                    throw new Exception($"right space of boundary({pair.Key.Id}) should not be null");
+            }
+            else
+                throw new Exception($"more than 2({pair.Value}) space contain boundary({pair.Key.Id})");
+        }
+    }
+
     [JsonIgnore] private static bool consistencyChecking = true;
     private void ConsistencyCheck()
     {
