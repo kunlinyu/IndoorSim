@@ -72,6 +72,15 @@ public class SimulationController : MonoBehaviour
                     Debug.Log("Switch to tool navigable");
                 }
             }
+            else if (e.name == "direction")
+            {
+                if (oldToolName != "direction")
+                {
+                    toolObj = new GameObject("boundary direction");
+                    currentTool = toolObj.AddComponent<BoundaryDirectionEditor>();
+                    Debug.Log("Switch to tool boundary direction");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());

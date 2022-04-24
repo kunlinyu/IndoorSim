@@ -5,6 +5,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
 [RequireComponent(typeof(BoxCollider))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class BoundaryController : MonoBehaviour, Selectable
 {
     private CellBoundary boundary;
@@ -22,6 +23,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
+    public void ReRender() => needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;
@@ -122,6 +124,30 @@ public class BoundaryController : MonoBehaviour, Selectable
             lr.material = highLightMaterial;
             lr.startWidth = width * 2.0f;
             lr.endWidth = width * 2.0f;
+        }
+
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (Boundary.Navigable() == Navigable.Navigable)
+        {
+            switch (Boundary.NaviDirection)
+            {
+                case NaviDirection.NoneDirection:
+                    sr.sprite = null;
+                    break;
+                case NaviDirection.Left2Right:
+                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/left2right");
+                    break;
+                case NaviDirection.Right2Left:
+                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/right2left");
+                    break;
+                case NaviDirection.BiDirection:
+                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/bi-direction");
+                    break;
+            }
+        }
+        else
+        {
+            sr.sprite = null;
         }
 
         needUpdateRenderer = false;

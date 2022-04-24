@@ -12,8 +12,17 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
-    [JsonPropertyAttribute] public Navigable Navigable { get; set; } = Navigable.Navigable;
-
+    [JsonPropertyAttribute] public Navigable navigable = Navigable.Navigable;
+    [JsonIgnore]
+    public Navigable Navigable
+    {
+        get => navigable;
+        set
+        {
+            navigable = value;
+            allBoundaries.ForEach(b => b.OnUpdate?.Invoke());
+        }
+    }
     [JsonIgnore] public Polygon Polygon { get => (Polygon)Geom!; }
 
 

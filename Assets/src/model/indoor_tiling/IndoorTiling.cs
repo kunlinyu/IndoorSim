@@ -883,7 +883,7 @@ public class IndoorTiling
         return AddSpaceInternal(current);
     }
 
-    // we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
+    // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
     private List<CellSpace> CreateCellSpaceMulti(List<JumpInfo> path)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
@@ -913,6 +913,7 @@ public class IndoorTiling
         return result;
     }
 
+    // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
     private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);

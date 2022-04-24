@@ -15,7 +15,7 @@ public class CellBoundary
     [JsonPropertyAttribute] public LineString Geom { get; private set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
-    [JsonPropertyAttribute] private NaviDirection NaviDirection { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] public NaviDirection NaviDirection { set; get; } = NaviDirection.BiDirection;
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
     [JsonIgnore] public Action OnUpdate = () => { };
@@ -149,6 +149,8 @@ public class CellBoundary
             leftSpace = space;
         else
             rightSpace = space;
+        OnUpdate?.Invoke();
+
     }
 
     public void PartialUnBound(CellSpace space)
@@ -157,5 +159,6 @@ public class CellBoundary
             leftSpace = null;
         else if (rightSpace == space)
             rightSpace = null;
+        OnUpdate?.Invoke();
     }
 }
