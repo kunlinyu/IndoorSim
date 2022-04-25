@@ -149,6 +149,9 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             sr.sprite = null;
         }
+        sr.sortingOrder = 3;
+        sr.drawMode = SpriteDrawMode.Sliced;
+        sr.size = new Vector2(0.5f, 0.5f);
 
         needUpdateRenderer = false;
     }
