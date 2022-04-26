@@ -18,7 +18,6 @@ public class SpaceController : MonoBehaviour, Selectable
 
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
-    public void ReRender() => needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;

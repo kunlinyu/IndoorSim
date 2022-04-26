@@ -35,7 +35,6 @@ public class BoundaryDirectionEditor : MonoBehaviour, ITool
                     bc.Boundary.NaviDirection = NaviDirection.BiDirection;
                     break;
             }
-            bc.ReRender();
         }
     }
 }

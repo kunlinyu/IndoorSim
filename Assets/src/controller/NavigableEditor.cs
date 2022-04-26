@@ -33,7 +33,6 @@ public class NavigableEditor : MonoBehaviour, ITool
                     sc.Space.Navigable = Navigable.PhysicallyNonNavigable;
                     break;
             }
-            sc.ReRender();
         }
     }
 }

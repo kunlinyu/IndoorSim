@@ -19,7 +19,7 @@ public class IndoorTiling
     [JsonPropertyAttribute] public List<CellVertex> vertexPool = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool = new List<CellSpace>();
-    [JsonPropertyAttribute] public List<RepresentativeLine> rLinePool = new List<RepresentativeLine>();
+    [JsonPropertyAttribute] public List<RLineGroup> rLinePool = new List<RLineGroup>();
     [JsonPropertyAttribute] public InstructionHistory instructionHistory = new InstructionHistory();
     [JsonPropertyAttribute] public string digestCache = "";
 
@@ -29,16 +29,19 @@ public class IndoorTiling
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
-    [JsonIgnore] private Dictionary<CellSpace, HashSet<RepresentativeLine>> space2RLines = new Dictionary<CellSpace, HashSet<RepresentativeLine>>();
+    [JsonIgnore] private Dictionary<CellSpace, RLineGroup> space2RLines = new Dictionary<CellSpace, RLineGroup>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
 
     [JsonIgnore] public Action<CellVertex> OnVertexCreated = (v) => { };
     [JsonIgnore] public Action<CellBoundary> OnBoundaryCreated = (b) => { };
     [JsonIgnore] public Action<CellSpace> OnSpaceCreated = (s) => { };
+    [JsonIgnore] public Action<RLineGroup> OnRLinesCreated = (rLs) => { };
+
 
     [JsonIgnore] public Action<CellVertex> OnVertexRemoved = (v) => { };
     [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
     [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
+    [JsonIgnore] public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
 
     public ICollection<Geometry> Polygonizer()
     {
@@ -58,11 +61,11 @@ public class IndoorTiling
 
     public IndoorTiling(IndoorTiling another)
     {
-        // TODO: should we trigger OnCreate?
+        // TODO: should we trigger OnCreate? no if we use this as a unity test tool
         this.vertexPool.AddRange(another.vertexPool);
         this.boundaryPool.AddRange(another.boundaryPool);
         this.spacePool.AddRange(another.spacePool);
-        this.rLinePool.AddRange(another.rLinePool);
+        this.rLinePool.Union(another.rLinePool);
 
         this.IdGenVertex = another.IdGenVertex?.clone();
         this.IdGenBoundary = another.IdGenBoundary?.clone();
@@ -80,8 +83,7 @@ public class IndoorTiling
         }
         foreach (var entry in another.space2RLines)
         {
-            this.space2RLines[entry.Key] = new HashSet<RepresentativeLine>();
-            this.space2RLines[entry.Key].UnionWith(entry.Value);
+            this.space2RLines[entry.Key] = entry.Value;
         }
         foreach (var entry in another.boundary2RLines)
         {
@@ -113,6 +115,9 @@ public class IndoorTiling
         foreach (var s in spacePool)
             OnSpaceRemoved?.Invoke(s);
         spacePool.Clear();
+        foreach (var r in rLinePool)
+            OnRLinesRemoved?.Invoke(r);
+        rLinePool.Clear();
 
         instructionHistory.Clear();
 
@@ -135,8 +140,6 @@ public class IndoorTiling
             rLinePool = indoorTiling.rLinePool;
             instructionHistory = indoorTiling.instructionHistory;
 
-            // TODO: r-line?
-
             UpdateIndices();
 
             foreach (var v in vertexPool)
@@ -145,6 +148,8 @@ public class IndoorTiling
                 OnBoundaryCreated?.Invoke(b);
             foreach (var s in spacePool)
                 OnSpaceCreated?.Invoke(s);
+            foreach (var r in rLinePool)
+                OnRLinesCreated?.Invoke(r);
 
             IdGenVertex?.Reset(vertexPool.Select(v => v.Id).ToList());
             IdGenBoundary?.Reset(boundaryPool.Select(b => b.Id).ToList());
@@ -194,9 +199,10 @@ public class IndoorTiling
 
         spacePool.ForEach(space => space.allBoundaries.ForEach(b => b.PartialBound(space)));
 
+        space2RLines.Clear();
+        rLinePool.ForEach(rl => space2RLines[rl.space] = rl);
 
         // TODO:
-        // space2RLines
         // boundary2RLines
     }
 
@@ -589,6 +595,9 @@ public class IndoorTiling
         {
             s.UpdateFromVertex();
             s.OnUpdate?.Invoke();
+
+            space2RLines[s].UpdateGeom();
+            space2RLines[s].OnUpdate();
         }
 
         foreach (var s1 in spaces)
@@ -703,14 +712,16 @@ public class IndoorTiling
         BoundaryLeftRightCheck();
     }
 
-    public void AddRepresentativeLine(LineString ls, CellBoundary from, CellBoundary to, CellSpace through)
+    public void AddRepresentativeLine(CellBoundary from, CellBoundary to, CellSpace through)
     {
-        // new RepresentativeLine(ls, from, to, through);
+        space2RLines[through].Add(new RepresentativeLine(from, to, through, PassType.AllowedToPass));
+        through.OnUpdate?.Invoke();
     }
 
     public void RemoveRepresentativeLine(RepresentativeLine rLine)
     {
-
+        space2RLines[rLine.through].Remove(rLine);
+        rLine.through.OnUpdate?.Invoke();
     }
 
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
@@ -782,6 +793,14 @@ public class IndoorTiling
     {
         if (boundaryPool.Contains(boundary)) throw new ArgumentException("add redundant cell boundary");
 
+        boundary.OnDirectionUpdate += () =>
+        {
+            if (boundary.leftSpace != null && space2RLines.ContainsKey(boundary.leftSpace))
+                space2RLines[boundary.leftSpace].UpdateIn2Out();
+            if (boundary.rightSpace != null && space2RLines.ContainsKey(boundary.rightSpace))
+                space2RLines[boundary.rightSpace]?.UpdateIn2Out();
+        };
+
         boundaryPool.Add(boundary);
 
         vertex2Boundaries[boundary.P0].Add(boundary);
@@ -816,6 +835,24 @@ public class IndoorTiling
         RelateVertexSpace(space);
         space.allBoundaries.ForEach(b => b.PartialBound(space));
         OnSpaceCreated?.Invoke(space);
+
+
+        RLineGroup rLineGroup = new RLineGroup(space);
+        rLinePool.Add(rLineGroup);
+        space2RLines[space] = rLineGroup;
+
+        OnRLinesCreated?.Invoke(rLineGroup);
+
+        space.OnNavigableUpdate += () =>
+        {
+            space2RLines[space].UpdateIn2Out();
+            space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].UpdateIn2Out(); });
+            space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].UpdateIn2Out(); });
+        };
+
+        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].UpdateIn2Out(); });
+        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].UpdateIn2Out(); });
+
         return space.Id;
     }
 
@@ -827,6 +864,11 @@ public class IndoorTiling
             vertex2Spaces[vertex].Remove(space);
         space.allBoundaries.ForEach(b => b.PartialUnBound(space));
         OnSpaceRemoved?.Invoke(space);
+
+        rLinePool.Remove(space2RLines[space]);
+        OnRLinesRemoved?.Invoke(space2RLines[space]);
+
+        space2RLines.Remove(space);
     }
 
     private void UpdateSpaceInternal(CellSpace space, CellSpace? removeHoleContainThisHole, List<CellSpace> addHoles)

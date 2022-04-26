@@ -15,10 +15,22 @@ public class CellBoundary
     [JsonPropertyAttribute] public LineString Geom { get; private set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
-    [JsonPropertyAttribute] public NaviDirection NaviDirection { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] private NaviDirection naviDirection { set; get; } = NaviDirection.BiDirection;
+    [JsonIgnore]
+    public NaviDirection NaviDirection
+    {
+        set
+        {
+            naviDirection = value;
+            OnUpdate?.Invoke();
+            OnDirectionUpdate?.Invoke();
+        }
+        get => naviDirection;
+    }
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
     [JsonIgnore] public Action OnUpdate = () => { };
+    [JsonIgnore] public Action OnDirectionUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
 
     public Navigable Navigable()
