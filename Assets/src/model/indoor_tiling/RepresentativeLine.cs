@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 public enum PassType
 {
-    IllForm,  // the "from" is not the inbound of "through", or the "to" is not the outbound of "through"
     DoNotPass,
     AllowedToPass,
 }
@@ -15,7 +14,10 @@ public class RepresentativeLine
     [JsonPropertyAttribute] public CellBoundary from { get; private set; }
     [JsonPropertyAttribute] public CellBoundary to { get; private set; }
     [JsonPropertyAttribute] public CellSpace through { get; private set; }
-    [JsonPropertyAttribute] public PassType passType { get; private set; }
+    [JsonPropertyAttribute] public PassType passType { get; set; }
+
+    public bool IllForm()
+        => !through.InBound().Contains(from) || !through.OutBound().Contains(to);
 
     public RepresentativeLine(CellBoundary from, CellBoundary to, CellSpace through, PassType passType)
     {

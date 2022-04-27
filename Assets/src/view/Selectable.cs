@@ -7,6 +7,7 @@ public enum SelectableType
     Vertex,
     Boundary,
     Space,
+    RLine,
 }
 public interface Selectable
 {

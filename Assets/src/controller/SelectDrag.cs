@@ -5,7 +5,7 @@ using UnityEngine;
 using NetTopologySuite.Geometries;
 #nullable enable
 
-enum Status
+enum SelectStatus
 {
     Idle,
     Selecting,
@@ -22,7 +22,7 @@ public class SelectDrag : MonoBehaviour, ITool
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
 
-    private Status status = Status.Idle;
+    private SelectStatus status = SelectStatus.Idle;
 
     private bool adhoc = false;
 
@@ -52,7 +52,7 @@ public class SelectDrag : MonoBehaviour, ITool
         dragHotspot = new Vector2(0, 0);
     }
 
-    void SwitchStatus(Status status)
+    void SwitchStatus(SelectStatus status)
     {
         Debug.Log(status);
         this.status = status;
@@ -66,7 +66,7 @@ public class SelectDrag : MonoBehaviour, ITool
 
         switch (status)
         {
-            case Status.Idle:
+            case SelectStatus.Idle:
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
@@ -82,11 +82,11 @@ public class SelectDrag : MonoBehaviour, ITool
                                 if (boundary.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
                         }
-                        SwitchStatus(Status.Dragging);
+                        SwitchStatus(SelectStatus.Dragging);
                     }
                     else
                     {
-                        SwitchStatus(Status.Selecting);
+                        SwitchStatus(SelectStatus.Selecting);
                     }
                     mouseDownPosition = CameraController.mousePositionOnGround();
                 }
@@ -99,7 +99,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.Auto);
                 break;
 
-            case Status.Selecting:
+            case SelectStatus.Selecting:
                 if (Input.GetMouseButtonUp(0))
                 {
                     // check release immediately?
@@ -130,9 +130,9 @@ public class SelectDrag : MonoBehaviour, ITool
                         }
 
                     if (selectedVertices.Count > 0)
-                        SwitchStatus(Status.Selected);
+                        SwitchStatus(SelectStatus.Selected);
                     else
-                        SwitchStatus(Status.Idle);
+                        SwitchStatus(SelectStatus.Idle);
                     GetComponent<LineRenderer>().positionCount = 0;
                 }
                 else
@@ -158,7 +158,7 @@ public class SelectDrag : MonoBehaviour, ITool
                 }
                 break;
 
-            case Status.Selected:
+            case SelectStatus.Selected:
                 if (Input.GetMouseButtonUp(0))
                     throw new System.Exception("should not release button 0 in Selected status");
                 else if (Input.GetMouseButtonDown(0))
@@ -166,7 +166,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     mouseDownPosition = CameraController.mousePositionOnGround();
                     if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
                     {
-                        SwitchStatus(Status.Dragging);
+                        SwitchStatus(SelectStatus.Dragging);
                     }
                     else  // re select
                     {
@@ -182,7 +182,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             selectedSpaces.Clear();
                         }
 
-                        SwitchStatus(Status.Selecting);
+                        SwitchStatus(SelectStatus.Selecting);
                     }
                 }
                 else if (Input.GetMouseButtonUp(1))
@@ -195,7 +195,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     selectedBoundaries.Clear();
                     selectedSpaces.Clear();
 
-                    SwitchStatus(Status.Idle);
+                    SwitchStatus(SelectStatus.Idle);
                 }
 
                 if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
@@ -206,7 +206,7 @@ public class SelectDrag : MonoBehaviour, ITool
 
                 break;
 
-            case Status.Dragging:
+            case SelectStatus.Dragging:
                 if (Input.GetMouseButtonDown(0))
                     throw new System.Exception("should not press button 0 in GetMouseButtonUp status");
 
@@ -237,11 +237,11 @@ public class SelectDrag : MonoBehaviour, ITool
                             adhoc = false;
                             selectedVertices.Clear();
                             selectedBoundaries.Clear();
-                            SwitchStatus(Status.Idle);
+                            SwitchStatus(SelectStatus.Idle);
                         }
                         else
                         {
-                            SwitchStatus(Status.Selected);
+                            SwitchStatus(SelectStatus.Selected);
                         }
                     }
                 }
@@ -250,7 +250,7 @@ public class SelectDrag : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(1))
         {
-            status = Status.Idle;
+            status = SelectStatus.Idle;
             foreach (var vc in selectedVertices)
                 vc.selected = false;
             foreach (var bc in selectedBoundaries)

@@ -81,6 +81,15 @@ public class SimulationController : MonoBehaviour
                     Debug.Log("Switch to tool boundary direction");
                 }
             }
+            else if (e.name == "rline")
+            {
+                if (oldToolName != "rline")
+                {
+                    toolObj = new GameObject("rline");
+                    currentTool = toolObj.AddComponent<RLineEditor>();
+                    Debug.Log("Switch to tool rline");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());

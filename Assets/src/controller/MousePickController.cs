@@ -10,8 +10,19 @@ public class MousePickController : MonoBehaviour
     public const float radiusFactor = 0.02f;
 
     static private Selectable? pointedEntity = null;
-
     static public Selectable? PointedEntity { get => pointedEntity; }
+
+    static private VertexController? pointedVertex = null;
+    static public VertexController? PointedVertex { get => pointedVertex; }
+
+    static private BoundaryController? pointedBoundary = null;
+    static public BoundaryController? PointedBoundary { get => pointedBoundary; }
+
+    static private SpaceController? pointedSpace = null;
+    static public SpaceController? PointedSpace { get => pointedSpace; }
+
+    static private RLineController? pointedRLine = null;
+    static public RLineController? PointedRLine { get => pointedRLine; }
 
     public UIEventDispatcher? eventDispatcher;
 
@@ -31,49 +42,82 @@ public class MousePickController : MonoBehaviour
         float radius = Camera.main.transform.position.y * radiusFactor;
         RaycastHit[] hits = Physics.SphereCastAll(Camera.main.transform.position, radius, ray.direction, 100.0f);
 
-        Selectable? NearestEntity = null;
-        float minDistance = float.MaxValue;
+        VertexController? nearestVertex = null;
+        BoundaryController? nearestBoundary = null;
+        SpaceController? nearestSpace = null;
+        RLineController? nearestRLine = null;
+        float vertexMinDistance = float.MaxValue;
+        float boundaryMinDistance = float.MaxValue;
+        float spaceMinDistance = float.MaxValue;
+        float rLineMinDistance = float.MaxValue;
+
+
         foreach (RaycastHit hit in hits)
         {
             if (hit.collider.gameObject.GetComponent<VertexController>() != null)
             {
-                Selectable vc = hit.collider.gameObject.GetComponent<VertexController>();
+                VertexController vc = hit.collider.gameObject.GetComponent<VertexController>();
                 float distance = vc.Distance(mousePositionOnGround);
-                if (NearestEntity == null || minDistance > distance || NearestEntity.type != SelectableType.Vertex)
+                if (vertexMinDistance > distance)
                 {
-                    NearestEntity = vc;
-                    minDistance = distance;
+                    nearestVertex = vc;
+                    vertexMinDistance = distance;
                 }
             }
             if (hit.collider.gameObject.GetComponent<BoundaryController>() != null)
             {
-                if (NearestEntity != null && NearestEntity.type == SelectableType.Vertex) continue;
-                Selectable vc = hit.collider.gameObject.GetComponent<BoundaryController>();
-                float distance = vc.Distance(mousePositionOnGround);
-                if (NearestEntity == null || minDistance > distance || NearestEntity.type == SelectableType.Space)
+                BoundaryController bc = hit.collider.gameObject.GetComponent<BoundaryController>();
+                float distance = bc.Distance(mousePositionOnGround);
+                if (boundaryMinDistance > distance)
                 {
-                    NearestEntity = vc;
-                    minDistance = distance;
+                    nearestBoundary = bc;
+                    boundaryMinDistance = distance;
                 }
             }
             if (hit.collider.gameObject.GetComponent<SpaceController>() != null)
             {
-                if (NearestEntity != null && NearestEntity.type != SelectableType.Space) continue;
-                Selectable vc = hit.collider.gameObject.GetComponent<SpaceController>();
-                float distance = vc.Distance(mousePositionOnGround);
-                if (NearestEntity == null || minDistance > distance)
+                SpaceController sc = hit.collider.gameObject.GetComponent<SpaceController>();
+                float distance = sc.Distance(mousePositionOnGround);
+                if (spaceMinDistance > distance)
                 {
-                    NearestEntity = vc;
-                    minDistance = distance;
+                    nearestSpace = sc;
+                    spaceMinDistance = distance;
+                }
+            }
+            if (hit.collider.gameObject.GetComponent<RLineController>() != null)
+            {
+                RLineController rc = hit.collider.gameObject.GetComponent<RLineController>();
+                float distance = rc.Distance(mousePositionOnGround);
+                if (rLineMinDistance > distance)
+                {
+                    nearestRLine = rc;
+                    rLineMinDistance = distance;
                 }
             }
         }
 
-        if (NearestEntity != pointedEntity)
+        pointedVertex = nearestVertex;
+        pointedBoundary = nearestBoundary;
+        pointedSpace = nearestSpace;
+        pointedRLine = nearestRLine;
+
+        Selectable? nearestEntity = null;
+        if (nearestVertex != null)
+            nearestEntity = nearestVertex;
+        else if (nearestBoundary != null)
+            nearestEntity = nearestBoundary;
+        else if (nearestRLine != null)
+            nearestEntity = nearestRLine;
+        else if (nearestSpace != null)
+            nearestEntity = nearestSpace;
+
+
+
+        if (nearestEntity != pointedEntity)
         {
             if (pointedEntity != null) pointedEntity.highLight = false;
-            if (NearestEntity != null) NearestEntity.highLight = true;
-            pointedEntity = NearestEntity;
+            if (nearestEntity != null) nearestEntity.highLight = true;
+            pointedEntity = nearestEntity;
 
             eventDispatcher!.Raise(this, new UIEvent() { type = UIEventType.SceneTip, message = pointedEntity == null ? "" : pointedEntity.Tip() });
         }

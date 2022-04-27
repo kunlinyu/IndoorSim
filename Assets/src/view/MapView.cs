@@ -9,9 +9,12 @@ public class MapView : MonoBehaviour
     public GameObject vertexParentObj;
     public GameObject boundaryParentObj;
     public GameObject spaceParentObj;
+    public GameObject rLineParentObj;
+
     public Transform vertexParent;
     public Transform boundaryParent;
     public Transform spaceParent;
+    public Transform rLineParent;
 
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
@@ -39,6 +42,12 @@ public class MapView : MonoBehaviour
         spaceParentObj.transform.localPosition = Vector3.zero;
         spaceParentObj.transform.localRotation = Quaternion.identity;
         spaceParent = spaceParentObj.transform;
+
+        rLineParentObj = new GameObject("rLine parent");
+        rLineParentObj.transform.SetParent(transform);
+        rLineParentObj.transform.localPosition = Vector3.zero;
+        rLineParentObj.transform.localRotation = Quaternion.identity;
+        rLineParent = rLineParentObj.transform;
 
 
         indoorTiling.OnVertexCreated += (vertex) =>
@@ -91,13 +100,15 @@ public class MapView : MonoBehaviour
         indoorTiling.OnRLinesCreated += (rLines) =>
         {
             var obj = new GameObject(rLines.space.Id + " rLines");
-            obj.transform.SetParent(spaceParent);
+            obj.transform.SetParent(rLineParent);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
             cellspace2RLineObj[rLines] = obj;
 
             var controller = obj.AddComponent<RLinesController>();
             controller.material = Resources.Load<Material>("material/arrow");
+            controller.materialDark = Resources.Load<Material>("material/arrow dark");
+            controller.materialHighlight = Resources.Load<Material>("material/arrow highlight");
             controller.RLines = rLines;
         };
         indoorTiling.OnVertexRemoved += (vertex) =>

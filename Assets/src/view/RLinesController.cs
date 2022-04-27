@@ -1,6 +1,67 @@
 using System.Linq;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using UnityEngine;
+
+public class RLineController : MonoBehaviour, Selectable
+{
+    public RepresentativeLine rLine;
+    private bool _highLight = false;
+    private bool needUpdateRenderer = true;
+    public bool highLight
+    {
+        get => _highLight;
+        set
+        {
+            _highLight = value;
+            needUpdateRenderer = true;
+        }
+    }
+    private bool _selected = false;
+    public bool selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            needUpdateRenderer = true;
+        }
+    }
+
+    public Material material;
+    public Material materialDark;
+    public Material materialHighlight;
+
+    public SelectableType type { get => SelectableType.RLine; }
+
+    public float Distance(Vector3 vec)
+        => (float)rLine.geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+
+    public string Tip()
+        => $"from: {rLine.from.Id}\n" +
+           $"to: {rLine.to.Id}\n" +
+           $"through: {rLine.through.Id}";
+
+    public float scrollSpeed = 1.0f;
+    void Update()
+    {
+
+        if (highLight)
+            GetComponent<LineRenderer>().material = materialHighlight;
+        else if (rLine.passType == PassType.AllowedToPass)
+            GetComponent<LineRenderer>().material = material;
+        else if (rLine.passType == PassType.DoNotPass)
+            GetComponent<LineRenderer>().material = materialDark;
+        else
+            throw new System.Exception("unknown pass type: " + rLine.passType);
+
+        if (rLine.passType == PassType.AllowedToPass)
+        {
+            float offset = Time.time * -1.0f * scrollSpeed;
+            GetComponent<LineRenderer>().material.SetTextureOffset("_MainTex", new Vector2(offset, 0));
+        }
+    }
+}
 
 public class RLinesController : MonoBehaviour
 {
@@ -8,16 +69,18 @@ public class RLinesController : MonoBehaviour
     public RLineGroup RLines
     {
         get => rLines;
-        set {
+        set
+        {
             rLines = value;
             rLines.OnUpdate += updateRenderer;
         }
     }
-    private List<GameObject> rendererObj = new List<GameObject>();
+    private List<GameObject> renderObj = new List<GameObject>();
 
     public Material material;
+    public Material materialDark;
+    public Material materialHighlight;
     public float width = 0.05f;
-    public float scrollSpeed = 1.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -26,28 +89,27 @@ public class RLinesController : MonoBehaviour
         updateRenderer();
     }
 
-    // Update is called once per frame
-
-    void Update()
-    {
-        float offset = Time.time * -1.0f * scrollSpeed;
-        foreach (GameObject obj in rendererObj)
-            obj.GetComponent<LineRenderer>().material.SetTextureOffset("_MainTex", new Vector2(offset, 0));
-    }
-
 
     void updateRenderer()
     {
         Debug.Log("rLines updateRenderer");
-        rendererObj.ForEach(obj => Destroy(obj));
-        rendererObj.Clear();
+        renderObj.ForEach(obj => Destroy(obj));
+        renderObj.Clear();
 
         foreach (var rLine in rLines.rLines)
         {
+            if (rLine.IllForm()) continue;
             GameObject obj = new GameObject("rLine renderer");
             obj.transform.SetParent(transform);
             obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-            rendererObj.Add(obj);
+            obj.transform.position = Utils.Coor2Vec(rLine.geom.GetPointN(rLine.geom.NumPoints / 2).Coordinate);
+            renderObj.Add(obj);
+
+            var rlc = obj.AddComponent<RLineController>();
+            rlc.rLine = rLine;
+            rlc.material = material;
+            rlc.materialDark = materialDark;
+            rlc.materialHighlight = materialHighlight;
 
             LineRenderer lr = obj.AddComponent<LineRenderer>();
             lr.positionCount = rLine.geom.NumPoints;
@@ -60,12 +122,11 @@ public class RLinesController : MonoBehaviour
             lr.endWidth = width;
             lr.numCapVertices = 5;
             lr.numCornerVertices = 0;
-            lr.material = material;
             lr.sortingOrder = 2;
 
-            // SphereCollider sc = obj.AddComponent<SphereCollider>();
-            // // sc.center
-            // sc.radius = 0.1f;
+            SphereCollider sc = obj.AddComponent<SphereCollider>();
+            sc.center = Vector3.zero;
+            sc.radius = 0.1f;
         }
 
     }

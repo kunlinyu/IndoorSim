@@ -14,11 +14,23 @@ public class RLineGroup
     [JsonPropertyAttribute] public List<RepresentativeLine> rLines { get; private set; } = new List<RepresentativeLine>();
     [JsonIgnore] public Action OnUpdate = () => { };
 
+    public void UpdateOneRLine(CellBoundary b1, CellBoundary b2, PassType passType)
+    {
+        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.from == b1 && rl.to == b2);
+        if (rl == null)
+            rLines.Add(new RepresentativeLine(b1, b2, space, passType));
+        else
+            rl.passType = passType;
+    }
+
     public RLineGroup(CellSpace space)
     {
         this.space = space;
-        foreach (var b1 in space.InBound())
-            foreach (var b2 in space.OutBound())
+        var inbound = space.InBound();
+        var outbound = space.OutBound();
+
+        foreach (var b1 in space.allBoundaries)
+            foreach (var b2 in space.allBoundaries)
                 if (b1 != b2)
                     Add(new RepresentativeLine(b1, b2, space, PassType.AllowedToPass));
     }
@@ -62,12 +74,11 @@ public class RLineGroup
 
     public void UpdateIn2Out()
     {
-        rLines.Clear();
+        var inbound = space.InBound();
+        var outbound = space.OutBound();
 
-        foreach (var b1 in space.InBound())
-            foreach (var b2 in space.OutBound())
-                if (b1 != b2)
-                    Add(new RepresentativeLine(b1, b2, space, PassType.AllowedToPass));
+        // TODO: ?
+
         OnUpdate?.Invoke();
     }
 }

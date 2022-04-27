@@ -42,6 +42,7 @@ public class BoundaryController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
+    public SelectableType type { get => SelectableType.Boundary; }
 
     [SerializeField] public Material material;
     [SerializeField] public Material highLightMaterial;
@@ -49,7 +50,6 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     public float widthFactor = 0.01f;
     private float width = 0.0f;
-    public SelectableType type { get => SelectableType.Boundary; }
 
     private int lastCameraHeightInt;
 
