@@ -54,4 +54,28 @@ public class M
         }
         return result;
     }
+
+    static public Coordinate[] bazierCurve3(Coordinate P0, Coordinate P1, Coordinate P2, double stepLength)
+    {
+        double length = LineStringLength(bazierCurve3(P0, P1, P2, 200));
+        int step = (int) (length / stepLength);
+        return bazierCurve3(P0, P1, P2, step);
+    }
+    static public Coordinate[] bazierCurve4(Coordinate P0, Coordinate P1, Coordinate P2, Coordinate P3, double stepLength)
+    {
+        double length = LineStringLength(bazierCurve4(P0, P1, P2, P3, 200));
+        int step = (int) (length / stepLength);
+        return bazierCurve4(P0, P1, P2, P3, step);
+    }
+
+    static public double LineStringLength(Coordinate[] coordinates)
+    {
+        if (coordinates.Length == 0) throw new ArgumentException("should have at least one coordinate");
+        if (coordinates.Length == 1) return 0.0d;
+
+        double length = 0.0d;
+        for (int i = 1; i < coordinates.Length; i++)
+            length += coordinates[i].Distance(coordinates[i - 1]);
+        return length;
+    }
 }

@@ -97,8 +97,7 @@ public class MapView : MonoBehaviour
             cellspace2RLineObj[rLines] = obj;
 
             var controller = obj.AddComponent<RLinesController>();
-            controller.material = new Material(Shader.Find("Sprites/Default"));
-            controller.material.color = new Color(0.7f, 0.7f, 0.7f);
+            controller.material = Resources.Load<Material>("material/arrow");
             controller.RLines = rLines;
         };
         indoorTiling.OnVertexRemoved += (vertex) =>
