@@ -12,7 +12,7 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
-    [JsonPropertyAttribute] public Navigable navigable = Navigable.Navigable;
+    [JsonPropertyAttribute] private Navigable navigable = Navigable.Navigable;
 
     [JsonIgnore]
     public Navigable Navigable
@@ -23,7 +23,6 @@ public class CellSpace : Container
             navigable = value;
             allBoundaries.ForEach(b => b.OnUpdate?.Invoke());
             OnUpdate?.Invoke();
-            OnNavigableUpdate?.Invoke();
         }
     }
     [JsonIgnore] public Polygon Polygon { get => (Polygon)Geom!; }
@@ -53,7 +52,6 @@ public class CellSpace : Container
     }
 
     [JsonIgnore] public Action OnUpdate = () => { };
-    [JsonIgnore] public Action OnNavigableUpdate = () => { };
 
     private CellSpace() : base("")
     {

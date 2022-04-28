@@ -23,14 +23,12 @@ public class CellBoundary
         {
             naviDirection = value;
             OnUpdate?.Invoke();
-            OnDirectionUpdate?.Invoke();
         }
         get => naviDirection;
     }
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
     [JsonIgnore] public Action OnUpdate = () => { };
-    [JsonIgnore] public Action OnDirectionUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
 
     public Navigable Navigable()

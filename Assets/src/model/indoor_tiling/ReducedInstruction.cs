@@ -16,7 +16,9 @@ public enum SubjectType
 {
     Boundary,
     Vertices,
-    // TODO: vertices
+    BoundaryDirection,
+    SpaceNavigable,
+    RLine,
 }
 
 // Following instructions are valid:
@@ -24,6 +26,9 @@ public enum SubjectType
 // 2. Update Boundary
 // 3. Remove Boundary
 // 4. Update Vertices
+// 5. Update boundary direction
+// 6. Update space navigable
+// 7. Update RLine PassType
 
 [Serializable]
 public struct Parameters
@@ -34,6 +39,12 @@ public struct Parameters
     [JsonPropertyAttribute] public List<Coordinate>? newCoors;
     [JsonPropertyAttribute] public LineString? newLineString;
     [JsonPropertyAttribute] public LineString? oldLineString;
+    [JsonPropertyAttribute] public NaviDirection oldDirection;
+    [JsonPropertyAttribute] public NaviDirection newDirection;
+    [JsonPropertyAttribute] public Navigable oldNavigable;
+    [JsonPropertyAttribute] public Navigable newNavigable;
+    [JsonPropertyAttribute] public PassType oldPassType;
+    [JsonPropertyAttribute] public PassType newPassType;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -103,6 +114,33 @@ public class ReducedInstruction
         return ri;
     }
 
+    public static ReducedInstruction UpdateBoundaryDirection(LineString oldLineString, NaviDirection oldDirection, NaviDirection newDirection)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.BoundaryDirection;
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldLineString = Clone(oldLineString), oldDirection = oldDirection, newDirection = newDirection };
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateSpaceNavigable(Coordinate spaceInterior, Navigable oldNavigable, Navigable newNavigable)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.SpaceNavigable;
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldCoor = spaceInterior, oldNavigable = oldNavigable, newNavigable = newNavigable };
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateRLinePassType(LineString oldLineString, PassType oldPassType, PassType newPassType)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.RLine;
+        ri.predicate = Predicate.Update;
+        ri.param = new Parameters() { oldLineString = oldLineString, oldPassType = oldPassType, newPassType = newPassType };
+        return ri;
+    }
+
     static public List<ReducedInstruction> Reverse(List<ReducedInstruction> instructions)
     {
         var result = new List<ReducedInstruction>();
@@ -121,7 +159,7 @@ public class ReducedInstruction
                     case Predicate.Update:
                         return UpdateVertices(param.newCoors, param.oldCoors);
                     default:
-                        throw new InvalidCastException("Unknown predicate");
+                        throw new ArgumentException("Unknown predicate");
                 }
             case SubjectType.Boundary:
                 switch (predicate)
@@ -133,10 +171,23 @@ public class ReducedInstruction
                     case Predicate.Update:
                         return UpdateBoundary(param.newLineString, param.oldLineString);
                     default:
-                        throw new InvalidCastException("Unknown predicate");
+                        throw new ArgumentException("Unknown predicate");
                 }
+            case SubjectType.BoundaryDirection:
+                if (predicate == Predicate.Update)
+                    return UpdateBoundaryDirection(param.oldLineString, param.newDirection, param.oldDirection);
+                else
+                    throw new ArgumentException("boundary direction can only update.");
+            case SubjectType.SpaceNavigable:
+                if (predicate == Predicate.Update)
+                    return UpdateSpaceNavigable(param.oldCoor, param.newNavigable, param.oldNavigable);
+                else throw new ArgumentException("space navigable can only update.");
+            case SubjectType.RLine:
+                if (predicate == Predicate.Update)
+                    return UpdateRLinePassType(param.oldLineString, param.newPassType, param.oldPassType);
+                else throw new ArgumentException("rLine pass type can only update.");
             default:
-                throw new InvalidCastException("Unknown subject type");
+                throw new ArgumentException("Unknown subject type");
         }
     }
 

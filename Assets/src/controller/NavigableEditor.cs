@@ -29,13 +29,13 @@ public class NavigableEditor : MonoBehaviour, ITool
             switch (sc.Space.Navigable)
             {
                 case Navigable.PhysicallyNonNavigable:
-                    sc.Space.Navigable = Navigable.LogicallyNonNavigable;
+                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.LogicallyNonNavigable);
                     break;
                 case Navigable.LogicallyNonNavigable:
-                    sc.Space.Navigable = Navigable.Navigable;
+                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.Navigable);
                     break;
                 case Navigable.Navigable:
-                    sc.Space.Navigable = Navigable.PhysicallyNonNavigable;
+                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.PhysicallyNonNavigable);
                     break;
             }
         }

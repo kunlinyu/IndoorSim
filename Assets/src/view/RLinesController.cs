@@ -40,7 +40,8 @@ public class RLineController : MonoBehaviour, Selectable
     public string Tip()
         => $"from: {rLine.from.Id}\n" +
            $"to: {rLine.to.Id}\n" +
-           $"through: {rLine.through.Id}";
+           $"through: {rLine.through.Id}\n" +
+           $"passType: {rLine.passType}";
 
     public float scrollSpeed = 1.0f;
     void Update()
@@ -92,7 +93,6 @@ public class RLinesController : MonoBehaviour
 
     void updateRenderer()
     {
-        Debug.Log("rLines updateRenderer");
         renderObj.ForEach(obj => Destroy(obj));
         renderObj.Clear();
 

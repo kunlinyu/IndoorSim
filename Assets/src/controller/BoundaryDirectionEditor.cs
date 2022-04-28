@@ -28,16 +28,16 @@ public class BoundaryDirectionEditor : MonoBehaviour, ITool
             switch (bc.Boundary.NaviDirection)
             {
                 case NaviDirection.BiDirection:
-                    bc.Boundary.NaviDirection = NaviDirection.Left2Right;
+                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Left2Right);
                     break;
                 case NaviDirection.Left2Right:
-                    bc.Boundary.NaviDirection = NaviDirection.Right2Left;
+                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Right2Left);
                     break;
                 case NaviDirection.Right2Left:
-                    bc.Boundary.NaviDirection = NaviDirection.NoneDirection;
+                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.NoneDirection);
                     break;
                 case NaviDirection.NoneDirection:
-                    bc.Boundary.NaviDirection = NaviDirection.BiDirection;
+                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.BiDirection);
                     break;
             }
         }

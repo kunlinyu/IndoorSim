@@ -25,9 +25,9 @@ public class RLineEditor : MonoBehaviour, ITool
             if (pointedRLine == null) return;
 
             if (pointedRLine.rLine.passType == PassType.DoNotPass)
-                pointedRLine.rLine.passType = PassType.AllowedToPass;
+                IndoorSim.indoorTiling.UpdateRLinePassType(pointedRLine.rLine, PassType.AllowedToPass);
             else if (pointedRLine.rLine.passType == PassType.AllowedToPass)
-                pointedRLine.rLine.passType = PassType.DoNotPass;
+                IndoorSim.indoorTiling.UpdateRLinePassType(pointedRLine.rLine, PassType.DoNotPass);
             else
                 throw new System.Exception("unknown passtype");
         }

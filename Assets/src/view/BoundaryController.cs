@@ -166,4 +166,5 @@ public class BoundaryController : MonoBehaviour, Selectable
            $"P1: {boundary.P1.Id}\n" +
            $"left:  {boundary.leftSpace?.Id}\n" +
            $"right: {boundary.rightSpace?.Id}";
+
 }

@@ -231,6 +231,18 @@ public class IndoorTiling
         return boundaries.FirstOrDefault(b => b.Geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
     }
 
+    private CellSpace? FindSpaceGeom(Coordinate coor)
+        => spacePool.FirstOrDefault(space => space.Polygon.Contains(new Point(coor)));
+
+    private RepresentativeLine? FindRLine(LineString ls)
+    {
+        foreach (var rLines in rLinePool)
+            foreach (var rl in rLines.rLines)
+                if (ls.EqualsNormalized(rl.geom))
+                    return rl;
+        return null;
+    }
+
     public bool Undo()
     {
         var instructions = instructionHistory.Undo();
@@ -338,6 +350,39 @@ public class IndoorTiling
                     default:
                         throw new ArgumentException("Unknown predicate: " + instruction.predicate);
                 }
+                break;
+            case SubjectType.BoundaryDirection:
+                if (instruction.predicate == Predicate.Update)
+                {
+                    CellBoundary? boundary = FindBoundaryGeom(instruction.param.oldLineString);
+                    if (boundary == null)
+                        throw new ArgumentException("can not find boundary: " + instruction.param.oldLineString);
+                    UpdateBoundaryNaviDirection(boundary, instruction.param.newDirection);
+                }
+                else
+                    throw new ArgumentException("boundary direction can only update.");
+                break;
+            case SubjectType.SpaceNavigable:
+                if (instruction.predicate == Predicate.Update)
+                {
+                    CellSpace? space = FindSpaceGeom(instruction.param.oldCoor);
+                    if (space == null)
+                        throw new ArgumentException("can not find space contain point: " + instruction.param.oldCoor.ToString());
+                    UpdateSpaceNavigable(space, instruction.param.newNavigable);
+                }
+                else
+                    throw new ArgumentException("space navigable can only update.");
+                break;
+            case SubjectType.RLine:
+                if (instruction.predicate == Predicate.Update)
+                {
+                    RepresentativeLine? rLine = FindRLine(instruction.param.oldLineString);
+                    if (rLine == null)
+                        throw new ArgumentException("can not find representative line: " + instruction.param.oldLineString);
+                    UpdateRLinePassType(rLine, instruction.param.newPassType);
+                }
+                else
+                    throw new ArgumentException("rLine pass type can only update.");
                 break;
             default:
                 throw new ArgumentException("Unknown subject type: " + instruction.subject);
@@ -725,6 +770,40 @@ public class IndoorTiling
         rLine.through.OnUpdate?.Invoke();
     }
 
+    public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
+
+        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.Geom, boundary.NaviDirection, direction));
+
+        boundary.NaviDirection = direction;
+
+        if (boundary.leftSpace != null && space2RLines.ContainsKey(boundary.leftSpace))
+            space2RLines[boundary.leftSpace]?.OnUpdate?.Invoke();
+        if (boundary.rightSpace != null && space2RLines.ContainsKey(boundary.rightSpace))
+            space2RLines[boundary.rightSpace]?.OnUpdate?.Invoke();
+
+    }
+
+    public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
+    {
+        if (!spacePool.Contains(space)) throw new ArgumentException("unknown space: " + space.Id);
+
+        instructionHistory.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
+
+        space.Navigable = navigable;
+
+        space2RLines[space].OnUpdate?.Invoke();
+        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
+        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
+    }
+
+    public void UpdateRLinePassType(RepresentativeLine rLine, PassType passType)
+    {
+        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLine.geom, rLine.passType, passType));
+        rLine.passType = passType;
+    }
+
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
         => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
     private List<JumpInfo> AdjacentFinder(CellVertex cv)
@@ -776,8 +855,6 @@ public class IndoorTiling
         vertex2Boundaries[vertex] = new HashSet<CellBoundary>();
         vertex2Spaces[vertex] = new HashSet<CellSpace>();
         OnVertexCreated?.Invoke(vertex);
-
-        // history.Do(ReducedInstruction.AddVertex(vertex));
     }
 
     private void RemoveVertexInternal(CellVertex vertex)
@@ -786,21 +863,11 @@ public class IndoorTiling
         vertex2Boundaries.Remove(vertex);
         vertex2Spaces.Remove(vertex);
         OnVertexRemoved?.Invoke(vertex);
-
-        // history.Do(ReducedInstruction.RemoveVertex(vertex));
     }
 
     private void AddBoundaryInternal(CellBoundary boundary)
     {
         if (boundaryPool.Contains(boundary)) throw new ArgumentException("add redundant cell boundary");
-
-        boundary.OnDirectionUpdate += () =>
-        {
-            if (boundary.leftSpace != null && space2RLines.ContainsKey(boundary.leftSpace))
-                space2RLines[boundary.leftSpace]?.OnUpdate?.Invoke();
-            if (boundary.rightSpace != null && space2RLines.ContainsKey(boundary.rightSpace))
-                space2RLines[boundary.rightSpace]?.OnUpdate?.Invoke();
-        };
 
         boundaryPool.Add(boundary);
 
@@ -843,13 +910,6 @@ public class IndoorTiling
         space2RLines[space] = rLineGroup;
 
         OnRLinesCreated?.Invoke(rLineGroup);
-
-        space.OnNavigableUpdate += () =>
-        {
-            space2RLines[space].OnUpdate?.Invoke();
-            space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
-            space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
-        };
 
         space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
         space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });

@@ -114,7 +114,8 @@ public class SpaceController : MonoBehaviour, Selectable
         return $"Geom.Holes.Length: {space.Polygon.Holes.Length}\n" +
                $"Holes.Count: {space.Holes.Count}\n" +
                $"Geom.Shell.NumPoints: {space.Polygon.Shell.NumPoints}\n" +
-               $"allBoundaries.Count: {space.allBoundaries.Count}";
+               $"allBoundaries.Count: {space.allBoundaries.Count}\n" +
+               $"Geom.Contains.InteriorPoint: {space.Geom.Contains(space.Geom.InteriorPoint)}";
     }
 
     public string Tip()
