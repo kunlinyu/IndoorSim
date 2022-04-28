@@ -14,7 +14,7 @@ public class RLineEditor : MonoBehaviour, ITool
 
     void Start()
     {
-
+        MousePickController.pickType = CurrentPickType.RLine;
     }
 
     void Update()

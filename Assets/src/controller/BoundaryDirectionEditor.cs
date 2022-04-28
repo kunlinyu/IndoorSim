@@ -10,6 +10,11 @@ public class BoundaryDirectionEditor : MonoBehaviour, ITool
     public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
 
+    void Start()
+    {
+        MousePickController.pickType = CurrentPickType.Boundary;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && !MouseOnUI)

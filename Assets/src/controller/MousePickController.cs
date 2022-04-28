@@ -4,6 +4,15 @@ using UnityEngine;
 
 #nullable enable
 
+public enum CurrentPickType
+{
+    All,
+    Vertex,
+    Boundary,
+    Space,
+    RLine,
+}
+
 public class MousePickController : MonoBehaviour
 {
 
@@ -25,6 +34,8 @@ public class MousePickController : MonoBehaviour
     static public RLineController? PointedRLine { get => pointedRLine; }
 
     public UIEventDispatcher? eventDispatcher;
+
+    static public CurrentPickType pickType { get; set; } = CurrentPickType.All;
 
     // Start is called before the first frame update
     void Start()
@@ -102,16 +113,28 @@ public class MousePickController : MonoBehaviour
         pointedRLine = nearestRLine;
 
         Selectable? nearestEntity = null;
-        if (nearestVertex != null)
+
+
+        if (pickType == CurrentPickType.All)
+        {
+            if (nearestVertex != null)
+                nearestEntity = nearestVertex;
+            else if (nearestBoundary != null)
+                nearestEntity = nearestBoundary;
+            else if (nearestRLine != null)
+                nearestEntity = nearestRLine;
+            else if (nearestSpace != null)
+                nearestEntity = nearestSpace;
+        }
+        else if (pickType == CurrentPickType.Vertex)
             nearestEntity = nearestVertex;
-        else if (nearestBoundary != null)
+        else if (pickType == CurrentPickType.Boundary)
             nearestEntity = nearestBoundary;
-        else if (nearestRLine != null)
-            nearestEntity = nearestRLine;
-        else if (nearestSpace != null)
+        else if (pickType == CurrentPickType.Space)
             nearestEntity = nearestSpace;
-
-
+        else if (pickType == CurrentPickType.RLine)
+            nearestEntity = nearestRLine;
+        else throw new System.Exception("unknown pick type: " + pickType);
 
         if (nearestEntity != pointedEntity)
         {

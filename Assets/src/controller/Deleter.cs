@@ -20,6 +20,7 @@ public class Deleter : MonoBehaviour, ITool
         cursurTexture = Resources.Load<Texture2D>("cursor/delete");
         hotspot = new Vector2(0.0f, 0.0f);
         UnityEngine.Cursor.SetCursor(cursurTexture, hotspot, CursorMode.Auto);
+        MousePickController.pickType = CurrentPickType.Boundary;
     }
 
     // Update is called once per frame

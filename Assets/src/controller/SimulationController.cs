@@ -31,6 +31,7 @@ public class SimulationController : MonoBehaviour
                 Destroy(toolObj);
                 toolObj = null;
                 currentTool = null;
+                MousePickController.pickType = CurrentPickType.All;
                 UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             }
 

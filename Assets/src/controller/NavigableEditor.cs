@@ -12,6 +12,11 @@ public class NavigableEditor : MonoBehaviour, ITool
     public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
 
+    void Start()
+    {
+        MousePickController.pickType = CurrentPickType.Space;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && !MouseOnUI)
