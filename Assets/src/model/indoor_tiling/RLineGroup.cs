@@ -29,10 +29,11 @@ public class RLineGroup
         var inbound = space.InBound();
         var outbound = space.OutBound();
 
-        foreach (var b1 in space.allBoundaries)
-            foreach (var b2 in space.allBoundaries)
-                if (b1 != b2)
-                    Add(new RepresentativeLine(b1, b2, space, PassType.AllowedToPass));
+        if (space.allBoundaries.Count < 7)
+            foreach (var b1 in space.allBoundaries)
+                foreach (var b2 in space.allBoundaries)
+                    if (b1 != b2)
+                        Add(new RepresentativeLine(b1, b2, space, PassType.AllowedToPass));
     }
     public RLineGroup(CellSpace space, List<RepresentativeLine> rLines)
     {
