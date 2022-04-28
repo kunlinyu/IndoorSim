@@ -150,7 +150,12 @@ public class BoundaryController : MonoBehaviour, Selectable
         }
         sr.sortingOrder = 3;
         sr.drawMode = SpriteDrawMode.Sliced;
-        sr.size = new Vector2(0.5f, 0.5f);
+
+        float arrowSizeFactor = 0.2f;
+        float maxSpriteSize = 0.2f;
+        float spriteSize = Mathf.Min((float)boundary.Geom.Length * arrowSizeFactor, maxSpriteSize);
+
+        sr.size = new Vector2(spriteSize, spriteSize);
 
         needUpdateRenderer = false;
     }
