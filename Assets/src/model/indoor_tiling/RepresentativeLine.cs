@@ -10,15 +10,16 @@ public enum PassType
 }
 public class RepresentativeLine
 {
-    [JsonPropertyAttribute] public LineString geom { get; private set; }
     [JsonPropertyAttribute] public CellBoundary from { get; private set; }
     [JsonPropertyAttribute] public CellBoundary to { get; private set; }
     [JsonPropertyAttribute] public CellSpace through { get; private set; }
     [JsonPropertyAttribute] public PassType passType { get; set; }
+    [JsonIgnore] public LineString geom { get; private set; }
 
     public bool IllForm()
         => !through.InBound().Contains(from) || !through.OutBound().Contains(to);
 
+    public RepresentativeLine() { }  // for deserialize only
     public RepresentativeLine(CellBoundary from, CellBoundary to, CellSpace through, PassType passType)
     {
         this.from = from;

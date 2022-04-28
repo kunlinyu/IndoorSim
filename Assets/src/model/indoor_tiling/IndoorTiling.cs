@@ -201,6 +201,7 @@ public class IndoorTiling
 
         space2RLines.Clear();
         rLinePool.ForEach(rl => space2RLines[rl.space] = rl);
+        rLinePool.ForEach(rls => rls.rLines.ForEach(rl => rl.UpdateGeom()));  // update geom after space partial bound to boundary
 
         // TODO:
         // boundary2RLines

@@ -10,18 +10,11 @@ using UnityEngine;
 #nullable enable
 public class RLineGroup
 {
-    [JsonPropertyAttribute] public CellSpace space { get; private set; }
+    [JsonPropertyAttribute] public CellSpace? space { get; private set; }
     [JsonPropertyAttribute] public List<RepresentativeLine> rLines { get; private set; } = new List<RepresentativeLine>();
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    public void UpdateOneRLine(CellBoundary b1, CellBoundary b2, PassType passType)
-    {
-        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.from == b1 && rl.to == b2);
-        if (rl == null)
-            rLines.Add(new RepresentativeLine(b1, b2, space, passType));
-        else
-            rl.passType = passType;
-    }
+    public RLineGroup() { }
 
     public RLineGroup(CellSpace space)
     {
@@ -39,6 +32,15 @@ public class RLineGroup
     {
         this.space = space;
         this.rLines = rLines;
+    }
+
+    public void UpdateOneRLine(CellBoundary b1, CellBoundary b2, PassType passType)
+    {
+        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.from == b1 && rl.to == b2);
+        if (rl == null)
+            rLines.Add(new RepresentativeLine(b1, b2, space, passType));
+        else
+            rl.passType = passType;
     }
 
     public void Add(RepresentativeLine rLine)
