@@ -71,14 +71,4 @@ public class RLineGroup
 
     public void UpdateGeom()
         => rLines.ForEach(rl => rl.UpdateGeom());
-
-    public void UpdateIn2Out()
-    {
-        var inbound = space.InBound();
-        var outbound = space.OutBound();
-
-        // TODO: ?
-
-        OnUpdate?.Invoke();
-    }
 }

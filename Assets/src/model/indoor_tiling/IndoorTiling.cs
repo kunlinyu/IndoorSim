@@ -796,9 +796,9 @@ public class IndoorTiling
         boundary.OnDirectionUpdate += () =>
         {
             if (boundary.leftSpace != null && space2RLines.ContainsKey(boundary.leftSpace))
-                space2RLines[boundary.leftSpace].UpdateIn2Out();
+                space2RLines[boundary.leftSpace]?.OnUpdate?.Invoke();
             if (boundary.rightSpace != null && space2RLines.ContainsKey(boundary.rightSpace))
-                space2RLines[boundary.rightSpace]?.UpdateIn2Out();
+                space2RLines[boundary.rightSpace]?.OnUpdate?.Invoke();
         };
 
         boundaryPool.Add(boundary);
@@ -845,13 +845,13 @@ public class IndoorTiling
 
         space.OnNavigableUpdate += () =>
         {
-            space2RLines[space].UpdateIn2Out();
-            space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].UpdateIn2Out(); });
-            space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].UpdateIn2Out(); });
+            space2RLines[space].OnUpdate?.Invoke();
+            space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
+            space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
         };
 
-        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].UpdateIn2Out(); });
-        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].UpdateIn2Out(); });
+        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
+        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
 
         return space.Id;
     }
