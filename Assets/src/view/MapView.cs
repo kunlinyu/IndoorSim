@@ -60,9 +60,9 @@ public class MapView : MonoBehaviour
 
             var controller = obj.AddComponent<VertexController>();
             controller.Vertex = vertex;
-            controller.material = Resources.Load<Material>("material/vertex material");
-            controller.highLightMaterial = Resources.Load<Material>("material/vertex highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("material/vertex selected material");
+            controller.material = Resources.Load<Material>("Materials/vertex material");
+            controller.highLightMaterial = Resources.Load<Material>("Materials/vertex highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("Materials/vertex selected material");
             controller.sortingLayerId = SortingLayer.NameToID("traffic");
         };
         indoorTiling.OnBoundaryCreated += (boundary) =>
@@ -74,9 +74,9 @@ public class MapView : MonoBehaviour
             boundary2Obj[boundary] = obj;
 
             var controller = obj.AddComponent<BoundaryController>();
-            controller.material = Resources.Load<Material>("material/boundary material");
-            controller.highLightMaterial = Resources.Load<Material>("material/boundary highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("material/boundary selected material");
+            controller.material = Resources.Load<Material>("Materials/boundary material");
+            controller.highLightMaterial = Resources.Load<Material>("Materials/boundary highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("Materials/boundary selected material");
             controller.Boundary = boundary;
         };
         indoorTiling.OnSpaceCreated += (space) =>
@@ -88,13 +88,13 @@ public class MapView : MonoBehaviour
             cellspace2Obj[space] = obj;
 
             var controller = obj.AddComponent<SpaceController>();
-            controller.material = Resources.Load<Material>("material/space material");
-            controller.logNonNaviMat = Resources.Load<Material>("material/log non navi space");
-            controller.phyNonNaviMat = Resources.Load<Material>("material/phy non navi space");
+            controller.material = Resources.Load<Material>("Materials/space material");
+            controller.logNonNaviMat = Resources.Load<Material>("Materials/log non navi space");
+            controller.phyNonNaviMat = Resources.Load<Material>("Materials/phy non navi space");
 
-            controller.highLightMaterial = Resources.Load<Material>("material/space highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("material/space selected material");
-            controller.triangulationMaterial = Resources.Load<Material>("material/space triangulation material");
+            controller.highLightMaterial = Resources.Load<Material>("Materials/space highlight material");
+            controller.selectedMaterial = Resources.Load<Material>("Materials/space selected material");
+            controller.triangulationMaterial = Resources.Load<Material>("Materials/space triangulation material");
             controller.Space = space;
         };
         indoorTiling.OnRLinesCreated += (rLines) =>
@@ -106,9 +106,9 @@ public class MapView : MonoBehaviour
             cellspace2RLineObj[rLines] = obj;
 
             var controller = obj.AddComponent<RLinesController>();
-            controller.material = Resources.Load<Material>("material/arrow");
-            controller.materialDark = Resources.Load<Material>("material/arrow dark");
-            controller.materialHighlight = Resources.Load<Material>("material/arrow highlight");
+            controller.material = Resources.Load<Material>("Materials/arrow");
+            controller.materialDark = Resources.Load<Material>("Materials/arrow dark");
+            controller.materialHighlight = Resources.Load<Material>("Materials/arrow highlight");
             controller.RLines = rLines;
         };
         indoorTiling.OnVertexRemoved += (vertex) =>
