@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
-  m_Name: shelves
+  m_Name: shelves2
   m_EditorClassIdentifier: 
   m_ToolName: shelves
   m_Class: 4
