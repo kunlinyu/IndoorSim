@@ -273,6 +273,9 @@ public class IndoorTiling
         }
     }
 
+    public void SessionStart() => instructionHistory.SessionStart();
+    public void SessionCommit() => instructionHistory.SessionCommit();
+
     // TODO: consider id generator when interpret reverse instruction
     private void InterpretInstruction(List<ReducedInstruction> instructions)
     {
@@ -388,6 +391,21 @@ public class IndoorTiling
                 throw new ArgumentException("Unknown subject type: " + instruction.subject);
         }
         instructionHistory.IgnoreDo = false;
+    }
+
+    public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor)
+    {
+        CellVertex? startVertex = FindVertexCoor(startCoor);
+        CellVertex? endVertex = FindVertexCoor(endCoor);
+        if (startVertex != null && endVertex != null)
+            return AddBoundary(startVertex, endVertex);
+        else if (startVertex != null && endVertex == null)
+            return AddBoundary(startVertex, endCoor);
+        else if (startVertex == null && endVertex != null)
+            return AddBoundary(startCoor, endVertex);
+        else
+            return AddBoundary(startCoor, endCoor);
+
     }
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor)
     {

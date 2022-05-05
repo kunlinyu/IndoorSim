@@ -14,11 +14,16 @@ public class Shelves : MonoBehaviour, ITool
 
     Vector3 firstPoint;
     Vector3 secondPoint;
+    Vector3 lastPoint;
+
+    CellVertex? firstVertex;
+    CellVertex? secondVertex;
+    CellVertex? lastVertex;
+
     float shelfWidth;
     float corridorWidth;
     int shelfCount;
     int corridorCount;
-    Vector3 lastPoint;
 
     // status == 0, Idle
     // status == 1, firstPoint clicked, going to click secondPoint
@@ -34,6 +39,9 @@ public class Shelves : MonoBehaviour, ITool
     List<GameObject> shelvesObj = new List<GameObject>();
 
     Vector3? mousePositionNullable = null;
+    Vector3? mouseSnapPosition = null;
+
+    List<List<Vector3>> spaceVectors = new List<List<Vector3>>();
 
 
     void Start()
@@ -57,73 +65,123 @@ public class Shelves : MonoBehaviour, ITool
 
     void Update()
     {
-        mousePositionNullable = CameraController.mousePositionOnGround();
         UpdateViewModel();
         UpdateView();
     }
 
     void UpdateViewModel()
     {
+        mousePositionNullable = CameraController.mousePositionOnGround();
+        mouseSnapPosition = mousePositionNullable;
+        if (MousePickController.PointedVertex != null)
+            mouseSnapPosition = Utils.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
+        if (mouseSnapPosition == null) return;
+
+        Vector3 segmentDir = (secondPoint - firstPoint).normalized;
+        Vector3 toNew = mouseSnapPosition.Value - firstPoint;
+        switch (status)
+        {
+            case 0:
+                firstVertex = MousePickController.PointedVertex?.Vertex;
+                firstPoint = mouseSnapPosition.Value;
+                break;
+            case 1:
+                secondVertex = MousePickController.PointedVertex?.Vertex;
+                secondPoint = mouseSnapPosition.Value;
+                break;
+            case 2:
+                shelfWidth = Vector3.Cross(segmentDir, toNew).y;
+                break;
+            case 3:
+                float shelfAndCorridorWidth = Vector3.Cross(segmentDir, toNew).y;
+                if (Mathf.Abs(shelfAndCorridorWidth) > Mathf.Abs(shelfWidth) && shelfAndCorridorWidth * shelfWidth > 0.0f)
+                    corridorWidth = shelfAndCorridorWidth - shelfWidth;
+                else
+                    corridorWidth = 0.0f;
+                break;
+            case 4:
+                float blockWidth = Vector3.Cross(segmentDir, toNew).y;
+                float pairWidth = shelfWidth + corridorWidth;
+                int fullPairCount = Mathf.FloorToInt(Mathf.Abs(blockWidth / pairWidth));
+
+                shelfCount = fullPairCount;
+                corridorCount = fullPairCount;
+
+                float remain = Mathf.Abs(blockWidth) - Mathf.Abs(fullPairCount * pairWidth);
+                if (Mathf.Abs(remain) > 1e-3)
+                    shelfCount++;
+                if (Mathf.Abs(remain) > Mathf.Abs(shelfWidth))
+                    corridorCount++;
+
+                lastVertex = MousePickController.PointedVertex?.Vertex;
+                lastPoint = mouseSnapPosition.Value;
+
+                while (spaceVectors.Count < shelfCount + corridorCount)
+                    spaceVectors.Add(new List<Vector3>(4));
+                while (spaceVectors.Count > shelfCount + corridorCount)
+                    spaceVectors.RemoveAt(spaceVectors.Count - 1);
+
+                Vector3 right = Quaternion.AngleAxis(-90.0f, Vector3.up) * segmentDir;
+                Vector3 secondToNew = lastPoint - secondPoint;
+                Vector3 secondToNewDir = secondToNew.normalized;
+                secondToNewDir = secondToNewDir / Mathf.Abs(Vector3.Dot(right, secondToNewDir));
+                for (int i = 0; i < spaceVectors.Count; i++)
+                {
+                    int previousCorridors = i / 2;
+                    int previousShelves = i - previousCorridors;
+                    float previousWidth = previousCorridors * Mathf.Abs(corridorWidth) + previousShelves * Mathf.Abs(shelfWidth);
+                    float currentWidth = (i % 2 == 0) ? Mathf.Abs(shelfWidth) : Mathf.Abs(corridorWidth);
+
+                    spaceVectors[i].Clear();
+                    spaceVectors[i].Add(firstPoint + secondToNewDir * previousWidth);
+                    spaceVectors[i].Add(firstPoint + secondToNewDir * (previousWidth + currentWidth));
+                    spaceVectors[i].Add(secondPoint + secondToNewDir * (previousWidth + currentWidth));
+                    spaceVectors[i].Add(secondPoint + secondToNewDir * previousWidth);
+                }
+
+
+
+                // TODO: calculate the latest two points and make it to be the new first and second, and jump to 2
+                // TODO: click right button to cancel
+
+                break;
+            default:
+                throw new System.Exception("Illegal shelves status: " + status);
+        }
+
+
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
             if (mousePositionNullable == null) return;
-            Vector3 mousePosition = mousePositionNullable.Value;
+            mouseSnapPosition = mousePositionNullable.Value;
+            if (MousePickController.PointedVertex != null)
+                mouseSnapPosition = Utils.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
             Debug.Log(status);
 
             switch (status)
             {
-                case 0:
-                    firstPoint = mousePosition;
-                    status++;
-                    break;
-                case 1:
-                    secondPoint = mousePosition;
-                    status++;
-                    break;
-                case 2:
-                    {
-                        Vector3 segmentDir = (secondPoint - firstPoint).normalized;
-                        Vector3 toNew = mousePosition - firstPoint;
-                        shelfWidth = Vector3.Cross(segmentDir, toNew).y;
-                        status++;
-                        break;
-                    }
-                case 3:
-                    {
-                        Vector3 segmentDir = (secondPoint - firstPoint).normalized;
-                        Vector3 toNew = mousePosition - firstPoint;
-                        float shelfAndCorridorWidth = Vector3.Cross(segmentDir, toNew).y;
-                        if (Mathf.Abs(shelfAndCorridorWidth) > Mathf.Abs(shelfWidth))
-                        {
-                            corridorWidth = shelfAndCorridorWidth - shelfWidth;
-                            status++;
-                        }
-                        break;
-                    }
+                case 0: status++; break;
+                case 1: status++; break;
+                case 2: status++; break;
+                case 3: if (corridorWidth != 0.0f) status++; break;
                 case 4:
+                    IndoorSim.indoorTiling.SessionStart();
+                    IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        Vector3 segmentDir = (secondPoint - firstPoint).normalized;
-                        Vector3 toNew = mousePosition - firstPoint;
-                        float blockWidth = Vector3.Cross(segmentDir, toNew).y;
-                        float pairWidth = shelfWidth + corridorWidth;
-                        int fullPairCount = Mathf.FloorToInt(blockWidth / pairWidth);
+                        var b1 = IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
+                        if (b1 == null) break;
+                        var b2 = IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
+                        if (b2 == null) break;
+                        var b3 = IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
+                        if (b3 == null) break;
 
-                        shelfCount = fullPairCount + 1;
-                        corridorCount = fullPairCount;
-
-                        float remain = blockWidth - fullPairCount * pairWidth;
-                        if (remain > shelfWidth)
-                            corridorCount++;
-
-                        lastPoint = mousePosition;
-
-                        // TODO: calculate the latest two points and make it to be the new first and second, and jump to 2
-                        // TODO: click right button to cancel
-
-                        status = 0;
-
-                        break;
+                        Navigable navigable = i % 2 == 0 ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
+                        IndoorSim.indoorTiling.UpdateSpaceNavigable(b3.leftSpace!, navigable);
                     }
+                    IndoorSim.indoorTiling.SessionCommit();
+                    status = 0;
+                    break;
                 default:
                     throw new System.Exception("Illegal shelves status: " + status);
             }
@@ -131,27 +189,27 @@ public class Shelves : MonoBehaviour, ITool
         }
     }
 
-    void UpdateView()
+    void ApplyToModel(Vector3 firstPoint, Vector3 secondPoint, Vector3 lastPoint,
+                      float shelfWidth, float corridorWidth,
+                      int shelfCount, int corridorCount)
     {
 
+    }
+
+    void UpdateView()
+    {
         // first to second
         if (status > 0)
         {
-            Vector3 currentPoint;
             LineRenderer lr = firstToSecondObj.GetComponent<LineRenderer>();
 
-            if (status == 1 && mousePositionNullable == null)
+            if (status == 1 && mouseSnapPosition == null)
                 lr.positionCount = 0;
             else
             {
-                if (status == 1 && mousePositionNullable != null)
-                    currentPoint = mousePositionNullable.Value;
-                else
-                    currentPoint = secondPoint;
-
                 lr.positionCount = 2;
                 lr.SetPosition(0, firstPoint);
-                lr.SetPosition(1, currentPoint);
+                lr.SetPosition(1, secondPoint);
 
                 lr.alignment = LineAlignment.TransformZ;
                 lr.useWorldSpace = true;
@@ -175,29 +233,18 @@ public class Shelves : MonoBehaviour, ITool
         // shelf width
         if (status == 2 || status == 3)
         {
-            float currentShelfWidth;
             LineRenderer lr = shelfWidthLineObj.GetComponent<LineRenderer>();
 
-            if (status == 2 && mousePositionNullable == null)
+            if (status == 2 && mouseSnapPosition == null)
             {
                 lr.positionCount = 0;
             }
             else
             {
                 Vector3 segmentDir = (secondPoint - firstPoint).normalized;
-                if (status == 2 && mousePositionNullable != null)
-                {
-                    Vector3 toNew = mousePositionNullable.Value - firstPoint;
-                    currentShelfWidth = Vector3.Cross(segmentDir, toNew).y;
-                }
-                else
-                {
-                    currentShelfWidth = shelfWidth;
-                }
-
                 Vector3 right = Quaternion.AngleAxis(-90.0f, Vector3.up) * segmentDir;
-                Vector3 firstRight = firstPoint - right * currentShelfWidth;
-                Vector3 secondRight = secondPoint - right * currentShelfWidth;
+                Vector3 firstRight = firstPoint - right * shelfWidth;
+                Vector3 secondRight = secondPoint - right * shelfWidth;
 
                 lr.positionCount = 4;
 
@@ -230,7 +277,7 @@ public class Shelves : MonoBehaviour, ITool
         {
             LineRenderer lr = corridorWidthLineObj.GetComponent<LineRenderer>();
 
-            if (mousePositionNullable == null)
+            if (mouseSnapPosition == null)
             {
                 lr.positionCount = 0;
             }
@@ -238,10 +285,7 @@ public class Shelves : MonoBehaviour, ITool
             {
                 Vector3 segmentDir = (secondPoint - firstPoint).normalized;
 
-                Vector3 toNew = mousePositionNullable.Value - firstPoint;
-                float currentBlockWidth = Vector3.Cross(segmentDir, toNew).y;
-
-                if (currentBlockWidth * shelfWidth < 0.0f || Mathf.Abs(currentBlockWidth) <= Mathf.Abs(shelfWidth))
+                if (corridorWidth == 0.0f)
                 {
                     lr.positionCount = 0;
                 }
@@ -250,8 +294,8 @@ public class Shelves : MonoBehaviour, ITool
                     Vector3 right = Quaternion.AngleAxis(-90.0f, Vector3.up) * segmentDir;
                     Vector3 firstRight = firstPoint - right * shelfWidth;
                     Vector3 secondRight = secondPoint - right * shelfWidth;
-                    Vector3 firstRightRight = firstRight - right * (currentBlockWidth - shelfWidth);
-                    Vector3 secondRightRight = secondRight - right * (currentBlockWidth - shelfWidth);
+                    Vector3 firstRightRight = firstRight - right * corridorWidth;
+                    Vector3 secondRightRight = secondRight - right * corridorWidth;
 
                     lr.positionCount = 4;
 
@@ -282,7 +326,7 @@ public class Shelves : MonoBehaviour, ITool
 
         if (status == 4)
         {
-            if (mousePositionNullable == null)
+            if (mouseSnapPosition == null)
             {
                 foreach (var obj in shelvesObj)
                     Destroy(obj);
@@ -290,21 +334,7 @@ public class Shelves : MonoBehaviour, ITool
             }
             else
             {
-                Vector3 segmentDir = (secondPoint - firstPoint).normalized;
-                Vector3 toNew = mousePositionNullable.Value - firstPoint;
-                Vector3 right = Quaternion.AngleAxis(-90.0f, Vector3.up) * segmentDir;
-                float blockWidth = Vector3.Cross(segmentDir, toNew).magnitude;
-                float pairWidth = Mathf.Abs(shelfWidth + corridorWidth);
-                int fullPairCount = Mathf.FloorToInt(blockWidth / pairWidth);
-
-                shelfCount = fullPairCount + 1;
-                corridorCount = fullPairCount;
-
-                float remain = blockWidth - fullPairCount * pairWidth;
-                if (remain > Mathf.Abs(shelfWidth))
-                    corridorCount += 1;
-
-                while (shelvesObj.Count < Mathf.Abs(shelfCount + corridorCount))
+                while (shelvesObj.Count < spaceVectors.Count)
                 {
                     string objName = "shelf";
                     if (shelvesObj.Count % 2 == 1)
@@ -325,31 +355,16 @@ public class Shelves : MonoBehaviour, ITool
                     lr.sortingOrder = 10;
                     lr.material = draftMaterial;
                 }
-                while (shelvesObj.Count > Mathf.Abs(shelfCount + corridorCount))
+                while (shelvesObj.Count > spaceVectors.Count)
                 {
                     Destroy(shelvesObj[shelvesObj.Count - 1]);
                     shelvesObj.RemoveAt(shelvesObj.Count - 1);
                 }
 
-                Vector3 secondToNew = mousePositionNullable.Value - secondPoint;
-                Vector3 secondToNewDir = secondToNew.normalized;
-                secondToNewDir = secondToNewDir / Mathf.Abs(Vector3.Dot(right, secondToNewDir));
                 for (int i = 0; i < shelvesObj.Count; i++)
                 {
-                    int previousCorridors = i / 2;
-                    int previousShelves = i - previousCorridors;
-                    float previousWidth = previousCorridors * Mathf.Abs(corridorWidth) + previousShelves * Mathf.Abs(shelfWidth);
-                    float currentWidth = (i % 2 == 0) ? Mathf.Abs(shelfWidth) : Mathf.Abs(corridorWidth);
-
-                    Vector3[] points = new Vector3[4];
-
-                    points[0] = firstPoint + secondToNewDir * previousWidth;
-                    points[1] = firstPoint + secondToNewDir * (previousWidth + currentWidth);
-                    points[2] = secondPoint + secondToNewDir * (previousWidth + currentWidth);
-                    points[3] = secondPoint + secondToNewDir * previousWidth;
-
                     shelvesObj[i].GetComponent<LineRenderer>().positionCount = 4;
-                    shelvesObj[i].GetComponent<LineRenderer>().SetPositions(points);
+                    shelvesObj[i].GetComponent<LineRenderer>().SetPositions(spaceVectors[i].ToArray());
                 }
             }
         }
