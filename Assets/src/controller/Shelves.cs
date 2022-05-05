@@ -16,10 +16,6 @@ public class Shelves : MonoBehaviour, ITool
     Vector3 secondPoint;
     Vector3 lastPoint;
 
-    CellVertex? firstVertex;
-    CellVertex? secondVertex;
-    CellVertex? lastVertex;
-
     float shelfWidth;
     float corridorWidth;
     int shelfCount;
@@ -42,6 +38,8 @@ public class Shelves : MonoBehaviour, ITool
     Vector3? mouseSnapPosition = null;
 
     List<List<Vector3>> spaceVectors = new List<List<Vector3>>();
+
+    bool firstIsShelf = true;
 
 
     void Start()
@@ -69,6 +67,9 @@ public class Shelves : MonoBehaviour, ITool
         UpdateView();
     }
 
+    static bool isShelf(bool firstIsShelf, int i)
+        => (i % 2 == 0) ^ !firstIsShelf;
+
     void UpdateViewModel()
     {
         mousePositionNullable = CameraController.mousePositionOnGround();
@@ -82,11 +83,9 @@ public class Shelves : MonoBehaviour, ITool
         switch (status)
         {
             case 0:
-                firstVertex = MousePickController.PointedVertex?.Vertex;
                 firstPoint = mouseSnapPosition.Value;
                 break;
             case 1:
-                secondVertex = MousePickController.PointedVertex?.Vertex;
                 secondPoint = mouseSnapPosition.Value;
                 break;
             case 2:
@@ -113,7 +112,6 @@ public class Shelves : MonoBehaviour, ITool
                 if (Mathf.Abs(remain) > Mathf.Abs(shelfWidth))
                     corridorCount++;
 
-                lastVertex = MousePickController.PointedVertex?.Vertex;
                 lastPoint = mouseSnapPosition.Value;
 
                 while (spaceVectors.Count < shelfCount + corridorCount)
@@ -129,8 +127,16 @@ public class Shelves : MonoBehaviour, ITool
                 {
                     int previousCorridors = i / 2;
                     int previousShelves = i - previousCorridors;
+
+                    // if (isShelf(firstIsShelf, i))
+                    // {
+                    //     int tmp = previousCorridors;
+                    //     previousCorridors = previousShelves;
+                    //     previousShelves = tmp;
+                    // }
+
                     float previousWidth = previousCorridors * Mathf.Abs(corridorWidth) + previousShelves * Mathf.Abs(shelfWidth);
-                    float currentWidth = (i % 2 == 0) ? Mathf.Abs(shelfWidth) : Mathf.Abs(corridorWidth);
+                    float currentWidth = i % 2 == 0 ? Mathf.Abs(shelfWidth) : Mathf.Abs(corridorWidth);
 
                     spaceVectors[i].Clear();
                     spaceVectors[i].Add(firstPoint + secondToNewDir * previousWidth);
@@ -167,6 +173,7 @@ public class Shelves : MonoBehaviour, ITool
                 case 4:
                     IndoorSim.indoorTiling.SessionStart();
                     IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
                         var b1 = IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
@@ -176,16 +183,33 @@ public class Shelves : MonoBehaviour, ITool
                         var b3 = IndoorSim.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
-                        Navigable navigable = i % 2 == 0 ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
-                        IndoorSim.indoorTiling.UpdateSpaceNavigable(b3.leftSpace!, navigable);
+                        Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
+                        CellSpace newSpace = shelfWidth > 0.0f ? b3.leftSpace! : b3.rightSpace!;
+                        IndoorSim.indoorTiling.UpdateSpaceNavigable(newSpace!, navigable);
+
+                        lastBoundary = b2;
                     }
                     IndoorSim.indoorTiling.SessionCommit();
-                    status = 0;
+
+                    firstPoint = Utils.Coor2Vec(lastBoundary!.P0.Coordinate);
+                    secondPoint = Utils.Coor2Vec(lastBoundary!.P1.Coordinate);
+
+                    if (spaceVectors.Count % 2 == 1)
+                        firstIsShelf = !firstIsShelf;
+
+                    status = 2;
+
                     break;
                 default:
                     throw new System.Exception("Illegal shelves status: " + status);
             }
             Debug.Log(status);
+        }
+
+        if (Input.GetMouseButtonDown(1) && !MouseOnUI)
+        {
+            if (status > 0) status--;
+            if (status == 0) firstIsShelf = true;
         }
     }
 
@@ -336,9 +360,9 @@ public class Shelves : MonoBehaviour, ITool
             {
                 while (shelvesObj.Count < spaceVectors.Count)
                 {
-                    string objName = "shelf";
-                    if (shelvesObj.Count % 2 == 1)
-                        objName = "corridor";
+                    string objName = "corridor";
+                    if (isShelf(firstIsShelf, shelvesObj.Count))
+                        objName = "shelf";
                     objName += " " + shelvesObj.Count.ToString();
                     GameObject obj = new GameObject(objName);
                     obj.transform.SetParent(transform);
