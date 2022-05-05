@@ -11,6 +11,7 @@ public class InstructionHistory
     [JsonPropertyAttribute] private Stack<List<ReducedInstruction>> future = new Stack<List<ReducedInstruction>>();
 
     [JsonIgnore] private List<ReducedInstruction>? uncommittedInstruction = null;
+    [JsonIgnore] private int reEntryLevel = 0;
 
     public bool IgnoreDo { get; set; } = false;
 
@@ -18,9 +19,9 @@ public class InstructionHistory
     {
         if (!IgnoreDo)
         {
-            if (uncommittedInstruction != null)
-                throw new InvalidOperationException("There are some uncommitted instruction. Should not start again.");
-            uncommittedInstruction = new List<ReducedInstruction>();
+            if (reEntryLevel == 0)
+                uncommittedInstruction = new List<ReducedInstruction>();
+            reEntryLevel += 1;
         }
     }
 
@@ -28,13 +29,21 @@ public class InstructionHistory
     {
         if (!IgnoreDo)
         {
-            if (uncommittedInstruction == null)
-                throw new InvalidOperationException("You should start session first.");
-            if (uncommittedInstruction.Count == 0)
-                throw new InvalidOperationException("Nothing can be commit.");
-            history.Push(uncommittedInstruction);
-            future.Clear();
-            uncommittedInstruction = null;
+            reEntryLevel -= 1;
+            if (reEntryLevel == 0)
+            {
+                if (uncommittedInstruction!.Count == 0)
+                {
+                    Debug.LogWarning("Do nothing before commit.");
+                }
+                else
+                {
+                    history.Push(uncommittedInstruction);
+                    future.Clear();
+                    uncommittedInstruction = null;
+                }
+            }
+
         }
     }
 
