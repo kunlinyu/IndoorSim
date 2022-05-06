@@ -38,8 +38,7 @@ public class CameraController : MonoBehaviour
         if (Input.GetKey(KeyCode.Z))
             move += Vector3.down;
 
-        if (Input.mouseScrollDelta.y != 0)
-            move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
+        move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
 
         float move_space = transform.position.y * KeyboardMoveSpeed;
         if (move.magnitude > 0.0)

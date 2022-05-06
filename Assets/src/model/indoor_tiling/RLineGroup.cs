@@ -22,7 +22,7 @@ public class RLineGroup
         var inbound = space.InBound();
         var outbound = space.OutBound();
 
-        if (space.allBoundaries.Count < 7)
+        if (space.allBoundaries.Count(b => b.Navigable() == Navigable.Navigable) < 6)
             foreach (var b1 in space.allBoundaries)
                 foreach (var b2 in space.allBoundaries)
                     if (b1 != b2)

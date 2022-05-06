@@ -107,8 +107,8 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
         lr.loop = false;
-        lr.startWidth = width * 2.0f;
-        lr.endWidth = width / 2.0f;
+        lr.startWidth = width;
+        lr.endWidth = width;
         lr.numCapVertices = 5;
         lr.numCornerVertices = 0;
         lr.material = material;
@@ -165,6 +165,7 @@ public class BoundaryController : MonoBehaviour, Selectable
            $"P0: {boundary.P0.Id}\n" +
            $"P1: {boundary.P1.Id}\n" +
            $"left:  {boundary.leftSpace?.Id}\n" +
-           $"right: {boundary.rightSpace?.Id}";
+           $"right: {boundary.rightSpace?.Id}\n" +
+           $"navigable: {boundary.Navigable()}";
 
 }

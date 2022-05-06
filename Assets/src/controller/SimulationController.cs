@@ -101,6 +101,16 @@ public class SimulationController : MonoBehaviour
                     Debug.Log("Switch to tool shelves");
                 }
             }
+            else if (e.name == "shelves2")
+            {
+                if (oldToolName != "shelves2")
+                {
+                    toolObj = new GameObject("shelves2");
+                    currentTool = toolObj.AddComponent<Shelves2>();
+                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
+                    Debug.Log("Switch to tool shelves2");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSim.indoorTiling.Serialize());
