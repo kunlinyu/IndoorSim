@@ -550,15 +550,15 @@ public class IndoorTiling
 
             case NewCellSpaceCase.Split:
                 RemoveSpaceInternal(oldCellSpace!);
-                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
-                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1, oldCellSpace!.Navigable));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2, oldCellSpace!.Navigable));
                 Debug.Log("split cellspace");
                 break;
 
             case NewCellSpaceCase.SplitNeedReSearch:
                 RemoveSpaceInternal(oldCellSpace!);
-                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps1));
-                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps2));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps1, oldCellSpace!.Navigable));
+                AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps2, oldCellSpace!.Navigable));
                 Debug.Log("split cellspace");
                 break;
 
@@ -1035,7 +1035,7 @@ public class IndoorTiling
     }
 
     // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
-    private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path)
+    private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path, Navigable navigable = Navigable.Navigable)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
 
@@ -1043,6 +1043,7 @@ public class IndoorTiling
 
         double area = 0.0f;
         CellSpace shell = cellSpaces.First();
+        shell.Navigable = navigable;
         foreach (var cellspace in cellSpaces)
             if (cellspace.Polygon.Area > area)
             {
