@@ -12,7 +12,7 @@ public class SpaceController : MonoBehaviour, Selectable
         set
         {
             space = value;
-            space.OnUpdate += () => { ReTriangulate(); updateRenderer(); };
+            space.OnUpdate += () => { ReTriangulate(); updateRenderer(Vector3.zero); };
         }
     }
 
@@ -55,19 +55,20 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         polygonRenderObj = new GameObject("polygon render obj");
         polygonRenderObj.transform.SetParent(transform);
+        polygonRenderObj.transform.localPosition = Vector3.zero;
         polygonRenderObj.AddComponent<PolygonRenderer>();
     }
 
     void Start()
     {
         ReTriangulate();
-        updateRenderer();
+        updateRenderer(Vector3.zero);
     }
 
     void Update()
     {
         if (needUpdateRenderer)
-            updateRenderer();
+            updateRenderer(Vector3.zero);
     }
 
     void ReTriangulate()
@@ -83,9 +84,10 @@ public class SpaceController : MonoBehaviour, Selectable
     }
 
 
-    void updateRenderer()
+    public void updateRenderer(Vector3 offset)
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
+        polygonRenderObj.transform.localPosition = offset;
         pr.enableBorder = false;
         if (selected)
             pr.interiorMaterial = selectedMaterial;

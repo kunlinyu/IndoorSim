@@ -69,18 +69,29 @@ public class SelectDrag : MonoBehaviour, ITool
             case SelectStatus.Idle:
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
-                    if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
+                    if (pointedEntity != null)
                     {
                         adhoc = true;
                         if (pointedEntity.type == SelectableType.Vertex)
                             selectedVertices.Add((VertexController)pointedEntity);
-                        else
+                        else if (pointedEntity.type == SelectableType.Boundary)
                         {
                             CellBoundary boundary = ((BoundaryController)pointedEntity).Boundary;
                             selectedBoundaries.Add((BoundaryController)pointedEntity);
                             foreach (var entry in mapView.vertex2Obj)
                                 if (boundary.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
+                        }
+                        else
+                        {
+                            CellSpace space = ((SpaceController)pointedEntity).Space;
+                            selectedSpaces.Add((SpaceController)pointedEntity);
+                            foreach (var entry in mapView.vertex2Obj)
+                                if (space.allVertices.Contains(entry.Key))
+                                    selectedVertices.Add(entry.Value.GetComponent<VertexController>());
+                            foreach (var entry in mapView.boundary2Obj)
+                                if (space.allBoundaries.Contains(entry.Key))
+                                    selectedBoundaries.Add(entry.Value.GetComponent<BoundaryController>());
                         }
                         SwitchStatus(SelectStatus.Dragging);
                     }
@@ -93,7 +104,7 @@ public class SelectDrag : MonoBehaviour, ITool
                 else if (Input.GetMouseButtonUp(0))
                     throw new System.Exception("should not release button 0 in Idle status");
 
-                if (pointedEntity != null && pointedEntity.type != SelectableType.Space)
+                if (pointedEntity != null)
                     UnityEngine.Cursor.SetCursor(dragCursurTexture, dragHotspot, CursorMode.Auto);
                 else
                     UnityEngine.Cursor.SetCursor(selectCursurTexture, selectHotspot, CursorMode.Auto);
@@ -128,6 +139,15 @@ public class SelectDrag : MonoBehaviour, ITool
                             if (!selectedBoundaries.Contains(bc))
                                 selectedBoundaries.Add(bc);
                         }
+                    foreach (var entry in mapView.cellspace2Obj)
+                        if (selectBox.Contains(entry.Key.Geom))
+                        {
+                            var sc = entry.Value.GetComponent<SpaceController>();
+                            sc.selected = true;
+                            if (!selectedSpaces.Contains(sc))
+                                selectedSpaces.Add(sc);
+                        }
+
 
                     if (selectedVertices.Count > 0)
                         SwitchStatus(SelectStatus.Selected);
@@ -170,7 +190,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     else  // re select
                     {
-                        // no "control" key pressed, clear selected
+                        // no CTRL key pressed, clear selected
                         if (!Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
                         {
                             foreach (var vc in selectedVertices)
@@ -182,6 +202,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             selectedSpaces.Clear();
                         }
 
+                        // if CTRL key pressed, add new selected entities
                         SwitchStatus(SelectStatus.Selecting);
                     }
                 }
@@ -229,6 +250,10 @@ public class SelectDrag : MonoBehaviour, ITool
                         Vector3[] positions = bc.Boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta!.Value).ToArray();
                         bc.updateRenderer(positions);
                     }
+                    foreach (SpaceController sc in selectedSpaces)
+                    {
+                        sc.updateRenderer(delta!.Value);
+                    }
                     if (Input.GetMouseButtonUp(0))
                     {
                         IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
@@ -237,6 +262,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             adhoc = false;
                             selectedVertices.Clear();
                             selectedBoundaries.Clear();
+                            selectedSpaces.Clear();
                             SwitchStatus(SelectStatus.Idle);
                         }
                         else
@@ -255,6 +281,8 @@ public class SelectDrag : MonoBehaviour, ITool
                 vc.selected = false;
             foreach (var bc in selectedBoundaries)
                 bc.selected = false;
+            foreach (var sc in selectedSpaces)
+                sc.selected = false;
             selectedVertices.Clear();
             selectedBoundaries.Clear();
             selectedSpaces.Clear();

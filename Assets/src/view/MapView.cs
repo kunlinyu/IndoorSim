@@ -18,7 +18,7 @@ public class MapView : MonoBehaviour
 
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
-    private Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
+    public Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
     private Dictionary<RLineGroup, GameObject> cellspace2RLineObj = new Dictionary<RLineGroup, GameObject>();
 
     void Start()
