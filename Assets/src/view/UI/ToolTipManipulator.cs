@@ -33,8 +33,8 @@ public class ToolTipManipulator : Manipulator
             element = new VisualElement();
             element.style.backgroundColor = Color.grey;
             element.style.position = Position.Absolute;
-            element.style.left = this.target.worldBound.max.x;
-            element.style.top = this.target.worldBound.yMin;
+            element.style.left = this.target.worldBound.min.x;
+            element.style.top = this.target.worldBound.max.y;
             var label = new Label(this.target.tooltip);
             label.style.color = Color.white;
             element.Add(label);

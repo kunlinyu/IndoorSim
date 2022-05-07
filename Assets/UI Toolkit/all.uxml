@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Template name="ToolBar" src="project://database/Assets/UI%20Toolkit/ToolBar.uxml?fileID=9197481963319205126&amp;guid=b37453758b475c87ba6236a5e748f459&amp;type=3#ToolBar" />
+    <ui:Template name="CursorTip" src="project://database/Assets/UI%20Toolkit/CursorTip.uxml?fileID=9197481963319205126&amp;guid=74044d9cb1a8d1c4ca98d036881596c8&amp;type=3#CursorTip" />
+    <ui:Template name="version" src="project://database/Assets/UI%20Toolkit/version.uxml?fileID=9197481963319205126&amp;guid=112f8c16a6e9a853884d7cf30adb4e23&amp;type=3#version" />
+    <ui:Template name="LogWindow" src="project://database/Assets/UI%20Toolkit/LogWindow.uxml?fileID=9197481963319205126&amp;guid=b5fa3b0122337c1f6b0f8bd66bd6fa0e&amp;type=3#LogWindow" />
+    <ui:Instance template="ToolBar" name="ToolBarContainer" />
+    <ui:Instance template="CursorTip" name="CursorTipContainer" style="flex-direction: column; height: auto; justify-content: flex-start; bottom: 0; top: auto; align-items: stretch; position: absolute; left: 0;">
+        <AttributeOverrides element-name="Tip" text="cursor tip" />
+    </ui:Instance>
+    <ui:Instance template="version" name="version" style="position: absolute; right: 0; bottom: 0;" />
+    <ui:Instance template="LogWindow" name="LogWindow" style="position: absolute; right: 0; bottom: 20px; max-width: 500px; max-height: none; min-width: 100px; min-height: 100px; justify-content: flex-end;" />
+</ui:UXML>

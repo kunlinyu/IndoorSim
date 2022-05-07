@@ -5,22 +5,19 @@ using UnityEngine.UIElements;
 
 public class CursorTip : MonoBehaviour
 {
-    [SerializeField] public UIEventDispatcher eventDispatcher;
+    Label tip;
     private string uiMessage;
     private string sceneMessage;
     private bool MouseOnUI;
 
-    void Start()
+    public void Init(Label tip)
     {
-        Label tip = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Tip");
-        tip.text = "xxx";
-
-        eventDispatcher.eventListener += EventListener;
+        this.tip = tip;
+        this.tip.text = "";
     }
 
     void Update()
     {
-        Label tip = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Tip");
         if (MouseOnUI)
             tip.text = uiMessage;
         else
@@ -29,16 +26,12 @@ public class CursorTip : MonoBehaviour
         tip.style.bottom = Input.mousePosition.y;
     }
 
-    void EventListener(object sender, UIEvent e)
+    public void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.UITip)
-        {
             uiMessage = e.message;
-        }
         else if (e.type == UIEventType.SceneTip)
-        {
             sceneMessage = e.message;
-        }
         else if (e.type == UIEventType.EnterLeaveUIPanel)
         {
             if (e.message == "enter")
