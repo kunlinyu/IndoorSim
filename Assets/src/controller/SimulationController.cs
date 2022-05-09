@@ -24,7 +24,7 @@ public class SimulationController : MonoBehaviour
         if (e.type == UIEventType.ButtonClick)
         {
             string oldToolName = "";
-            if (toolObj != null)
+            if (toolObj != null && e.name != "save asset")  // TODO: fuck
             {
                 oldToolName = toolObj.name;
                 Debug.Log("Disable tool " + toolObj.name);
@@ -53,6 +53,18 @@ public class SimulationController : MonoBehaviour
                     currentTool = toolObj.AddComponent<SelectDrag>();
                     currentTool.draftMaterial = Resources.Load<Material>("Materials/tool select drag");
                     Debug.Log("Switch to tool select drag");
+                }
+            }
+            else if (e.name == "save asset")
+            {
+                if (toolObj != null && toolObj.name == "select drag")
+                {
+                    Debug.Log("going to save asset");
+                    ((SelectDrag)currentTool).ExtractSelected2Asset();
+                }
+                else
+                {
+                    Debug.LogWarning("use select & drag tool to select something before save asset");
                 }
             }
             else if (e.name == "delete")

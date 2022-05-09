@@ -59,7 +59,7 @@ public class RepresentativeLine
             Coordinate fromP0right = M.Rotate(from.P1.Coordinate, from.P0.Coordinate, -Math.PI / 2.0f);
             P1 = M.Translate(P0, from.P0.Coordinate, fromP0right, bazierHandlerLength);
         }
-        else throw new Exception("space contain the boundary but it is neighter the left nor the right side of boundary");
+        else throw new Exception("space contain the boundary but it is neither the left nor the right side of boundary");
 
         double toShift = shiftRatio * to.Geom.Length;
         if (to.leftSpace == through)

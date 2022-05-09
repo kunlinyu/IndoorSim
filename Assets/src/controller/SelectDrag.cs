@@ -101,7 +101,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     mouseDownPosition = CameraController.mousePositionOnGround();
                 }
-                else if (Input.GetMouseButtonUp(0))
+                else if (Input.GetMouseButtonUp(0) && !MouseOnUI)
                     throw new System.Exception("should not release button 0 in Idle status");
 
                 if (pointedEntity != null)
@@ -179,9 +179,9 @@ public class SelectDrag : MonoBehaviour, ITool
                 break;
 
             case SelectStatus.Selected:
-                if (Input.GetMouseButtonUp(0))
+                if (Input.GetMouseButtonUp(0) && !MouseOnUI)
                     throw new System.Exception("should not release button 0 in Selected status");
-                else if (Input.GetMouseButtonDown(0))
+                else if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     mouseDownPosition = CameraController.mousePositionOnGround();
                     if (MousePickController.PointedEntity != null && MousePickController.PointedEntity.selected)
@@ -289,6 +289,17 @@ public class SelectDrag : MonoBehaviour, ITool
             GetComponent<LineRenderer>().positionCount = 0;
         }
 
+    }
+
+    public void ExtractSelected2Asset()
+    {
+        if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
+            IndoorSim.indoorTiling.ExtractAsset("untitled asdf",
+                selectedVertices.Select(vc => vc.Vertex).ToList(),
+                selectedBoundaries.Select(bc => bc.Boundary).ToList(),
+                selectedSpaces.Select(sc => sc.Space).ToList());
+        else
+            Debug.LogWarning("nothing can be save as asset");
     }
 
     List<Vector3> SquareFromCursor()

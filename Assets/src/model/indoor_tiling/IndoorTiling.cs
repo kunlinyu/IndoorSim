@@ -21,6 +21,7 @@ public class IndoorTiling
     [JsonPropertyAttribute] public List<CellSpace> spacePool = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RLineGroup> rLinePool = new List<RLineGroup>();
     [JsonPropertyAttribute] public InstructionHistory instructionHistory = new InstructionHistory();
+    [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
@@ -61,11 +62,14 @@ public class IndoorTiling
 
     public IndoorTiling(IndoorTiling another)
     {
-        // TODO: should we trigger OnCreate? no if we use this as a unity test tool
+        if (another.spacePool.Count != another.rLinePool.Count) throw new ArgumentException("space count should equal to rLine count");
+
+        // TODO: should we trigger OnCreate? no if we use this as a unit test tool
         this.vertexPool.AddRange(another.vertexPool);
         this.boundaryPool.AddRange(another.boundaryPool);
         this.spacePool.AddRange(another.spacePool);
         this.rLinePool.Union(another.rLinePool);
+
 
         this.IdGenVertex = another.IdGenVertex?.clone();
         this.IdGenBoundary = another.IdGenBoundary?.clone();
@@ -164,6 +168,8 @@ public class IndoorTiling
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
         if (indoorTiling != null && historyOnly)
         {
+            if (indoorTiling.spacePool.Count != indoorTiling.rLinePool.Count)
+                throw new ArgumentException("space count should equal to rLine count");
             indoorTiling.vertexPool.Clear();
             indoorTiling.boundaryPool.Clear();
             indoorTiling.spacePool.Clear();
@@ -867,6 +873,50 @@ public class IndoorTiling
             return ls.GetPointN(1);
     }
 
+    public Asset ExtractAsset(string name, List<CellVertex> vertices, List<CellBoundary> boundaries, List<CellSpace> spaces)
+    {
+        // TODO: check arguments contained by current indoorTiling
+
+        IndoorTiling newIndoorTiling = new IndoorTiling();
+        newIndoorTiling.vertexPool.AddRange(vertices);
+        newIndoorTiling.boundaryPool.AddRange(boundaries);
+        newIndoorTiling.spacePool.AddRange(spaces);
+        newIndoorTiling.rLinePool.AddRange(spaces.Select(s => space2RLines[s]));
+        string json = newIndoorTiling.Serialize();
+
+        Asset asset = new Asset() { name = name, json = json, dateTime = DateTime.Now };
+        assets.Add(asset);
+
+        Debug.Log("ExtractAsset done");
+        Debug.Log(asset.json);
+
+        return asset;
+    }
+
+    public void AddAsset(Asset asset)
+    {
+        IndoorTiling? indoorTiling = Deserialize(asset.json);
+        if (indoorTiling == null) throw new ArgumentException("can not deserialize the asset");
+        assets.Add(asset);
+    }
+
+    public void ApplyAsset(Asset asset)
+    {
+        if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset");
+        IndoorTiling? indoorTiling = Deserialize(asset.json);
+        if (indoorTiling == null) throw new Exception("Oops! can not deserialize the asset");
+        indoorTiling.UpdateIndices();
+
+        instructionHistory.SessionStart();
+
+        indoorTiling.vertexPool.ForEach(v => AddVertexInternal(v));
+        indoorTiling.boundaryPool.ForEach(b => AddBoundaryInternal(b));
+        indoorTiling.spacePool.ForEach(s => AddSpaceInternal(s));
+        // TODO: apply rLine in asset
+
+        instructionHistory.SessionCommit();
+    }
+
     public void AddVertexInternal(CellVertex vertex)
     {
         vertexPool.Add(vertex);
@@ -921,7 +971,6 @@ public class IndoorTiling
         RelateVertexSpace(space);
         space.allBoundaries.ForEach(b => b.PartialBound(space));
         OnSpaceCreated?.Invoke(space);
-
 
         RLineGroup rLineGroup = new RLineGroup(space);
         rLinePool.Add(rLineGroup);
