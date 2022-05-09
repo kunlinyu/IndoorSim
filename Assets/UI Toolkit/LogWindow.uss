@@ -1,0 +1,23 @@
+#Log {
+    background-color: rgba(107, 195, 229, 0.5);
+}
+
+#Log:hover {
+    background-color: rgba(155, 248, 215, 0.53);
+}
+
+#Warning {
+    background-color: rgba(227, 233, 118, 0.52);
+}
+
+#Warning:hover {
+    background-color: rgba(159, 231, 117, 0.53);
+}
+
+#Error {
+    background-color: rgba(231, 125, 125, 0.51);
+}
+
+#Error:hover {
+    background-color: rgba(223, 251, 152, 0.47);
+}

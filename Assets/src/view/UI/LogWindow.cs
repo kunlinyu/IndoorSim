@@ -1,28 +1,65 @@
 using System;
+using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class LogWindow : MonoBehaviour
 {
+    private const int kMaxLogCount = 100;
 
-    private StyleColor logColor;
-    private StyleColor warningColor;
-    private StyleColor errorColor;
-    private const int kMaxLogCount = 20;
+    private List<string> logs = new List<string>();
     ListView listView;
+
+    int count = 0;
+    int count2Last = 0;
 
     void Start()
     {
         Application.logMessageReceived += HandleLog;
     }
 
-    public void Init(ListView listView, StyleColor logColor, StyleColor warningColor, StyleColor errorColor)
+    public void Init(ListView listView)
     {
         this.listView = listView;
-        this.logColor = logColor;
-        this.warningColor = warningColor;
-        this.errorColor = errorColor;
+
+        this.listView.itemsSource = logs;
+
+        this.listView.makeItem = () => new Label();
+
+        this.listView.bindItem = (label, index) =>
+        {
+            string log = logs[index];
+            ((Label)label).text = log;
+            label.name = LogType.Log.ToString();
+
+            if (log.StartsWith(LogType.Log.ToString()))
+                label.name = LogType.Log.ToString();
+            else if (log.StartsWith(LogType.Warning.ToString()))
+                label.name = LogType.Warning.ToString();
+            else if (log.StartsWith(LogType.Error.ToString()))
+                label.name = LogType.Error.ToString();
+
+            label.tooltip = "double click to copy";
+        };
+
+        this.listView.onItemsChosen += (items) =>
+        {
+            if (items.ToList().Count == 1)
+            {
+                CopyText((string)items.First());
+                Thread.Sleep(300);
+                Debug.Log($"Copy to clipboard: \"{(string)items.First()}\"");
+            }
+        };
+    }
+
+    private void CopyText(string textToCopy)
+    {
+        TextEditor editor = new TextEditor { text = textToCopy };
+        editor.SelectAll();
+        editor.Copy();
     }
 
     void OnDisable()
@@ -32,17 +69,13 @@ public class LogWindow : MonoBehaviour
 
     void HandleLog(string logString, string stackTrace, LogType type)
     {
-        Label label = new Label(type.ToString() + "[" + DateTime.Now.TimeOfDay.ToString(@"hh\:mm\:ss\.ff") + "] " + logString);
-        if (type == LogType.Log)
-            label.style.backgroundColor = logColor;
-        else if (type == LogType.Warning)
-            label.style.backgroundColor = warningColor;
-        else if (type == LogType.Error)
-            label.style.backgroundColor = errorColor;
+        string logWithHeader = type.ToString() + "[" + DateTime.Now.TimeOfDay.ToString(@"hh\:mm\:ss\.ff") + "] " + logString;
+        logs.Add(logWithHeader);
+        while (logs.Count > kMaxLogCount)
+            logs.RemoveAt(0);
 
-        listView.hierarchy.Add(label);
-        while (listView.hierarchy.childCount > kMaxLogCount)
-            listView.hierarchy.RemoveAt(0);
+        listView.Rebuild();
+        listView.ScrollToItemById(logs.Count - 1);
     }
 }
 

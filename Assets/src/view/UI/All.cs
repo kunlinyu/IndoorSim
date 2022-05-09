@@ -35,10 +35,7 @@ public class All : MonoBehaviour
         ListView listView = root.Q<ListView>("LogList");
 
         LogWindow logWindow = GetComponent<LogWindow>();
-        StyleColor logColor = root.Q<Label>("LogBackground").resolvedStyle.backgroundColor;
-        StyleColor warningColor = root.Q<Label>("WarningBackground").resolvedStyle.backgroundColor;
-        StyleColor errorColor = root.Q<Label>("ErrorBackground").resolvedStyle.backgroundColor;
-        logWindow.Init(root.Q<ListView>("LogList"), logColor, warningColor, errorColor);
+        logWindow.Init(root.Q<ListView>("LogList"));
     }
 
     void Update()
