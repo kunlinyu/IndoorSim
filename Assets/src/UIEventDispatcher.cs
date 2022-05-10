@@ -9,6 +9,7 @@ public enum UIEventType
     EnterLeaveUIPanel,
     SceneTip,
     UITip,
+    Asset,
 }
 
 [Serializable]

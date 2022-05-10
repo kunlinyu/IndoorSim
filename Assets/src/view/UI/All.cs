@@ -6,17 +6,17 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(ToolBarController))]
 [RequireComponent(typeof(CursorTip))]
 [RequireComponent(typeof(LogWindow))]
+[RequireComponent(typeof(AssetsPanelController))]
 public class All : MonoBehaviour
 {
-
     public UIEventDispatcher eventDispatcher;
 
     void Start()
     {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
 
+        // toolBar
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
-
         ToolBarController toolBarController = GetComponent<ToolBarController>();
         toolBarController.LoadButtons(toolBar, (button, tbd) =>
             { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ButtonClick }); });
@@ -25,17 +25,27 @@ public class All : MonoBehaviour
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
 
+        // cursor tip
         CursorTip cursorTip = GetComponent<CursorTip>();
         cursorTip.Init(root.Q<Label>("Tip"));
         eventDispatcher.eventListener += cursorTip.EventListener;
 
+        // version label
         Label versionLabel = root.Q<Label>("VersionLabel");
         versionLabel.text = " IndoorSim version: V" + Application.version;
 
-        ListView listView = root.Q<ListView>("LogList");
+        // log window
+        GetComponent<LogWindow>().Init(root.Q<ListView>("LogList"));
 
-        LogWindow logWindow = GetComponent<LogWindow>();
-        logWindow.Init(root.Q<ListView>("LogList"));
+        // assets panel
+        var assetsPanel = GetComponent<AssetsPanelController>();
+        assetsPanel.Init(
+            root.Q<VisualElement>("AssetsPanel"),
+            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "apply", message = index.ToString(), type = UIEventType.Asset }); },
+            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "remove", message = index.ToString(), type = UIEventType.Asset }); }
+        );
+        eventDispatcher.eventListener += assetsPanel.EventListener;
+
     }
 
     void Update()

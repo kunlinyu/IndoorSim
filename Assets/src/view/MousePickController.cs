@@ -37,12 +37,6 @@ public class MousePickController : MonoBehaviour
 
     static public CurrentPickType pickType { get; set; } = CurrentPickType.All;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
     void Update()
     {
         Vector3? mousePositionOnGroundNullable = CameraController.mousePositionOnGround();

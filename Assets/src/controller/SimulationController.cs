@@ -14,6 +14,8 @@ public class SimulationController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
 
+    public Camera screenshotCamera;
+
     void Start()
     {
         eventDispatcher.eventListener += EventListener;
@@ -50,8 +52,11 @@ public class SimulationController : MonoBehaviour
                 if (oldToolName != "select drag")
                 {
                     toolObj = new GameObject("select drag");
-                    currentTool = toolObj.AddComponent<SelectDrag>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool select drag");
+                    SelectDrag selectDrag = toolObj.AddComponent<SelectDrag>();
+                    selectDrag.draftMaterial = Resources.Load<Material>("Materials/tool select drag");
+                    selectDrag.screenshotCamera = screenshotCamera;
+
+                    currentTool = selectDrag;
                     Debug.Log("Switch to tool select drag");
                 }
             }

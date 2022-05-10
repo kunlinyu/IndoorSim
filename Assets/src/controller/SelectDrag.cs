@@ -22,6 +22,8 @@ public class SelectDrag : MonoBehaviour, ITool
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
 
+    public Camera screenshotCamera;
+
     private SelectStatus status = SelectStatus.Idle;
 
     private bool adhoc = false;
@@ -291,13 +293,48 @@ public class SelectDrag : MonoBehaviour, ITool
 
     }
 
+    private static string ScreenShotName(int width, int height)
+    {
+        return string.Format("{0}/screen_{1}x{2}_{3}.png",
+                             Application.dataPath,
+                             width, height,
+                             System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+    }
+    private string capture(float maxX, float minX, float maxY, float minY)
+    {
+        int resWidth = 128;
+        int resHeight = 128;
+        RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
+
+        screenshotCamera.orthographicSize = Mathf.Max(maxX - minX, maxY - minY);
+        Vector3 position = screenshotCamera.transform.position;
+        position.x = (maxX + minX) / 2.0f;
+        position.z = (maxY + minY) / 2.0f;
+        screenshotCamera.transform.position = position;
+
+        screenshotCamera.targetTexture = rt;
+        Texture2D screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+        screenshotCamera.Render();
+        RenderTexture.active = rt;
+        screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+        screenshotCamera.targetTexture = null;
+        RenderTexture.active = null;
+        Destroy(rt);
+        byte[] bytes = screenShot.EncodeToPNG();
+        string filename = ScreenShotName(resWidth, resHeight);
+        System.IO.File.WriteAllBytes(filename, bytes);
+        Debug.Log(string.Format("Took screenshot to: {0}", filename));
+        return Convert.ToBase64String(bytes);
+    }
+
     public void ExtractSelected2Asset()
     {
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
             IndoorSim.indoorTiling.ExtractAsset("untitled asdf",
                 selectedVertices.Select(vc => vc.Vertex).ToList(),
                 selectedBoundaries.Select(bc => bc.Boundary).ToList(),
-                selectedSpaces.Select(sc => sc.Space).ToList());
+                selectedSpaces.Select(sc => sc.Space).ToList(),
+                capture);
         else
             Debug.LogWarning("nothing can be save as asset");
     }

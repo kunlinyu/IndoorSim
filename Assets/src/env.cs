@@ -8,9 +8,6 @@ public class env : MonoBehaviour
     public MapView mapView;  // view
 
     public SimulationController simController;  // controller
-    public ToolBarController toolBarController;
-
-    public UIEventDispatcher eventDispatcher;
 
     void OnEnable()
     {

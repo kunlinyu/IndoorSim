@@ -1,25 +1,28 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public class MapView : MonoBehaviour
 {
     public IndoorTiling indoorTiling;
 
-    public GameObject vertexParentObj;
-    public GameObject boundaryParentObj;
-    public GameObject spaceParentObj;
-    public GameObject rLineParentObj;
+    private GameObject vertexParentObj;
+    private GameObject boundaryParentObj;
+    private GameObject spaceParentObj;
+    private GameObject rLineParentObj;
 
-    public Transform vertexParent;
-    public Transform boundaryParent;
-    public Transform spaceParent;
-    public Transform rLineParent;
+    private Transform vertexParent;
+    private Transform boundaryParent;
+    private Transform spaceParent;
+    private Transform rLineParent;
 
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
     public Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
     private Dictionary<RLineGroup, GameObject> cellspace2RLineObj = new Dictionary<RLineGroup, GameObject>();
+
+    public UIEventDispatcher? eventDispatcher;
 
     void Start()
     {
@@ -111,6 +114,7 @@ public class MapView : MonoBehaviour
             controller.materialHighlight = Resources.Load<Material>("Materials/arrow highlight");
             controller.RLines = rLines;
         };
+
         indoorTiling.OnVertexRemoved += (vertex) =>
         {
             Destroy(vertex2Obj[vertex]);
@@ -130,6 +134,17 @@ public class MapView : MonoBehaviour
         {
             Destroy(cellspace2RLineObj[rLines]);
             cellspace2RLineObj.Remove(rLines);
+        };
+
+        indoorTiling.OnAssetUpdated += (assets) =>
+        {
+            // TODO: create thumbnail
+            var e = new UIEvent();
+            e.type = UIEventType.Asset;
+            e.name = "list";
+            e.message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Newtonsoft.Json.Formatting.Indented });
+
+            eventDispatcher?.Raise(this, e);
         };
     }
 

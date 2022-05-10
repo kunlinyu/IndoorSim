@@ -13,6 +13,7 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
 
+
 [Serializable]
 public class IndoorTiling
 {
@@ -38,11 +39,12 @@ public class IndoorTiling
     [JsonIgnore] public Action<CellSpace> OnSpaceCreated = (s) => { };
     [JsonIgnore] public Action<RLineGroup> OnRLinesCreated = (rLs) => { };
 
-
     [JsonIgnore] public Action<CellVertex> OnVertexRemoved = (v) => { };
     [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
     [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
     [JsonIgnore] public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
+
+    [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
 
     public ICollection<Geometry> Polygonizer()
     {
@@ -113,18 +115,23 @@ public class IndoorTiling
         foreach (var v in vertexPool)
             OnVertexRemoved?.Invoke(v);
         vertexPool.Clear();
+
         foreach (var b in boundaryPool)
             OnBoundaryRemoved?.Invoke(b);
         boundaryPool.Clear();
+
         foreach (var s in spacePool)
             OnSpaceRemoved?.Invoke(s);
         spacePool.Clear();
+
         foreach (var r in rLinePool)
             OnRLinesRemoved?.Invoke(r);
         rLinePool.Clear();
 
-        instructionHistory.Clear();
+        assets.Clear();
+        OnAssetUpdated?.Invoke(assets);
 
+        instructionHistory.Clear();
 
         IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
         if (indoorTiling == null) return false;
@@ -154,6 +161,8 @@ public class IndoorTiling
                 OnSpaceCreated?.Invoke(s);
             foreach (var r in rLinePool)
                 OnRLinesCreated?.Invoke(r);
+
+            OnAssetUpdated?.Invoke(assets);
 
             IdGenVertex?.Reset(vertexPool.Select(v => v.Id).ToList());
             IdGenBoundary?.Reset(boundaryPool.Select(b => b.Id).ToList());
@@ -873,7 +882,11 @@ public class IndoorTiling
             return ls.GetPointN(1);
     }
 
-    public Asset ExtractAsset(string name, List<CellVertex> vertices, List<CellBoundary> boundaries, List<CellSpace> spaces)
+    public Asset ExtractAsset(string name,
+        List<CellVertex> vertices,
+        List<CellBoundary> boundaries,
+        List<CellSpace> spaces,
+        Func<float, float, float, float, string>? captureThumbnailBase64)
     {
         // TODO: check arguments contained by current indoorTiling
 
@@ -884,11 +897,21 @@ public class IndoorTiling
         newIndoorTiling.rLinePool.AddRange(spaces.Select(s => space2RLines[s]));
         string json = newIndoorTiling.Serialize();
 
-        Asset asset = new Asset() { name = name, json = json, dateTime = DateTime.Now };
-        assets.Add(asset);
+        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.Geom).ToArray());
+        Envelope evl = gc.EnvelopeInternal;
 
-        Debug.Log("ExtractAsset done");
-        Debug.Log(asset.json);
+        Asset asset = new Asset()
+        {
+            name = name,
+            thumbnailBase64 = captureThumbnailBase64?.Invoke((float)evl.MaxX, (float)evl.MinX, (float)evl.MaxY, (float)evl.MinY),
+            dateTime = DateTime.Now,
+            verticesCount = vertices.Count,
+            boundariesCount = boundaries.Count,
+            spacesCount = spaces.Count,
+            json = json,
+        };
+        assets.Add(asset);
+        OnAssetUpdated?.Invoke(assets);
 
         return asset;
     }
@@ -898,6 +921,14 @@ public class IndoorTiling
         IndoorTiling? indoorTiling = Deserialize(asset.json);
         if (indoorTiling == null) throw new ArgumentException("can not deserialize the asset");
         assets.Add(asset);
+        OnAssetUpdated?.Invoke(assets);
+    }
+
+    public void RemoveAsset(Asset asset)
+    {
+        if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset: " + asset.name);
+        assets.Remove(asset);
+        OnAssetUpdated?.Invoke(assets);
     }
 
     public void ApplyAsset(Asset asset)
