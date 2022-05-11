@@ -99,14 +99,14 @@ public class IndoorTiling
         }
     }
 
-    public string Serialize()
+    public string Serialize(bool indent = true)
     {
         digestCache = CalcDigest();
         JsonConvert.DefaultSettings = ()
             => new JsonSerializerSettings
             {
                 PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-                Formatting = Newtonsoft.Json.Formatting.Indented
+                Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             };
         return JsonConvert.SerializeObject(this, new WKTConverter(), new CoorConverter());
     }
@@ -896,7 +896,7 @@ public class IndoorTiling
         newIndoorTiling.boundaryPool.AddRange(boundaries);
         newIndoorTiling.spacePool.AddRange(spaces);
         newIndoorTiling.rLinePool.AddRange(spaces.Select(s => space2RLines[s]));
-        string json = newIndoorTiling.Serialize();
+        string json = newIndoorTiling.Serialize(false);
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.Geom).ToArray());
         Envelope evl = gc.EnvelopeInternal;
