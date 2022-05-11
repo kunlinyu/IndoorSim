@@ -315,6 +315,17 @@ public class SelectDrag : MonoBehaviour, ITool
     }
     private string capture(float maxX, float minX, float maxY, float minY)
     {
+
+        foreach (var entry in mapView.vertex2Obj)
+            if (!entry.Value.GetComponent<VertexController>().selected)
+                entry.Value.SetActive(false);
+        foreach (var entry in mapView.boundary2Obj)
+            if (!entry.Value.GetComponent<BoundaryController>().selected)
+                entry.Value.SetActive(false);
+        foreach (var entry in mapView.cellspace2Obj)
+            if (!entry.Value.GetComponent<SpaceController>().selected)
+                entry.Value.SetActive(false);
+
         int resWidth = 128;
         int resHeight = 128;
         RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
@@ -337,6 +348,14 @@ public class SelectDrag : MonoBehaviour, ITool
         string filename = ScreenShotName(resWidth, resHeight);
         System.IO.File.WriteAllBytes(filename, bytes);
         Debug.Log(string.Format("Took screenshot to: {0}", filename));
+
+
+        foreach (var entry in mapView.vertex2Obj)
+            entry.Value.SetActive(true);
+        foreach (var entry in mapView.boundary2Obj)
+            entry.Value.SetActive(true);
+        foreach (var entry in mapView.cellspace2Obj)
+            entry.Value.SetActive(true);
         return Convert.ToBase64String(bytes);
     }
 
