@@ -21,8 +21,8 @@ public class AssetApplier : MonoBehaviour, ITool
 
     float rotation = 0.0f;
     float rotationAnchor = 0.0f;
-
     Vector3 anchorMouse;
+
 
     const float kRatationSpeed = 0.05f;  // should be same to CameraController.rotationSpeed
 
@@ -72,7 +72,7 @@ public class AssetApplier : MonoBehaviour, ITool
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(1, p1);
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !MouseOnUI)
         {
             IndoorSim.indoorTiling.SessionStart();
             foreach (var obj in boundaryRenderObjs)
@@ -82,6 +82,10 @@ public class AssetApplier : MonoBehaviour, ITool
                 IndoorSim.indoorTiling.AddBoundaryAutoSnap(coor0, coor1);
             }
             IndoorSim.indoorTiling.SessionCommit();
+
+            assetIndoorTiling = null;
+            boundaryRenderObjs.ForEach(obj => Destroy(obj));
+            boundaryRenderObjs.Clear();
         }
 
         if (Input.GetMouseButtonDown(1))

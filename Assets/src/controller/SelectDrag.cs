@@ -293,6 +293,19 @@ public class SelectDrag : MonoBehaviour, ITool
 
     }
 
+    void OnDestroy()
+    {
+        foreach (var vc in selectedVertices)
+            vc.selected = false;
+        foreach (var bc in selectedBoundaries)
+            bc.selected = false;
+        foreach (var sc in selectedSpaces)
+            sc.selected = false;
+        selectedVertices.Clear();
+        selectedBoundaries.Clear();
+        selectedSpaces.Clear();
+    }
+
     private static string ScreenShotName(int width, int height)
     {
         return string.Format("{0}/screen_{1}x{2}_{3}.png",

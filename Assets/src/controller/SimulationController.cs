@@ -130,7 +130,7 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "apply asset")
             {
-                if (oldToolName != "apply asset")
+                // if (oldToolName != "apply asset")
                 {
                     toolObj = new GameObject("apply asset");
                     AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();

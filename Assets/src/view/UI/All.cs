@@ -38,13 +38,18 @@ public class All : MonoBehaviour
         GetComponent<LogWindow>().Init(root.Q<ListView>("LogList"));
 
         // assets panel
-        var assetsPanel = GetComponent<AssetsPanelController>();
-        assetsPanel.Init(
-            root.Q<VisualElement>("AssetsPanel"),
-            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); },
-            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); }
+        var assetsPanelController = GetComponent<AssetsPanelController>();
+        var assetsPanel = root.Q<VisualElement>("AssetsPanel");
+        assetsPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        assetsPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
+        assetsPanelController.Init(
+            assetsPanel,
+            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); },
+            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); }
         );
-        eventDispatcher.eventListener += assetsPanel.EventListener;
+        eventDispatcher.eventListener += assetsPanelController.EventListener;
 
     }
 
