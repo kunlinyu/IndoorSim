@@ -64,7 +64,8 @@ public class IndoorTiling
 
     public IndoorTiling(IndoorTiling another)
     {
-        if (another.spacePool.Count != another.rLinePool.Count) throw new ArgumentException("space count should equal to rLine count");
+        if (another.spacePool.Count != another.rLinePool.Count && another.rLinePool.Count != 0)
+            throw new ArgumentException($"space count({another.spacePool.Count}) should equal to rLine count({another.rLinePool.Count})");
 
         // TODO: should we trigger OnCreate? no if we use this as a unit test tool
         this.vertexPool.AddRange(another.vertexPool);
@@ -177,8 +178,8 @@ public class IndoorTiling
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
         if (indoorTiling != null && historyOnly)
         {
-            if (indoorTiling.spacePool.Count != indoorTiling.rLinePool.Count)
-                throw new ArgumentException("space count should equal to rLine count");
+            if (indoorTiling.spacePool.Count != indoorTiling.rLinePool.Count && indoorTiling.rLinePool.Count != 0)
+                throw new ArgumentException($"space count({indoorTiling.spacePool.Count}) should equal to rLine count({indoorTiling.rLinePool.Count})");
             indoorTiling.vertexPool.Clear();
             indoorTiling.boundaryPool.Clear();
             indoorTiling.spacePool.Clear();
