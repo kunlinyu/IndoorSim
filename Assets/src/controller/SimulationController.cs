@@ -23,7 +23,7 @@ public class SimulationController : MonoBehaviour
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.type == UIEventType.ButtonClick)
+        if (e.type == UIEventType.ToolButtonClick)
         {
             string oldToolName = "";
             if (toolObj != null && e.name != "save asset")  // TODO: fuck
@@ -127,6 +127,22 @@ public class SimulationController : MonoBehaviour
                     currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
                     Debug.Log("Switch to tool shelves2");
                 }
+            }
+            else if (e.name == "apply asset")
+            {
+                if (oldToolName != "apply asset")
+                {
+                    toolObj = new GameObject("apply asset");
+                    AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
+                    assetApplier.assetId = Int32.Parse(e.message);
+                    currentTool = assetApplier;
+                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
+                    Debug.Log("Switch to asset applier");
+                }
+            }
+            else if (e.name == "remove asset")
+            {
+
             }
             else if (e.name == "save")
             {

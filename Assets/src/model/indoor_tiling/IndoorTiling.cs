@@ -899,6 +899,7 @@ public class IndoorTiling
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.Geom).ToArray());
         Envelope evl = gc.EnvelopeInternal;
+        Point centroid = gc.Centroid;
 
         Asset asset = new Asset()
         {
@@ -909,6 +910,8 @@ public class IndoorTiling
             boundariesCount = boundaries.Count,
             spacesCount = spaces.Count,
             json = json,
+            centerX = centroid.X,
+            centerY = centroid.Y,
         };
         assets.Add(asset);
         OnAssetUpdated?.Invoke(assets);
@@ -931,7 +934,7 @@ public class IndoorTiling
         OnAssetUpdated?.Invoke(assets);
     }
 
-    public void ApplyAsset(Asset asset)
+    public void ApplyAsset(Asset asset, Coordinate center, float rotation)
     {
         if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset");
         IndoorTiling? indoorTiling = Deserialize(asset.json);

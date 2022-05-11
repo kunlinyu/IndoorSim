@@ -5,16 +5,6 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// struct AssetButtonInfo
-// {
-//     public string name;
-//     public Sprite thumbnailBase64;
-//     public DateTime dateTime;
-//     public int verticesCount;
-//     public int boundariesCount;
-//     public int spacesCount;
-// }
-
 public class AssetsPanelController : MonoBehaviour
 {
     [SerializeField] public VisualTreeAsset assetButtonTemplate;

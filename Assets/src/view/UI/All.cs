@@ -19,7 +19,7 @@ public class All : MonoBehaviour
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
         ToolBarController toolBarController = GetComponent<ToolBarController>();
         toolBarController.LoadButtons(toolBar, (button, tbd) =>
-            { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ButtonClick }); });
+            { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ToolButtonClick }); });
         toolBar.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>
@@ -41,8 +41,8 @@ public class All : MonoBehaviour
         var assetsPanel = GetComponent<AssetsPanelController>();
         assetsPanel.Init(
             root.Q<VisualElement>("AssetsPanel"),
-            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "apply", message = index.ToString(), type = UIEventType.Asset }); },
-            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "remove", message = index.ToString(), type = UIEventType.Asset }); }
+            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); },
+            (index) => { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); }
         );
         eventDispatcher.eventListener += assetsPanel.EventListener;
 
