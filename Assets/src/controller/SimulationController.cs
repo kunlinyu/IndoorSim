@@ -150,7 +150,7 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "load")
             {
-                indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile(), true);
+                indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile(), false);
             }
             else if (e.name == "redo")
             {

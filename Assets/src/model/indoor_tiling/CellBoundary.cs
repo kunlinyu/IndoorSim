@@ -160,7 +160,6 @@ public class CellBoundary
         else
             rightSpace = space;
         OnUpdate?.Invoke();
-
     }
 
     public void PartialUnBound(CellSpace space)

@@ -140,9 +140,12 @@ public class IndoorTiling
         if (historyOnly)
         {
             instructionHistory = indoorTiling.instructionHistory;
+            assets = indoorTiling.assets;
             IdGenVertex?.Reset();
             IdGenBoundary?.Reset();
             IdGenSpace?.Reset();
+
+            OnAssetUpdated?.Invoke(assets);
         }
         else
         {
@@ -150,6 +153,7 @@ public class IndoorTiling
             boundaryPool = indoorTiling.boundaryPool;
             spacePool = indoorTiling.spacePool;
             rLinePool = indoorTiling.rLinePool;
+            assets = indoorTiling.assets;
             instructionHistory = indoorTiling.instructionHistory;
 
             UpdateIndices();
@@ -625,6 +629,13 @@ public class IndoorTiling
             space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
             newBoundary1.PartialBound(space);
             newBoundary2.PartialBound(space);
+
+            rLinePool.Remove(space2RLines[space]);
+            OnRLinesRemoved?.Invoke(space2RLines[space]);
+            RLineGroup rLineGroup = new RLineGroup(space);
+            rLinePool.Add(rLineGroup);
+            space2RLines[space] = rLineGroup;
+            OnRLinesCreated?.Invoke(rLineGroup);
         }
         vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
         FullPolygonizerCheck();
