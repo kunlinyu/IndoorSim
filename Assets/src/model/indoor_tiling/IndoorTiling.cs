@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.IO;
+using System.Text;
 using System.Collections.Generic;
 
 using NetTopologySuite.Geometries;
@@ -102,13 +104,29 @@ public class IndoorTiling
     public string Serialize(bool indent = true)
     {
         digestCache = CalcDigest();
-        JsonConvert.DefaultSettings = ()
+        Newtonsoft.Json.JsonConvert.DefaultSettings = ()
             => new JsonSerializerSettings
             {
                 PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
                 Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
             };
-        return JsonConvert.SerializeObject(this, new WKTConverter(), new CoorConverter());
+
+        JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(JsonConvert.DefaultSettings());
+        StringBuilder sb = new StringBuilder(256);
+        StringWriter sw = new StringWriter(sb);
+        using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+        {
+            jsonWriter.Formatting = jsonSerializer.Formatting;
+            jsonWriter.IndentChar = '\t';
+            jsonWriter.Indentation = 1;
+            jsonSerializer.Serialize(jsonWriter, this, null);
+        }
+
+        return sw.ToString();
+
+        // return JsonConvert.SerializeObject(this);
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
@@ -220,8 +238,8 @@ public class IndoorTiling
         spacePool.ForEach(space => space.allBoundaries.ForEach(b => b.PartialBound(space)));
 
         space2RLines.Clear();
-        rLinePool.ForEach(rl => space2RLines[rl.space] = rl);
-        rLinePool.ForEach(rls => rls.rLines.ForEach(rl => rl.UpdateGeom()));  // update geom after space partial bound to boundary
+        rLinePool.ForEach(rl => space2RLines[rl.space!] = rl);
+        rLinePool.ForEach(rls => rls.rLines.ForEach(rl => rl.UpdateGeom(rls.space)));  // update geom after space partial bound to boundary
 
         // TODO:
         // boundary2RLines
@@ -316,7 +334,7 @@ public class IndoorTiling
                     case Predicate.Update:
                         {
                             List<CellVertex> vertices = new List<CellVertex>();
-                            foreach (var coor in instruction.param.oldCoors)
+                            foreach (var coor in instruction.oldParam.coors())
                             {
                                 CellVertex? vertex = FindVertexCoor(coor);
                                 if (vertex != null)
@@ -324,7 +342,7 @@ public class IndoorTiling
                                 else
                                     throw new ArgumentException("one of vertex can not found: " + coor);
                             }
-                            UpdateVertices(vertices, instruction.param.newCoors);
+                            UpdateVertices(vertices, instruction.newParam.coors());
                             break;
                         }
                     default:
@@ -336,9 +354,9 @@ public class IndoorTiling
                 {
                     case Predicate.Add:
                         {
-                            Coordinate startCoor = instruction.param.newLineString.StartPoint.Coordinate;
+                            Coordinate startCoor = instruction.newParam.lineString().StartPoint.Coordinate;
                             CellVertex? start = FindVertexCoor(startCoor);
-                            Coordinate endCoor = instruction.param.newLineString.EndPoint.Coordinate;
+                            Coordinate endCoor = instruction.newParam.lineString().EndPoint.Coordinate;
                             CellVertex? end = FindVertexCoor(endCoor);
 
                             CellBoundary? boundary = null;
@@ -356,18 +374,18 @@ public class IndoorTiling
                         break;
                     case Predicate.Remove:
                         {
-                            CellBoundary? boundary = FindBoundaryGeom(instruction.param.oldLineString);
+                            CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
                             if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.param.oldLineString);
+                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
                             RemoveBoundary(boundary);
                         }
                         break;
                     case Predicate.Update:
                         {
-                            CellBoundary? boundary = FindBoundaryGeom(instruction.param.oldLineString);
+                            CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
                             if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.param.oldLineString);
-                            boundary.UpdateGeom(instruction.param.newLineString);
+                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
+                            boundary.UpdateGeom(instruction.newParam.lineString());
                         }
                         break;
                     default:
@@ -377,10 +395,10 @@ public class IndoorTiling
             case SubjectType.BoundaryDirection:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    CellBoundary? boundary = FindBoundaryGeom(instruction.param.oldLineString);
+                    CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
                     if (boundary == null)
-                        throw new ArgumentException("can not find boundary: " + instruction.param.oldLineString);
-                    UpdateBoundaryNaviDirection(boundary, instruction.param.newDirection);
+                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
+                    UpdateBoundaryNaviDirection(boundary, instruction.newParam.naviInfo().direction);
                 }
                 else
                     throw new ArgumentException("boundary direction can only update.");
@@ -388,10 +406,10 @@ public class IndoorTiling
             case SubjectType.SpaceNavigable:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    CellSpace? space = FindSpaceGeom(instruction.param.oldCoor);
+                    CellSpace? space = FindSpaceGeom(instruction.oldParam.coor());
                     if (space == null)
-                        throw new ArgumentException("can not find space contain point: " + instruction.param.oldCoor.ToString());
-                    UpdateSpaceNavigable(space, instruction.param.newNavigable);
+                        throw new ArgumentException("can not find space contain point: " + instruction.oldParam.coor().ToString());
+                    UpdateSpaceNavigable(space, instruction.newParam.naviInfo().navigable);
                 }
                 else
                     throw new ArgumentException("space navigable can only update.");
@@ -399,10 +417,10 @@ public class IndoorTiling
             case SubjectType.RLine:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    RepresentativeLine? rLine = FindRLine(instruction.param.oldLineString);
+                    RepresentativeLine? rLine = FindRLine(instruction.oldParam.lineString());
                     if (rLine == null)
-                        throw new ArgumentException("can not find representative line: " + instruction.param.oldLineString);
-                    UpdateRLinePassType(rLine, instruction.param.newPassType);
+                        throw new ArgumentException("can not find representative line: " + instruction.oldParam.lineString());
+                    UpdateRLinePassType(rLine, instruction.newParam.naviInfo().passType);
                 }
                 else
                     throw new ArgumentException("rLine pass type can only update.");
@@ -809,12 +827,6 @@ public class IndoorTiling
         through.OnUpdate?.Invoke();
     }
 
-    public void RemoveRepresentativeLine(RepresentativeLine rLine)
-    {
-        space2RLines[rLine.through].Remove(rLine);
-        rLine.through.OnUpdate?.Invoke();
-    }
-
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
@@ -845,8 +857,8 @@ public class IndoorTiling
 
     public void UpdateRLinePassType(RepresentativeLine rLine, PassType passType)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLine.geom, rLine.passType, passType));
-        rLine.passType = passType;
+        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLine.geom, rLine.pass, passType));
+        rLine.pass = passType;
     }
 
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)

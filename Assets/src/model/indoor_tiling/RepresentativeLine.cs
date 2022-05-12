@@ -10,32 +10,31 @@ public enum PassType
 }
 public class RepresentativeLine
 {
-    [JsonPropertyAttribute] public CellBoundary from { get; private set; }
+    [JsonPropertyAttribute] public CellBoundary fr { get; private set; }
     [JsonPropertyAttribute] public CellBoundary to { get; private set; }
-    [JsonPropertyAttribute] public CellSpace through { get; private set; }
-    [JsonPropertyAttribute] public PassType passType { get; set; }
+    [JsonPropertyAttribute] public PassType pass { get; set; }
     [JsonIgnore] public LineString geom { get; private set; }
 
-    public bool IllForm()
-        => !through.InBound().Contains(from) || !through.OutBound().Contains(to);
+    public bool IllForm(CellSpace through)
+        => !through.InBound().Contains(fr) || !through.OutBound().Contains(to);
 
     public RepresentativeLine() { }  // for deserialize only
-    public RepresentativeLine(CellBoundary from, CellBoundary to, CellSpace through, PassType passType)
+    public RepresentativeLine(CellBoundary fr, CellBoundary to, CellSpace through, PassType passType)
     {
-        this.from = from;
+        this.fr = fr;
         this.to = to;
-        this.through = through;
-        this.passType = passType;
+        // this.through = through;
+        this.pass = passType;
 
-        if (!through.allBoundaries.Contains(from)) throw new ArgumentException("the \"from\" boundary should bound the \"through\" space");
+        if (!through.allBoundaries.Contains(fr)) throw new ArgumentException("the \"fr\" boundary should bound the \"through\" space");
         if (!through.allBoundaries.Contains(to)) throw new ArgumentException("the \"to\" boundary should bound the \"through\" space");
 
-        geom = UpdateGeom();
+        geom = UpdateGeom(through);
     }
 
-    public LineString UpdateGeom()
+    public LineString UpdateGeom(CellSpace through)
     {
-        double lengthRoughEstimate = from.Geom.Centroid.Distance(to.Geom.Centroid);
+        double lengthRoughEstimate = fr.Geom.Centroid.Distance(to.Geom.Centroid);
         double bazierHandlerLength = 0.2d * lengthRoughEstimate;
         double shiftRatio = 0.1f;
 
@@ -46,20 +45,20 @@ public class RepresentativeLine
 
         var gf = new GeometryFactory();
 
-        double fromShift = shiftRatio * from.Geom.Length;
-        if (from.leftSpace == through)
+        double fromShift = shiftRatio * fr.Geom.Length;
+        if (fr.leftSpace == through)
         {
-            P0 = M.Translate(from.Geom.Centroid.Coordinate, from.P0.Coordinate, from.P1.Coordinate, fromShift);
-            Coordinate fromP0left = M.Rotate(from.P1.Coordinate, from.P0.Coordinate, Math.PI / 2.0f);
-            P1 = M.Translate(P0, from.P0.Coordinate, fromP0left, bazierHandlerLength);
+            P0 = M.Translate(fr.Geom.Centroid.Coordinate, fr.P0.Coordinate, fr.P1.Coordinate, fromShift);
+            Coordinate fromP0left = M.Rotate(fr.P1.Coordinate, fr.P0.Coordinate, Math.PI / 2.0f);
+            P1 = M.Translate(P0, fr.P0.Coordinate, fromP0left, bazierHandlerLength);
         }
-        else if (from.rightSpace == through)
+        else if (fr.rightSpace == through)
         {
-            P0 = M.Translate(from.Geom.Centroid.Coordinate, from.P1.Coordinate, from.P0.Coordinate, fromShift);
-            Coordinate fromP0right = M.Rotate(from.P1.Coordinate, from.P0.Coordinate, -Math.PI / 2.0f);
-            P1 = M.Translate(P0, from.P0.Coordinate, fromP0right, bazierHandlerLength);
+            P0 = M.Translate(fr.Geom.Centroid.Coordinate, fr.P1.Coordinate, fr.P0.Coordinate, fromShift);
+            Coordinate fromP0right = M.Rotate(fr.P1.Coordinate, fr.P0.Coordinate, -Math.PI / 2.0f);
+            P1 = M.Translate(P0, fr.P0.Coordinate, fromP0right, bazierHandlerLength);
         }
-        else throw new Exception($"space({through.Id}) contain the boundary({from.Id}) but it is neither the left nor the right side of boundary");
+        else throw new Exception($"space({through.Id}) contain the boundary({fr.Id}) but it is neither the left nor the right side of boundary");
 
         double toShift = shiftRatio * to.Geom.Length;
         if (to.leftSpace == through)

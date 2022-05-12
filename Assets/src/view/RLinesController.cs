@@ -38,10 +38,9 @@ public class RLineController : MonoBehaviour, Selectable
         => (float)rLine.geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
 
     public string Tip()
-        => $"from: {rLine.from.Id}\n" +
+        => $"from: {rLine.fr.Id}\n" +
            $"to: {rLine.to.Id}\n" +
-           $"through: {rLine.through.Id}\n" +
-           $"passType: {rLine.passType}";
+           $"passType: {rLine.pass}";
 
     public float scrollSpeed = 1.0f;
     void Update()
@@ -49,14 +48,14 @@ public class RLineController : MonoBehaviour, Selectable
 
         if (highLight)
             GetComponent<LineRenderer>().material = materialHighlight;
-        else if (rLine.passType == PassType.AllowedToPass)
+        else if (rLine.pass == PassType.AllowedToPass)
             GetComponent<LineRenderer>().material = material;
-        else if (rLine.passType == PassType.DoNotPass)
+        else if (rLine.pass == PassType.DoNotPass)
             GetComponent<LineRenderer>().material = materialDark;
         else
-            throw new System.Exception("unknown pass type: " + rLine.passType);
+            throw new System.Exception("unknown pass type: " + rLine.pass);
 
-        if (rLine.passType == PassType.AllowedToPass)
+        if (rLine.pass == PassType.AllowedToPass)
         {
             float offset = Time.time * -1.0f * scrollSpeed;
             GetComponent<LineRenderer>().material.SetTextureOffset("_MainTex", new Vector2(offset, 0));
@@ -98,7 +97,7 @@ public class RLinesController : MonoBehaviour
 
         foreach (var rLine in rLines.rLines)
         {
-            if (rLine.IllForm()) continue;
+            if (rLine.IllForm(rLines.space)) continue;
             GameObject obj = new GameObject("rLine renderer");
             obj.transform.SetParent(transform);
             obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);

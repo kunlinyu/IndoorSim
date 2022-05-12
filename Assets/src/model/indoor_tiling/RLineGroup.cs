@@ -36,17 +36,15 @@ public class RLineGroup
 
     public void UpdateOneRLine(CellBoundary b1, CellBoundary b2, PassType passType)
     {
-        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.from == b1 && rl.to == b2);
+        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.fr == b1 && rl.to == b2);
         if (rl == null)
             rLines.Add(new RepresentativeLine(b1, b2, space, passType));
         else
-            rl.passType = passType;
+            rl.pass = passType;
     }
 
     public void Add(RepresentativeLine rLine)
     {
-        if (space != rLine.through)
-            throw new ArgumentException($"The representative(from space {rLine.through.Id}) line don't belong to the space({space.Id})");
         rLines.Add(rLine);
         OnUpdate?.Invoke();
     }
@@ -63,15 +61,15 @@ public class RLineGroup
 
     public void Remove(CellBoundary from, CellBoundary to)
     {
-        RepresentativeLine? target = rLines.FirstOrDefault(rLine => rLine.from == from && rLine.to == to);
+        RepresentativeLine? target = rLines.FirstOrDefault(rLine => rLine.fr == from && rLine.to == to);
         if (target == null) throw new ArgumentException($"can not find representative line from {from.Id} to {to.Id}");
         rLines.Remove(target);
         OnUpdate?.Invoke();
     }
 
     public List<RepresentativeLine> next(CellBoundary from)
-        => rLines.Where(rLine => rLine.from == from).ToList();
+        => rLines.Where(rLine => rLine.fr == from).ToList();
 
     public void UpdateGeom()
-        => rLines.ForEach(rl => rl.UpdateGeom());
+        => rLines.ForEach(rl => rl.UpdateGeom(space));
 }

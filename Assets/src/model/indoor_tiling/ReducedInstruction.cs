@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using UnityEngine;
 
 #nullable enable
 
@@ -30,33 +31,62 @@ public enum SubjectType
 // 6. Update space navigable
 // 7. Update RLine PassType
 
+public struct NaviInfo
+{
+    [JsonPropertyAttribute] public NaviDirection direction;
+    [JsonPropertyAttribute] public Navigable navigable;
+    [JsonPropertyAttribute] public PassType passType;
+}
+
 [Serializable]
 public struct Parameters
 {
-    [JsonPropertyAttribute] public Coordinate? newCoor;
-    [JsonPropertyAttribute] public Coordinate? oldCoor;
-    [JsonPropertyAttribute] public List<Coordinate>? oldCoors;
-    [JsonPropertyAttribute] public List<Coordinate>? newCoors;
-    [JsonPropertyAttribute] public LineString? newLineString;
-    [JsonPropertyAttribute] public LineString? oldLineString;
-    [JsonPropertyAttribute] public NaviDirection oldDirection;
-    [JsonPropertyAttribute] public NaviDirection newDirection;
-    [JsonPropertyAttribute] public Navigable oldNavigable;
-    [JsonPropertyAttribute] public Navigable newNavigable;
-    [JsonPropertyAttribute] public PassType oldPassType;
-    [JsonPropertyAttribute] public PassType newPassType;
+    [JsonPropertyAttribute] public Coordinate? coor;
+    [JsonPropertyAttribute] public List<Coordinate>? coors;
+    [JsonPropertyAttribute] public LineString? lineString;
+    [JsonPropertyAttribute] public NaviInfo? naviInfo;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
 }
 
+[Serializable]
+public struct ParametersC
+{
+    [JsonPropertyAttribute] public Coordinate? oldCoor;
+    [JsonPropertyAttribute] public List<Coordinate>? oldCoors;
+    [JsonPropertyAttribute] public LineString? oldLineString;
+    [JsonPropertyAttribute] public NaviDirection oldDirection;
+    [JsonPropertyAttribute] public Navigable oldNavigable;
+    [JsonPropertyAttribute] public PassType oldPassType;
+
+    [JsonPropertyAttribute] public Coordinate? newCoor;
+    [JsonPropertyAttribute] public List<Coordinate>? newCoors;
+    [JsonPropertyAttribute] public LineString? newLineString;
+    [JsonPropertyAttribute] public NaviDirection newDirection;
+    [JsonPropertyAttribute] public Navigable newNavigable;
+    [JsonPropertyAttribute] public PassType newPassType;
+
+
+    public override string ToString()
+        => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
+}
+
+public static class ParameterExtension
+{
+    public static Coordinate coor(this Parameters? param) => param!.Value.coor!;
+    public static List<Coordinate> coors(this Parameters? param) => param!.Value.coors!;
+    public static LineString lineString(this Parameters? param) => param!.Value.lineString!;
+    public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
+}
 
 [Serializable]
 public class ReducedInstruction
 {
     [JsonPropertyAttribute] public SubjectType subject { get; set; }
     [JsonPropertyAttribute] public Predicate predicate { get; set; }
-    [JsonPropertyAttribute] public Parameters param { get; set; } = new Parameters();
+    [JsonPropertyAttribute] public Parameters? oldParam { get; set; } = null;
+    [JsonPropertyAttribute] public Parameters? newParam { get; set; } = null;
 
     ReducedInstruction()
     { }
@@ -70,14 +100,15 @@ public class ReducedInstruction
     }
 
     public override string ToString()
-        => predicate + " " + subject + " " + param.ToString();
+        => predicate + " " + subject + " " + oldParam.ToString() + " " + newParam.ToString();
 
     public static ReducedInstruction UpdateVertices(List<Coordinate> oldCoors, List<Coordinate> newCoors)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Vertices;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldCoors = oldCoors, newCoors = newCoors };
+        ri.oldParam = new Parameters() { coors = oldCoors };
+        ri.newParam = new Parameters() { coors = newCoors };
         return ri;
     }
 
@@ -89,7 +120,7 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
-        ri.param = new Parameters() { newLineString = Clone(ls) };
+        ri.newParam = new Parameters() { lineString = Clone(ls) };
         return ri;
     }
 
@@ -101,7 +132,7 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
-        ri.param = new Parameters() { oldLineString = Clone(ls) };
+        ri.oldParam = new Parameters() { lineString = Clone(ls) };
         return ri;
     }
 
@@ -110,7 +141,8 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldLineString = Clone(oldLineString), newLineString = Clone(newLineString) };
+        ri.oldParam = new Parameters() { lineString = Clone(oldLineString) };
+        ri.newParam = new Parameters() { lineString = Clone(newLineString) };
         return ri;
     }
 
@@ -119,7 +151,8 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.BoundaryDirection;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldLineString = Clone(oldLineString), oldDirection = oldDirection, newDirection = newDirection };
+        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { direction = oldDirection } };
+        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { direction = newDirection } };
         return ri;
     }
 
@@ -128,7 +161,8 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.SpaceNavigable;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldCoor = spaceInterior, oldNavigable = oldNavigable, newNavigable = newNavigable };
+        ri.oldParam = new Parameters() { coor = spaceInterior, naviInfo = new NaviInfo() { navigable = oldNavigable } };
+        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { navigable = newNavigable } };
         return ri;
     }
 
@@ -137,7 +171,8 @@ public class ReducedInstruction
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.RLine;
         ri.predicate = Predicate.Update;
-        ri.param = new Parameters() { oldLineString = oldLineString, oldPassType = oldPassType, newPassType = newPassType };
+        ri.oldParam = new Parameters() { lineString = oldLineString, naviInfo = new NaviInfo() { passType = oldPassType } };
+        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { passType = newPassType } };
         return ri;
     }
 
@@ -157,7 +192,7 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Update:
-                        return UpdateVertices(param.newCoors, param.oldCoors);
+                        return UpdateVertices(newParam.coors(), oldParam.coors());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }
@@ -165,26 +200,26 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveBoundary(param.newLineString);
+                        return RemoveBoundary(newParam.lineString());
                     case Predicate.Remove:
-                        return AddBoundary(param.oldLineString);
+                        return AddBoundary(oldParam.lineString());
                     case Predicate.Update:
-                        return UpdateBoundary(param.newLineString, param.oldLineString);
+                        return UpdateBoundary(newParam.lineString(), oldParam.lineString());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }
             case SubjectType.BoundaryDirection:
                 if (predicate == Predicate.Update)
-                    return UpdateBoundaryDirection(param.oldLineString, param.newDirection, param.oldDirection);
+                    return UpdateBoundaryDirection(oldParam.lineString(), newParam.naviInfo().direction, oldParam.naviInfo().direction);
                 else
                     throw new ArgumentException("boundary direction can only update.");
             case SubjectType.SpaceNavigable:
                 if (predicate == Predicate.Update)
-                    return UpdateSpaceNavigable(param.oldCoor, param.newNavigable, param.oldNavigable);
+                    return UpdateSpaceNavigable(oldParam.coor(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
                 else throw new ArgumentException("space navigable can only update.");
             case SubjectType.RLine:
                 if (predicate == Predicate.Update)
-                    return UpdateRLinePassType(param.oldLineString, param.newPassType, param.oldPassType);
+                    return UpdateRLinePassType(oldParam.lineString(), newParam.naviInfo().passType, oldParam.naviInfo().passType);
                 else throw new ArgumentException("rLine pass type can only update.");
             default:
                 throw new ArgumentException("Unknown subject type");
