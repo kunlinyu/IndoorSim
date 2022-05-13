@@ -24,6 +24,8 @@ public class SimpleIDGenerator : IDGenInterface
 
     public string Gen() => Prefix + next++ + Suffix;
 
+    public string Preview() => Prefix + next + Suffix;
+
     public bool valid(string id)
         => id.StartsWith(Prefix) &&
            id.EndsWith(Suffix) &&
@@ -40,7 +42,8 @@ public class SimpleIDGenerator : IDGenInterface
 
     public void Reset() => next = 0;
 
-    public void Reset(string last) => next = Number(last) + 1;
+    public void ResetLast(string last) => next = Number(last) + 1;
+    public void ResetNext(string next) => this.next = Number(next);
 
     public void Reset(ICollection<string> allHistory)
     {

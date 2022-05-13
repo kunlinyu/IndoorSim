@@ -45,6 +45,7 @@ public struct Parameters
     [JsonPropertyAttribute] public List<Coordinate>? coors;
     [JsonPropertyAttribute] public LineString? lineString;
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
+    [JsonPropertyAttribute] public string? id;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -78,6 +79,7 @@ public static class ParameterExtension
     public static List<Coordinate> coors(this Parameters? param) => param!.Value.coors!;
     public static LineString lineString(this Parameters? param) => param!.Value.lineString!;
     public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
+    public static string Id(this Parameters? param) => param!.Value.id!;
 }
 
 [Serializable]
@@ -113,26 +115,26 @@ public class ReducedInstruction
     }
 
     public static ReducedInstruction AddBoundary(CellBoundary boundary)
-        => AddBoundary(boundary.Geom);
+        => AddBoundary(boundary.Geom, boundary.Id);
 
-    public static ReducedInstruction AddBoundary(LineString ls)
+    public static ReducedInstruction AddBoundary(LineString ls, string id)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
-        ri.newParam = new Parameters() { lineString = Clone(ls) };
+        ri.newParam = new Parameters() { lineString = Clone(ls), id = id };
         return ri;
     }
 
     public static ReducedInstruction RemoveBoundary(CellBoundary boundary)
-        => RemoveBoundary(boundary.Geom);
+        => RemoveBoundary(boundary.Geom, boundary.Id);
 
-    public static ReducedInstruction RemoveBoundary(LineString ls)
+    public static ReducedInstruction RemoveBoundary(LineString ls, string id)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
-        ri.oldParam = new Parameters() { lineString = Clone(ls) };
+        ri.oldParam = new Parameters() { lineString = Clone(ls), id = id };
         return ri;
     }
 
@@ -200,9 +202,9 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveBoundary(newParam.lineString());
+                        return RemoveBoundary(newParam.lineString(), newParam.Id());
                     case Predicate.Remove:
-                        return AddBoundary(oldParam.lineString());
+                        return AddBoundary(oldParam.lineString(), oldParam.Id());
                     case Predicate.Update:
                         return UpdateBoundary(newParam.lineString(), oldParam.lineString());
                     default:

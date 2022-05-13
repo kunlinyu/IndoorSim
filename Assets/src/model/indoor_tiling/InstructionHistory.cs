@@ -6,13 +6,28 @@ using UnityEngine;
 #nullable enable
 
 [Serializable]
-public class InstructionHistory
+public class InstructionHistory<InstructionType>
 {
-    [JsonPropertyAttribute] private Stack<List<ReducedInstruction>> history = new Stack<List<ReducedInstruction>>();
-    [JsonPropertyAttribute] private Stack<List<ReducedInstruction>> future = new Stack<List<ReducedInstruction>>();
+    [JsonPropertyAttribute] private Stack<List<InstructionType>> history = new Stack<List<InstructionType>>();
+    [JsonPropertyAttribute] private Stack<List<InstructionType>> future = new Stack<List<InstructionType>>();
+    [JsonPropertyAttribute] private List<string> snapShots = new List<string>();
 
-    [JsonIgnore] private List<ReducedInstruction>? uncommittedInstruction = null;
+    [JsonIgnore] public Func<string> getSnapshot;
+    [JsonIgnore]
+    public Func<string> GetSnapshot
+    {
+        set
+        {
+            getSnapshot = value;
+            if (snapShots.Count == 0)
+                snapShots.Add(getSnapshot.Invoke());
+        }
+    }
+    [JsonIgnore] private List<InstructionType>? uncommittedInstruction = null;
     [JsonIgnore] private int reEntryLevel = 0;
+
+    public InstructionHistory()
+    { }
 
     public bool IgnoreDo { get; set; } = false;
 
@@ -21,7 +36,7 @@ public class InstructionHistory
         if (!IgnoreDo)
         {
             if (reEntryLevel == 0)
-                uncommittedInstruction = new List<ReducedInstruction>();
+                uncommittedInstruction = new List<InstructionType>();
             reEntryLevel += 1;
         }
     }
@@ -42,13 +57,15 @@ public class InstructionHistory
                     history.Push(uncommittedInstruction);
                     future.Clear();
                     uncommittedInstruction = null;
+                    while (snapShots.Count > history.Count) snapShots.RemoveAt(snapShots.Count - 1);
+                    snapShots.Add(getSnapshot.Invoke());
                 }
             }
 
         }
     }
 
-    public void DoStep(ReducedInstruction instruction)
+    public void DoStep(InstructionType instruction)
     {
         if (!IgnoreDo)
         {
@@ -58,7 +75,7 @@ public class InstructionHistory
         }
     }
 
-    public void DoCommit(ReducedInstruction instruction)
+    public void DoCommit(InstructionType instruction)
     {
         if (!IgnoreDo)
         {
@@ -68,7 +85,7 @@ public class InstructionHistory
         }
     }
 
-    public List<ReducedInstruction> Undo()
+    public List<InstructionType> Undo(out string snapShot)
     {
         if (uncommittedInstruction != null)
             throw new InvalidOperationException("There are some uncommitted instruction. Should not undo.");
@@ -78,15 +95,17 @@ public class InstructionHistory
             var last = history.Peek();
             history.Pop();
             future.Push(last);
+            snapShot = history.Count < snapShots.Count ? snapShots[history.Count] : "";
             return last;
         }
         else
         {
-            return new List<ReducedInstruction>();
+            snapShot = "";
+            return new List<InstructionType>();
         }
     }
 
-    public List<ReducedInstruction> Redo()
+    public List<InstructionType> Redo(out string snapShot)
     {
         if (uncommittedInstruction != null)
             throw new InvalidOperationException("There are some uncommitted instruction. Should not redo.");
@@ -96,22 +115,25 @@ public class InstructionHistory
             var next = future.Peek();
             future.Pop();
             history.Push(next);
+            snapShot = history.Count < snapShots.Count ? snapShots[history.Count] : "";
             return next;
         }
         else
         {
-            return new List<ReducedInstruction>();
+            snapShot = "";
+            return new List<InstructionType>();
         }
     }
 
     public void Uuundo()
     {
-        while (history.Count > 0) Undo();
+        while (history.Count > 0) Undo(out var snapShot);
     }
 
     public void Clear()
     {
         history.Clear();
         future.Clear();
+        snapShots.Clear();
     }
 }

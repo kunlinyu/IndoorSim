@@ -5,8 +5,10 @@ using UnityEngine;
 public interface IDGenInterface
 {
     string Gen();
+    string Preview();
     void Reset();
-    void Reset(string last);
+    void ResetLast(string last);
+    void ResetNext(string next);
     void Reset(ICollection<string> allHistory);
 
     bool valid(string id);
