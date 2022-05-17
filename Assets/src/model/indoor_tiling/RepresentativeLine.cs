@@ -34,7 +34,7 @@ public class RepresentativeLine
 
     public LineString UpdateGeom(CellSpace through)
     {
-        double lengthRoughEstimate = fr.Geom.Centroid.Distance(to.Geom.Centroid);
+        double lengthRoughEstimate = fr.geom.Centroid.Distance(to.geom.Centroid);
         double bazierHandlerLength = 0.2d * lengthRoughEstimate;
         double shiftRatio = 0.1f;
 
@@ -45,31 +45,31 @@ public class RepresentativeLine
 
         var gf = new GeometryFactory();
 
-        double fromShift = shiftRatio * fr.Geom.Length;
+        double fromShift = shiftRatio * fr.geom.Length;
         if (fr.leftSpace == through)
         {
-            P0 = M.Translate(fr.Geom.Centroid.Coordinate, fr.P0.Coordinate, fr.P1.Coordinate, fromShift);
+            P0 = M.Translate(fr.geom.Centroid.Coordinate, fr.P0.Coordinate, fr.P1.Coordinate, fromShift);
             Coordinate fromP0left = M.Rotate(fr.P1.Coordinate, fr.P0.Coordinate, Math.PI / 2.0f);
             P1 = M.Translate(P0, fr.P0.Coordinate, fromP0left, bazierHandlerLength);
         }
         else if (fr.rightSpace == through)
         {
-            P0 = M.Translate(fr.Geom.Centroid.Coordinate, fr.P1.Coordinate, fr.P0.Coordinate, fromShift);
+            P0 = M.Translate(fr.geom.Centroid.Coordinate, fr.P1.Coordinate, fr.P0.Coordinate, fromShift);
             Coordinate fromP0right = M.Rotate(fr.P1.Coordinate, fr.P0.Coordinate, -Math.PI / 2.0f);
             P1 = M.Translate(P0, fr.P0.Coordinate, fromP0right, bazierHandlerLength);
         }
         else throw new Exception($"space({through.Id}) contain the boundary({fr.Id}) but it is neither the left nor the right side of boundary");
 
-        double toShift = shiftRatio * to.Geom.Length;
+        double toShift = shiftRatio * to.geom.Length;
         if (to.leftSpace == through)
         {
-            P3 = M.Translate(to.Geom.Centroid.Coordinate, to.P1.Coordinate, to.P0.Coordinate, toShift);
+            P3 = M.Translate(to.geom.Centroid.Coordinate, to.P1.Coordinate, to.P0.Coordinate, toShift);
             Coordinate toP0left = M.Rotate(to.P1.Coordinate, to.P0.Coordinate, Math.PI / 2.0f);
             P2 = M.Translate(P3, to.P0.Coordinate, toP0left, bazierHandlerLength);
         }
         else if (to.rightSpace == through)
         {
-            P3 = M.Translate(to.Geom.Centroid.Coordinate, to.P0.Coordinate, to.P1.Coordinate, toShift);
+            P3 = M.Translate(to.geom.Centroid.Coordinate, to.P0.Coordinate, to.P1.Coordinate, toShift);
             Coordinate toP0right = M.Rotate(to.P1.Coordinate, to.P0.Coordinate, -Math.PI / 2.0f);
             P2 = M.Translate(P3, to.P0.Coordinate, toP0right, bazierHandlerLength);
         }

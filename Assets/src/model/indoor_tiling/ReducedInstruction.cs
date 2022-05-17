@@ -45,29 +45,6 @@ public struct Parameters
     [JsonPropertyAttribute] public List<Coordinate>? coors;
     [JsonPropertyAttribute] public LineString? lineString;
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
-    [JsonPropertyAttribute] public string? id;
-
-    public override string ToString()
-        => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
-}
-
-[Serializable]
-public struct ParametersC
-{
-    [JsonPropertyAttribute] public Coordinate? oldCoor;
-    [JsonPropertyAttribute] public List<Coordinate>? oldCoors;
-    [JsonPropertyAttribute] public LineString? oldLineString;
-    [JsonPropertyAttribute] public NaviDirection oldDirection;
-    [JsonPropertyAttribute] public Navigable oldNavigable;
-    [JsonPropertyAttribute] public PassType oldPassType;
-
-    [JsonPropertyAttribute] public Coordinate? newCoor;
-    [JsonPropertyAttribute] public List<Coordinate>? newCoors;
-    [JsonPropertyAttribute] public LineString? newLineString;
-    [JsonPropertyAttribute] public NaviDirection newDirection;
-    [JsonPropertyAttribute] public Navigable newNavigable;
-    [JsonPropertyAttribute] public PassType newPassType;
-
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -79,7 +56,6 @@ public static class ParameterExtension
     public static List<Coordinate> coors(this Parameters? param) => param!.Value.coors!;
     public static LineString lineString(this Parameters? param) => param!.Value.lineString!;
     public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
-    public static string Id(this Parameters? param) => param!.Value.id!;
 }
 
 [Serializable]
@@ -115,26 +91,26 @@ public class ReducedInstruction
     }
 
     public static ReducedInstruction AddBoundary(CellBoundary boundary)
-        => AddBoundary(boundary.Geom, boundary.Id);
+        => AddBoundary(boundary.geom);
 
-    public static ReducedInstruction AddBoundary(LineString ls, string id)
+    public static ReducedInstruction AddBoundary(LineString ls)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
-        ri.newParam = new Parameters() { lineString = Clone(ls), id = id };
+        ri.newParam = new Parameters() { lineString = Clone(ls) };
         return ri;
     }
 
     public static ReducedInstruction RemoveBoundary(CellBoundary boundary)
-        => RemoveBoundary(boundary.Geom, boundary.Id);
+        => RemoveBoundary(boundary.geom);
 
-    public static ReducedInstruction RemoveBoundary(LineString ls, string id)
+    public static ReducedInstruction RemoveBoundary(LineString ls)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
-        ri.oldParam = new Parameters() { lineString = Clone(ls), id = id };
+        ri.oldParam = new Parameters() { lineString = Clone(ls) };
         return ri;
     }
 
@@ -202,9 +178,9 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveBoundary(newParam.lineString(), newParam.Id());
+                        return RemoveBoundary(newParam.lineString());
                     case Predicate.Remove:
-                        return AddBoundary(oldParam.lineString(), oldParam.Id());
+                        return AddBoundary(oldParam.lineString());
                     case Predicate.Update:
                         return UpdateBoundary(newParam.lineString(), oldParam.lineString());
                     default:

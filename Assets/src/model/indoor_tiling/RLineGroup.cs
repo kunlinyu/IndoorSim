@@ -11,7 +11,7 @@ using UnityEngine;
 public class RLineGroup
 {
     [JsonPropertyAttribute] public CellSpace space { get; private set; }
-    [JsonPropertyAttribute] public List<RepresentativeLine> undefaultRLines { get; private set; } = new List<RepresentativeLine>();
+    [JsonPropertyAttribute] public List<RepresentativeLine> udRL { get; private set; } = new List<RepresentativeLine>();  // un-default RLines
     [JsonIgnore] public List<RepresentativeLine> rLines { get; private set; } = new List<RepresentativeLine>();
     [JsonIgnore] public const PassType defaultPassType = PassType.AllowedToPass;
     [JsonIgnore] public Action OnUpdate = () => { };
@@ -26,7 +26,7 @@ public class RLineGroup
             foreach (var fr in space.allBoundaries)
                 foreach (var to in space.allBoundaries)
                     if (fr != to)
-                        if (undefaultRLines.FirstOrDefault(rl => rl.fr == fr && rl.to == to) == null)
+                        if (udRL.FirstOrDefault(rl => rl.fr == fr && rl.to == to) == null)
                             rLines.Add(new RepresentativeLine(fr, to, space, defaultPassType));
         }
 
@@ -68,9 +68,9 @@ public class RLineGroup
             throw new Exception($"can not find the rline from \"fr\"({fr.Id}) to \"to\"({to.Id})");
 
         if (rl.pass == defaultPassType && passType != defaultPassType)
-            undefaultRLines.Add(rl);
+            udRL.Add(rl);
         if (rl.pass != defaultPassType && passType == defaultPassType)
-            undefaultRLines.Remove(rl);
+            udRL.Remove(rl);
 
         rl.pass = passType;
     }

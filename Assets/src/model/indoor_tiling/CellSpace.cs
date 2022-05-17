@@ -1,8 +1,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+
 using NetTopologySuite.Geometries;
+
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
+
 using UnityEngine;
 #nullable enable
 
@@ -13,6 +17,8 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] private Navigable navigable = Navigable.Navigable;
+
+    [JsonIgnore] public string Id { get; set; } = "";
 
     [JsonIgnore]
     public Navigable Navigable
@@ -60,14 +66,26 @@ public class CellSpace : Container
         Geom = new GeometryFactory().CreatePolygon();
     }
 
-    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null") : base(id)
+    [OnDeserialized]
+    internal void OnDeserializedMethod(StreamingContext context)
+    {
+        UpdateFromVertex();
+    }
+
+    [OnSerializing]
+    private void OnSerializingMethod(StreamingContext context)
+    {
+        Geom = null;
+    }
+
+    public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "") : base(id)
     {
         Geom = polygon;
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
     }
 
-    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "null") : base(id)
+    public CellSpace(ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "") : base(id)
     {
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
@@ -79,6 +97,7 @@ public class CellSpace : Container
         return new CellSpace(new GeometryFactory().CreatePolygon(Polygon.Shell), shellVertices, shellBoundaries, "shell cell space");
     }
 
+    // TODO: we should use UpdateFromBoundary to support complex boundary geometry
     public Polygon UpdateFromVertex()
     {
         List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);

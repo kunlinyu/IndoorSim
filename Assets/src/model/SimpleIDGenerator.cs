@@ -50,8 +50,11 @@ public class SimpleIDGenerator : IDGenInterface
         int maxLast = -1;
         foreach (string id in allHistory)
         {
-            int last = Number(id);
-            if (maxLast < last) maxLast = last;
+            if (id != null && id.Length > 0)
+            {
+                int last = Number(id);
+                if (maxLast < last) maxLast = last;
+            }
         }
         next = maxLast + 1;
         Debug.Log("Reset: " + Prefix + " next: " + next);

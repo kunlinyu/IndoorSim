@@ -54,7 +54,7 @@ public class LineString : MonoBehaviour, ITool
                     splitBoundary = true;
                     currentBoundary = ((BoundaryController)pointed).Boundary;
 
-                    Coordinate[] nearestCoor = DistanceOp.NearestPoints(currentBoundary.Geom, new GeometryFactory().CreatePoint(currentCoor));
+                    Coordinate[] nearestCoor = DistanceOp.NearestPoints(currentBoundary.geom, new GeometryFactory().CreatePoint(currentCoor));
                     currentCoor = nearestCoor[0];
                 }
 

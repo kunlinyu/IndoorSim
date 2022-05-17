@@ -14,10 +14,10 @@ using NetTopologySuite.Operation.Polygonize;
 [Serializable]
 public class IndoorData
 {
-    [JsonPropertyAttribute] public List<CellVertex> vertexPool { get; set; } = new List<CellVertex>();
-    [JsonPropertyAttribute] public List<CellBoundary> boundaryPool { get; set; } = new List<CellBoundary>();
-    [JsonPropertyAttribute] public List<CellSpace> spacePool { get; set; } = new List<CellSpace>();
-    [JsonPropertyAttribute] public List<RLineGroup> rLinePool { get; set; } = new List<RLineGroup>();
+    [JsonPropertyAttribute] public List<CellVertex> vertexPool { get; private set; } = new List<CellVertex>();
+    [JsonPropertyAttribute] public List<CellBoundary> boundaryPool { get; private set; } = new List<CellBoundary>();
+    [JsonPropertyAttribute] public List<CellSpace> spacePool { get; private set; } = new List<CellSpace>();
+    [JsonPropertyAttribute] public List<RLineGroup> rLinePool { get; private set; } = new List<RLineGroup>();
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
@@ -27,7 +27,7 @@ public class IndoorData
     public bool Contains(CellSpace space) => spacePool.Contains(space);
     public bool Contains(RLineGroup rLines) => rLinePool.Contains(rLines);
 
-    public bool CrossesBoundaries(LineString ls) => boundaryPool.Any(b => b.Geom.Crosses(ls));
+    public bool CrossesBoundaries(LineString ls) => boundaryPool.Any(b => b.geom.Crosses(ls));
 
     public ICollection<CellBoundary> Vertex2Boundaries(CellVertex vertex) => vertex2Boundaries[vertex];
     public ICollection<CellSpace> Vertex2Spaces(CellVertex vertex)
@@ -74,11 +74,11 @@ public class IndoorData
         vertex2Boundaries[boundary.P1].Remove(boundary);
     }
 
-    public void AddSpace(CellSpace space, IDGenInterface? IdGenSpace)
+    public void AddSpace(CellSpace space, string id)
     {
         if (spacePool.Contains(space)) throw new ArgumentException("add redundant cell space");
 
-        space.Id = IdGenSpace?.Gen() ?? "no id";
+        space.Id = id;
         spacePool.Add(space);
         space.allBoundaries.ForEach(b => b.PartialBound(space));
     }
@@ -112,6 +112,24 @@ public class IndoorData
         rLineGroup.rLines.ForEach(rl => { boundary2RLines[rl.fr].Remove(rl); boundary2RLines[rl.to].Remove(rl); });
     }
 
+    public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
+        boundary.NaviDirection = direction;
+    }
+
+    public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
+    {
+        if (!spacePool.Contains(space)) throw new ArgumentException("unknown space: " + space.Id);
+        space.Navigable = navigable;
+    }
+
+    public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
+    {
+        if (!rLinePool.Contains(rLines)) throw new ArgumentException("unknown rLineGroup");
+        rLines.SetPassType(fr, to, passType);
+    }
+
     public CellVertex? FindVertexCoor(Point coor)
     => vertexPool.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < 1e-4f);  // TODO: magic number
 
@@ -128,7 +146,7 @@ public class IndoorData
         if (end == null)
             throw new ArgumentException("can not find vertex as end point of line string: " + ls.EndPoint.Coordinate);
         var boundaries = VertexPair2Boundaries(start, end);
-        return boundaries.FirstOrDefault(b => b.Geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
+        return boundaries.FirstOrDefault(b => b.geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
     }
 
     public CellSpace? FindSpaceGeom(Coordinate coor)
@@ -220,7 +238,7 @@ public class IndoorData
     public ICollection<Geometry> Polygonizer()
     {
         var polygonizer = new Polygonizer();
-        polygonizer.Add(boundaryPool.Select(b => (Geometry)b.Geom).ToList());
+        polygonizer.Add(boundaryPool.Select(b => (Geometry)b.geom).ToList());
         return polygonizer.GetPolygons();
     }
 }

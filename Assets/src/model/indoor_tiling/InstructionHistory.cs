@@ -58,7 +58,9 @@ public class InstructionHistory<InstructionType>
                     future.Clear();
                     uncommittedInstruction = null;
                     while (snapShots.Count > history.Count) snapShots.RemoveAt(snapShots.Count - 1);
-                    snapShots.Add(getSnapshot.Invoke());
+                    string? snapShot = getSnapshot?.Invoke();
+                    if (snapShot != null)
+                        snapShots.Add(snapShot);
                 }
             }
 

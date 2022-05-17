@@ -15,7 +15,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         set
         {
             boundary = value;
-            boundary.OnUpdate += () => { updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray()); };
+            boundary.OnUpdate += () => { updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray()); };
             boundary.OnUpdate += updateCollider;
             boundary.OnUpdate += updateTransform;
         }
@@ -54,13 +54,13 @@ public class BoundaryController : MonoBehaviour, Selectable
     private int lastCameraHeightInt;
 
     public float Distance(Vector3 vec)
-    => (float)boundary.Geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+    => (float)boundary.geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
 
     // Start is called before the first frame update
     void Start()
     {
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-        updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+        updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
         updateCollider();
         updateTransform();
     }
@@ -76,21 +76,21 @@ public class BoundaryController : MonoBehaviour, Selectable
             width = newHeightInt * 2.0f * widthFactor + 0.01f;
         }
         if (needUpdateRenderer)
-            updateRenderer(boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+            updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
     }
 
     void updateCollider()
     {
         GetComponent<BoxCollider>().center = Vector3.zero;
-        GetComponent<BoxCollider>().size = new Vector3((float)boundary.Geom.Length, 0.1f, 0.1f);
+        GetComponent<BoxCollider>().size = new Vector3((float)boundary.geom.Length, 0.1f, 0.1f);
     }
 
     void updateTransform()
     {
-        transform.localPosition = Utils.Coor2Vec(boundary.Geom.Centroid.Coordinate);
+        transform.localPosition = Utils.Coor2Vec(boundary.geom.Centroid.Coordinate);
 
-        Coordinate start = boundary.Geom.StartPoint.Coordinate;
-        Coordinate end = boundary.Geom.EndPoint.Coordinate;
+        Coordinate start = boundary.geom.StartPoint.Coordinate;
+        Coordinate end = boundary.geom.EndPoint.Coordinate;
         float x = (float)(start.X - end.X);
         float y = (float)(start.Y - end.Y);
         float theta = Mathf.Atan2(y, x);
@@ -102,7 +102,7 @@ public class BoundaryController : MonoBehaviour, Selectable
     {
         // TODO use prefab
         LineRenderer lr = GetComponent<LineRenderer>();
-        lr.positionCount = boundary.Geom.NumPoints;
+        lr.positionCount = boundary.geom.NumPoints;
         lr.SetPositions(positions);
         lr.alignment = LineAlignment.TransformZ;
         lr.useWorldSpace = true;
@@ -153,7 +153,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
         float arrowSizeFactor = 0.2f;
         float maxSpriteSize = 0.2f;
-        float spriteSize = Mathf.Min((float)boundary.Geom.Length * arrowSizeFactor, maxSpriteSize);
+        float spriteSize = Mathf.Min((float)boundary.geom.Length * arrowSizeFactor, maxSpriteSize);
 
         sr.size = new Vector2(spriteSize, spriteSize);
 

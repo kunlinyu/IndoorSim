@@ -23,8 +23,8 @@ public class Digest
 
     public static string CellBoundaryList(List<CellBoundary> boundaries)
     {
-        boundaries.Sort((b1, b2) => Math.Sign(b1.Geom.Length - b2.Geom.Length));
-        return "{" + String.Join(", ", boundaries.Select(b => $"{b.Geom.Length}")) + "}";
+        boundaries.Sort((b1, b2) => Math.Sign(b1.geom.Length - b2.geom.Length));
+        return "{" + String.Join(", ", boundaries.Select(b => $"{b.geom.Length}")) + "}";
     }
 
     public static string CellSpaceList(List<CellSpace> spaces)

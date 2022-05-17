@@ -12,27 +12,44 @@ struct BoundaryType
 }
 public class CellBoundary
 {
-    [JsonPropertyAttribute] public string Id { get; private set; }
-    [JsonPropertyAttribute] public LineString Geom { get; private set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
-    [JsonPropertyAttribute] private NaviDirection naviDirection { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] private NaviDirection naviDir { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] private LineString? Geom;  // complex line string should save to json file
+
+    [JsonIgnore] private LineString? autoGenGeom;
+    [JsonIgnore]
+    public LineString geom
+    {
+        get
+        {
+            if (Geom != null && Geom.NumPoints == 2)  // TODO: migration
+                Geom = null;  // TODO: migration
+
+            if (Geom != null) return Geom;
+            if (autoGenGeom == null)
+                autoGenGeom = new GeometryFactory().CreateLineString(new Coordinate[] { P0.Coordinate, P1.Coordinate });
+            return autoGenGeom;
+        }
+    }
+
+    [JsonIgnore] public string Id { get; set; }
 
     [JsonIgnore]
     public NaviDirection NaviDirection
     {
         set
         {
-            naviDirection = value;
+            naviDir = value;
             OnUpdate?.Invoke();
         }
-        get => naviDirection;
+        get => naviDir;
     }
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
 
     [JsonIgnore] public Action OnUpdate = () => { };
-    [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
+    [JsonIgnore] public LineString GeomReverse { get => (LineString)geom.Reverse(); }
 
     public Navigable Navigable()
     {
@@ -61,31 +78,21 @@ public class CellBoundary
     private CellBoundary()  // for deserialization
     {
         Id = "";
-        Geom = new LineString(new Coordinate[0]);
+        autoGenGeom = new LineString(new Coordinate[0]);
         P0 = new CellVertex();
         P1 = new CellVertex();
     }
 
-    public CellBoundary(LineString ls, CellVertex p0, CellVertex p1, string id)
-    {
-        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
-        if (ls.NumPoints < 2) throw new ArgumentException("line string of boundary should have 2 points at least");
-        Geom = ls;
-        P0 = p0;
-        P1 = p1;
-        Id = id;
-    }
-
     public LineString GeomOrder(CellVertex start, CellVertex end)
     {
-        if (Object.ReferenceEquals(start, P0) && Object.ReferenceEquals(end, P1)) return this.Geom;
+        if (Object.ReferenceEquals(start, P0) && Object.ReferenceEquals(end, P1)) return this.geom;
         if (Object.ReferenceEquals(start, P1) && Object.ReferenceEquals(end, P0)) return this.GeomReverse;
         throw new ArgumentException("Don't contain vertices");
     }
 
     public LineString GeomEndWith(CellVertex end)
     {
-        if (Object.ReferenceEquals(end, P1)) return this.Geom;
+        if (Object.ReferenceEquals(end, P1)) return this.geom;
         if (Object.ReferenceEquals(end, P0)) return this.GeomReverse;
         throw new ArgumentException("Don't contain end vertex");
     }
@@ -93,7 +100,7 @@ public class CellBoundary
     public CellBoundary(CellVertex p0, CellVertex p1, string id = "null")
     {
         if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
-        Geom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate });
+        autoGenGeom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate });
         P0 = p0;
         P1 = p1;
         Id = id;
@@ -101,10 +108,10 @@ public class CellBoundary
 
     public void UpdateFromVertex()
     {
-        Coordinate[] coor = Geom.Coordinates;
+        Coordinate[] coor = geom.Coordinates;
         coor[0] = P0.Coordinate;
         coor[coor.Length - 1] = P1.Coordinate;
-        Geom = new GeometryFactory().CreateLineString(coor);
+        autoGenGeom = new GeometryFactory().CreateLineString(coor);
         OnUpdate?.Invoke();
     }
 
@@ -112,7 +119,10 @@ public class CellBoundary
     {
         if (ls.StartPoint.Distance(P0.Geom) > 1e-4f) throw new ArgumentException("the geom of boundary should connect vertices.");
         if (ls.EndPoint.Distance(P1.Geom) > 1e-4f) throw new ArgumentException("the geom of boundary should connect vertices.");
-        Geom = ls;
+        if (ls.NumPoints > 2)
+            Geom = ls;
+        else
+            autoGenGeom = ls;
         OnUpdate?.Invoke();
     }
 
@@ -139,8 +149,8 @@ public class CellBoundary
 
     public Point ClosestPointTo(CellVertex cv)
     {
-        if (Object.ReferenceEquals(cv, P0)) return Geom.GetPointN(1);
-        if (Object.ReferenceEquals(cv, P1)) return Geom.GetPointN(Geom.NumPoints - 2);
+        if (Object.ReferenceEquals(cv, P0)) return geom.GetPointN(1);
+        if (Object.ReferenceEquals(cv, P1)) return geom.GetPointN(geom.NumPoints - 2);
         throw new ArgumentException("Not any one of my CellVertex");
     }
 

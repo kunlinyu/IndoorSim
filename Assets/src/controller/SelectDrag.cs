@@ -134,7 +134,7 @@ public class SelectDrag : MonoBehaviour, ITool
                                 selectedVertices.Add(vc);
                         }
                     foreach (var entry in mapView.boundary2Obj)
-                        if (selectBox.Contains(entry.Key.Geom))
+                        if (selectBox.Contains(entry.Key.geom))
                         {
                             var bc = entry.Value.GetComponent<BoundaryController>();
                             bc.selected = true;
@@ -249,7 +249,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     foreach (BoundaryController bc in selectedBoundaries)
                     {
-                        Vector3[] positions = bc.Boundary.Geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta!.Value).ToArray();
+                        Vector3[] positions = bc.Boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta!.Value).ToArray();
                         bc.updateRenderer(positions);
                     }
                     foreach (SpaceController sc in selectedSpaces)
