@@ -6,6 +6,10 @@ using UnityEngine;
 public class RLineController : MonoBehaviour, Selectable
 {
     public RepresentativeLine rLine;
+    public RLineGroup rLines;
+    public CellBoundary fr;
+    public CellBoundary to;
+
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
     public bool highLight
@@ -105,7 +109,10 @@ public class RLinesController : MonoBehaviour
             renderObj.Add(obj);
 
             var rlc = obj.AddComponent<RLineController>();
+            rlc.rLines = rLines;
             rlc.rLine = rLine;
+            rlc.fr = rLine.fr;
+            rlc.to = rLine.to;
             rlc.material = material;
             rlc.materialDark = materialDark;
             rlc.materialHighlight = materialHighlight;

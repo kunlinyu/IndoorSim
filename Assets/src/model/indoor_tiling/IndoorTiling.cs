@@ -5,7 +5,6 @@ using System.Text;
 using System.Collections.Generic;
 
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Polygonize;
 using Newtonsoft.Json;
 
 using UnityEngine;
@@ -14,7 +13,6 @@ using UnityEditor;
 using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
-
 
 class IdSerializer
 {
@@ -41,10 +39,7 @@ class IdSerializer
 [Serializable]
 public class IndoorTiling
 {
-    [JsonPropertyAttribute] public List<CellVertex> vertexPool = new List<CellVertex>();
-    [JsonPropertyAttribute] public List<CellBoundary> boundaryPool = new List<CellBoundary>();
-    [JsonPropertyAttribute] public List<CellSpace> spacePool = new List<CellSpace>();
-    [JsonPropertyAttribute] public List<RLineGroup> rLinePool = new List<RLineGroup>();
+    [JsonPropertyAttribute] public IndoorData? indoorData = new IndoorData();
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> instructionHistory = new InstructionHistory<ReducedInstruction>();
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
@@ -52,11 +47,6 @@ public class IndoorTiling
     [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
     [JsonIgnore] public IDGenInterface? IdGenBoundary { get; private set; }
     [JsonIgnore] public IDGenInterface? IdGenSpace { get; private set; }
-
-    [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
-    [JsonIgnore] private Dictionary<CellVertex, HashSet<CellSpace>> vertex2Spaces = new Dictionary<CellVertex, HashSet<CellSpace>>();
-    [JsonIgnore] private Dictionary<CellSpace, RLineGroup> space2RLines = new Dictionary<CellSpace, RLineGroup>();
-    [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
 
     [JsonIgnore] public Action<CellVertex> OnVertexCreated = (v) => { };
     [JsonIgnore] public Action<CellBoundary> OnBoundaryCreated = (b) => { };
@@ -70,13 +60,6 @@ public class IndoorTiling
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
 
-    public ICollection<Geometry> Polygonizer()
-    {
-        var polygonizer = new Polygonizer();
-        polygonizer.Add(boundaryPool.Select(b => (Geometry)b.Geom).ToList());
-        return polygonizer.GetPolygons();
-    }
-
     public IndoorTiling()
     { }
     public IndoorTiling(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
@@ -88,58 +71,18 @@ public class IndoorTiling
         instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
     }
 
-    public IndoorTiling(IndoorTiling another)
-    {
-        if (another.spacePool.Count != another.rLinePool.Count && another.rLinePool.Count != 0)
-            throw new ArgumentException($"space count({another.spacePool.Count}) should equal to rLine count({another.rLinePool.Count})");
-
-        // TODO: should we trigger OnCreate? no if we use this as a unit test tool
-        this.vertexPool.AddRange(another.vertexPool);
-        this.boundaryPool.AddRange(another.boundaryPool);
-        this.spacePool.AddRange(another.spacePool);
-        this.rLinePool.Union(another.rLinePool);
-
-        this.IdGenVertex = another.IdGenVertex?.clone();
-        this.IdGenBoundary = another.IdGenBoundary?.clone();
-        this.IdGenSpace = another.IdGenSpace?.clone();
-
-        this.instructionHistory = another.instructionHistory;
-        this.instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
-
-        foreach (var entry in another.vertex2Boundaries)
-        {
-            this.vertex2Boundaries[entry.Key] = new HashSet<CellBoundary>();
-            this.vertex2Boundaries[entry.Key].UnionWith(entry.Value);
-        }
-        foreach (var entry in another.vertex2Spaces)
-        {
-            this.vertex2Spaces[entry.Key] = new HashSet<CellSpace>();
-            this.vertex2Spaces[entry.Key].UnionWith(entry.Value);
-        }
-        foreach (var entry in another.space2RLines)
-        {
-            this.space2RLines[entry.Key] = entry.Value;
-        }
-        foreach (var entry in another.boundary2RLines)
-        {
-            this.boundary2RLines[entry.Key] = new HashSet<RepresentativeLine>();
-            this.boundary2RLines[entry.Key].UnionWith(entry.Value);
-        }
-    }
-
     public string Serialize(bool indent = true)
     {
-        digestCache = CalcDigest();
-        Newtonsoft.Json.JsonConvert.DefaultSettings = ()
-            => new JsonSerializerSettings
-            {
-                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-                Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
-                NullValueHandling = NullValueHandling.Ignore,
-                Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
-            };
+        digestCache = indoorData.CalcDigest();
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+            Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
+        };
 
-        JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(JsonConvert.DefaultSettings());
+        JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
         StringBuilder sb = new StringBuilder(256);
         StringWriter sw = new StringWriter(sb);
         using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
@@ -151,74 +94,51 @@ public class IndoorTiling
         }
 
         return sw.ToString();
-
         // return JsonConvert.SerializeObject(this);
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
-        foreach (var v in vertexPool)
+        foreach (var v in indoorData.vertexPool)
             OnVertexRemoved?.Invoke(v);
-        vertexPool.Clear();
-
-        foreach (var b in boundaryPool)
+        foreach (var b in indoorData.boundaryPool)
             OnBoundaryRemoved?.Invoke(b);
-        boundaryPool.Clear();
-
-        foreach (var s in spacePool)
+        foreach (var s in indoorData.spacePool)
             OnSpaceRemoved?.Invoke(s);
-        spacePool.Clear();
-
-        foreach (var r in rLinePool)
+        foreach (var r in indoorData.rLinePool)
             OnRLinesRemoved?.Invoke(r);
-        rLinePool.Clear();
+        indoorData = new IndoorData();
 
-        assets.Clear();
         OnAssetUpdated?.Invoke(assets);
+        assets.Clear();
 
         instructionHistory.Clear();
 
         IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
         if (indoorTiling == null) return false;
 
-        if (historyOnly)
+        instructionHistory = indoorTiling.instructionHistory;
+        instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
+
+        assets = indoorTiling.assets;
+        OnAssetUpdated?.Invoke(assets);
+
+        if (!historyOnly)
         {
-            instructionHistory = indoorTiling.instructionHistory;
-            instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
-            assets = indoorTiling.assets;
-            IdGenVertex?.Reset();
-            IdGenBoundary?.Reset();
-            IdGenSpace?.Reset();
-
-            OnAssetUpdated?.Invoke(assets);
-        }
-        else
-        {
-            vertexPool = indoorTiling.vertexPool;
-            boundaryPool = indoorTiling.boundaryPool;
-            spacePool = indoorTiling.spacePool;
-            rLinePool = indoorTiling.rLinePool;
-            assets = indoorTiling.assets;
-            instructionHistory = indoorTiling.instructionHistory;
-            instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
-
-            UpdateIndices();
-
-            foreach (var v in vertexPool)
+            indoorData = indoorTiling.indoorData;
+            foreach (var v in indoorData.vertexPool)
                 OnVertexCreated?.Invoke(v);
-            foreach (var b in boundaryPool)
+            foreach (var b in indoorData.boundaryPool)
                 OnBoundaryCreated?.Invoke(b);
-            foreach (var s in spacePool)
+            foreach (var s in indoorData.spacePool)
                 OnSpaceCreated?.Invoke(s);
-            foreach (var r in rLinePool)
+            foreach (var r in indoorData.rLinePool)
                 OnRLinesCreated?.Invoke(r);
-
-            OnAssetUpdated?.Invoke(assets);
-
-            IdGenVertex?.Reset(vertexPool.Select(v => v.Id).ToList());
-            IdGenBoundary?.Reset(boundaryPool.Select(b => b.Id).ToList());
-            IdGenSpace?.Reset(spacePool.Select(s => s.Id).ToList());
         }
+
+        IdGenVertex?.Reset(indoorData.vertexPool.Select(v => v.Id).ToList());
+        IdGenBoundary?.Reset(indoorData.boundaryPool.Select(b => b.Id).ToList());
+        IdGenSpace?.Reset(indoorData.spacePool.Select(s => s.Id).ToList());
 
         return true;
     }
@@ -226,87 +146,19 @@ public class IndoorTiling
     public static IndoorTiling? Deserialize(string json, bool historyOnly = false)
     {
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
-        if (indoorTiling != null && historyOnly)
+        if (indoorTiling == null) return null;
+
+        if (historyOnly)
         {
-            if (indoorTiling.spacePool.Count != indoorTiling.rLinePool.Count && indoorTiling.rLinePool.Count != 0)
-                throw new ArgumentException($"space count({indoorTiling.spacePool.Count}) should equal to rLine count({indoorTiling.rLinePool.Count})");
-            indoorTiling.vertexPool.Clear();
-            indoorTiling.boundaryPool.Clear();
-            indoorTiling.spacePool.Clear();
-            indoorTiling.rLinePool.Clear();
+            indoorTiling.indoorData = new IndoorData();
             indoorTiling.instructionHistory.Uuundo();
         }
+        else
+        {
+            if (indoorTiling.indoorData != null)
+                indoorTiling.indoorData.UpdateIndices();
+        }
         return indoorTiling;
-    }
-
-    public void UpdateIndices()
-    {
-        vertex2Boundaries.Clear();
-        foreach (CellBoundary boundary in boundaryPool)
-        {
-            if (!vertex2Boundaries.ContainsKey(boundary.P0))
-                vertex2Boundaries[boundary.P0] = new HashSet<CellBoundary>();
-            vertex2Boundaries[boundary.P0].Add(boundary);
-            if (!vertex2Boundaries.ContainsKey(boundary.P1))
-                vertex2Boundaries[boundary.P1] = new HashSet<CellBoundary>();
-            vertex2Boundaries[boundary.P1].Add(boundary);
-        }
-
-        vertex2Spaces.Clear();
-        foreach (CellSpace space in spacePool)
-        {
-            foreach (CellVertex vertex in space.allVertices)
-            {
-                if (!vertex2Spaces.ContainsKey(vertex))
-                    vertex2Spaces[vertex] = new HashSet<CellSpace>();
-                vertex2Spaces[vertex].Add(space);
-            }
-        }
-
-        spacePool.ForEach(space => space.allBoundaries.ForEach(b => b.PartialBound(space)));
-
-        space2RLines.Clear();
-        rLinePool.ForEach(rl => space2RLines[rl.space!] = rl);
-        rLinePool.ForEach(rls => rls.rLines.ForEach(rl => rl.UpdateGeom(rls.space)));  // update geom after space partial bound to boundary
-
-        // TODO:
-        // boundary2RLines
-    }
-
-    private CellVertex? FindVertexId(string id)
-        => vertexPool.FirstOrDefault(vertex => vertex.Id == id);
-
-    private CellBoundary? FindBoundaryId(string id)
-        => boundaryPool.FirstOrDefault(boundary => boundary.Id == id);
-
-    private CellVertex? FindVertexCoor(Point coor)
-        => vertexPool.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < 1e-4f);  // TODO: magic number
-
-    private CellVertex? FindVertexCoor(Coordinate coor)
-        => vertexPool.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < 1e-4f);  // TODO: magic number
-
-    private CellBoundary? FindBoundaryGeom(LineString ls)  // BUG: this function may throw exception when undo
-    {
-        CellVertex? start = FindVertexCoor(ls.StartPoint);
-        if (start == null)
-            throw new ArgumentException("can not find vertex as start point of line string: " + ls.StartPoint.Coordinate);
-        CellVertex? end = FindVertexCoor(ls.EndPoint);
-        if (end == null)
-            throw new ArgumentException("can not find vertex as end point of line string: " + ls.EndPoint.Coordinate);
-        var boundaries = VertexPair2Boundaries(start, end);
-        return boundaries.FirstOrDefault(b => b.Geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
-    }
-
-    private CellSpace? FindSpaceGeom(Coordinate coor)
-        => spacePool.FirstOrDefault(space => space.Polygon.Contains(new Point(coor)));
-
-    private RepresentativeLine? FindRLine(LineString ls)
-    {
-        foreach (var rLines in rLinePool)
-            foreach (var rl in rLines.rLines)
-                if (ls.EqualsNormalized(rl.geom))
-                    return rl;
-        return null;
     }
 
     public bool Undo()
@@ -367,7 +219,7 @@ public class IndoorTiling
                             List<CellVertex> vertices = new List<CellVertex>();
                             foreach (var coor in instruction.oldParam.coors())
                             {
-                                CellVertex? vertex = FindVertexCoor(coor);
+                                CellVertex? vertex = indoorData.FindVertexCoor(coor);
                                 if (vertex != null)
                                     vertices.Add(vertex);
                                 else
@@ -386,9 +238,9 @@ public class IndoorTiling
                     case Predicate.Add:
                         {
                             Coordinate startCoor = instruction.newParam.lineString().StartPoint.Coordinate;
-                            CellVertex? start = FindVertexCoor(startCoor);
+                            CellVertex? start = indoorData.FindVertexCoor(startCoor);
                             Coordinate endCoor = instruction.newParam.lineString().EndPoint.Coordinate;
-                            CellVertex? end = FindVertexCoor(endCoor);
+                            CellVertex? end = indoorData.FindVertexCoor(endCoor);
                             string? id = instruction.newParam.Id();
 
                             CellBoundary? boundary = null;
@@ -406,7 +258,7 @@ public class IndoorTiling
                         break;
                     case Predicate.Remove:
                         {
-                            CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
+                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
                             if (boundary == null)
                                 throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
                             RemoveBoundary(boundary);
@@ -414,7 +266,7 @@ public class IndoorTiling
                         break;
                     case Predicate.Update:
                         {
-                            CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
+                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
                             if (boundary == null)
                                 throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
                             boundary.UpdateGeom(instruction.newParam.lineString());
@@ -427,7 +279,7 @@ public class IndoorTiling
             case SubjectType.BoundaryDirection:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    CellBoundary? boundary = FindBoundaryGeom(instruction.oldParam.lineString());
+                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
                     if (boundary == null)
                         throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
                     UpdateBoundaryNaviDirection(boundary, instruction.newParam.naviInfo().direction);
@@ -438,7 +290,7 @@ public class IndoorTiling
             case SubjectType.SpaceNavigable:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    CellSpace? space = FindSpaceGeom(instruction.oldParam.coor());
+                    CellSpace? space = indoorData.FindSpaceGeom(instruction.oldParam.coor());
                     if (space == null)
                         throw new ArgumentException("can not find space contain point: " + instruction.oldParam.coor().ToString());
                     UpdateSpaceNavigable(space, instruction.newParam.naviInfo().navigable);
@@ -449,10 +301,10 @@ public class IndoorTiling
             case SubjectType.RLine:
                 if (instruction.predicate == Predicate.Update)
                 {
-                    RepresentativeLine? rLine = FindRLine(instruction.oldParam.lineString());
-                    if (rLine == null)
+                    RepresentativeLine? rLine = indoorData.FindRLine(instruction.oldParam.lineString(), out var rLineGroup);
+                    if (rLine == null || rLineGroup == null)
                         throw new ArgumentException("can not find representative line: " + instruction.oldParam.lineString());
-                    UpdateRLinePassType(rLine, instruction.newParam.naviInfo().passType);
+                    UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, instruction.newParam.naviInfo().passType);
                 }
                 else
                     throw new ArgumentException("rLine pass type can only update.");
@@ -465,8 +317,8 @@ public class IndoorTiling
 
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
-        CellVertex? startVertex = FindVertexCoor(startCoor);
-        CellVertex? endVertex = FindVertexCoor(endCoor);
+        CellVertex? startVertex = indoorData.FindVertexCoor(startCoor);
+        CellVertex? endVertex = indoorData.FindVertexCoor(endCoor);
         if (startVertex != null && endVertex != null)
             return AddBoundary(startVertex, endVertex, id);
         else if (startVertex != null && endVertex == null)
@@ -481,9 +333,7 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
 
-        foreach (CellBoundary b in boundaryPool)
-            if (b.Geom.Crosses(ls))
-                return null;
+        if (indoorData.CrossesBoundaries(ls)) return null;
 
         var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
         AddVertexInternal(start);
@@ -494,7 +344,6 @@ public class IndoorTiling
         instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
-        ConsistencyCheck();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -504,11 +353,9 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, endCoor });
 
-        if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (!indoorData.Contains(start)) throw new ArgumentException("can not find vertex start");
 
-        foreach (CellBoundary b in boundaryPool)
-            if (b.Geom.Crosses(ls))
-                return null;
+        if (indoorData.CrossesBoundaries(ls)) return null;
 
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
         AddVertexInternal(end);
@@ -517,7 +364,6 @@ public class IndoorTiling
         instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
-        ConsistencyCheck();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -527,11 +373,9 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, end.Coordinate });
 
-        if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
+        if (!indoorData.Contains(end)) throw new ArgumentException("can not find vertex end");
 
-        foreach (CellBoundary b in boundaryPool)
-            if (b.Geom.Crosses(ls))
-                return null;
+        if (indoorData.CrossesBoundaries(ls)) return null;
 
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
         AddVertexInternal(start);
@@ -540,7 +384,6 @@ public class IndoorTiling
         instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
-        ConsistencyCheck();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -558,14 +401,12 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, end.Coordinate });
 
-        if (!vertexPool.Contains(start)) throw new ArgumentException("can not find vertex start");
-        if (!vertexPool.Contains(end)) throw new ArgumentException("can not find vertex end");
+        if (!indoorData.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (!indoorData.Contains(end)) throw new ArgumentException("can not find vertex end");
         if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
-        foreach (CellBoundary b in boundaryPool)
-            if (b.Geom.Crosses(ls))
-                return null;
-        if (VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
+        if (indoorData.CrossesBoundaries(ls)) return null;
+        if (indoorData.VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
         CellBoundary boundary = new CellBoundary(ls, start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
 
@@ -596,7 +437,7 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
         CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
-        CellSpace? oldCellSpace = spacePool.FirstOrDefault(cs => cs.Polygon.Contains(MiddlePoint(ls)));
+        CellSpace? oldCellSpace = indoorData.spacePool.FirstOrDefault(cs => cs.Polygon.Contains(IndoorData.MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
@@ -640,7 +481,6 @@ public class IndoorTiling
                 Debug.Log("add hole to cellspace");
                 break;
         }
-        ConsistencyCheck();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -648,46 +488,37 @@ public class IndoorTiling
 
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary");
+        if (!indoorData.Contains(boundary)) throw new ArgumentException("unknown boundary");
         if (boundary.Geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
         Debug.Log("split boundary");
         instructionHistory.SessionStart();
 
-        // Create vertex
-        CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
-        AddVertexInternal(middleVertex);
-
+        // Remove spaces
+        List<CellSpace> spaces = boundary.Spaces().ToList();
+        spaces.ForEach(s => RemoveSpaceInternal(s));
 
         // Remove old boundary
         RemoveBoundaryInternal(boundary);
 
+        // Add new vertex
+        CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
+        AddVertexInternal(middleVertex);
 
-        // Create and add new boundary
+        // Create and add new boundaries
         CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
         CellBoundary newBoundary2 = new CellBoundary(middleVertex, boundary.P1, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
-
-        instructionHistory.SessionCommit();
-
-
-        // update space and vertex2space indices
-        List<CellSpace> spaces = Boundary2Space(boundary);
+        // Construct new spaces and Add
         foreach (var space in spaces)
         {
             space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
-            newBoundary1.PartialBound(space);
-            newBoundary2.PartialBound(space);
-
-            rLinePool.Remove(space2RLines[space]);
-            OnRLinesRemoved?.Invoke(space2RLines[space]);
-            RLineGroup rLineGroup = new RLineGroup(space);
-            rLinePool.Add(rLineGroup);
-            space2RLines[space] = rLineGroup;
-            OnRLinesCreated?.Invoke(rLineGroup);
+            AddSpaceInternal(space);
         }
-        vertex2Spaces[middleVertex] = new HashSet<CellSpace>(spaces);
+
+        instructionHistory.SessionCommit();
+
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return middleVertex;
@@ -705,12 +536,10 @@ public class IndoorTiling
         HashSet<CellBoundary> boundaries = new HashSet<CellBoundary>();
         HashSet<CellSpace> spaces = new HashSet<CellSpace>();
         foreach (var vertex in vertices)
-            if (vertexPool.Contains(vertex))
+            if (indoorData.Contains(vertex))
             {
-                if (vertex2Boundaries.ContainsKey(vertex))
-                    boundaries.UnionWith(vertex2Boundaries[vertex]);
-                if (vertex2Spaces.ContainsKey(vertex))
-                    spaces.UnionWith(vertex2Spaces[vertex]);
+                boundaries.UnionWith(indoorData.Vertex2Boundaries(vertex));
+                spaces.UnionWith(indoorData.Vertex2Spaces(vertex));
             }
             else throw new ArgumentException("can not find vertex");
         Debug.Log("related boundaries: " + boundaries.Count);
@@ -719,11 +548,10 @@ public class IndoorTiling
         foreach (var b in boundaries)
             b.UpdateFromVertex();
 
-
         bool valid = true;
         foreach (var b1 in boundaries)
         {
-            foreach (var b2 in boundaryPool)
+            foreach (var b2 in indoorData.boundaryPool)
                 if (!System.Object.ReferenceEquals(b1, b2))
                     if (b1.Geom.Crosses(b2.Geom))
                     {
@@ -734,16 +562,17 @@ public class IndoorTiling
 
         foreach (var s in spaces)
         {
+            Debug.Log(s.Id);
             s.UpdateFromVertex();
             s.OnUpdate?.Invoke();
 
-            space2RLines[s].UpdateGeom();
-            space2RLines[s].OnUpdate();
+            s.rLines?.UpdateGeom();
+            s.rLines?.OnUpdate?.Invoke();
         }
 
         foreach (var s1 in spaces)
         {
-            foreach (var s2 in spacePool)
+            foreach (var s2 in indoorData.spacePool)
                 if (!System.Object.ReferenceEquals(s1, s2))
                     if (s1.Polygon.Relate(s2.Geom, "T********"))  // TODO magic string
                     {
@@ -785,28 +614,33 @@ public class IndoorTiling
         }
     }
 
-    public void RemoveBoundary(CellBoundary boundary)
+    private void RemoveBoundaryWithVertex(CellBoundary boundary)
     {
         instructionHistory.SessionStart();
         RemoveBoundaryInternal(boundary);
         instructionHistory.SessionCommit();
 
         // Remove Vertex if no boundary connect to it
-        if (vertex2Boundaries[boundary.P0].Count == 0)
+        if (indoorData.Vertex2Boundaries(boundary.P0).Count == 0)
             RemoveVertexInternal(boundary.P0);
-        if (vertex2Boundaries[boundary.P1].Count == 0)
+        if (indoorData.Vertex2Boundaries(boundary.P1).Count == 0)
             RemoveVertexInternal(boundary.P1);
+    }
 
+    public void RemoveBoundary(CellBoundary boundary)
+    {
         // Remove space
-        List<CellSpace> spaces = Boundary2Space(boundary);
+        List<CellSpace> spaces = new List<CellSpace>(boundary.Spaces());
         if (spaces.Count == 0)  // no cellspace related
         {
-            // nothing
+            Debug.Log("remove boundary without any space");
+            RemoveBoundaryWithVertex(boundary);
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
         {
             Debug.Log("remove cellspace because the shell broke.");
             RemoveSpaceInternal(spaces[0]);
+            RemoveBoundaryWithVertex(boundary);
         }
         else if (spaces[0].ShellCellSpace().Polygon.Contains(spaces[1].ShellCellSpace().Polygon) ||
                  spaces[1].ShellCellSpace().Polygon.Contains(spaces[0].ShellCellSpace().Polygon))  // one in the hole of another
@@ -827,115 +661,81 @@ public class IndoorTiling
             CellSpace? hole = parent.FindHole(child);
             if (hole != null)
             {
-                UpdateSpaceInternal(parent, child, new List<CellSpace>());
-                RelateVertexSpace(parent);
                 RemoveSpaceInternal(child);
+                RemoveSpaceInternal(parent);
+                RemoveBoundaryWithVertex(boundary);
+                UpdateHoleOfSpace(parent, child, new List<CellSpace>());
+                AddSpaceInternal(parent);
             }
             else
             {
+                RemoveSpaceInternal(child);
+                RemoveSpaceInternal(parent);
+                RemoveBoundaryWithVertex(boundary);
+
                 List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder);
                 List<CellSpace> holes = CreateCellSpaceMulti(path);
-                UpdateSpaceInternal(parent, child, holes);
-                RelateVertexSpace(parent);
-                RemoveSpaceInternal(child);
+                UpdateHoleOfSpace(parent, child, holes);
+                AddSpaceInternal(parent);
             }
         }
         else  // Two parallel cellspace. merge them
         {
-            List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder, true, true);
+            Debug.Log("merge two spaces");
 
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
+            RemoveBoundaryWithVertex(boundary);
+
+            List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder, true, true);
             AddSpaceConsiderHole(CreateCellSpaceWithHole(path));
         }
-        ConsistencyCheck();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
     }
 
-    public void AddRepresentativeLine(CellBoundary from, CellBoundary to, CellSpace through)
-    {
-        space2RLines[through].Add(new RepresentativeLine(from, to, through, PassType.AllowedToPass));
-        through.OnUpdate?.Invoke();
-    }
-
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
+        if (!indoorData.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
 
         instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.Geom, boundary.NaviDirection, direction));
 
         boundary.NaviDirection = direction;
 
-        if (boundary.leftSpace != null && space2RLines.ContainsKey(boundary.leftSpace))
-            space2RLines[boundary.leftSpace]?.OnUpdate?.Invoke();
-        if (boundary.rightSpace != null && space2RLines.ContainsKey(boundary.rightSpace))
-            space2RLines[boundary.rightSpace]?.OnUpdate?.Invoke();
-
+        if (boundary.leftSpace != null)
+            boundary.leftSpace.OnUpdate?.Invoke();
+        if (boundary.rightSpace != null)
+            boundary.rightSpace.OnUpdate?.Invoke();
     }
 
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
     {
-        if (!spacePool.Contains(space)) throw new ArgumentException("unknown space: " + space.Id);
+        if (!indoorData.Contains(space)) throw new ArgumentException("unknown space: " + space.Id);
 
         instructionHistory.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
 
         space.Navigable = navigable;
 
-        space2RLines[space].OnUpdate?.Invoke();
-        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
-        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
+        space.rLines?.OnUpdate?.Invoke();
+        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) b.leftSpace.rLines?.OnUpdate?.Invoke(); });
+        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) b.rightSpace.rLines?.OnUpdate?.Invoke(); });
     }
 
-    public void UpdateRLinePassType(RepresentativeLine rLine, PassType passType)
+    public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLine.geom, rLine.pass, passType));
-        rLine.pass = passType;
+        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLines.Geom(fr, to), rLines.passType(fr, to), passType));
+        rLines.SetPassType(fr, to, passType);
     }
 
-    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
-        => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
     private List<JumpInfo> AdjacentFinder(CellVertex cv)
     {
-        if (vertex2Boundaries.ContainsKey(cv))
-            return vertex2Boundaries[cv].Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
+        if (indoorData.Contains(cv))
+            return indoorData.Vertex2Boundaries(cv).Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
         else
         {
             Debug.LogError(cv.Id);
-            foreach (var entry in vertex2Boundaries)
-                Debug.LogError(entry.Key.Id);
             throw new Exception(cv.Id);
         }
-    }
-
-    private List<CellSpace> Boundary2Space(CellBoundary boundary)
-    {
-        HashSet<CellSpace> potentialSpaces = new HashSet<CellSpace>();
-        if (vertex2Spaces.ContainsKey(boundary.P0))
-            potentialSpaces.UnionWith(vertex2Spaces[boundary.P0]);
-        if (vertex2Spaces.ContainsKey(boundary.P1))
-            potentialSpaces.UnionWith(vertex2Spaces[boundary.P1]);
-
-        List<CellSpace> result = potentialSpaces.Where(space => space.allBoundaries.Contains(boundary)).ToList();
-        if (result.Count > 2)
-        {
-            string debug = "GEOMETRYCOLLECTION(";
-            foreach (var space in result) debug += space.ToString() + ", ";
-            debug += ")";
-            Debug.Log(debug);
-            throw new InvalidOperationException("The boundary have more than one related spaces");
-        }
-        return result;
-    }
-
-    private Point MiddlePoint(LineString ls)
-    {
-        if (ls.NumPoints < 2)
-            throw new ArgumentException("Empty LingString don't have middlePoint");
-        else if (ls.NumPoints == 2)
-            return new GeometryFactory().CreatePoint(new Coordinate((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f));
-        else
-            return ls.GetPointN(1);
     }
 
     public Asset ExtractAsset(string name,
@@ -946,12 +746,12 @@ public class IndoorTiling
     {
         // TODO: check arguments contained by current indoorTiling
 
-        IndoorTiling newIndoorTiling = new IndoorTiling();
-        newIndoorTiling.vertexPool.AddRange(vertices);
-        newIndoorTiling.boundaryPool.AddRange(boundaries);
-        newIndoorTiling.spacePool.AddRange(spaces);
-        newIndoorTiling.rLinePool.AddRange(spaces.Select(s => space2RLines[s]));
-        string json = newIndoorTiling.Serialize(false);
+        IndoorData newIndoorData = new IndoorData();
+        newIndoorData.vertexPool.AddRange(vertices);
+        newIndoorData.boundaryPool.AddRange(boundaries);
+        newIndoorData.spacePool.AddRange(spaces);
+        newIndoorData.rLinePool.AddRange(spaces.Select(s => s.rLines!));
+        string json = newIndoorData.Serialize(false);
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.Geom).ToArray());
         Envelope evl = gc.EnvelopeInternal;
@@ -977,8 +777,8 @@ public class IndoorTiling
 
     public void AddAsset(Asset asset)
     {
-        IndoorTiling? indoorTiling = Deserialize(asset.json);
-        if (indoorTiling == null) throw new ArgumentException("can not deserialize the asset");
+        IndoorData? indoorData = IndoorData.Deserialize(asset.json);
+        if (indoorData == null) throw new ArgumentException("can not deserialize the asset");
         assets.Add(asset);
         OnAssetUpdated?.Invoke(assets);
     }
@@ -993,15 +793,14 @@ public class IndoorTiling
     public void ApplyAsset(Asset asset, Coordinate center, float rotation)
     {
         if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset");
-        IndoorTiling? indoorTiling = Deserialize(asset.json);
-        if (indoorTiling == null) throw new Exception("Oops! can not deserialize the asset");
-        indoorTiling.UpdateIndices();
+        IndoorData? tempIndoorData = IndoorData.Deserialize(asset.json);
+        if (tempIndoorData == null) throw new Exception("Oops! can not deserialize the asset");
 
         instructionHistory.SessionStart();
 
-        indoorTiling.vertexPool.ForEach(v => AddVertexInternal(v));
-        indoorTiling.boundaryPool.ForEach(b => AddBoundaryInternal(b));
-        indoorTiling.spacePool.ForEach(s => AddSpaceInternal(s));
+        indoorData.vertexPool.ForEach(v => AddVertexInternal(v));
+        indoorData.boundaryPool.ForEach(b => AddBoundaryInternal(b));
+        indoorData.spacePool.ForEach(s => AddSpaceInternal(s));
         // TODO: apply rLine in asset
 
         instructionHistory.SessionCommit();
@@ -1009,119 +808,70 @@ public class IndoorTiling
 
     public void AddVertexInternal(CellVertex vertex)
     {
-        vertexPool.Add(vertex);
-        vertex2Boundaries[vertex] = new HashSet<CellBoundary>();
-        vertex2Spaces[vertex] = new HashSet<CellSpace>();
+        indoorData.AddVertex(vertex);
         OnVertexCreated?.Invoke(vertex);
     }
 
     private void RemoveVertexInternal(CellVertex vertex)
     {
-        vertexPool.Remove(vertex);
-        vertex2Boundaries.Remove(vertex);
-        vertex2Spaces.Remove(vertex);
+        indoorData.RemoveVertex(vertex);
         OnVertexRemoved?.Invoke(vertex);
     }
 
     private void AddBoundaryInternal(CellBoundary boundary)
     {
-        if (boundaryPool.Contains(boundary)) throw new ArgumentException("add redundant cell boundary");
-
-        boundaryPool.Add(boundary);
-
-        vertex2Boundaries[boundary.P0].Add(boundary);
-        vertex2Boundaries[boundary.P1].Add(boundary);
-
+        indoorData.AddBoundary(boundary);
         OnBoundaryCreated.Invoke(boundary);
-
         instructionHistory.DoStep(ReducedInstruction.AddBoundary(boundary));
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)
     {
-        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("can not find cell boundary");
-
-        // Remove Boundary only
-        boundaryPool.Remove(boundary);
-
-        // update lookup tables
-        vertex2Boundaries[boundary.P0].Remove(boundary);
-        vertex2Boundaries[boundary.P1].Remove(boundary);
-
+        indoorData.RemoveBoundary(boundary);
         OnBoundaryRemoved?.Invoke(boundary);
-
         instructionHistory.DoStep(ReducedInstruction.RemoveBoundary(boundary));
     }
 
-    private string AddSpaceInternal(CellSpace space)
+
+    private void AddSpaceInternal(CellSpace space)
     {
-        if (spacePool.Contains(space)) throw new ArgumentException("add redundant space");
-        space.Id = IdGenSpace?.Gen() ?? "no id";
-        spacePool.Add(space);
-        RelateVertexSpace(space);
-        space.allBoundaries.ForEach(b => b.PartialBound(space));
+        indoorData.AddSpace(space, IdGenSpace);
         OnSpaceCreated?.Invoke(space);
 
         RLineGroup rLineGroup = new RLineGroup(space);
-        rLinePool.Add(rLineGroup);
-        space2RLines[space] = rLineGroup;
 
+        indoorData.AddRLines(rLineGroup);
         OnRLinesCreated?.Invoke(rLineGroup);
 
-        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) space2RLines[b.leftSpace].OnUpdate?.Invoke(); });
-        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) space2RLines[b.rightSpace].OnUpdate?.Invoke(); });
-
-        return space.Id;
+        // TODO: create a function to query neighbor space and update them
+        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) b.leftSpace.rLines?.OnUpdate?.Invoke(); });
+        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) b.rightSpace.rLines?.OnUpdate?.Invoke(); });
     }
 
     private void RemoveSpaceInternal(CellSpace space)
     {
-        if (!spacePool.Contains(space)) throw new ArgumentException("Can not find the space");
-        spacePool.Remove(space);
-        foreach (var vertex in space.allVertices)
-            vertex2Spaces[vertex].Remove(space);
-        space.allBoundaries.ForEach(b => b.PartialUnBound(space));
+        var rLines = space.rLines!;
+        indoorData.RemoveRLines(rLines);
+        OnRLinesRemoved?.Invoke(rLines);
+
+        indoorData.RemoveSpace(space);
         OnSpaceRemoved?.Invoke(space);
-
-        rLinePool.Remove(space2RLines[space]);
-        OnRLinesRemoved?.Invoke(space2RLines[space]);
-
-        space2RLines.Remove(space);
     }
 
-    private void UpdateSpaceInternal(CellSpace space, CellSpace? removeHoleContainThisHole, List<CellSpace> addHoles)
+    private void UpdateHoleOfSpace(CellSpace space, CellSpace? removeHoleContainThisHole, List<CellSpace> addHoles)
     {
-        List<CellBoundary> oldAllBoundaries = new List<CellBoundary>(space.allBoundaries);
-
         if (removeHoleContainThisHole != null)
             space.RemoveHole(removeHoleContainThisHole);
+
         addHoles.ForEach(hole => space.AddHole(hole));
-
-        List<CellBoundary> newAllBoundaries = new List<CellBoundary>(space.allBoundaries);
-        foreach (var b in oldAllBoundaries)
-            if (!newAllBoundaries.Contains(b))
-                b.PartialUnBound(space);
-        foreach (var b in newAllBoundaries)
-            if (!oldAllBoundaries.Contains(b))
-                b.PartialBound(space);
     }
 
-    private void RelateVertexSpace(CellSpace space)
-    {
-        var allVertices = space.allVertices;
-        foreach (var entry in vertex2Spaces)
-            if (entry.Value.Contains(space) && !allVertices.Contains(entry.Key))
-                vertex2Spaces[entry.Key].Remove(space);
-        foreach (var vertex in allVertices)
-            vertex2Spaces[vertex].Add(space);
-    }
-
-    private string AddSpaceConsiderHole(CellSpace current)
+    private void AddSpaceConsiderHole(CellSpace current)
     {
         CellSpace? spaceContainCurrent = null;
         List<CellSpace> holeOfCurrent = new List<CellSpace>();
 
-        foreach (CellSpace space in spacePool)
+        foreach (CellSpace space in indoorData.spacePool)
         {
             if (space.Polygon.Contains(current.Polygon.Shell))
                 if (spaceContainCurrent == null)
@@ -1134,13 +884,14 @@ public class IndoorTiling
 
         if (spaceContainCurrent != null)
         {
-            UpdateSpaceInternal(spaceContainCurrent, null, new List<CellSpace>() { current });
-            RelateVertexSpace(spaceContainCurrent);
+            RemoveSpaceInternal(spaceContainCurrent);
+            UpdateHoleOfSpace(spaceContainCurrent, null, new List<CellSpace>() { current });
+            AddSpaceInternal(spaceContainCurrent);
         }
 
-        UpdateSpaceInternal(current, null, holeOfCurrent);
+        UpdateHoleOfSpace(current, null, holeOfCurrent);
 
-        return AddSpaceInternal(current);
+        AddSpaceInternal(current);
     }
 
     // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
@@ -1189,7 +940,7 @@ public class IndoorTiling
                 area = cellspace.Polygon.Area;
                 shell = cellspace;
             }
-        UpdateSpaceInternal(shell, null, cellSpaces.Where(cs => cs != shell).ToList());
+        UpdateHoleOfSpace(shell, null, cellSpaces.Where(cs => cs != shell).ToList());
         return shell;
     }
     private CellSpace CreateCellSpaceInternal(List<JumpInfo> jumps, bool CCW = true)
@@ -1216,20 +967,11 @@ public class IndoorTiling
         return new CellSpace(vertices, boundaries);
     }
 
-    public string CalcDigest()
-        => CalcDigest(Digest.CellSpaceList(spacePool));
-    public string CalcDigest(string spacesDigest)
-    => "{" +
-        $"vertexPool.Count: {vertexPool.Count}, " +
-        $"boundaryPool digest: {Digest.CellBoundaryList(boundaryPool)}, " +
-        $"spacePool digest: {spacesDigest}" +
-        "}";
-
 
     private void FullPolygonizerCheck()
     {
-        string expectDigest = CalcDigest(Digest.PolygonList(Polygonizer().Select(geom => (Polygon)geom).ToList()));
-        string increaseDigest = CalcDigest();
+        string expectDigest = indoorData.CalcDigest(Digest.PolygonList(indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        string increaseDigest = indoorData.CalcDigest();
         if (expectDigest != increaseDigest)
         {
             Debug.Log(expectDigest);
@@ -1241,10 +983,9 @@ public class IndoorTiling
     private void BoundaryLeftRightCheck()
     {
         Dictionary<CellBoundary, int> sideCount = new Dictionary<CellBoundary, int>();
-        boundaryPool.ForEach(b => sideCount.Add(b, 0));
+        indoorData.boundaryPool.ForEach(b => sideCount.Add(b, 0));
 
-        spacePool.ForEach(space => space.allBoundaries.ForEach(b
-            =>
+        indoorData.spacePool.ForEach(space => space.allBoundaries.ForEach(b =>
         {
             if (b.leftSpace != space && b.rightSpace != space)
                 throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");
@@ -1277,71 +1018,5 @@ public class IndoorTiling
                 throw new Exception($"more than 2({pair.Value}) space contain boundary({pair.Key.Id})");
         }
     }
-
-    [JsonIgnore] private static bool consistencyChecking = true;
-    private void ConsistencyCheck()
-    {
-        if (consistencyChecking) return;
-        Debug.Log("Polygonizer().Count, spacePoll.count " + Polygonizer().Count + " " + spacePool.Count);
-
-        consistencyChecking = true;
-
-        string before = CalcDigest();
-        string beforeAll = Serialize();
-
-        List<CellBoundary> boundaries = new List<CellBoundary>(boundaryPool);
-        bool valid = true;
-        IndoorTiling? tempIndoorTiling = null;
-        foreach (var boundary in boundaries)
-        {
-            Debug.Log("Remove " + boundary.Id);
-            tempIndoorTiling = new IndoorTiling(this);
-            tempIndoorTiling.RemoveBoundary(boundary);
-
-            Debug.Log("Add back " + boundary.Id);
-            if (tempIndoorTiling.vertexPool.Contains(boundary.P0))
-            {
-                if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
-                    tempIndoorTiling.AddBoundary(boundary.P0, boundary.P1);
-                else
-                    tempIndoorTiling.AddBoundary(boundary.P0, boundary.P1.Coordinate);
-            }
-            else
-            {
-                if (tempIndoorTiling.vertexPool.Contains(boundary.P1))
-                    tempIndoorTiling.AddBoundary(boundary.P0.Coordinate, boundary.P1);
-                else
-                    tempIndoorTiling.AddBoundary(boundary.P0.Coordinate, boundary.P1.Coordinate);
-            }
-
-            string after = tempIndoorTiling.CalcDigest();
-            if (before != after)
-            {
-                Debug.LogError(boundary.Id);
-                Debug.LogError(boundary.Geom);
-                Debug.LogError(before);
-                Debug.LogError(after);
-                valid = false;
-            }
-            tempIndoorTiling = null;
-
-            string afterAll = Serialize();
-            if (beforeAll != afterAll)
-            {
-                Debug.LogError(beforeAll);
-                Debug.LogError(afterAll);
-                throw new Exception("Oops");
-            }
-        }
-
-
-        if (valid)
-            Debug.Log($"ConsistencyCheck OK after try remove {boundaries.Count} boundaries");
-
-        consistencyChecking = false;
-    }
-
-
-
 
 }

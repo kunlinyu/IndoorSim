@@ -5,8 +5,8 @@ using Newtonsoft.Json;
 
 public enum PassType
 {
-    DoNotPass,
-    AllowedToPass,
+    AllowedToPass = 0,
+    DoNotPass = 1,
 }
 public class RepresentativeLine
 {

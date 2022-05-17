@@ -51,6 +51,8 @@ public class CellSpace : Container
         }
     }
 
+    [JsonIgnore] public RLineGroup? rLines;
+
     [JsonIgnore] public Action OnUpdate = () => { };
 
     private CellSpace() : base("")
@@ -141,7 +143,6 @@ public class CellSpace : Container
         target.shellBoundaries.Add(newBoundary2);
 
         UpdateFromVertex();
-        OnUpdate?.Invoke();
     }
 
     public static CellSpace MergeOrMinusCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)

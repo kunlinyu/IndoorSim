@@ -12,7 +12,7 @@ public class SpaceController : MonoBehaviour, Selectable
         set
         {
             space = value;
-            space.OnUpdate += () => { ReTriangulate(); updateRenderer(Vector3.zero); };
+            space.OnUpdate += ReTriangulateUpdateRenderer;
         }
     }
 
@@ -71,6 +71,12 @@ public class SpaceController : MonoBehaviour, Selectable
             updateRenderer(Vector3.zero);
     }
 
+    void ReTriangulateUpdateRenderer()
+    {
+        ReTriangulate();
+        updateRenderer(Vector3.zero);
+    }
+
     void ReTriangulate()
     {
         PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
@@ -125,5 +131,10 @@ public class SpaceController : MonoBehaviour, Selectable
         return DebugTip() + "\n" +
                 $"id: {space.Id}\n" +
                 $"navigable: {space.Navigable}";
+    }
+
+    void OnDestroy()
+    {
+        space.OnUpdate -= ReTriangulateUpdateRenderer;
     }
 }

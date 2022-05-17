@@ -36,7 +36,7 @@ public class AssetApplier : MonoBehaviour, ITool
             if (assetIndoorTiling == null) throw new System.Exception("can not deserialize asset");
 
             boundaryRenderObjs.Clear();
-            foreach (var boundary in assetIndoorTiling.boundaryPool)
+            foreach (var boundary in assetIndoorTiling.indoorData.boundaryPool)
             {
                 GameObject obj = new GameObject("asset boundary");
                 obj.transform.SetParent(transform);
@@ -62,11 +62,11 @@ public class AssetApplier : MonoBehaviour, ITool
 
 
         Vector3 center = new Vector3((float)asset.Value.centerX, 0.0f, (float)asset.Value.centerY);
-        for (int i = 0; i < assetIndoorTiling.boundaryPool.Count; i++)
+        for (int i = 0; i < assetIndoorTiling.indoorData.boundaryPool.Count; i++)
         {
             Quaternion rot = Quaternion.AngleAxis(rotation, Vector3.up);
-            Vector3 p0 = rot * (Utils.Coor2Vec(assetIndoorTiling.boundaryPool[i].P0.Coordinate) - center) + mousePosition.Value;
-            Vector3 p1 = rot * (Utils.Coor2Vec(assetIndoorTiling.boundaryPool[i].P1.Coordinate) - center) + mousePosition.Value;
+            Vector3 p0 = rot * (Utils.Coor2Vec(assetIndoorTiling.indoorData.boundaryPool[i].P0.Coordinate) - center) + mousePosition.Value;
+            Vector3 p1 = rot * (Utils.Coor2Vec(assetIndoorTiling.indoorData.boundaryPool[i].P1.Coordinate) - center) + mousePosition.Value;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().positionCount = 2;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(0, p0);
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(1, p1);

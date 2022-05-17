@@ -47,7 +47,7 @@ public class SimpleIDGenerator : IDGenInterface
 
     public void Reset(ICollection<string> allHistory)
     {
-        int maxLast = 0;
+        int maxLast = -1;
         foreach (string id in allHistory)
         {
             int last = Number(id);

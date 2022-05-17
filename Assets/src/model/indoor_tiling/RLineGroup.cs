@@ -10,61 +10,69 @@ using UnityEngine;
 #nullable enable
 public class RLineGroup
 {
-    [JsonPropertyAttribute] public CellSpace? space { get; private set; }
-    [JsonPropertyAttribute] public List<RepresentativeLine> rLines { get; private set; } = new List<RepresentativeLine>();
+    [JsonPropertyAttribute] public CellSpace space { get; private set; }
+    [JsonPropertyAttribute] public List<RepresentativeLine> undefaultRLines { get; private set; } = new List<RepresentativeLine>();
+    [JsonIgnore] public List<RepresentativeLine> rLines { get; private set; } = new List<RepresentativeLine>();
+    [JsonIgnore] public const PassType defaultPassType = PassType.AllowedToPass;
     [JsonIgnore] public Action OnUpdate = () => { };
 
     public RLineGroup() { }
+
+    private void FillDefaultRLines()
+    {
+        int rLineCount = space.allBoundaries.Count * (space.allBoundaries.Count - 1);
+        if (rLines.Count < rLineCount)
+        {
+            foreach (var fr in space.allBoundaries)
+                foreach (var to in space.allBoundaries)
+                    if (fr != to)
+                        if (undefaultRLines.FirstOrDefault(rl => rl.fr == fr && rl.to == to) == null)
+                            rLines.Add(new RepresentativeLine(fr, to, space, defaultPassType));
+        }
+
+        if (rLines.Count != rLineCount)
+            throw new Exception($"rLines.Count({rLines.Count}) != space.allBoundaries.Count * (space.allBoundaries.Count - 1)({rLineCount})");
+    }
 
     public RLineGroup(CellSpace space)
     {
         this.space = space;
         var inbound = space.InBound();
         var outbound = space.OutBound();
-
-        if (space.allBoundaries.Count(b => b.Navigable() == Navigable.Navigable) < 6)
-            foreach (var b1 in space.allBoundaries)
-                foreach (var b2 in space.allBoundaries)
-                    if (b1 != b2)
-                        Add(new RepresentativeLine(b1, b2, space, PassType.AllowedToPass));
-    }
-    public RLineGroup(CellSpace space, List<RepresentativeLine> rLines)
-    {
-        this.space = space;
-        this.rLines = rLines;
+        FillDefaultRLines();
     }
 
-    public void UpdateOneRLine(CellBoundary b1, CellBoundary b2, PassType passType)
+    public PassType passType(CellBoundary fr, CellBoundary to)
     {
-        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.fr == b1 && rl.to == b2);
+        FillDefaultRLines();
+        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.fr == fr && rl.to == to);
         if (rl == null)
-            rLines.Add(new RepresentativeLine(b1, b2, space, passType));
-        else
-            rl.pass = passType;
+            throw new Exception($"can not find the rline from \"fr\"({fr.Id}) to \"to\"({to.Id})");
+        return rl.pass;
     }
 
-    public void Add(RepresentativeLine rLine)
+    public LineString Geom(CellBoundary fr, CellBoundary to)
     {
-        rLines.Add(rLine);
-        OnUpdate?.Invoke();
+        FillDefaultRLines();
+        LineString? ls = rLines.FirstOrDefault(rl => rl.fr == fr && rl.to == to)?.geom;
+        if (ls == null)
+            throw new Exception($"can not find the geom of rline from \"fr\"({fr.Id}) to \"to\"({to.Id})");
+        return ls;
     }
 
-    public void Add(CellBoundary from, CellBoundary to)
-        => Add(new RepresentativeLine(from, to, space, PassType.AllowedToPass));
-
-    public void Remove(RepresentativeLine rLine)
+    public void SetPassType(CellBoundary fr, CellBoundary to, PassType passType)
     {
-        if (!rLines.Contains(rLine)) throw new ArgumentException("can not find the representative line to be remove");
-        rLines.Remove(rLine);
-        OnUpdate?.Invoke();
-    }
+        FillDefaultRLines();
+        RepresentativeLine? rl = rLines.FirstOrDefault(rl => rl.fr == fr && rl.to == to);
+        if (rl == null)
+            throw new Exception($"can not find the rline from \"fr\"({fr.Id}) to \"to\"({to.Id})");
 
-    public void Remove(CellBoundary from, CellBoundary to)
-    {
-        RepresentativeLine? target = rLines.FirstOrDefault(rLine => rLine.fr == from && rLine.to == to);
-        if (target == null) throw new ArgumentException($"can not find representative line from {from.Id} to {to.Id}");
-        rLines.Remove(target);
-        OnUpdate?.Invoke();
+        if (rl.pass == defaultPassType && passType != defaultPassType)
+            undefaultRLines.Add(rl);
+        if (rl.pass != defaultPassType && passType == defaultPassType)
+            undefaultRLines.Remove(rl);
+
+        rl.pass = passType;
     }
 
     public List<RepresentativeLine> next(CellBoundary from)

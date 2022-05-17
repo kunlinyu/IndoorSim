@@ -24,19 +24,19 @@ public class ConsistencyTest
         IndoorTiling newIndoorTiling = IndoorTiling.Deserialize(json, true);
         do {} while (newIndoorTiling.Redo());
 
-        string expectDigest = newIndoorTiling.CalcDigest(Digest.PolygonList(offlineIndoorTiling.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        string expectDigest = newIndoorTiling.indoorData.CalcDigest(Digest.PolygonList(offlineIndoorTiling.indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
         Debug.Log(expectDigest);
         Debug.Log("---");
         Debug.Log(offlineIndoorTiling.digestCache);
         if (fulltest)
         {
             Assert.AreEqual(expectDigest, offlineIndoorTiling.digestCache);      // old cache
-            Assert.AreEqual(expectDigest, offlineIndoorTiling.CalcDigest());     // old calc
-            Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, offlineIndoorTiling.indoorData.CalcDigest());     // old calc
+            Assert.AreEqual(expectDigest, newIndoorTiling.indoorData.CalcDigest());  // new calc
         }
         else
         {
-            Assert.AreEqual(expectDigest, newIndoorTiling.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, newIndoorTiling.indoorData.CalcDigest());  // new calc
         }
     }
 

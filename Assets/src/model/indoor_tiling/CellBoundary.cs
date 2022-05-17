@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
@@ -16,6 +17,7 @@ public class CellBoundary
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
     [JsonPropertyAttribute] private NaviDirection naviDirection { set; get; } = NaviDirection.BiDirection;
+
     [JsonIgnore]
     public NaviDirection NaviDirection
     {
@@ -28,6 +30,7 @@ public class CellBoundary
     }
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
+
     [JsonIgnore] public Action OnUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)Geom.Reverse(); }
 
@@ -43,6 +46,16 @@ public class CellBoundary
             return global::Navigable.LogicallyNonNavigable;
         else
             return global::Navigable.Navigable;
+    }
+
+    public ICollection<CellSpace> Spaces()
+    {
+        List<CellSpace> result = new List<CellSpace>();
+        if (leftSpace != null)
+            result.Add(leftSpace);
+        if (rightSpace != null)
+            result.Add(rightSpace);
+        return result;
     }
 
     private CellBoundary()  // for deserialization
@@ -168,6 +181,13 @@ public class CellBoundary
             leftSpace = null;
         else if (rightSpace == space)
             rightSpace = null;
+        OnUpdate?.Invoke();
+    }
+
+    public void PartialUnBoundAll()
+    {
+        leftSpace = null;
+        rightSpace = null;
         OnUpdate?.Invoke();
     }
 }
