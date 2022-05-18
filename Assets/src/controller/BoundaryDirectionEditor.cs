@@ -24,8 +24,8 @@ public class BoundaryDirectionEditor : MonoBehaviour, ITool
             if (pointed.type != SelectableType.Boundary) return;
 
             BoundaryController bc = (BoundaryController)pointed;
-            if (bc.Boundary.Navigable() != Navigable.Navigable) return;
-            switch (bc.Boundary.NaviDirection)
+            if (bc.Boundary.SmartNavigable() != Navigable.Navigable) return;
+            switch (bc.Boundary.NaviDir)
             {
                 case NaviDirection.BiDirection:
                     IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Left2Right);

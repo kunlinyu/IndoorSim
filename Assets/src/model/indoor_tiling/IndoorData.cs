@@ -115,7 +115,13 @@ public class IndoorData
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
         if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
-        boundary.NaviDirection = direction;
+        boundary.NaviDir = direction;
+    }
+
+    public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
+    {
+        if (!boundaryPool.Contains(boundary)) throw new ArgumentException("unknown boundary: " + boundary.Id);
+        boundary.Navigable = navigable;
     }
 
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)

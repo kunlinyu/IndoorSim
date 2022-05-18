@@ -78,6 +78,8 @@ public class MapView : MonoBehaviour
 
             var controller = obj.AddComponent<BoundaryController>();
             controller.material = Resources.Load<Material>("Materials/boundary material");
+            controller.logNonNaviMat = Resources.Load<Material>("Materials/boundary log non navi");
+            controller.phyNonNaviMat = Resources.Load<Material>("Materials/boundary phy non navi");
             controller.highLightMaterial = Resources.Load<Material>("Materials/boundary highlight material");
             controller.selectedMaterial = Resources.Load<Material>("Materials/boundary selected material");
             controller.Boundary = boundary;
@@ -92,8 +94,8 @@ public class MapView : MonoBehaviour
 
             var controller = obj.AddComponent<SpaceController>();
             controller.material = Resources.Load<Material>("Materials/space material");
-            controller.logNonNaviMat = Resources.Load<Material>("Materials/log non navi space");
-            controller.phyNonNaviMat = Resources.Load<Material>("Materials/phy non navi space");
+            controller.logNonNaviMat = Resources.Load<Material>("Materials/space log non navi");
+            controller.phyNonNaviMat = Resources.Load<Material>("Materials/space phy non navi");
 
             controller.highLightMaterial = Resources.Load<Material>("Materials/space highlight material");
             controller.selectedMaterial = Resources.Load<Material>("Materials/space selected material");

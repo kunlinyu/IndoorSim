@@ -1,16 +1,18 @@
-using System.Linq;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 #nullable enable
 
-public enum CurrentPickType
+[Flags]
+public enum CurrentPickType : short
 {
-    All,
-    Vertex,
-    Boundary,
-    Space,
-    RLine,
+    None = 0,
+    Vertex = 1,
+    Boundary = 2,
+    Space = 4,
+    RLine = 8,
+    All = 15,
 }
 
 public class MousePickController : MonoBehaviour
@@ -108,27 +110,21 @@ public class MousePickController : MonoBehaviour
 
         Selectable? nearestEntity = null;
 
+        if ((pickType & CurrentPickType.Space) == CurrentPickType.Space)
+            if (nearestSpace != null)
+                nearestEntity = nearestSpace;
 
-        if (pickType == CurrentPickType.All)
-        {
+        if ((pickType & CurrentPickType.RLine) == CurrentPickType.RLine)
+            if (nearestRLine != null)
+                nearestEntity = nearestRLine;
+
+        if ((pickType & CurrentPickType.Boundary) == CurrentPickType.Boundary)
+            if (nearestBoundary != null)
+                nearestEntity = nearestBoundary;
+
+        if ((pickType & CurrentPickType.Vertex) == CurrentPickType.Vertex)
             if (nearestVertex != null)
                 nearestEntity = nearestVertex;
-            else if (nearestBoundary != null)
-                nearestEntity = nearestBoundary;
-            else if (nearestRLine != null)
-                nearestEntity = nearestRLine;
-            else if (nearestSpace != null)
-                nearestEntity = nearestSpace;
-        }
-        else if (pickType == CurrentPickType.Vertex)
-            nearestEntity = nearestVertex;
-        else if (pickType == CurrentPickType.Boundary)
-            nearestEntity = nearestBoundary;
-        else if (pickType == CurrentPickType.Space)
-            nearestEntity = nearestSpace;
-        else if (pickType == CurrentPickType.RLine)
-            nearestEntity = nearestRLine;
-        else throw new System.Exception("unknown pick type: " + pickType);
 
         if (nearestEntity != pointedEntity)
         {

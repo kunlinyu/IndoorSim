@@ -45,6 +45,8 @@ public class BoundaryController : MonoBehaviour, Selectable
     public SelectableType type { get => SelectableType.Boundary; }
 
     [SerializeField] public Material material;
+    [SerializeField] public Material logNonNaviMat;
+    [SerializeField] public Material phyNonNaviMat;
     [SerializeField] public Material highLightMaterial;
     [SerializeField] public Material selectedMaterial;
 
@@ -115,20 +117,26 @@ public class BoundaryController : MonoBehaviour, Selectable
         lr.sortingOrder = 2;
 
         if (selected)
-        {
             lr.material = selectedMaterial;
-        }
         else if (highLight)
         {
             lr.material = highLightMaterial;
             lr.startWidth = width * 2.0f;
             lr.endWidth = width * 2.0f;
         }
+        else if (boundary.Navigable == Navigable.Navigable)
+            lr.material = material;
+        else if (boundary.Navigable == Navigable.LogicallyNonNavigable)
+            lr.material = logNonNaviMat;
+        else if (boundary.Navigable == Navigable.PhysicallyNonNavigable)
+            lr.material = phyNonNaviMat;
+        else
+            throw new System.Exception("unknown navigable enum: " + boundary.Navigable);
 
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        if (Boundary.Navigable() == Navigable.Navigable)
+        if (Boundary.SmartNavigable() == Navigable.Navigable)
         {
-            switch (Boundary.NaviDirection)
+            switch (Boundary.NaviDir)
             {
                 case NaviDirection.NoneDirection:
                     sr.sprite = null;
@@ -166,6 +174,6 @@ public class BoundaryController : MonoBehaviour, Selectable
            $"P1: {boundary.P1.Id}\n" +
            $"left:  {boundary.leftSpace?.Id}\n" +
            $"right: {boundary.rightSpace?.Id}\n" +
-           $"navigable: {boundary.Navigable()}";
+           $"navigable: {boundary.Navigable}";
 
 }

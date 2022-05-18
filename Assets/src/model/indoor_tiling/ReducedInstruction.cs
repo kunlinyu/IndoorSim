@@ -18,6 +18,7 @@ public enum SubjectType
     Boundary,
     Vertices,
     BoundaryDirection,
+    BoundaryNavigable,
     SpaceNavigable,
     RLine,
 }
@@ -28,8 +29,9 @@ public enum SubjectType
 // 3. Remove Boundary
 // 4. Update Vertices
 // 5. Update boundary direction
-// 6. Update space navigable
-// 7. Update RLine PassType
+// 6. Update boundary navigable
+// 7. Update space navigable
+// 8. Update RLine PassType
 
 public struct NaviInfo
 {
@@ -134,6 +136,16 @@ public class ReducedInstruction
         return ri;
     }
 
+    public static ReducedInstruction UpdateBoundaryNavigable(LineString oldLineString, Navigable oldNavigable, Navigable newNavigable)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.BoundaryNavigable;
+        ri.predicate = Predicate.Update;
+        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { navigable = oldNavigable } };
+        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { navigable = newNavigable } };
+        return ri;
+    }
+
     public static ReducedInstruction UpdateSpaceNavigable(Coordinate spaceInterior, Navigable oldNavigable, Navigable newNavigable)
     {
         ReducedInstruction ri = new ReducedInstruction();
@@ -191,6 +203,10 @@ public class ReducedInstruction
                     return UpdateBoundaryDirection(oldParam.lineString(), newParam.naviInfo().direction, oldParam.naviInfo().direction);
                 else
                     throw new ArgumentException("boundary direction can only update.");
+            case SubjectType.BoundaryNavigable:
+                if (predicate == Predicate.Update)
+                    return UpdateBoundaryNavigable(oldParam.lineString(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
+                else throw new ArgumentException("boundary navigable can only update.");
             case SubjectType.SpaceNavigable:
                 if (predicate == Predicate.Update)
                     return UpdateSpaceNavigable(oldParam.coor(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);

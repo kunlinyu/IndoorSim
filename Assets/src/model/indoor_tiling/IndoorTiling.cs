@@ -288,6 +288,17 @@ public class IndoorTiling
                 else
                     throw new ArgumentException("boundary direction can only update.");
                 break;
+            case SubjectType.BoundaryNavigable:
+                if (instruction.predicate == Predicate.Update)
+                {
+                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
+                    if (boundary == null)
+                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
+                    UpdateBoundaryNavigable(boundary, instruction.newParam.naviInfo().navigable);
+                }
+                else
+                    throw new ArgumentException("boundary navigable can only update.");
+                break;
             case SubjectType.SpaceNavigable:
                 if (instruction.predicate == Predicate.Update)
                 {
@@ -697,14 +708,22 @@ public class IndoorTiling
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDirection, direction));
+        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));
 
         indoorData.UpdateBoundaryNaviDirection(boundary, direction);
 
-        if (boundary.leftSpace != null)
-            boundary.leftSpace.rLines?.OnUpdate?.Invoke();
-        if (boundary.rightSpace != null)
-            boundary.rightSpace.rLines?.OnUpdate?.Invoke();
+        boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
+        boundary.rightSpace?.rLines?.OnUpdate?.Invoke();
+    }
+
+    public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
+    {
+        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryNavigable(boundary.geom, boundary.Navigable, navigable));
+
+        indoorData.UpdateBoundaryNavigable(boundary, navigable);
+
+        boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
+        boundary.rightSpace?.rLines?.OnUpdate?.Invoke();
     }
 
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
@@ -714,6 +733,8 @@ public class IndoorTiling
         indoorData.UpdateSpaceNavigable(space, navigable);
 
         space.rLines?.OnUpdate?.Invoke();
+
+        // TODO: add a mothod to access neighbor spaces
         space.allBoundaries.ForEach(b => { if (b.leftSpace != null) b.leftSpace.rLines?.OnUpdate?.Invoke(); });
         space.allBoundaries.ForEach(b => { if (b.rightSpace != null) b.rightSpace.rLines?.OnUpdate?.Invoke(); });
     }

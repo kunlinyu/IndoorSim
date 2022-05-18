@@ -316,11 +316,11 @@ public class CellSpace : Container
     {
         return allBoundaries.Where(b =>
         {
-            if (b.Navigable() != Navigable.Navigable) return false;
+            if (b.SmartNavigable() != Navigable.Navigable) return false;
             if (b.leftSpace == this)
             {
                 if (b.rightSpace != null)
-                    switch (b.NaviDirection)
+                    switch (b.NaviDir)
                     {
                         case NaviDirection.Right2Left:
                         case NaviDirection.BiDirection:
@@ -334,7 +334,7 @@ public class CellSpace : Container
             else if (b.rightSpace == this)
             {
                 if (b.leftSpace != null)
-                    switch (b.NaviDirection)
+                    switch (b.NaviDir)
                     {
                         case NaviDirection.Left2Right:
                         case NaviDirection.BiDirection:
@@ -353,11 +353,11 @@ public class CellSpace : Container
     {
         return allBoundaries.Where(b =>
         {
-            if (b.Navigable() != Navigable.Navigable) return false;
+            if (b.SmartNavigable() != Navigable.Navigable) return false;
             if (b.leftSpace == this)
             {
                 if (b.rightSpace != null)
-                    switch (b.NaviDirection)
+                    switch (b.NaviDir)
                     {
                         case NaviDirection.Left2Right:
                         case NaviDirection.BiDirection:
@@ -371,7 +371,7 @@ public class CellSpace : Container
             else if (b.rightSpace == this)
             {
                 if (b.leftSpace != null)
-                    switch (b.NaviDirection)
+                    switch (b.NaviDir)
                     {
                         case NaviDirection.Right2Left:
                         case NaviDirection.BiDirection:

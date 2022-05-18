@@ -15,6 +15,7 @@ public class CellBoundary
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
     [JsonPropertyAttribute] private NaviDirection naviDir { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] private Navigable navigable { set; get; } = Navigable.Navigable;
     [JsonPropertyAttribute] private LineString? Geom;  // complex line string should save to json file
 
     [JsonIgnore] private LineString? autoGenGeom;
@@ -23,9 +24,6 @@ public class CellBoundary
     {
         get
         {
-            if (Geom != null && Geom.NumPoints == 2)  // TODO: migration
-                Geom = null;  // TODO: migration
-
             if (Geom != null) return Geom;
             if (autoGenGeom == null)
                 autoGenGeom = new GeometryFactory().CreateLineString(new Coordinate[] { P0.Coordinate, P1.Coordinate });
@@ -36,7 +34,7 @@ public class CellBoundary
     [JsonIgnore] public string Id { get; set; }
 
     [JsonIgnore]
-    public NaviDirection NaviDirection
+    public NaviDirection NaviDir
     {
         set
         {
@@ -45,20 +43,33 @@ public class CellBoundary
         }
         get => naviDir;
     }
+    [JsonIgnore]
+    public Navigable Navigable
+    {
+        set
+        {
+            navigable = value;
+            OnUpdate?.Invoke();
+        }
+        get => navigable;
+    }
+
     [JsonIgnore] public CellSpace? leftSpace;
     [JsonIgnore] public CellSpace? rightSpace;
 
     [JsonIgnore] public Action OnUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)geom.Reverse(); }
 
-    public Navigable Navigable()
+    public Navigable SmartNavigable()
     {
         if (leftSpace == null || rightSpace == null)
             return global::Navigable.PhysicallyNonNavigable;
-        else if (leftSpace.Navigable == global::Navigable.PhysicallyNonNavigable ||
+        else if (navigable == global::Navigable.PhysicallyNonNavigable ||
+                 leftSpace.Navigable == global::Navigable.PhysicallyNonNavigable ||
                  rightSpace.Navigable == global::Navigable.PhysicallyNonNavigable)
             return global::Navigable.PhysicallyNonNavigable;
-        else if (leftSpace.Navigable == global::Navigable.LogicallyNonNavigable ||
+        else if (navigable == global::Navigable.LogicallyNonNavigable ||
+                 leftSpace.Navigable == global::Navigable.LogicallyNonNavigable ||
                  rightSpace.Navigable == global::Navigable.LogicallyNonNavigable)
             return global::Navigable.LogicallyNonNavigable;
         else

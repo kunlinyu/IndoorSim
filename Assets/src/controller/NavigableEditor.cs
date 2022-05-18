@@ -14,7 +14,7 @@ public class NavigableEditor : MonoBehaviour, ITool
 
     void Start()
     {
-        MousePickController.pickType = CurrentPickType.Space;
+        MousePickController.pickType = CurrentPickType.Space | CurrentPickType.Boundary;
     }
 
     void Update()
@@ -23,20 +23,43 @@ public class NavigableEditor : MonoBehaviour, ITool
         {
             Selectable? pointed = MousePickController.PointedEntity;
             if (pointed == null) return;
-            if (pointed.type != SelectableType.Space) return;
 
-            SpaceController sc = (SpaceController)pointed;
-            switch (sc.Space.Navigable)
+            if (pointed.type == SelectableType.Space)
             {
-                case Navigable.PhysicallyNonNavigable:
-                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.LogicallyNonNavigable);
-                    break;
-                case Navigable.LogicallyNonNavigable:
-                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.Navigable);
-                    break;
-                case Navigable.Navigable:
-                    IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.PhysicallyNonNavigable);
-                    break;
+                SpaceController sc = (SpaceController)pointed;
+                switch (sc.Space.Navigable)
+                {
+                    case Navigable.PhysicallyNonNavigable:
+                        IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.LogicallyNonNavigable);
+                        break;
+                    case Navigable.LogicallyNonNavigable:
+                        IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.Navigable);
+                        break;
+                    case Navigable.Navigable:
+                        IndoorSim.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.PhysicallyNonNavigable);
+                        break;
+                }
+            }
+            else if (pointed.type == SelectableType.Boundary)
+            {
+                BoundaryController bc = (BoundaryController)pointed;
+                switch (bc.Boundary.Navigable)
+                {
+                    case Navigable.PhysicallyNonNavigable:
+                        IndoorSim.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.LogicallyNonNavigable);
+                        break;
+                    case Navigable.LogicallyNonNavigable:
+                        IndoorSim.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.Navigable);
+                        break;
+                    case Navigable.Navigable:
+                        IndoorSim.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.PhysicallyNonNavigable);
+                        break;
+                }
+
+            }
+            else
+            {
+                throw new System.Exception("unexpected pointed type: " + pointed.type);
             }
         }
     }
