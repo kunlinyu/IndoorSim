@@ -140,7 +140,6 @@ public class MapView : MonoBehaviour
 
         indoorTiling.OnAssetUpdated += (assets) =>
         {
-            // TODO: create thumbnail
             var e = new UIEvent();
             e.type = UIEventType.Asset;
             e.name = "list";

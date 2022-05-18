@@ -177,14 +177,12 @@ public class IndoorTiling
     public void SessionStart() => instructionHistory.SessionStart();
     public void SessionCommit() => instructionHistory.SessionCommit();
 
-    // TODO: consider id generator when interpret reverse instruction
     private void InterpretInstruction(List<ReducedInstruction> instructions)
     {
         foreach (var instruction in instructions)
             InterpretInstruction(instruction);
     }
 
-    // TODO: consider id generator when interpret reverse instruction
     private void InterpretInstruction(ReducedInstruction instruction)
     {
         Debug.Log("interpret instruction: " + instruction);
