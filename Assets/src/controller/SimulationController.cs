@@ -146,7 +146,7 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "save")
             {
-                SaveToFile(indoorSim.indoorTiling.Serialize());
+                SaveToFile(indoorSim.indoorTiling.Serialize(true));
             }
             else if (e.name == "load")
             {

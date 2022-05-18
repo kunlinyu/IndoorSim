@@ -16,7 +16,6 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
-
     [JsonIgnore] public string Id { get; set; } = "";
 
     [JsonIgnore]
@@ -65,17 +64,9 @@ public class CellSpace : Container
         Geom = new GeometryFactory().CreatePolygon();
     }
 
-    [OnDeserialized]
-    internal void OnDeserializedMethod(StreamingContext context)
-    {
-        UpdateFromVertex();
-    }
-
-    [OnSerializing]
-    private void OnSerializingMethod(StreamingContext context)
-    {
-        Geom = null;
-    }
+    [OnDeserialized] internal void OnDeserializedMethod(StreamingContext context) => UpdateFromVertex();
+    [OnSerializing] private void OnSerializingMethod(StreamingContext context) => Geom = null;
+    [OnSerialized] private void OnSerializedMethod(StreamingContext context) => UpdateFromVertex();  // TODO: too heavy to re update for serialization
 
     public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "") : base(id)
     {
