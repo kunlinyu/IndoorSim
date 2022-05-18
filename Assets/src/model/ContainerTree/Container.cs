@@ -7,6 +7,7 @@ public class Container
 {
     [JsonPropertyAttribute] public string containerId { get; set; }
     [JsonPropertyAttribute] public Geometry? Geom { get; protected set; }
+    [JsonPropertyAttribute] public Navigable navigable = Navigable.Navigable;
     [JsonPropertyAttribute] public List<Container> children = new List<Container>();
     [JsonPropertyAttribute] public Dictionary<string, string> kvp = new Dictionary<string, string>();
 

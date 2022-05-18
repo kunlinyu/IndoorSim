@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public enum Navigable
 {
     PhysicallyNonNavigable,
     LogicallyNonNavigable,
     Navigable,
+    Mix,
 }
 
 public enum NaviDirection

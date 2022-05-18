@@ -14,28 +14,6 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
 
-class IdSerializer
-{
-    public static string Serialize(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
-    {
-        string str1 = IdGenVertex.Preview();
-        string str2 = IdGenBoundary.Preview();
-        string str3 = IdGenSpace.Preview();
-        if (str1.Contains('\n') || str2.Contains('\n') || str3.Contains('\n')) throw new Exception("delimiter conflict");
-        return str1 + '\n' + str2 + '\n' + str3;
-    }
-    public static void Deserialize(string str, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
-    {
-        if (str.Where(c => c == '\n').Count() != 2) throw new ArgumentException("can not deserialize");
-        using (var reader = new StringReader(str))
-        {
-            IdGenVertex.ResetNext(reader.ReadLine());
-            IdGenBoundary.ResetNext(reader.ReadLine());
-            IdGenSpace.ResetNext(reader.ReadLine());
-        }
-    }
-}
-
 [Serializable]
 public class IndoorTiling
 {
