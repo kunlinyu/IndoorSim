@@ -14,9 +14,12 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
 
+
 [Serializable]
 public class IndoorTiling
 {
+    public string kInnerInterSectionDE9IMPatter = "T********";
+
     [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> instructionHistory = new InstructionHistory<ReducedInstruction>();
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
@@ -45,8 +48,6 @@ public class IndoorTiling
         this.IdGenVertex = IdGenVertex;
         this.IdGenBoundary = IdGenBoundary;
         this.IdGenSpace = IdGenSpace;
-
-        // instructionHistory.GetSnapshot = () => IdSerializer.Serialize(IdGenVertex, IdGenBoundary, IdGenSpace);
     }
 
     public string Serialize(bool indent = false)
@@ -562,7 +563,7 @@ public class IndoorTiling
         {
             foreach (var s2 in indoorData.spacePool)
                 if (!System.Object.ReferenceEquals(s1, s2))
-                    if (s1.Polygon.Relate(s2.Geom, "T********"))  // TODO magic string
+                    if (s1.Polygon.Relate(s2.Geom, kInnerInterSectionDE9IMPatter))
                     {
                         valid = false;
                         goto validresult;
@@ -710,9 +711,7 @@ public class IndoorTiling
 
         space.rLines?.OnUpdate?.Invoke();
 
-        // TODO: add a mothod to access neighbor spaces
-        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) b.leftSpace.rLines?.OnUpdate?.Invoke(); });
-        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) b.rightSpace.rLines?.OnUpdate?.Invoke(); });
+        indoorData.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
 
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
@@ -738,7 +737,9 @@ public class IndoorTiling
         List<CellSpace> spaces,
         Func<float, float, float, float, string>? captureThumbnailBase64)
     {
-        // TODO: check arguments contained by current indoorTiling
+        if (vertices.Any(v => !indoorData.Contains(v))) throw new ArgumentException("can not find some vertex");
+        if (boundaries.Any(b => !indoorData.Contains(b))) throw new ArgumentException("can not find some boundary");
+        if (spaces.Any(s => !indoorData.Contains(s))) throw new ArgumentException("can not find some space");
 
         IndoorData newIndoorData = new IndoorData();
         newIndoorData.vertexPool.AddRange(vertices);
@@ -837,9 +838,7 @@ public class IndoorTiling
         indoorData.AddRLines(rLineGroup);
         OnRLinesCreated?.Invoke(rLineGroup);
 
-        // TODO: create a function to query neighbor space and update them
-        space.allBoundaries.ForEach(b => { if (b.leftSpace != null) b.leftSpace.rLines?.OnUpdate?.Invoke(); });
-        space.allBoundaries.ForEach(b => { if (b.rightSpace != null) b.rightSpace.rLines?.OnUpdate?.Invoke(); });
+        indoorData.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
 
     private void RemoveSpaceInternal(CellSpace space)

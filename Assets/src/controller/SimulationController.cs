@@ -114,7 +114,7 @@ public class SimulationController : MonoBehaviour
                 {
                     toolObj = new GameObject("shelves");
                     currentTool = toolObj.AddComponent<Shelves>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
+                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
                     Debug.Log("Switch to tool shelves");
                 }
             }
@@ -124,7 +124,7 @@ public class SimulationController : MonoBehaviour
                 {
                     toolObj = new GameObject("shelves2");
                     currentTool = toolObj.AddComponent<Shelves2>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
+                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
                     Debug.Log("Switch to tool shelves2");
                 }
             }
@@ -136,7 +136,7 @@ public class SimulationController : MonoBehaviour
                     AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
                     assetApplier.assetId = Int32.Parse(e.message);
                     currentTool = assetApplier;
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");  // TODO: material
+                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
                     Debug.Log("Switch to asset applier");
                 }
             }

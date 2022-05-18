@@ -146,9 +146,16 @@ public class CellBoundary
 
     public CellVertex Another(CellVertex one)
     {
-        if (Object.ReferenceEquals(one, P0)) return P1;
-        if (Object.ReferenceEquals(one, P1)) return P0;
+        if (one == P0) return P1;
+        if (one == P1) return P0;
         throw new ArgumentException("Not any one of my CellVertex");
+    }
+
+    public CellSpace? Another(CellSpace space)
+    {
+        if (space == leftSpace) return rightSpace;
+        if (space == rightSpace) return leftSpace;
+        return null;
     }
 
     public bool ConnectSameVertices(CellBoundary cb)

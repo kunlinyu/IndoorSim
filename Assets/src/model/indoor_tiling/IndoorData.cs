@@ -19,6 +19,8 @@ public class IndoorData
     [JsonPropertyAttribute] public List<CellSpace> spacePool { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RLineGroup> rLinePool { get; private set; } = new List<RLineGroup>();
 
+    [JsonIgnore] public const double kFindGeomEpsilon = 1e-4;
+
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
 
@@ -33,6 +35,8 @@ public class IndoorData
     public ICollection<CellSpace> Vertex2Spaces(CellVertex vertex)
         => vertex2Boundaries[vertex].Select(b => b.Spaces()).SelectMany(s => s).Distinct().ToList();
     public ICollection<RepresentativeLine> Boundary2RLines(CellBoundary boundary) => boundary2RLines[boundary];
+    public List<CellSpace> Space2Spaces(CellSpace space)
+        => space.allBoundaries.Select(b => b.Another(space)).Where(s => s != null).Select(s => s!).ToList();
 
     public void AddVertex(CellVertex vertex)
     {
@@ -137,10 +141,10 @@ public class IndoorData
     }
 
     public CellVertex? FindVertexCoor(Point coor)
-    => vertexPool.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < 1e-4f);  // TODO: magic number
+    => vertexPool.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < kFindGeomEpsilon);
 
     public CellVertex? FindVertexCoor(Coordinate coor)
-        => vertexPool.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < 1e-4f);  // TODO: magic number
+        => vertexPool.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < kFindGeomEpsilon);
     public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2)
         => vertex2Boundaries[cv1].Where(b => System.Object.ReferenceEquals(b.Another(cv1), cv2)).ToList();
     public CellBoundary? FindBoundaryGeom(LineString ls)
@@ -152,7 +156,7 @@ public class IndoorData
         if (end == null)
             throw new ArgumentException("can not find vertex as end point of line string: " + ls.EndPoint.Coordinate);
         var boundaries = VertexPair2Boundaries(start, end);
-        return boundaries.FirstOrDefault(b => b.geom.Distance(MiddlePoint(ls)) < 1e-4);  // TODO: magic number
+        return boundaries.FirstOrDefault(b => b.geom.Distance(MiddlePoint(ls)) < kFindGeomEpsilon);
     }
 
     public CellSpace? FindSpaceGeom(Coordinate coor)
