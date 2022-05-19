@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+
 
 #nullable enable
 
@@ -9,6 +11,11 @@ public struct SBPair
     public Container space;
     public LineString boundary;
     public LineString? representativeLine;
+}
+
+public class PlanSimpleResult
+{
+    public List<Point> boundaryCentroids = new List<Point>();
 }
 
 
@@ -28,4 +35,7 @@ public class PlanResult : IEnumerable
     }
 
     public IEnumerator GetEnumerator() => SBSequence.GetEnumerator();
+
+    public PlanSimpleResult ToSimple()
+        => new PlanSimpleResult() { boundaryCentroids = SBSequence.Select(sbPair => sbPair.boundary.Centroid).ToList() };
 }

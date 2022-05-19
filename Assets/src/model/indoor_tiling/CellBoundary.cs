@@ -76,7 +76,7 @@ public class CellBoundary
             return global::Navigable.Navigable;
     }
 
-    public ICollection<CellSpace> Spaces()
+    public List<CellSpace> Spaces()
     {
         List<CellSpace> result = new List<CellSpace>();
         if (leftSpace != null)

@@ -12,4 +12,19 @@ public class Container
     [JsonPropertyAttribute] public Dictionary<string, string> kvp = new Dictionary<string, string>();
 
     public Container(string id) { this.containerId = id; }
+
+    public bool Contains(string id) => Find(id) != null;
+
+    public Container? Find(string id)
+    {
+        if (containerId == id) return this;
+
+        foreach (var son in children)
+        {
+            var result = son.Find(id);
+            if (result != null) return result;
+        }
+
+        return null;
+    }
 }

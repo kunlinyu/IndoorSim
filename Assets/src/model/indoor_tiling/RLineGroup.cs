@@ -6,6 +6,12 @@ using Newtonsoft.Json;
 
 using UnityEngine;
 
+public struct BoundaryWithGeom
+{
+    public CellBoundary boundary;
+    public LineString rLineGeom;
+}
+
 
 #nullable enable
 public class RLineGroup
@@ -75,8 +81,11 @@ public class RLineGroup
         rl.pass = passType;
     }
 
-    public List<RepresentativeLine> next(CellBoundary from)
-        => rLines.Where(rLine => rLine.fr == from).ToList();
+    public List<BoundaryWithGeom> next(CellBoundary fr)
+        => rLines.Where(rLine => rLine.pass == PassType.AllowedToPass)
+                 .Where(rLine => rLine.fr == fr)
+                 .Select(rLine => new BoundaryWithGeom() { boundary = rLine.to, rLineGeom = rLine.geom} )
+                 .ToList();
 
     public void UpdateGeom()
         => rLines.ForEach(rl => rl.UpdateGeom(space));
