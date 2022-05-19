@@ -4,7 +4,7 @@ using UnityEngine;
 #nullable enable
 
 [RequireComponent(typeof(LineRenderer))]
-public class LineString : MonoBehaviour, ITool
+public class LineStringEditor : MonoBehaviour, ITool
 {
     public IndoorSim? IndoorSim { set; get; }
     public MapView? mapView { get; set; }

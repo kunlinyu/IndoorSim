@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class IndoorSim
 {
     public IndoorTiling indoorTiling;
-    public Simulation simulation;
+    // public Simulation simulation;
 
     // TODO: put assets here
 

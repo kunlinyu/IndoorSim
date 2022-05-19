@@ -42,7 +42,7 @@ public class SimulationController : MonoBehaviour
                 if (oldToolName != "lineString")
                 {
                     toolObj = new GameObject("lineString");
-                    currentTool = toolObj.AddComponent<LineString>();
+                    currentTool = toolObj.AddComponent<LineStringEditor>();
                     currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
                     Debug.Log("Switch to tool lineString");
                 }
