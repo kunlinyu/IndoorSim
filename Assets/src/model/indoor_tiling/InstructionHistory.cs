@@ -23,11 +23,13 @@ public class InstructionHistory<InstructionType>
                 snapShots.Add(getSnapshot.Invoke());
         }
     }
+
     [JsonIgnore] private List<InstructionType>? uncommittedInstruction = null;
     [JsonIgnore] private int reEntryLevel = 0;
 
-    public InstructionHistory()
-    { }
+#pragma warning disable CS8618
+    public InstructionHistory() { }  // for deserialize only
+#pragma warning restore CS8618
 
     public bool IgnoreDo { get; set; } = false;
 

@@ -22,7 +22,9 @@ public class RLineGroup
     [JsonIgnore] public const PassType defaultPassType = PassType.AllowedToPass;
     [JsonIgnore] public Action OnUpdate = () => { };
 
-    public RLineGroup() { }
+#pragma warning disable CS8618
+    public RLineGroup() { }  // for deserialize only
+#pragma warning restore CS8618
 
     private void FillDefaultRLines()
     {

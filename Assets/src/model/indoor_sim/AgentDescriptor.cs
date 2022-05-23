@@ -1,21 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class AgentDescriptor
+#nullable enable
+public struct AgentDescriptor
 {
     public string name;
     public string type;
-}
-
-public class AgentPoseDescriptor : AgentDescriptor
-{
     public double x;
     public double y;
     public double theta;
-}
-
-public class AgentContainerDescriptor : AgentDescriptor
-{
-    public string containerId;
-    public double theta;
+    public string? containerId;  // if containerId != null, them there should be one container with this id in IndoorData.
+                                 // And the x, y will be the Centroid of the container.geom
 }

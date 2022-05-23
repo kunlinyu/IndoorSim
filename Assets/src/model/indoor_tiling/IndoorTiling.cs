@@ -41,8 +41,9 @@ public class IndoorTiling
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
 
-    public IndoorTiling()
-    { }
+#pragma warning disable CS8618
+    public IndoorTiling() { }  // for deserialize only
+#pragma warning restore CS8618
 
     public IndoorTiling(IndoorData indoorData, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
@@ -117,15 +118,15 @@ public class IndoorTiling
                 OnRLinesCreated?.Invoke(r);
         }
 
-        IdGenVertex.Reset();
+        IdGenVertex!.Reset();
         foreach (var v in indoorData.vertexPool)
-            v.Id = IdGenVertex.Gen();
-        IdGenBoundary.Reset();
+            v.Id = IdGenVertex!.Gen();
+        IdGenBoundary!.Reset();
         foreach (var b in indoorData.boundaryPool)
-            b.Id = IdGenBoundary.Gen();
-        IdGenSpace.Reset();
+            b.Id = IdGenBoundary!.Gen();
+        IdGenSpace!.Reset();
         foreach (var s in indoorData.spacePool)
-            s.Id = IdGenSpace.Gen();
+            s.Id = IdGenSpace!.Gen();
 
         return true;
     }

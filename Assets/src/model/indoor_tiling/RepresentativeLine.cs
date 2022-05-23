@@ -18,7 +18,10 @@ public class RepresentativeLine
     public bool IllForm(CellSpace through)
         => !through.InBound().Contains(fr) || !through.OutBound().Contains(to);
 
+#pragma warning disable CS8618
     public RepresentativeLine() { }  // for deserialize only
+#pragma warning restore CS8618
+
     public RepresentativeLine(CellBoundary fr, CellBoundary to, CellSpace through, PassType passType)
     {
         this.fr = fr;

@@ -21,6 +21,8 @@ public enum SubjectType
     BoundaryNavigable,
     SpaceNavigable,
     RLine,
+    Agent,  // TODO:: create and interpret
+    Task,  // TODO:: create and interpret
 }
 
 // Following instructions are valid:
@@ -47,6 +49,7 @@ public struct Parameters
     [JsonPropertyAttribute] public List<Coordinate>? coors;
     [JsonPropertyAttribute] public LineString? lineString;
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
+    // [JsonPropertyAttribute] public Task? task;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
