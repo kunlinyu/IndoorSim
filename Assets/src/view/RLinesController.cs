@@ -11,14 +11,12 @@ public class RLineController : MonoBehaviour, Selectable
     public CellBoundary to;
 
     private bool _highLight = false;
-    private bool needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;
         set
         {
             _highLight = value;
-            needUpdateRenderer = true;
         }
     }
     private bool _selected = false;
@@ -28,7 +26,6 @@ public class RLineController : MonoBehaviour, Selectable
         set
         {
             _selected = value;
-            needUpdateRenderer = true;
         }
     }
 

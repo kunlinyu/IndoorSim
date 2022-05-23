@@ -25,9 +25,9 @@ public class RLineEditor : MonoBehaviour, ITool
             if (pointedRLine == null) return;
 
             if (pointedRLine.rLine.pass == PassType.DoNotPass)
-                IndoorSimData.indoorTiling.UpdateRLinePassType(pointedRLine.rLines, pointedRLine.fr, pointedRLine.to, PassType.AllowedToPass);
+                IndoorSimData?.indoorTiling.UpdateRLinePassType(pointedRLine.rLines, pointedRLine.fr, pointedRLine.to, PassType.AllowedToPass);
             else if (pointedRLine.rLine.pass == PassType.AllowedToPass)
-                IndoorSimData.indoorTiling.UpdateRLinePassType(pointedRLine.rLines, pointedRLine.fr, pointedRLine.to, PassType.DoNotPass);
+                IndoorSimData?.indoorTiling.UpdateRLinePassType(pointedRLine.rLines, pointedRLine.fr, pointedRLine.to, PassType.DoNotPass);
             else
                 throw new System.Exception("unknown passtype");
         }

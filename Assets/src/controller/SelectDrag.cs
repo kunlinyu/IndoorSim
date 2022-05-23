@@ -22,7 +22,7 @@ public class SelectDrag : MonoBehaviour, ITool
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
 
-    public Camera screenshotCamera;
+    public Camera? screenshotCamera;
 
     private SelectStatus status = SelectStatus.Idle;
 
@@ -315,6 +315,10 @@ public class SelectDrag : MonoBehaviour, ITool
     }
     private string capture(float maxX, float minX, float maxY, float minY)
     {
+        if (mapView == null)
+            return "";
+        if (screenshotCamera == null)
+            return "";
 
         foreach (var entry in mapView.vertex2Obj)
             if (!entry.Value.GetComponent<VertexController>().selected)
@@ -362,7 +366,7 @@ public class SelectDrag : MonoBehaviour, ITool
     public void ExtractSelected2Asset()
     {
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
-            IndoorSimData.indoorTiling.ExtractAsset("untitled asdf",
+            IndoorSimData?.indoorTiling.ExtractAsset("untitled asdf",
                 selectedVertices.Select(vc => vc.Vertex).ToList(),
                 selectedBoundaries.Select(bc => bc.Boundary).ToList(),
                 selectedSpaces.Select(sc => sc.Space).ToList(),

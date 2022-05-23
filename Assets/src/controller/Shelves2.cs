@@ -15,8 +15,8 @@ public class Shelves2 : MonoBehaviour, ITool
     Vector3 secondPoint;
     Vector3 lastPoint;
 
-    GameObject firstToSecondObj;
-    GameObject rectangleObj;
+    GameObject firstToSecondObj = new GameObject("first to second");
+    GameObject rectangleObj = new GameObject("rectangle");
     List<GameObject> shelvesObj = new List<GameObject>();
 
     Vector3? mousePositionNullable = null;
@@ -44,12 +44,10 @@ public class Shelves2 : MonoBehaviour, ITool
     // Start is called before the first frame update
     void Start()
     {
-        firstToSecondObj = new GameObject("first to second");
         firstToSecondObj.transform.SetParent(transform);
         firstToSecondObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         firstToSecondObj.AddComponent<LineRenderer>();
 
-        rectangleObj = new GameObject("rectangle");
         rectangleObj.transform.SetParent(transform);
         rectangleObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         rectangleObj.AddComponent<LineRenderer>();
@@ -144,25 +142,25 @@ public class Shelves2 : MonoBehaviour, ITool
                 case 1: status++; break;
                 case 2: status++; break;
                 case 3:
-                    IndoorSimData.indoorTiling.SessionStart();
-                    IndoorSimData.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    IndoorSimData?.indoorTiling.SessionStart();
+                    IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
                     CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        var b1 = IndoorSimData.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
+                        var b1 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
                         if (b1 == null) break;
-                        var b2 = IndoorSimData.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
+                        var b2 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
                         if (b2 == null) break;
-                        var b3 = IndoorSimData.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
+                        var b3 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
                         Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
                         CellSpace newSpace = shelfWidth > 0.0f ? b3.leftSpace! : b3.rightSpace!;
-                        IndoorSimData.indoorTiling.UpdateSpaceNavigable(newSpace!, navigable);
+                        IndoorSimData?.indoorTiling.UpdateSpaceNavigable(newSpace!, navigable);
 
                         lastBoundary = b2;
                     }
-                    IndoorSimData.indoorTiling.SessionCommit();
+                    IndoorSimData?.indoorTiling.SessionCommit();
                     splitCount = 2;
                     status = 0;
                     break;

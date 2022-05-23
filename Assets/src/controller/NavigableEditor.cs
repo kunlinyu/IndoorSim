@@ -30,13 +30,13 @@ public class NavigableEditor : MonoBehaviour, ITool
                 switch (sc.Space.Navigable)
                 {
                     case Navigable.PhysicallyNonNavigable:
-                        IndoorSimData.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.LogicallyNonNavigable);
+                        IndoorSimData?.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.LogicallyNonNavigable);
                         break;
                     case Navigable.LogicallyNonNavigable:
-                        IndoorSimData.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.Navigable);
+                        IndoorSimData?.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.Navigable);
                         break;
                     case Navigable.Navigable:
-                        IndoorSimData.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.PhysicallyNonNavigable);
+                        IndoorSimData?.indoorTiling.UpdateSpaceNavigable(sc.Space, Navigable.PhysicallyNonNavigable);
                         break;
                 }
             }
@@ -46,13 +46,13 @@ public class NavigableEditor : MonoBehaviour, ITool
                 switch (bc.Boundary.Navigable)
                 {
                     case Navigable.PhysicallyNonNavigable:
-                        IndoorSimData.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.LogicallyNonNavigable);
+                        IndoorSimData?.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.LogicallyNonNavigable);
                         break;
                     case Navigable.LogicallyNonNavigable:
-                        IndoorSimData.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.Navigable);
+                        IndoorSimData?.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.Navigable);
                         break;
                     case Navigable.Navigable:
-                        IndoorSimData.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.PhysicallyNonNavigable);
+                        IndoorSimData?.indoorTiling.UpdateBoundaryNavigable(bc.Boundary, Navigable.PhysicallyNonNavigable);
                         break;
                 }
 

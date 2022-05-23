@@ -12,9 +12,6 @@ public class LogWindow : MonoBehaviour
     private List<string> logs = new List<string>();
     ListView listView;
 
-    int count = 0;
-    int count2Last = 0;
-
     void Start()
     {
         Application.logMessageReceived += HandleLog;
