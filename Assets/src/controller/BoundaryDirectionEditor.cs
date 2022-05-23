@@ -4,7 +4,7 @@ using UnityEngine;
 #nullable enable
 public class BoundaryDirectionEditor : MonoBehaviour, ITool
 {
-    public IndoorSim? IndoorSim { set; get; }
+    public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { set; get; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
@@ -28,16 +28,16 @@ public class BoundaryDirectionEditor : MonoBehaviour, ITool
             switch (bc.Boundary.NaviDir)
             {
                 case NaviDirection.BiDirection:
-                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Left2Right);
+                    IndoorSimData.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Left2Right);
                     break;
                 case NaviDirection.Left2Right:
-                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Right2Left);
+                    IndoorSimData.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.Right2Left);
                     break;
                 case NaviDirection.Right2Left:
-                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.NoneDirection);
+                    IndoorSimData.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.NoneDirection);
                     break;
                 case NaviDirection.NoneDirection:
-                    IndoorSim.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.BiDirection);
+                    IndoorSimData.indoorTiling.UpdateBoundaryNaviDirection(bc.Boundary, NaviDirection.BiDirection);
                     break;
             }
         }

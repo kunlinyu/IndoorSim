@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class LineStringEditor : MonoBehaviour, ITool
 {
-    public IndoorSim? IndoorSim { set; get; }
+    public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
@@ -64,14 +64,14 @@ public class LineStringEditor : MonoBehaviour, ITool
                     CellBoundary? boundary = null;
 
                     if (splitBoundary)
-                        currentVertex = IndoorSim!.indoorTiling.SplitBoundary(currentBoundary!, currentCoor);
+                        currentVertex = IndoorSimData!.indoorTiling.SplitBoundary(currentBoundary!, currentCoor);
 
-                    if (lastVertex == null && currentVertex == null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastCoor, currentCoor);
-                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastVertex, currentCoor);
-                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSim!.indoorTiling.AddBoundary(lastCoor, currentVertex);
+                    if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastCoor, currentCoor);
+                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastVertex, currentCoor);
+                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastCoor, currentVertex);
                     else if (lastVertex != null && currentVertex != null)
                         if (lastVertex != currentVertex)
-                            boundary = IndoorSim!.indoorTiling.AddBoundary(lastVertex, currentVertex);
+                            boundary = IndoorSimData!.indoorTiling.AddBoundary(lastVertex, currentVertex);
 
                     if (boundary != null)
                     {

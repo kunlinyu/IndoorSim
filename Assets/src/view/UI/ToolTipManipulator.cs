@@ -32,7 +32,7 @@ public class ToolTipManipulator : Manipulator
         {
             element = new VisualElement();
             element.style.backgroundColor = Color.grey;
-            element.style.position = Position.Absolute;
+            element.style.position = UnityEngine.UIElements.Position.Absolute;
             element.style.left = this.target.worldBound.max.x - root.worldBound.min.x;
             element.style.top = this.target.worldBound.max.y - root.worldBound.min.y;
 

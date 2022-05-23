@@ -16,7 +16,7 @@ enum SelectStatus
 [RequireComponent(typeof(LineRenderer))]
 public class SelectDrag : MonoBehaviour, ITool
 {
-    public IndoorSim? IndoorSim { get; set; }
+    public IndoorSimData? IndoorSimData { get; set; }
     public MapView? mapView { get; set; }
     public int sortingLayerId { get; set; }
     public Material? draftMaterial { get; set; }
@@ -63,7 +63,7 @@ public class SelectDrag : MonoBehaviour, ITool
     void Update()
     {
         if (mapView == null) throw new InvalidOperationException("mapView null");
-        if (IndoorSim == null) throw new InvalidOperationException("IndoorSim null");
+        if (IndoorSimData == null) throw new InvalidOperationException("IndoorSim null");
         Selectable? pointedEntity = MousePickController.PointedEntity;
 
         switch (status)
@@ -258,7 +258,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
-                        IndoorSim.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
+                        IndoorSimData.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
                         if (adhoc)
                         {
                             adhoc = false;
@@ -362,7 +362,7 @@ public class SelectDrag : MonoBehaviour, ITool
     public void ExtractSelected2Asset()
     {
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
-            IndoorSim.indoorTiling.ExtractAsset("untitled asdf",
+            IndoorSimData.indoorTiling.ExtractAsset("untitled asdf",
                 selectedVertices.Select(vc => vc.Vertex).ToList(),
                 selectedBoundaries.Select(bc => bc.Boundary).ToList(),
                 selectedSpaces.Select(sc => sc.Space).ToList(),

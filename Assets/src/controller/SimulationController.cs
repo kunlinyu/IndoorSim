@@ -7,7 +7,7 @@ using SFB;
 
 public class SimulationController : MonoBehaviour
 {
-    public IndoorSim indoorSim;
+    public IndoorSimData indoorSimData;
     public MapView mapView;
     GameObject toolObj;
     ITool currentTool;
@@ -146,19 +146,19 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "save")
             {
-                SaveToFile(indoorSim.indoorTiling.Serialize(true));
+                SaveToFile(indoorSimData.indoorTiling.Serialize(true));
             }
             else if (e.name == "load")
             {
-                indoorSim.indoorTiling.DeserializeInPlace(LoadFromFile(), false);
+                indoorSimData.indoorTiling.DeserializeInPlace(LoadFromFile(), false);
             }
             else if (e.name == "redo")
             {
-                indoorSim.indoorTiling.Redo();
+                indoorSimData.indoorTiling.Redo();
             }
             else if (e.name == "undo")
             {
-                indoorSim.indoorTiling.Undo();
+                indoorSimData.indoorTiling.Undo();
             }
 
 
@@ -167,7 +167,7 @@ public class SimulationController : MonoBehaviour
             if (currentTool != null)
             {
                 currentTool.mapView = mapView;
-                currentTool.IndoorSim = indoorSim;
+                currentTool.IndoorSimData = indoorSimData;
             }
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)

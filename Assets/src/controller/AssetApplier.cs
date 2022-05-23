@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class AssetApplier : MonoBehaviour, ITool
 {
-    public IndoorSim? IndoorSim { set; get; }
+    public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
@@ -31,7 +31,7 @@ public class AssetApplier : MonoBehaviour, ITool
         if (asset == null)
         {
             Debug.Log("asset id: " + assetId);
-            asset = IndoorSim.indoorTiling.assets[assetId];
+            asset = IndoorSimData.indoorTiling.assets[assetId];
             assetIndoorData = IndoorData.Deserialize(asset.Value.json);
             if (assetIndoorData == null) throw new System.Exception("can not deserialize asset");
 
@@ -74,14 +74,14 @@ public class AssetApplier : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(0) && !MouseOnUI)
         {
-            IndoorSim.indoorTiling.SessionStart();
+            IndoorSimData.indoorTiling.SessionStart();
             foreach (var obj in boundaryRenderObjs)
             {
                 Coordinate coor0 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(0));
                 Coordinate coor1 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(1));
-                IndoorSim.indoorTiling.AddBoundaryAutoSnap(coor0, coor1);
+                IndoorSimData.indoorTiling.AddBoundaryAutoSnap(coor0, coor1);
             }
-            IndoorSim.indoorTiling.SessionCommit();
+            IndoorSimData.indoorTiling.SessionCommit();
 
             assetIndoorData = null;
             boundaryRenderObjs.ForEach(obj => Destroy(obj));

@@ -18,9 +18,9 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 [Serializable]
 public class IndoorTiling
 {
-    public string kInnerInterSectionDE9IMPatter = "T********";
+    [JsonIgnore] public string kInnerInterSectionDE9IMPatter = "T********";
 
-    [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
+    [JsonPropertyAttribute] public IndoorData indoorData;
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> instructionHistory = new InstructionHistory<ReducedInstruction>();
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
@@ -43,8 +43,10 @@ public class IndoorTiling
 
     public IndoorTiling()
     { }
-    public IndoorTiling(IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
+
+    public IndoorTiling(IndoorData indoorData, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
+        this.indoorData = indoorData;
         this.IdGenVertex = IdGenVertex;
         this.IdGenBoundary = IdGenBoundary;
         this.IdGenSpace = IdGenSpace;
@@ -55,6 +57,7 @@ public class IndoorTiling
         digestCache = indoorData.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
+            TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
             Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,

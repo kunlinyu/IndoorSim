@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 
+
 public class MapView : MonoBehaviour
 {
     public IndoorTiling indoorTiling;
@@ -22,7 +23,7 @@ public class MapView : MonoBehaviour
     public Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
     private Dictionary<RLineGroup, GameObject> cellspace2RLineObj = new Dictionary<RLineGroup, GameObject>();
 
-    public UIEventDispatcher? eventDispatcher;
+    public UIEventDispatcher eventDispatcher = null;
 
     void Start()
     {

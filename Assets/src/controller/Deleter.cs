@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Deleter : MonoBehaviour, ITool
 {
-    public IndoorSim? IndoorSim { set; get; }
+    public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public int sortingLayerId { set; get; }
     public Material? draftMaterial { set; get; }
@@ -32,7 +32,7 @@ public class Deleter : MonoBehaviour, ITool
             UnityEngine.Cursor.SetCursor(null, hotspot, CursorMode.Auto);
 
         if (Input.GetMouseButtonUp(0) && MousePickController.PointedEntity != null && MousePickController.PointedEntity.type == SelectableType.Boundary)
-            IndoorSim!.indoorTiling.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);
+            IndoorSimData!.indoorTiling.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);
 
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public interface ITool
 {
-    IndoorSim? IndoorSim { set; get; }
+    IndoorSimData? IndoorSimData { set; get; }
     MapView? mapView { set; get; }
     int sortingLayerId { set; get; }
     Material? draftMaterial { set; get; }
