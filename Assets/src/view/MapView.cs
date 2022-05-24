@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Newtonsoft.Json;
 
 
 public class MapView : MonoBehaviour
@@ -137,16 +136,6 @@ public class MapView : MonoBehaviour
         {
             Destroy(cellspace2RLineObj[rLines]);
             cellspace2RLineObj.Remove(rLines);
-        };
-
-        indoorTiling.OnAssetUpdated += (assets) =>
-        {
-            var e = new UIEvent();
-            e.type = UIEventType.Asset;
-            e.name = "list";
-            e.message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Newtonsoft.Json.Formatting.Indented });
-
-            eventDispatcher?.Raise(this, e);
         };
     }
 

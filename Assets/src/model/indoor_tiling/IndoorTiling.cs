@@ -18,28 +18,20 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 [Serializable]
 public class IndoorTiling
 {
-    [JsonIgnore] public string kInnerInterSectionDE9IMPatter = "T********";
-
-    [JsonPropertyAttribute] public IndoorData indoorData;
-    [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> instructionHistory = new InstructionHistory<ReducedInstruction>();
-    [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
-    [JsonPropertyAttribute] public string digestCache = "";
-
-    [JsonIgnore] public IDGenInterface? IdGenVertex { get; private set; }
-    [JsonIgnore] public IDGenInterface? IdGenBoundary { get; private set; }
-    [JsonIgnore] public IDGenInterface? IdGenSpace { get; private set; }
-
-    [JsonIgnore] public Action<CellVertex> OnVertexCreated = (v) => { };
-    [JsonIgnore] public Action<CellBoundary> OnBoundaryCreated = (b) => { };
-    [JsonIgnore] public Action<CellSpace> OnSpaceCreated = (s) => { };
-    [JsonIgnore] public Action<RLineGroup> OnRLinesCreated = (rLs) => { };
-
-    [JsonIgnore] public Action<CellVertex> OnVertexRemoved = (v) => { };
-    [JsonIgnore] public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
-    [JsonIgnore] public Action<CellSpace> OnSpaceRemoved = (s) => { };
-    [JsonIgnore] public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
-
-    [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
+    public string kInnerInterSectionDE9IMPatter = "T********";
+    public IndoorData indoorData { get; private set; }
+    public string digestCache = "";
+    public IDGenInterface? IdGenVertex { get; private set; }
+    public IDGenInterface? IdGenBoundary { get; private set; }
+    public IDGenInterface? IdGenSpace { get; private set; }
+    public Action<CellVertex> OnVertexCreated = (v) => { };
+    public Action<CellBoundary> OnBoundaryCreated = (b) => { };
+    public Action<CellSpace> OnSpaceCreated = (s) => { };
+    public Action<RLineGroup> OnRLinesCreated = (rLs) => { };
+    public Action<CellVertex> OnVertexRemoved = (v) => { };
+    public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
+    public Action<CellSpace> OnSpaceRemoved = (s) => { };
+    public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
 
 #pragma warning disable CS8618
     public IndoorTiling() { }  // for deserialize only
@@ -80,6 +72,29 @@ public class IndoorTiling
         // return JsonConvert.SerializeObject(this);
     }
 
+    public void AssignIndoorData(IndoorData indoorData)
+    {
+        this.indoorData.vertexPool.ForEach(v => OnVertexRemoved?.Invoke(v));
+        this.indoorData.boundaryPool.ForEach(b => OnBoundaryRemoved?.Invoke(b));
+        this.indoorData.spacePool.ForEach(s => OnSpaceRemoved?.Invoke(s));
+        this.indoorData.rLinePool.ForEach(r => OnRLinesRemoved?.Invoke(r));
+
+        this.indoorData = indoorData;
+
+        this.indoorData.vertexPool.ForEach(v => OnVertexCreated?.Invoke(v));
+        this.indoorData.boundaryPool.ForEach(b => OnBoundaryCreated?.Invoke(b));
+        this.indoorData.spacePool.ForEach(s => OnSpaceCreated?.Invoke(s));
+        this.indoorData.rLinePool.ForEach(r => OnRLinesCreated?.Invoke(r));
+
+
+        IdGenVertex!.Reset();
+        IdGenBoundary!.Reset();
+        IdGenSpace!.Reset();
+        this.indoorData.vertexPool.ForEach(v => v.Id = IdGenVertex!.Gen());
+        this.indoorData.boundaryPool.ForEach(b => b.Id = IdGenBoundary!.Gen());
+        this.indoorData.spacePool.ForEach(s => s.Id = IdGenSpace!.Gen());
+    }
+
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
         foreach (var v in indoorData.vertexPool)
@@ -92,18 +107,10 @@ public class IndoorTiling
             OnRLinesRemoved?.Invoke(r);
         indoorData = new IndoorData();
 
-        OnAssetUpdated?.Invoke(assets);
-        assets.Clear();
-
-        instructionHistory.Clear();
 
         IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
         if (indoorTiling == null) return false;
 
-        instructionHistory = indoorTiling.instructionHistory;
-
-        assets = indoorTiling.assets;
-        OnAssetUpdated?.Invoke(assets);
 
         if (!historyOnly)
         {
@@ -139,7 +146,7 @@ public class IndoorTiling
         if (historyOnly)
         {
             indoorTiling.indoorData = new IndoorData();
-            indoorTiling.instructionHistory.Uuundo();
+            // indoorTiling.instructionHistory.Uuundo();
         }
         else
         {
@@ -149,164 +156,6 @@ public class IndoorTiling
         return indoorTiling;
     }
 
-    public bool Undo()
-    {
-        var instructions = instructionHistory.Undo(out var snapShot);
-        if (instructions.Count > 0)
-        {
-            InterpretInstruction(ReducedInstruction.Reverse(instructions));
-            return true;
-        }
-        else
-        {
-            Debug.LogWarning("can not undo");
-            return false;
-        }
-    }
-
-    public bool Redo()
-    {
-        var instructions = instructionHistory.Redo(out var snapShot);
-        if (instructions.Count > 0)
-        {
-            InterpretInstruction(instructions);
-            return true;
-        }
-        else
-        {
-            Debug.LogWarning("can not redo");
-            return false;
-        }
-    }
-
-    public void SessionStart() => instructionHistory.SessionStart();
-    public void SessionCommit() => instructionHistory.SessionCommit();
-
-    private void InterpretInstruction(List<ReducedInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-            InterpretInstruction(instruction);
-    }
-
-    private void InterpretInstruction(ReducedInstruction instruction)
-    {
-        Debug.Log("interpret instruction: " + instruction);
-        instructionHistory.IgnoreDo = true;
-        switch (instruction.subject)
-        {
-            case SubjectType.Vertices:
-                switch (instruction.predicate)
-                {
-                    case Predicate.Update:
-                        {
-                            List<CellVertex> vertices = new List<CellVertex>();
-                            foreach (var coor in instruction.oldParam.coors())
-                            {
-                                CellVertex? vertex = indoorData.FindVertexCoor(coor);
-                                if (vertex != null)
-                                    vertices.Add(vertex);
-                                else
-                                    throw new ArgumentException("one of vertex can not found: " + coor);
-                            }
-                            UpdateVertices(vertices, instruction.newParam.coors());
-                            break;
-                        }
-                    default:
-                        throw new ArgumentException("Unknown predicate of subject type Vertices: " + instruction.predicate);
-                }
-                break;
-            case SubjectType.Boundary:
-                switch (instruction.predicate)
-                {
-                    case Predicate.Add:
-                        {
-                            Coordinate startCoor = instruction.newParam.lineString().StartPoint.Coordinate;
-                            CellVertex? start = indoorData.FindVertexCoor(startCoor);
-                            Coordinate endCoor = instruction.newParam.lineString().EndPoint.Coordinate;
-                            CellVertex? end = indoorData.FindVertexCoor(endCoor);
-
-                            CellBoundary? boundary = null;
-                            if (start == null && end == null)
-                                boundary = AddBoundary(startCoor, endCoor);
-                            else if (start != null && end == null)
-                                boundary = AddBoundary(start, endCoor);
-                            else if (start == null && end != null)
-                                boundary = AddBoundary(startCoor, end);
-                            else if (start != null && end != null)
-                                boundary = AddBoundary(start, end);
-                            if (boundary == null)
-                                throw new InvalidOperationException("add boundary failed:");
-                        }
-                        break;
-                    case Predicate.Remove:
-                        {
-                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                            if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                            RemoveBoundary(boundary);
-                        }
-                        break;
-                    case Predicate.Update:
-                        {
-                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                            if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                            boundary.UpdateGeom(instruction.newParam.lineString());
-                        }
-                        break;
-                    default:
-                        throw new ArgumentException("Unknown predicate: " + instruction.predicate);
-                }
-                break;
-            case SubjectType.BoundaryDirection:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                    if (boundary == null)
-                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                    UpdateBoundaryNaviDirection(boundary, instruction.newParam.naviInfo().direction);
-                }
-                else
-                    throw new ArgumentException("boundary direction can only update.");
-                break;
-            case SubjectType.BoundaryNavigable:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                    if (boundary == null)
-                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                    UpdateBoundaryNavigable(boundary, instruction.newParam.naviInfo().navigable);
-                }
-                else
-                    throw new ArgumentException("boundary navigable can only update.");
-                break;
-            case SubjectType.SpaceNavigable:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellSpace? space = indoorData.FindSpaceGeom(instruction.oldParam.coor());
-                    if (space == null)
-                        throw new ArgumentException("can not find space contain point: " + instruction.oldParam.coor().ToString());
-                    UpdateSpaceNavigable(space, instruction.newParam.naviInfo().navigable);
-                }
-                else
-                    throw new ArgumentException("space navigable can only update.");
-                break;
-            case SubjectType.RLine:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    RepresentativeLine? rLine = indoorData.FindRLine(instruction.oldParam.lineString(), out var rLineGroup);
-                    if (rLine == null || rLineGroup == null)
-                        throw new ArgumentException("can not find representative line: " + instruction.oldParam.lineString());
-                    UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, instruction.newParam.naviInfo().passType);
-                }
-                else
-                    throw new ArgumentException("rLine pass type can only update.");
-                break;
-            default:
-                throw new ArgumentException("Unknown subject type: " + instruction.subject);
-        }
-        instructionHistory.IgnoreDo = false;
-    }
 
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
@@ -334,9 +183,7 @@ public class IndoorTiling
         AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
-        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        instructionHistory.SessionCommit();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -354,9 +201,7 @@ public class IndoorTiling
         AddVertexInternal(end);
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
-        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        instructionHistory.SessionCommit();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -374,9 +219,7 @@ public class IndoorTiling
         AddVertexInternal(start);
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
-        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        instructionHistory.SessionCommit();
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return boundary;
@@ -417,9 +260,7 @@ public class IndoorTiling
         ring2.Add(end.Coordinate);
 
         // Add Boundary
-        instructionHistory.SessionStart();
         AddBoundaryInternal(boundary);
-        instructionHistory.SessionCommit();
 
         // can not reach
         if (ring1.Count < 2 && ring2.Count < 2) return boundary;
@@ -479,45 +320,43 @@ public class IndoorTiling
         return boundary;
     }
 
-    public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
+    public CellVertex SplitBoundary(CellBoundary oldBoundary, Coordinate middleCoor, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
     {
-        if (!indoorData.Contains(boundary)) throw new ArgumentException("unknown boundary");
-        if (boundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
+        if (!indoorData.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
+        if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
+        // TODO: check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries
         Debug.Log("split boundary");
-        instructionHistory.SessionStart();
 
         // Remove spaces
-        List<CellSpace> spaces = boundary.Spaces().ToList();
+        List<CellSpace> spaces = oldBoundary.Spaces().ToList();
         spaces.ForEach(s => RemoveSpaceInternal(s));
 
         // Remove old boundary
-        RemoveBoundaryInternal(boundary);
+        RemoveBoundaryInternal(oldBoundary);
 
         // Add new vertex
         CellVertex middleVertex = CellVertex.Instantiate(middleCoor, IdGenVertex);
         AddVertexInternal(middleVertex);
 
         // Create and add new boundaries
-        CellBoundary newBoundary1 = new CellBoundary(boundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
-        CellBoundary newBoundary2 = new CellBoundary(middleVertex, boundary.P1, IdGenBoundary?.Gen() ?? "no id");
+        newBoundary1 = new CellBoundary(oldBoundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
+        newBoundary2 = new CellBoundary(middleVertex, oldBoundary.P1, IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
         // Construct new spaces and Add
         foreach (var space in spaces)
         {
-            space.SplitBoundary(boundary, newBoundary1, newBoundary2, middleVertex);
+            space.SplitBoundary(oldBoundary, newBoundary1, newBoundary2, middleVertex);
             AddSpaceInternal(space);
         }
-
-        instructionHistory.SessionCommit();
 
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
         return middleVertex;
     }
 
-    public void UpdateVertices(List<CellVertex> vertices, List<Coordinate> newCoors)
+    public bool UpdateVertices(List<CellVertex> vertices, List<Coordinate> newCoors)
     {
         if (vertices.Count != newCoors.Count) throw new ArgumentException("vertices count should equals to coors count");
 
@@ -589,7 +428,6 @@ public class IndoorTiling
         if (valid)
         {
             vertices.ForEach(v => v.OnUpdate?.Invoke());
-            instructionHistory.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
             FullPolygonizerCheck();
             BoundaryLeftRightCheck();
         }
@@ -605,13 +443,13 @@ public class IndoorTiling
                 s.OnUpdate?.Invoke();
             }
         }
+
+        return valid;
     }
 
     private void RemoveBoundaryWithVertex(CellBoundary boundary)
     {
-        instructionHistory.SessionStart();
         RemoveBoundaryInternal(boundary);
-        instructionHistory.SessionCommit();
 
         // Remove Vertex if no boundary connect to it
         if (indoorData.Vertex2Boundaries(boundary.P0).Count == 0)
@@ -689,8 +527,6 @@ public class IndoorTiling
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));
-
         indoorData.UpdateBoundaryNaviDirection(boundary, direction);
 
         boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
@@ -699,8 +535,6 @@ public class IndoorTiling
 
     public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryNavigable(boundary.geom, boundary.Navigable, navigable));
-
         indoorData.UpdateBoundaryNavigable(boundary, navigable);
 
         boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
@@ -709,8 +543,6 @@ public class IndoorTiling
 
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
-
         indoorData.UpdateSpaceNavigable(space, navigable);
 
         space.rLines?.OnUpdate?.Invoke();
@@ -720,7 +552,6 @@ public class IndoorTiling
 
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLines.Geom(fr, to), rLines.passType(fr, to), passType));
         indoorData.UpdateRLinePassType(rLines, fr, to, passType);
     }
 
@@ -735,77 +566,7 @@ public class IndoorTiling
         }
     }
 
-    public Asset ExtractAsset(string name,
-        List<CellVertex> vertices,
-        List<CellBoundary> boundaries,
-        List<CellSpace> spaces,
-        Func<float, float, float, float, string>? captureThumbnailBase64)
-    {
-        if (vertices.Any(v => !indoorData.Contains(v))) throw new ArgumentException("can not find some vertex");
-        if (boundaries.Any(b => !indoorData.Contains(b))) throw new ArgumentException("can not find some boundary");
-        if (spaces.Any(s => !indoorData.Contains(s))) throw new ArgumentException("can not find some space");
-
-        IndoorData newIndoorData = new IndoorData();
-        newIndoorData.vertexPool.AddRange(vertices);
-        newIndoorData.boundaryPool.AddRange(boundaries);
-        newIndoorData.spacePool.AddRange(spaces);
-        newIndoorData.rLinePool.AddRange(spaces.Select(s => s.rLines!));
-        string json = newIndoorData.Serialize(false);
-
-        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.geom).ToArray());
-        Envelope evl = gc.EnvelopeInternal;
-        Point centroid = gc.Centroid;
-
-        Asset asset = new Asset()
-        {
-            name = name,
-            thumbnailBase64 = captureThumbnailBase64?.Invoke((float)evl.MaxX, (float)evl.MinX, (float)evl.MaxY, (float)evl.MinY),
-            dateTime = DateTime.Now,
-            verticesCount = vertices.Count,
-            boundariesCount = boundaries.Count,
-            spacesCount = spaces.Count,
-            json = json,
-            centerX = centroid.X,
-            centerY = centroid.Y,
-        };
-        assets.Add(asset);
-        OnAssetUpdated?.Invoke(assets);
-
-        return asset;
-    }
-
-    public void AddAsset(Asset asset)
-    {
-        IndoorData? indoorData = IndoorData.Deserialize(asset.json);
-        if (indoorData == null) throw new ArgumentException("can not deserialize the asset");
-        assets.Add(asset);
-        OnAssetUpdated?.Invoke(assets);
-    }
-
-    public void RemoveAsset(Asset asset)
-    {
-        if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset: " + asset.name);
-        assets.Remove(asset);
-        OnAssetUpdated?.Invoke(assets);
-    }
-
-    public void ApplyAsset(Asset asset, Coordinate center, float rotation)
-    {
-        if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset");
-        IndoorData? tempIndoorData = IndoorData.Deserialize(asset.json);
-        if (tempIndoorData == null) throw new Exception("Oops! can not deserialize the asset");
-
-        instructionHistory.SessionStart();
-
-        indoorData.vertexPool.ForEach(v => AddVertexInternal(v));
-        indoorData.boundaryPool.ForEach(b => AddBoundaryInternal(b));
-        indoorData.spacePool.ForEach(s => AddSpaceInternal(s));
-        // TODO: apply rLine in asset
-
-        instructionHistory.SessionCommit();
-    }
-
-    public void AddVertexInternal(CellVertex vertex)
+    private void AddVertexInternal(CellVertex vertex)
     {
         indoorData.AddVertex(vertex);
         OnVertexCreated?.Invoke(vertex);
@@ -821,14 +582,12 @@ public class IndoorTiling
     {
         indoorData.AddBoundary(boundary);
         OnBoundaryCreated.Invoke(boundary);
-        instructionHistory.DoStep(ReducedInstruction.AddBoundary(boundary));
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)
     {
         indoorData.RemoveBoundary(boundary);
         OnBoundaryRemoved?.Invoke(boundary);
-        instructionHistory.DoStep(ReducedInstruction.RemoveBoundary(boundary));
     }
 
 

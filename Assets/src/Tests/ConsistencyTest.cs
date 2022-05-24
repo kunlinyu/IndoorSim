@@ -19,24 +19,24 @@ public class ConsistencyTest
         string filePath = $"Assets/src/Tests/{prefix}/" + caseName.Substring((prefix + "_").Length) + extension;
         string json = File.ReadAllText(filePath);
 
-        IndoorTiling offlineIndoorTiling = IndoorTiling.Deserialize(json);
+        IndoorSimData offlineIndoorSimData = IndoorSimData.Deserialize(json);
 
-        IndoorTiling newIndoorTiling = IndoorTiling.Deserialize(json, true);
-        do {} while (newIndoorTiling.Redo());
+        IndoorSimData newIndoorSimData = IndoorSimData.Deserialize(json, true);
+        do { } while (newIndoorSimData.Redo());
 
-        string expectDigest = newIndoorTiling.indoorData.CalcDigest(Digest.PolygonList(offlineIndoorTiling.indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        string expectDigest = newIndoorSimData.indoorData.CalcDigest(Digest.PolygonList(offlineIndoorSimData.indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
         Debug.Log(expectDigest);
         Debug.Log("---");
-        Debug.Log(offlineIndoorTiling.digestCache);
+        Debug.Log(offlineIndoorSimData.digestCache);
         if (fulltest)
         {
-            Assert.AreEqual(expectDigest, offlineIndoorTiling.digestCache);      // old cache
-            Assert.AreEqual(expectDigest, offlineIndoorTiling.indoorData.CalcDigest());     // old calc
-            Assert.AreEqual(expectDigest, newIndoorTiling.indoorData.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, offlineIndoorSimData.digestCache);      // old cache
+            Assert.AreEqual(expectDigest, offlineIndoorSimData.indoorData.CalcDigest());     // old calc
+            Assert.AreEqual(expectDigest, newIndoorSimData.indoorData.CalcDigest());  // new calc
         }
         else
         {
-            Assert.AreEqual(expectDigest, newIndoorTiling.indoorData.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, newIndoorSimData.indoorData.CalcDigest());  // new calc
         }
     }
 

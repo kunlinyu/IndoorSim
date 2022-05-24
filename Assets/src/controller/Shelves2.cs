@@ -142,25 +142,25 @@ public class Shelves2 : MonoBehaviour, ITool
                 case 1: status++; break;
                 case 2: status++; break;
                 case 3:
-                    IndoorSimData?.indoorTiling.SessionStart();
-                    IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    IndoorSimData?.SessionStart();
+                    IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
                     CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        var b1 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
+                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
                         if (b1 == null) break;
-                        var b2 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
+                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
                         if (b2 == null) break;
-                        var b3 = IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
+                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
                         Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
                         CellSpace newSpace = shelfWidth > 0.0f ? b3.leftSpace! : b3.rightSpace!;
-                        IndoorSimData?.indoorTiling.UpdateSpaceNavigable(newSpace!, navigable);
+                        IndoorSimData?.UpdateSpaceNavigable(newSpace!, navigable);
 
                         lastBoundary = b2;
                     }
-                    IndoorSimData?.indoorTiling.SessionCommit();
+                    IndoorSimData?.SessionCommit();
                     splitCount = 2;
                     status = 0;
                     break;

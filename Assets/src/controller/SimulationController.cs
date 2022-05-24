@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 using SFB;
 
@@ -19,6 +19,15 @@ public class SimulationController : MonoBehaviour
     void Start()
     {
         eventDispatcher.eventListener += EventListener;
+        indoorSimData.OnAssetUpdated += (assets) =>
+        {
+            var e = new UIEvent();
+            e.type = UIEventType.Asset;
+            e.name = "list";
+            e.message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Newtonsoft.Json.Formatting.Indented });
+
+            eventDispatcher?.Raise(this, e);
+        };
     }
 
     void EventListener(object sender, UIEvent e)
@@ -146,19 +155,19 @@ public class SimulationController : MonoBehaviour
             }
             else if (e.name == "save")
             {
-                SaveToFile(indoorSimData.indoorTiling.Serialize(true));
+                SaveToFile(indoorSimData.Serialize(true));
             }
             else if (e.name == "load")
             {
-                indoorSimData.indoorTiling.DeserializeInPlace(LoadFromFile(), false);
+                indoorSimData.DeserializeInPlace(LoadFromFile(), true);
             }
             else if (e.name == "redo")
             {
-                indoorSimData.indoorTiling.Redo();
+                indoorSimData.Redo();
             }
             else if (e.name == "undo")
             {
-                indoorSimData.indoorTiling.Undo();
+                indoorSimData.Undo();
             }
 
 

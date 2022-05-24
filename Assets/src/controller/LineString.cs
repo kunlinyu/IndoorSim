@@ -64,14 +64,14 @@ public class LineStringEditor : MonoBehaviour, ITool
                     CellBoundary? boundary = null;
 
                     if (splitBoundary)
-                        currentVertex = IndoorSimData!.indoorTiling.SplitBoundary(currentBoundary!, currentCoor);
+                        currentVertex = IndoorSimData!.SplitBoundary(currentBoundary!, currentCoor);
 
-                    if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastCoor, currentCoor);
-                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastVertex, currentCoor);
-                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSimData!.indoorTiling.AddBoundary(lastCoor, currentVertex);
+                    if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentCoor);
+                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastVertex, currentCoor);
+                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentVertex);
                     else if (lastVertex != null && currentVertex != null)
                         if (lastVertex != currentVertex)
-                            boundary = IndoorSimData!.indoorTiling.AddBoundary(lastVertex, currentVertex);
+                            boundary = IndoorSimData!.AddBoundary(lastVertex, currentVertex);
 
                     if (boundary != null)
                     {

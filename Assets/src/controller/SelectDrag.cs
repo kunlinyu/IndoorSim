@@ -258,7 +258,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
-                        IndoorSimData.indoorTiling.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
+                        IndoorSimData.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
                         if (adhoc)
                         {
                             adhoc = false;
@@ -366,7 +366,7 @@ public class SelectDrag : MonoBehaviour, ITool
     public void ExtractSelected2Asset()
     {
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
-            IndoorSimData?.indoorTiling.ExtractAsset("untitled asdf",
+            IndoorSimData?.ExtractAsset("untitled asdf",
                 selectedVertices.Select(vc => vc.Vertex).ToList(),
                 selectedBoundaries.Select(bc => bc.Boundary).ToList(),
                 selectedSpaces.Select(sc => sc.Space).ToList(),

@@ -31,7 +31,7 @@ public class AssetApplier : MonoBehaviour, ITool
         if (asset == null)
         {
             Debug.Log("asset id: " + assetId);
-            asset = IndoorSimData?.indoorTiling.assets[assetId];
+            asset = IndoorSimData?.assets[assetId];
             if (asset == null) return;
             assetIndoorData = IndoorData.Deserialize(asset.Value.json);
             if (assetIndoorData == null) throw new System.Exception("can not deserialize asset");
@@ -75,14 +75,14 @@ public class AssetApplier : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(0) && !MouseOnUI)
         {
-            IndoorSimData?.indoorTiling.SessionStart();
+            IndoorSimData?.SessionStart();
             foreach (var obj in boundaryRenderObjs)
             {
                 Coordinate coor0 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(0));
                 Coordinate coor1 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(1));
-                IndoorSimData?.indoorTiling.AddBoundaryAutoSnap(coor0, coor1);
+                IndoorSimData?.AddBoundaryAutoSnap(coor0, coor1);
             }
-            IndoorSimData?.indoorTiling.SessionCommit();
+            IndoorSimData?.SessionCommit();
 
             assetIndoorData = null;
             boundaryRenderObjs.ForEach(obj => Destroy(obj));
