@@ -15,8 +15,11 @@ public class Shelves2 : MonoBehaviour, ITool
     Vector3 secondPoint;
     Vector3 lastPoint;
 
-    GameObject firstToSecondObj = new GameObject("first to second");
-    GameObject rectangleObj = new GameObject("rectangle");
+
+#pragma warning disable CS8618
+    GameObject firstToSecondObj;
+    GameObject rectangleObj;
+#pragma warning restore CS8618
     List<GameObject> shelvesObj = new List<GameObject>();
 
     Vector3? mousePositionNullable = null;
@@ -44,10 +47,12 @@ public class Shelves2 : MonoBehaviour, ITool
     // Start is called before the first frame update
     void Start()
     {
+        firstToSecondObj = new GameObject("first to second");
         firstToSecondObj.transform.SetParent(transform);
         firstToSecondObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         firstToSecondObj.AddComponent<LineRenderer>();
 
+        rectangleObj = new GameObject("rectangle");
         rectangleObj.transform.SetParent(transform);
         rectangleObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         rectangleObj.AddComponent<LineRenderer>();

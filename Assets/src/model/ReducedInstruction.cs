@@ -21,7 +21,10 @@ public enum SubjectType
     BoundaryNavigable,
     SpaceNavigable,
     RLine,
-    Agent,  // TODO:: create and interpret
+
+    GripMap,  // TODO:: create and interpret
+
+    Agent,
     Task,  // TODO:: create and interpret
 }
 
@@ -49,7 +52,8 @@ public struct Parameters
     [JsonPropertyAttribute] public List<Coordinate>? coors;
     [JsonPropertyAttribute] public LineString? lineString;
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
-    // [JsonPropertyAttribute] public Task? task;
+    [JsonPropertyAttribute] public Task? task;
+    [JsonPropertyAttribute] public AgentDescriptor? agent;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -61,6 +65,8 @@ public static class ParameterExtension
     public static List<Coordinate> coors(this Parameters? param) => param!.Value.coors!;
     public static LineString lineString(this Parameters? param) => param!.Value.lineString!;
     public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
+    public static AgentDescriptor agent(this Parameters? param) => param!.Value.agent!;
+    public static Task task(this Parameters? param) => param!.Value.task!;
 }
 
 [Serializable]
@@ -169,6 +175,40 @@ public class ReducedInstruction
         return ri;
     }
 
+    public static ReducedInstruction AddAgent(AgentDescriptor agent)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.Agent;
+        ri.predicate = Predicate.Add;
+
+        ri.newParam = new Parameters() { agent = agent.Clone() };
+
+        return ri;
+    }
+
+    public static ReducedInstruction RemoveAgent(AgentDescriptor agent)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.Agent;
+        ri.predicate = Predicate.Remove;
+
+        ri.oldParam = new Parameters() { agent = agent.Clone() };
+
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.Agent;
+        ri.predicate = Predicate.Update;
+
+        ri.oldParam = new Parameters() { agent = oldAgent.Clone() };
+        ri.newParam = new Parameters() { agent = newAgent.Clone() };
+
+        return ri;
+    }
+
     static public List<ReducedInstruction> Reverse(List<ReducedInstruction> instructions)
     {
         var result = new List<ReducedInstruction>();
@@ -206,18 +246,35 @@ public class ReducedInstruction
                     return UpdateBoundaryDirection(oldParam.lineString(), newParam.naviInfo().direction, oldParam.naviInfo().direction);
                 else
                     throw new ArgumentException("boundary direction can only update.");
+
             case SubjectType.BoundaryNavigable:
                 if (predicate == Predicate.Update)
                     return UpdateBoundaryNavigable(oldParam.lineString(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
                 else throw new ArgumentException("boundary navigable can only update.");
+
             case SubjectType.SpaceNavigable:
                 if (predicate == Predicate.Update)
                     return UpdateSpaceNavigable(oldParam.coor(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
                 else throw new ArgumentException("space navigable can only update.");
+
             case SubjectType.RLine:
                 if (predicate == Predicate.Update)
                     return UpdateRLinePassType(oldParam.lineString(), newParam.naviInfo().passType, oldParam.naviInfo().passType);
                 else throw new ArgumentException("rLine pass type can only update.");
+
+            case SubjectType.Agent:
+                switch (predicate)
+                {
+                    case Predicate.Add:
+                        return RemoveAgent(newParam.agent());
+                    case Predicate.Remove:
+                        return AddAgent(oldParam.agent());
+                    case Predicate.Update:
+                        return UpdateAgent(newParam.agent(), oldParam.agent());
+                    default:
+                        throw new ArgumentException("Unknown predicate");
+                }
+
             default:
                 throw new ArgumentException("Unknown subject type");
         }

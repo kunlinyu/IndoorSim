@@ -11,22 +11,28 @@ using UnityEngine;
 
 public class IndoorSimData
 {
+    [JsonPropertyAttribute] public List<GridMapInfo> gridMapInfos = new List<GridMapInfo>();
+    [JsonIgnore] GridMapInfo currentGridMapInfo;
 
     [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
     [JsonIgnore] public IndoorTiling indoorTiling;
+    [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
 
-    // TODO: put assets and instruction here
 
     [JsonPropertyAttribute] public List<SimData> simDataList = new List<SimData>();
-    [JsonIgnore] public SimData currentSimData;
+    [JsonIgnore] public SimData? currentSimData;
+
+    [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
+    [JsonIgnore] private InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
+    [JsonIgnore] private InstructionInterpreter activeInstructionInterpreter;
 
     [JsonIgnore] public Simulation? simulation = null;
 
-    [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> instructionHistory = new InstructionHistory<ReducedInstruction>();
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
+    [JsonIgnore] public Action<SimData?> OnSimulationSwitch = (s) => { };
 
     public string Serialize(bool indent = false)
     {
@@ -51,14 +57,13 @@ public class IndoorSimData
             jsonSerializer.Serialize(jsonWriter, this, null);
         }
 
-        return sw.ToString();
-        // return JsonConvert.SerializeObject(this);
+        return sw.ToString(); // return JsonConvert.SerializeObject(this);
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
         assets.Clear();
-        instructionHistory.Clear();
+        history.Clear();
 
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
         if (indoorSimData == null) return false;
@@ -66,7 +71,7 @@ public class IndoorSimData
         indoorData = indoorSimData.indoorData;
         simDataList = indoorSimData.simDataList;
         assets = indoorSimData.assets;
-        instructionHistory = indoorSimData.instructionHistory;
+        history = indoorSimData.history;
         OnAssetUpdated?.Invoke(assets);
 
         indoorTiling.AssignIndoorData(indoorData);
@@ -83,7 +88,7 @@ public class IndoorSimData
         {
             indoorSimData.indoorData = new IndoorData();
             indoorSimData.simDataList = new List<SimData>();
-            indoorSimData.instructionHistory.Uuundo();
+            indoorSimData.history.Uuundo();
         }
         else
         {
@@ -154,14 +159,14 @@ public class IndoorSimData
         IndoorData? tempIndoorData = IndoorData.Deserialize(asset.json);
         if (tempIndoorData == null) throw new Exception("Oops! can not deserialize the asset");
 
-        instructionHistory.SessionStart();
+        history.SessionStart();
 
         // indoorData.vertexPool.ForEach(v => AddVertexInternal(v));
         // indoorData.boundaryPool.ForEach(b => AddBoundaryInternal(b));
         // indoorData.spacePool.ForEach(s => AddSpaceInternal(s));
         // TODO: apply rLine in asset
 
-        instructionHistory.SessionCommit();
+        history.SessionCommit();
     }
 
     public IndoorSimData()
@@ -171,14 +176,135 @@ public class IndoorSimData
         SimData simData = new SimData();
         simDataList.Add(simData);
         currentSimData = simData;
+        OnSimulationSwitch?.Invoke(currentSimData);
+
+        activeHistory = history;
+        activeInstructionInterpreter = instructionInterpreter;
+
+
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.Vertices, (ins) =>
+        {
+            List<CellVertex> vertices = new List<CellVertex>();
+            foreach (var coor in ins.oldParam.coors())
+            {
+                CellVertex? vertex = indoorData.FindVertexCoor(coor);
+                if (vertex != null)
+                    vertices.Add(vertex);
+                else
+                    throw new ArgumentException("one of vertex can not found: " + coor);
+            }
+            indoorTiling.UpdateVertices(vertices, ins.newParam.coors());
+        });
+
+        instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.Boundary, (ins) =>
+        {
+            Coordinate startCoor = ins.newParam.lineString().StartPoint.Coordinate;
+            CellVertex? start = indoorData.FindVertexCoor(startCoor);
+            Coordinate endCoor = ins.newParam.lineString().EndPoint.Coordinate;
+            CellVertex? end = indoorData.FindVertexCoor(endCoor);
+
+            CellBoundary? boundary = null;
+            if (start == null && end == null)
+                boundary = indoorTiling.AddBoundary(startCoor, endCoor);
+            else if (start != null && end == null)
+                boundary = indoorTiling.AddBoundary(start, endCoor);
+            else if (start == null && end != null)
+                boundary = indoorTiling.AddBoundary(startCoor, end);
+            else if (start != null && end != null)
+                boundary = indoorTiling.AddBoundary(start, end);
+            if (boundary == null)
+                throw new InvalidOperationException("add boundary failed:");
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.Boundary, (ins) =>
+        {
+            CellBoundary? boundary = indoorData.FindBoundaryGeom(ins.oldParam.lineString());
+            if (boundary == null)
+                throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
+            indoorTiling.RemoveBoundary(boundary);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.Boundary, (ins) =>
+        {
+            CellBoundary? boundary = indoorData.FindBoundaryGeom(ins.oldParam.lineString());
+            if (boundary == null)
+                throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
+            boundary.UpdateGeom(ins.newParam.lineString());
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.BoundaryDirection, (ins) =>
+        {
+            CellBoundary? boundary = indoorData.FindBoundaryGeom(ins.oldParam.lineString());
+            if (boundary == null)
+                throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
+            indoorTiling.UpdateBoundaryNaviDirection(boundary, ins.newParam.naviInfo().direction);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.BoundaryNavigable, (ins) =>
+        {
+            CellBoundary? boundary = indoorData.FindBoundaryGeom(ins.oldParam.lineString());
+            if (boundary == null)
+                throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
+            indoorTiling.UpdateBoundaryNavigable(boundary, ins.newParam.naviInfo().navigable);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.SpaceNavigable, (ins) =>
+        {
+            CellSpace? space = indoorData.FindSpaceGeom(ins.oldParam.coor());
+            if (space == null)
+                throw new ArgumentException("can not find space contain point: " + ins.oldParam.coor().ToString());
+            indoorTiling.UpdateSpaceNavigable(space, ins.newParam.naviInfo().navigable);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.RLine, (ins) =>
+        {
+            RepresentativeLine? rLine = indoorData.FindRLine(ins.oldParam.lineString(), out var rLineGroup);
+            if (rLine == null || rLineGroup == null)
+                throw new ArgumentException("can not find representative line: " + ins.oldParam.lineString());
+            indoorTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, ins.newParam.naviInfo().passType);
+        });
+
+    }
+
+    public void SelectMapOrSimulation(int index)
+    {
+        if (index >= simDataList.Count) throw new ArgumentException($"simulation index({index}) out of range(-1 - {simDataList.Count})");
+        if (index < -1) throw new ArgumentException($"simulation index({index}) out of range(-1 - {simDataList.Count})");
+        if (index == -1)
+        {
+            activeHistory = history;
+            activeInstructionInterpreter = instructionInterpreter;
+            currentSimData = null;
+            OnSimulationSwitch?.Invoke(currentSimData);
+        }
+        else
+        {
+            currentSimData = simDataList[index];
+            activeHistory = currentSimData.history;
+            activeInstructionInterpreter = currentSimData.instructionInterpreter;
+            OnSimulationSwitch?.Invoke(currentSimData);
+        }
+    }
+
+    public SimData AddSimulation()
+    {
+        SimData newSimData = new SimData();
+        simDataList.Add(newSimData);
+        currentSimData = newSimData;
+        OnSimulationSwitch?.Invoke(currentSimData);
+        return newSimData;
+    }
+
+    public void RemoveSimulation(int index)
+    {
+        if (index >= simDataList.Count) throw new ArgumentException("simulation index out of range");
+        simDataList.RemoveAt(index);
     }
 
     public bool Undo()
     {
-        var instructions = instructionHistory.Undo(out var snapShot);
+        var instructions = activeHistory.Undo(out var snapShot);
         if (instructions.Count > 0)
         {
-            InterpretInstruction(ReducedInstruction.Reverse(instructions));
+            List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
+            Debug.Log("interpret instruction: " + reverseIns);
+            // activeHistory.IgnoreDo = true;  // TODO: remove
+            activeInstructionInterpreter.Execute(reverseIns);
+            // activeHistory.IgnoreDo = false;  // TODO: remove
             return true;
         }
         else
@@ -190,10 +316,13 @@ public class IndoorSimData
 
     public bool Redo()
     {
-        var instructions = instructionHistory.Redo(out var snapShot);
+        var instructions = activeHistory.Redo(out var snapShot);
         if (instructions.Count > 0)
         {
-            InterpretInstruction(instructions);
+            Debug.Log("interpret instruction: " + instructions);
+            // activeHistory.IgnoreDo = true;  // TODO: remove
+            activeInstructionInterpreter.Execute(instructions);
+            // activeHistory.IgnoreDo = false;  // TODO: remove
             return true;
         }
         else
@@ -203,174 +332,51 @@ public class IndoorSimData
         }
     }
 
-    public void SessionStart() => instructionHistory.SessionStart();
-    public void SessionCommit() => instructionHistory.SessionCommit();
+    public void SessionStart() => activeHistory.SessionStart();
+    public void SessionCommit() => activeHistory.SessionCommit();
 
-    private void InterpretInstruction(List<ReducedInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-            InterpretInstruction(instruction);
-    }
-
-    private void InterpretInstruction(ReducedInstruction instruction)
-    {
-        Debug.Log("interpret instruction: " + instruction);
-        instructionHistory.IgnoreDo = true;
-        switch (instruction.subject)
-        {
-            case SubjectType.Vertices:
-                switch (instruction.predicate)
-                {
-                    case Predicate.Update:
-                        {
-                            List<CellVertex> vertices = new List<CellVertex>();
-                            foreach (var coor in instruction.oldParam.coors())
-                            {
-                                CellVertex? vertex = indoorData.FindVertexCoor(coor);
-                                if (vertex != null)
-                                    vertices.Add(vertex);
-                                else
-                                    throw new ArgumentException("one of vertex can not found: " + coor);
-                            }
-                            indoorTiling.UpdateVertices(vertices, instruction.newParam.coors());
-                            break;
-                        }
-                    default:
-                        throw new ArgumentException("Unknown predicate of subject type Vertices: " + instruction.predicate);
-                }
-                break;
-            case SubjectType.Boundary:
-                switch (instruction.predicate)
-                {
-                    case Predicate.Add:
-                        {
-                            Coordinate startCoor = instruction.newParam.lineString().StartPoint.Coordinate;
-                            CellVertex? start = indoorData.FindVertexCoor(startCoor);
-                            Coordinate endCoor = instruction.newParam.lineString().EndPoint.Coordinate;
-                            CellVertex? end = indoorData.FindVertexCoor(endCoor);
-
-                            CellBoundary? boundary = null;
-                            if (start == null && end == null)
-                                boundary = indoorTiling.AddBoundary(startCoor, endCoor);
-                            else if (start != null && end == null)
-                                boundary = indoorTiling.AddBoundary(start, endCoor);
-                            else if (start == null && end != null)
-                                boundary = indoorTiling.AddBoundary(startCoor, end);
-                            else if (start != null && end != null)
-                                boundary = indoorTiling.AddBoundary(start, end);
-                            if (boundary == null)
-                                throw new InvalidOperationException("add boundary failed:");
-                        }
-                        break;
-                    case Predicate.Remove:
-                        {
-                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                            if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                            indoorTiling.RemoveBoundary(boundary);
-                        }
-                        break;
-                    case Predicate.Update:
-                        {
-                            CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                            if (boundary == null)
-                                throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                            boundary.UpdateGeom(instruction.newParam.lineString());
-                        }
-                        break;
-                    default:
-                        throw new ArgumentException("Unknown predicate: " + instruction.predicate);
-                }
-                break;
-            case SubjectType.BoundaryDirection:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                    if (boundary == null)
-                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                    indoorTiling.UpdateBoundaryNaviDirection(boundary, instruction.newParam.naviInfo().direction);
-                }
-                else
-                    throw new ArgumentException("boundary direction can only update.");
-                break;
-            case SubjectType.BoundaryNavigable:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellBoundary? boundary = indoorData.FindBoundaryGeom(instruction.oldParam.lineString());
-                    if (boundary == null)
-                        throw new ArgumentException("can not find boundary: " + instruction.oldParam.lineString());
-                    indoorTiling.UpdateBoundaryNavigable(boundary, instruction.newParam.naviInfo().navigable);
-                }
-                else
-                    throw new ArgumentException("boundary navigable can only update.");
-                break;
-            case SubjectType.SpaceNavigable:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    CellSpace? space = indoorData.FindSpaceGeom(instruction.oldParam.coor());
-                    if (space == null)
-                        throw new ArgumentException("can not find space contain point: " + instruction.oldParam.coor().ToString());
-                    indoorTiling.UpdateSpaceNavigable(space, instruction.newParam.naviInfo().navigable);
-                }
-                else
-                    throw new ArgumentException("space navigable can only update.");
-                break;
-            case SubjectType.RLine:
-                if (instruction.predicate == Predicate.Update)
-                {
-                    RepresentativeLine? rLine = indoorData.FindRLine(instruction.oldParam.lineString(), out var rLineGroup);
-                    if (rLine == null || rLineGroup == null)
-                        throw new ArgumentException("can not find representative line: " + instruction.oldParam.lineString());
-                    indoorTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, instruction.newParam.naviInfo().passType);
-                }
-                else
-                    throw new ArgumentException("rLine pass type can only update.");
-                break;
-            default:
-                throw new ArgumentException("Unknown subject type: " + instruction.subject);
-        }
-        instructionHistory.IgnoreDo = false;
-    }
 
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(startCoor, endCoor, id);
-        if (boundary != null) instructionHistory.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         return boundary;
     }
 
     public CellBoundary? AddBoundary(CellVertex start, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(start, endCoor, id);
-        if (boundary != null) instructionHistory.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         return boundary;
     }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(start, end, id);
-        if (boundary != null) instructionHistory.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         return boundary;
     }
 
     public CellBoundary? AddBoundary(Coordinate startCoor, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(startCoor, end, id);
-        if (boundary != null) instructionHistory.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         return boundary;
     }
 
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundaryAutoSnap(startCoor, endCoor, id);
-        if (boundary != null) instructionHistory.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         return boundary;
     }
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
         CellVertex vertex = indoorTiling.SplitBoundary(boundary, middleCoor, out var newBoundary1, out var newBoundary2);
-        instructionHistory.DoCommit(ReducedInstruction.RemoveBoundary(boundary));
-        instructionHistory.DoCommit(ReducedInstruction.AddBoundary(newBoundary1));
-        instructionHistory.DoCommit(ReducedInstruction.AddBoundary(newBoundary2));
+        history.SessionStart();
+        history.DoStep(ReducedInstruction.RemoveBoundary(boundary));
+        history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
+        history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
+        history.SessionCommit();
         return vertex;
     }
 
@@ -378,32 +384,64 @@ public class IndoorSimData
     {
         List<Coordinate> oldCoors = vertices.Select(v => v.Coordinate).ToList();
         bool ret = indoorTiling.UpdateVertices(vertices, newCoors);
-        if (ret) instructionHistory.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
+        if (ret) history.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
         return ret;
     }
     public void RemoveBoundary(CellBoundary boundary)
     {
-        instructionHistory.DoCommit(ReducedInstruction.RemoveBoundary(boundary));
+        history.DoCommit(ReducedInstruction.RemoveBoundary(boundary));
         indoorTiling.RemoveBoundary(boundary);
     }
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));
+        history.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));
         indoorTiling.UpdateBoundaryNaviDirection(boundary, direction);
     }
     public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateBoundaryNavigable(boundary.geom, boundary.Navigable, navigable));
+        history.DoCommit(ReducedInstruction.UpdateBoundaryNavigable(boundary.geom, boundary.Navigable, navigable));
         indoorTiling.UpdateBoundaryNavigable(boundary, navigable);
     }
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
+        history.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
         indoorTiling.UpdateSpaceNavigable(space, navigable);
     }
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {
-        instructionHistory.DoCommit(ReducedInstruction.UpdateRLinePassType(rLines.Geom(fr, to), rLines.passType(fr, to), passType));
+        history.DoCommit(ReducedInstruction.UpdateRLinePassType(rLines.Geom(fr, to), rLines.passType(fr, to), passType));
         indoorTiling.UpdateRLinePassType(rLines, fr, to, passType);
+    }
+
+    public void AddAgent(AgentDescriptor agent)
+    {
+        if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
+        currentSimData.agents.Add(agent);
+        currentSimData.history.DoCommit(ReducedInstruction.AddAgent(agent));
+    }
+
+    public void RemoveAgent(AgentDescriptor agent)
+    {
+        if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
+
+        int index = currentSimData.agents.FindIndex(a => a == agent);
+        if (index < 0) throw new ArgumentException("can not find the agent");
+
+        currentSimData.agents.RemoveAt(index);
+
+        currentSimData.history.DoCommit(ReducedInstruction.RemoveAgent(agent));
+
+    }
+
+    public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
+    {
+        if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
+
+        int index = currentSimData.agents.FindIndex(agent => agent == oldAgent);
+        if (index < 0) throw new ArgumentException("can not find the agent");
+
+        currentSimData.agents[index] = newAgent.Clone();
+
+        currentSimData.history.DoCommit(ReducedInstruction.UpdateAgent(oldAgent, newAgent));
     }
 }

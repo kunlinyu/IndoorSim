@@ -29,9 +29,12 @@ public class Shelves : MonoBehaviour, ITool
     // status > 4, Illegal
     int status = 0;
 
-    GameObject firstToSecondObj = new GameObject("first to second");
-    GameObject shelfWidthLineObj = new GameObject("shelf width line");
-    GameObject corridorWidthLineObj = new GameObject("corridor width line");
+#pragma warning disable CS8618
+    GameObject firstToSecondObj;
+    GameObject shelfWidthLineObj;
+    GameObject corridorWidthLineObj;
+#pragma warning restore CS8618
+
     List<GameObject> shelvesObj = new List<GameObject>();
 
     Vector3? mousePositionNullable = null;
@@ -44,14 +47,17 @@ public class Shelves : MonoBehaviour, ITool
 
     void Start()
     {
+        firstToSecondObj = new GameObject("first to second");
         firstToSecondObj.transform.SetParent(transform);
         firstToSecondObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         firstToSecondObj.AddComponent<LineRenderer>();
 
+        shelfWidthLineObj = new GameObject("shelf width line");
         shelfWidthLineObj.transform.SetParent(transform);
         shelfWidthLineObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         shelfWidthLineObj.AddComponent<LineRenderer>();
 
+        corridorWidthLineObj = new GameObject("corridor width line");
         corridorWidthLineObj.transform.SetParent(transform);
         corridorWidthLineObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         corridorWidthLineObj.AddComponent<LineRenderer>();

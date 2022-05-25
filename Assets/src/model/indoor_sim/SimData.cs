@@ -1,9 +1,33 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
 public class SimData
 {
-    [JsonPropertyAttribute] public List<AgentDescriptor> agents;
-    [JsonPropertyAttribute] public List<Task> tasks;
+    [JsonProperty] public string name;
+    [JsonProperty] public bool active;
+    [JsonProperty] public List<AgentDescriptor> agents;
+    [JsonProperty] public List<Task> tasks;
+    [JsonProperty] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
+    [JsonIgnore] public InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
+
+    public SimData()
+    {
+        instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.Agent, (ins) =>
+        {
+            agents.Add(ins.newParam.agent().Clone());
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.Agent, (ins) =>
+        {
+            int index = agents.FindIndex(agent => agent.Equals(ins.oldParam.agent()));
+            if (index < 0) throw new ArgumentException("can not find the agent to be removed");
+            agents.RemoveAt(index);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.Agent, (ins) =>
+        {
+            int index = agents.FindIndex(agent => agent.Equals(ins.oldParam.agent()));
+            if (index < 0) throw new ArgumentException("can not find the agent to be updated");
+            agents[index] = ins.newParam.agent().Clone();
+        });
+    }
 }
