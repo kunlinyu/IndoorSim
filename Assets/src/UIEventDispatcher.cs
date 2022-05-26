@@ -5,11 +5,12 @@ using UnityEngine;
 [Serializable]
 public enum UIEventType
 {
-    ToolButtonClick,
-    EnterLeaveUIPanel,
-    SceneTip,
-    UITip,
-    Asset,
+    ToolButtonClick,    // UI -> Scene
+    EnterLeaveUIPanel,  // UI -> Scene
+    SceneTip,           // Scene -> UI
+    UITip,              // Scene -> UI
+    Asset,              // Scene -> UI
+    Hierarchy,          // Scene -> UI
 }
 
 [Serializable]

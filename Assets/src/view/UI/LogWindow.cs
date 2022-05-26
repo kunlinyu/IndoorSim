@@ -21,6 +21,8 @@ public class LogWindow : MonoBehaviour
     {
         this.listView = listView;
 
+        this.listView.selectionType = SelectionType.Multiple;
+
         this.listView.itemsSource = logs;
 
         this.listView.makeItem = () => new Label();
@@ -48,6 +50,10 @@ public class LogWindow : MonoBehaviour
                 CopyText((string)items.First());
                 Thread.Sleep(300);
                 Debug.Log($"Copy to clipboard: \"{(string)items.First()}\"");
+            }
+            else
+            {
+                Debug.Log("don't support multiple select");
             }
         };
     }

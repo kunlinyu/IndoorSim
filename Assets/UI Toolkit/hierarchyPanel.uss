@@ -1,0 +1,3 @@
+.unity-list-view__item:selected {
+    color: red;
+}

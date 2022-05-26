@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(CursorTip))]
 [RequireComponent(typeof(LogWindow))]
 [RequireComponent(typeof(AssetsPanelController))]
+[RequireComponent(typeof(HierarchyPanelController))]
 public class All : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
@@ -51,6 +52,10 @@ public class All : MonoBehaviour
         );
         eventDispatcher.eventListener += assetsPanelController.EventListener;
 
+        // hierarchy panel
+        var hierarchyPanelController = GetComponent<HierarchyPanelController>();
+        var hierarchyPanel = root.Q<ScrollView>("FoldoutContainer");
+        hierarchyPanelController.Init(hierarchyPanel);
     }
 
     void Update()

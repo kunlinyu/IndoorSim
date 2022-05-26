@@ -10,7 +10,7 @@
             <ui:Instance template="ToolBar" name="ToolBarContainer" />
         </ui:VisualElement>
         <ui:VisualElement style="align-items: stretch; flex-direction: row; justify-content: space-around; width: auto; height: 100%;">
-            <ui:VisualElement name="Left" style="width: 170px;">
+            <ui:VisualElement name="Left" style="width: 400px;">
                 <ui:Instance template="hierarchyPanel" />
             </ui:VisualElement>
             <ui:VisualElement name="middle" style="width: auto; flex-direction: column-reverse;">

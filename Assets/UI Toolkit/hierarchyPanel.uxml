@@ -1,5 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement>
-        <ui:Foldout text="Scene" style="min-height: 300px; background-color: rgba(200, 200, 200, 0.39); border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;" />
-    </ui:VisualElement>
+    <Style src="project://database/Assets/UI%20Toolkit/hierarchyPanel.uss?fileID=7433441132597879392&amp;guid=a3191ef80a4053b55804852cacd2be4e&amp;type=3#hierarchyPanel" />
+    <ui:ScrollView name="FoldoutContainer" style="background-color: rgba(200, 200, 200, 0.62); border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; min-height: 200px;" />
 </ui:UXML>
