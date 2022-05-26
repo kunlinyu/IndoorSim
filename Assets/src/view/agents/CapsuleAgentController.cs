@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CapsuleRobotController : MonoBehaviour, RobotHW
+public class CapsuleAgentController : MonoBehaviour, RobotHW
 {
     private Action<ISensorData> listener;
 

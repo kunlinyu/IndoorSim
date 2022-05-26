@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 #nullable enable
-public class CapsuleEditor : MonoBehaviour, ITool
+public class AgentEditor : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
@@ -11,6 +11,8 @@ public class CapsuleEditor : MonoBehaviour, ITool
     public bool MouseOnUI { set; get; }
 
     private const double collisionRadius = 1.0f;
+
+    public string agentType = "";
 
 #pragma warning disable CS8618
     public GameObject shadow;
@@ -23,7 +25,7 @@ public class CapsuleEditor : MonoBehaviour, ITool
         shadow.transform.SetParent(transform);
         shadow.GetComponent<AgentShadowController>().freeMat = Resources.Load<Material>("Materials/agent shadow free");
         shadow.GetComponent<AgentShadowController>().collidedMat = Resources.Load<Material>("Materials/agent shadow collided");
-        shadow.GetComponent<AgentShadowController>().radius = Resources.Load<AgentTypeMeta>("AgentTypeMeta/capsule").collisionRadius;
+        shadow.GetComponent<AgentShadowController>().radius = Resources.Load<AgentTypeMeta>("AgentTypeMeta/" + agentType).collisionRadius;
     }
 
     void Update()
@@ -43,11 +45,11 @@ public class CapsuleEditor : MonoBehaviour, ITool
         if (Input.GetMouseButtonUp(0) && mousePosition != null && !MouseOnUI)
         {
             AgentDescriptor agent = new AgentDescriptor();
-            agent.name = "capsule agent";
-            agent.type = "capsule";
+            agent.name = agentType + " agent";
+            agent.type = agentType;
             agent.x = mousePosition.Value.x;
             agent.y = mousePosition.Value.z;
-            agent.theta = 0.0d;
+            agent.theta = 0.0f;
             agent.containerId = null;
             IndoorSimData?.AddAgent(agent);
         }

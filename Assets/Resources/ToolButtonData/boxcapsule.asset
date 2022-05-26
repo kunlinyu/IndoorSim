@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65f2663c3d404790ea6997b027d82793, type: 3}
-  m_Name: capsule
+  m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
+  m_Name: boxcapsule
   m_EditorClassIdentifier: 
-  typeName: capsule
-  prefabName: capsule
-  collisionRadius: 0.5
-  height: 1
-  MovingMode: 0
+  m_ToolName: boxcapsule
+  m_Class: 6
+  m_PortraitImage: {fileID: 21300000, guid: f88360117109871149a2af6bcc75d46e, type: 3}
+  m_SortingOrder: 0

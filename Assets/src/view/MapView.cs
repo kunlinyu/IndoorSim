@@ -12,51 +12,38 @@ public class MapView : MonoBehaviour
     private GameObject spaceParentObj;
     private GameObject rLineParentObj;
 
-    private Transform vertexParent;
-    private Transform boundaryParent;
-    private Transform spaceParent;
-    private Transform rLineParent;
-
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
     public Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
     private Dictionary<RLineGroup, GameObject> cellspace2RLineObj = new Dictionary<RLineGroup, GameObject>();
 
-    public UIEventDispatcher eventDispatcher = null;
-
     void Start()
     {
-
         vertexParentObj = new GameObject("vertex parent");
         vertexParentObj.transform.SetParent(transform);
         vertexParentObj.transform.localPosition = Vector3.zero;
         vertexParentObj.transform.localRotation = Quaternion.identity;
 
-        vertexParent = vertexParentObj.transform;
-
         boundaryParentObj = new GameObject("boundary parent");
         boundaryParentObj.transform.SetParent(transform);
         boundaryParentObj.transform.localPosition = Vector3.zero;
         boundaryParentObj.transform.localRotation = Quaternion.identity;
-        boundaryParent = boundaryParentObj.transform;
 
         spaceParentObj = new GameObject("space parent");
         spaceParentObj.transform.SetParent(transform);
         spaceParentObj.transform.localPosition = Vector3.zero;
         spaceParentObj.transform.localRotation = Quaternion.identity;
-        spaceParent = spaceParentObj.transform;
 
         rLineParentObj = new GameObject("rLine parent");
         rLineParentObj.transform.SetParent(transform);
         rLineParentObj.transform.localPosition = Vector3.zero;
         rLineParentObj.transform.localRotation = Quaternion.identity;
-        rLineParent = rLineParentObj.transform;
 
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
             var obj = new GameObject(vertex.Id);
-            obj.transform.SetParent(vertexParent);
+            obj.transform.SetParent(vertexParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
             vertex2Obj[vertex] = obj;
@@ -71,7 +58,7 @@ public class MapView : MonoBehaviour
         indoorTiling.OnBoundaryCreated += (boundary) =>
         {
             var obj = new GameObject(boundary.Id);
-            obj.transform.SetParent(boundaryParent);
+            obj.transform.SetParent(boundaryParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
             boundary2Obj[boundary] = obj;
@@ -87,7 +74,7 @@ public class MapView : MonoBehaviour
         indoorTiling.OnSpaceCreated += (space) =>
         {
             var obj = new GameObject(space.Id);
-            obj.transform.SetParent(spaceParent);
+            obj.transform.SetParent(spaceParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
             cellspace2Obj[space] = obj;
@@ -105,7 +92,7 @@ public class MapView : MonoBehaviour
         indoorTiling.OnRLinesCreated += (rLines) =>
         {
             var obj = new GameObject(rLines.space.Id + " rLines");
-            obj.transform.SetParent(rLineParent);
+            obj.transform.SetParent(rLineParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
             cellspace2RLineObj[rLines] = obj;

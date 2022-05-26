@@ -206,8 +206,23 @@ public class SimulationController : MonoBehaviour
                 if (oldToolName != "capsule")
                 {
                     toolObj = new GameObject("capsule");
-                    currentTool = toolObj.AddComponent<CapsuleEditor>();
+                    var agentEditor = toolObj.AddComponent<AgentEditor>();
+                    agentEditor.agentType = "capsule";
+                    currentTool = agentEditor;
+
                     Debug.Log("Switch to tool capsule");
+                }
+            }
+            else if (e.name == "boxcapsule")
+            {
+                if (oldToolName != "boxcapsule")
+                {
+                    toolObj = new GameObject("boxcapsule");
+                    var agentEditor = toolObj.AddComponent<AgentEditor>();
+                    agentEditor.agentType = "boxcapsule";
+                    currentTool = agentEditor;
+
+                    Debug.Log("Switch to tool boxcapsule");
                 }
             }
             else if (e.name == "save")

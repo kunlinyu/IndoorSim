@@ -109,7 +109,7 @@ GameObject:
   - component: {fileID: 6579345547589926411}
   - component: {fileID: 3309207481151619963}
   m_Layer: 0
-  m_Name: CapsuleRobot
+  m_Name: capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,7 +130,7 @@ Transform:
   - {fileID: 2004754042135791749}
   - {fileID: 3954819405521361591}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3309207481151619963
 MonoBehaviour:
@@ -218,9 +218,7 @@ LineRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Positions:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
+  m_Positions: []
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1

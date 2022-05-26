@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7441340175770365784}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 4.660963, y: 0, z: 6.686959}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -146,8 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a7ea75bf4584d78b70829b4605e7bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 0
-  freeMat: {fileID: 0}
-  collidedMat: {fileID: 0}
+  radius: 0.5
+  freeMat: {fileID: 2100000, guid: 1589dad803578fa9f83f29a9968511f5, type: 2}
+  collidedMat: {fileID: 2100000, guid: 6d02a73ae9bddc4c291b3abc133a2fdf, type: 2}
   collided: 0
-  center: {x: 0, y: 0, z: 0}
+  center: {x: 4.660963, y: 0, z: 6.686959}
