@@ -55,7 +55,10 @@ public class All : MonoBehaviour
         // hierarchy panel
         var hierarchyPanelController = GetComponent<HierarchyPanelController>();
         var hierarchyPanel = root.Q<ScrollView>("FoldoutContainer");
-        hierarchyPanelController.Init(hierarchyPanel);
+        hierarchyPanelController.Init(hierarchyPanel, (simName) => {
+            eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "add", message = simName, type = UIEventType.Simulation });
+        });
+        eventDispatcher.eventListener += hierarchyPanelController.EventListener;
     }
 
     void Update()

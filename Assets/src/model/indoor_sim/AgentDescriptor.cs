@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 #nullable enable
+
 public class AgentDescriptor
 {
     public string name = "";

@@ -32,7 +32,11 @@ public class IndoorSimData
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
-    [JsonIgnore] public Action<SimData?> OnSimulationSwitch = (s) => { };
+    [JsonIgnore] public Action<List<GridMapInfo>> OnGridMapUpdated = (grid) => { };
+    [JsonIgnore] public Action<IndoorData> OnIndoorDataUpdated = (indoor) => { };
+    [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
+    [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
+    [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
 
     public string Serialize(bool indent = false)
     {
@@ -57,7 +61,7 @@ public class IndoorSimData
             jsonSerializer.Serialize(jsonWriter, this, null);
         }
 
-        return sw.ToString(); // return JsonConvert.SerializeObject(this);
+        return sw.ToString();  // return JsonConvert.SerializeObject(this);
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
@@ -73,6 +77,7 @@ public class IndoorSimData
         assets = indoorSimData.assets;
         history = indoorSimData.history;
         OnAssetUpdated?.Invoke(assets);
+        OnIndoorDataUpdated?.Invoke(indoorData);
 
         indoorTiling.AssignIndoorData(indoorData);
 
@@ -88,7 +93,7 @@ public class IndoorSimData
         {
             indoorSimData.indoorData = new IndoorData();
             indoorSimData.simDataList = new List<SimData>();
-            indoorSimData.history.Uuundo();
+            // indoorSimData.history.Uuundo();
         }
         else
         {
@@ -173,10 +178,10 @@ public class IndoorSimData
     {
         indoorTiling = new IndoorTiling(indoorData, new SimpleIDGenerator("VTX"), new SimpleIDGenerator("BDR"), new SimpleIDGenerator("SPC"));
 
-        SimData simData = new SimData();
+        SimData simData = new SimData("default simulation");
         simDataList.Add(simData);
         currentSimData = simData;
-        OnSimulationSwitch?.Invoke(currentSimData);
+
 
         activeHistory = history;
         activeInstructionInterpreter = instructionInterpreter;
@@ -268,24 +273,29 @@ public class IndoorSimData
         {
             activeHistory = history;
             activeInstructionInterpreter = instructionInterpreter;
+            currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
             currentSimData = null;
-            OnSimulationSwitch?.Invoke(currentSimData);
         }
         else
         {
+            currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
             currentSimData = simDataList[index];
             activeHistory = currentSimData.history;
             activeInstructionInterpreter = currentSimData.instructionInterpreter;
-            OnSimulationSwitch?.Invoke(currentSimData);
+            currentSimData.agents.ForEach(agent => OnAgentCreate?.Invoke(agent));
         }
     }
 
-    public SimData AddSimulation()
+    public SimData AddSimulation(string name)
     {
-        SimData newSimData = new SimData();
+        currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+
+        SimData newSimData = new SimData(name);
         simDataList.Add(newSimData);
         currentSimData = newSimData;
-        OnSimulationSwitch?.Invoke(currentSimData);
+
+        OnSimulationListUpdated?.Invoke(simDataList);
+
         return newSimData;
     }
 
@@ -293,6 +303,23 @@ public class IndoorSimData
     {
         if (index >= simDataList.Count) throw new ArgumentException("simulation index out of range");
         simDataList.RemoveAt(index);
+        OnSimulationListUpdated?.Invoke(simDataList);
+    }
+
+    public void RemoveSimulation(string name)
+    {
+        int index = simDataList.FindIndex(simData => simData.name == name);
+        if (index < 0) throw new ArgumentException("can not find simulation with name: " + name);
+        simDataList.RemoveAt(index);
+        OnSimulationListUpdated?.Invoke(simDataList);
+    }
+
+    public void RenameSimulation(string oldName, string newName)
+    {
+        int index = simDataList.FindIndex(simData => simData.name == oldName);
+        if (index < 0) throw new ArgumentException("can not find simulation with name: " + oldName);
+        simDataList[index].name = newName;
+        OnSimulationListUpdated?.Invoke(simDataList);
     }
 
     public bool Undo()
@@ -305,6 +332,7 @@ public class IndoorSimData
             // activeHistory.IgnoreDo = true;  // TODO: remove
             activeInstructionInterpreter.Execute(reverseIns);
             // activeHistory.IgnoreDo = false;  // TODO: remove
+            OnIndoorDataUpdated?.Invoke(indoorData);
             return true;
         }
         else
@@ -323,6 +351,7 @@ public class IndoorSimData
             // activeHistory.IgnoreDo = true;  // TODO: remove
             activeInstructionInterpreter.Execute(instructions);
             // activeHistory.IgnoreDo = false;  // TODO: remove
+            OnIndoorDataUpdated?.Invoke(indoorData);
             return true;
         }
         else
@@ -340,6 +369,7 @@ public class IndoorSimData
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(startCoor, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return boundary;
     }
 
@@ -347,12 +377,14 @@ public class IndoorSimData
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(start, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return boundary;
     }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(start, end, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return boundary;
     }
 
@@ -360,6 +392,7 @@ public class IndoorSimData
     {
         CellBoundary? boundary = indoorTiling.AddBoundary(startCoor, end, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return boundary;
     }
 
@@ -367,6 +400,7 @@ public class IndoorSimData
     {
         CellBoundary? boundary = indoorTiling.AddBoundaryAutoSnap(startCoor, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return boundary;
     }
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
@@ -377,6 +411,7 @@ public class IndoorSimData
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
         history.SessionCommit();
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return vertex;
     }
 
@@ -385,12 +420,14 @@ public class IndoorSimData
         List<Coordinate> oldCoors = vertices.Select(v => v.Coordinate).ToList();
         bool ret = indoorTiling.UpdateVertices(vertices, newCoors);
         if (ret) history.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
+        OnIndoorDataUpdated?.Invoke(indoorData);
         return ret;
     }
     public void RemoveBoundary(CellBoundary boundary)
     {
         history.DoCommit(ReducedInstruction.RemoveBoundary(boundary));
         indoorTiling.RemoveBoundary(boundary);
+        OnIndoorDataUpdated?.Invoke(indoorData);
     }
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
@@ -418,6 +455,8 @@ public class IndoorSimData
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
         currentSimData.agents.Add(agent);
         currentSimData.history.DoCommit(ReducedInstruction.AddAgent(agent));
+        OnAgentCreate?.Invoke(agent);
+        OnSimulationListUpdated?.Invoke(simDataList);
     }
 
     public void RemoveAgent(AgentDescriptor agent)
@@ -431,6 +470,8 @@ public class IndoorSimData
 
         currentSimData.history.DoCommit(ReducedInstruction.RemoveAgent(agent));
 
+        OnAgentRemoved?.Invoke(agent);
+        OnSimulationListUpdated?.Invoke(simDataList);
     }
 
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)

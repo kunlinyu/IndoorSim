@@ -5,14 +5,14 @@ using Newtonsoft.Json;
 public class SimData
 {
     [JsonProperty] public string name;
-    [JsonProperty] public bool active;
-    [JsonProperty] public List<AgentDescriptor> agents;
-    [JsonProperty] public List<Task> tasks;
+    [JsonProperty] public List<AgentDescriptor> agents = new List<AgentDescriptor>();
+    [JsonProperty] public List<Task> tasks = new List<Task>();
     [JsonProperty] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
     [JsonIgnore] public InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
 
-    public SimData()
+    public SimData(string name)
     {
+        this.name = name;
         instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.Agent, (ins) =>
         {
             agents.Add(ins.newParam.agent().Clone());

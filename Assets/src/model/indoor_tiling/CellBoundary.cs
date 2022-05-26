@@ -31,7 +31,7 @@ public class CellBoundary
         }
     }
 
-    [JsonIgnore] public string Id { get; set; }
+    [JsonPropertyAttribute] public string Id { get; set; }
 
     [JsonIgnore]
     public NaviDirection NaviDir

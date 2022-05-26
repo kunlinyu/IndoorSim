@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 public class LogWindow : MonoBehaviour
 {
     private const int kMaxLogCount = 100;
+    private const int kMaxLogLength = 200;
 
     private List<string> logs = new List<string>();
     ListView listView;
@@ -29,15 +30,19 @@ public class LogWindow : MonoBehaviour
 
         this.listView.bindItem = (label, index) =>
         {
-            string log = logs[index];
-            ((Label)label).text = log;
-            label.name = LogType.Log.ToString();
+            string logPrefix = logs[index];
+            if (logPrefix.Length > kMaxLogLength)
+                logPrefix = logPrefix.Substring(0, kMaxLogLength);
 
-            if (log.StartsWith(LogType.Log.ToString()))
+            ((Label)label).text = logPrefix;
+
+            label.userData = index;
+
+            if (logPrefix.StartsWith(LogType.Log.ToString()))
                 label.name = LogType.Log.ToString();
-            else if (log.StartsWith(LogType.Warning.ToString()))
+            else if (logPrefix.StartsWith(LogType.Warning.ToString()))
                 label.name = LogType.Warning.ToString();
-            else if (log.StartsWith(LogType.Error.ToString()))
+            else if (logPrefix.StartsWith(LogType.Error.ToString()))
                 label.name = LogType.Error.ToString();
 
             label.tooltip = "double click to copy";

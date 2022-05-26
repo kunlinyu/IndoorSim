@@ -9,8 +9,9 @@ public enum UIEventType
     EnterLeaveUIPanel,  // UI -> Scene
     SceneTip,           // Scene -> UI
     UITip,              // Scene -> UI
-    Asset,              // Scene -> UI
+    Asset,              // Scene -> UI (bidirectional?)
     Hierarchy,          // Scene -> UI
+    Simulation,         // UI -> Scene
 }
 
 [Serializable]

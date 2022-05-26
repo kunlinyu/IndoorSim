@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 
@@ -27,6 +29,52 @@ public class SimulationController : MonoBehaviour
             e.message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Newtonsoft.Json.Formatting.Indented });
 
             eventDispatcher?.Raise(this, e);
+        };
+        indoorSimData.OnIndoorDataUpdated += (indoorData) =>
+        {
+            var e = new UIEvent();
+            e.type = UIEventType.Hierarchy;
+            e.name = "indoordata";
+            e.message = indoorData.Serialize(false);
+
+            eventDispatcher?.Raise(this, e);
+        };
+        indoorSimData.OnSimulationListUpdated += (sims) =>
+        {
+            List<SimData> noHistorySims = new List<SimData>();
+            sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { agents = sim.agents, tasks = sim.tasks, history = null }));
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                Formatting = Newtonsoft.Json.Formatting.None,
+                NullValueHandling = NullValueHandling.Ignore,
+            };
+
+            JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
+            StringBuilder sb = new StringBuilder(256);
+            StringWriter sw = new StringWriter(sb);
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+            {
+                jsonWriter.Formatting = jsonSerializer.Formatting;
+                jsonWriter.IndentChar = '\t';
+                jsonWriter.Indentation = 1;
+                jsonSerializer.Serialize(jsonWriter, noHistorySims);
+            }
+            string simsJson = sw.ToString();
+
+
+            var e = new UIEvent();
+            e.type = UIEventType.Hierarchy;
+            e.name = "simulation";
+            e.message = simsJson;
+
+            eventDispatcher?.Raise(this, e);
+        };
+
+        indoorSimData.OnAgentCreate += (agent) =>
+        {
+
         };
     }
 
@@ -153,13 +201,22 @@ public class SimulationController : MonoBehaviour
             {
 
             }
+            else if (e.name == "capsule")
+            {
+                if (oldToolName != "capsule")
+                {
+                    toolObj = new GameObject("capsule");
+                    currentTool = toolObj.AddComponent<CapsuleEditor>();
+                    Debug.Log("Switch to tool capsule");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSimData.Serialize(true));
             }
             else if (e.name == "load")
             {
-                indoorSimData.DeserializeInPlace(LoadFromFile(), true);
+                indoorSimData.DeserializeInPlace(LoadFromFile(), false);
             }
             else if (e.name == "redo")
             {
@@ -186,6 +243,11 @@ public class SimulationController : MonoBehaviour
                     currentTool.MouseOnUI = true;
                 else if (e.message == "leave")
                     currentTool.MouseOnUI = false;
+        }
+        else if (e.type == UIEventType.Simulation)
+        {
+            if (e.name == "add")
+                indoorSimData.AddSimulation(e.message);
         }
     }
 
