@@ -26,6 +26,16 @@ public class AgentDescriptor
         };
     }
 
+    public void CopyFrom(AgentDescriptor agent)
+    {
+        name = agent.name;
+        type = agent.type;
+        x = agent.x;
+        y = agent.y;
+        theta = agent.theta;
+        containerId = agent.containerId;
+    }
+
     public override bool Equals(object obj)
     {
         if (obj == null || GetType() != obj.GetType())

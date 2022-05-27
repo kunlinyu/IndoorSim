@@ -35,8 +35,13 @@ public class SimulationView : MonoBehaviour
         };
         indoorSimData.OnAgentRemoved += (agent) =>
         {
-            Destroy(agent2Obj[agent]);
-            agent2Obj.Remove(agent);
+            Debug.Log("unity remove agent object");
+            Debug.Log(agent2Obj.Count);
+            DestroyImmediate(agent2Obj[agent]);
+            bool ret = agent2Obj.Remove(agent);
+            Debug.Log(agent2Obj.Count);
+            if (ret == false)
+                Debug.LogWarning("unity remove agent object failed");
         };
     }
 

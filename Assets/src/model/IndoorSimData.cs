@@ -37,6 +37,7 @@ public class IndoorSimData
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
+    [JsonIgnore] public Action<AgentDescriptor> OnAgentUpdated = (a) => { };
 
     public string Serialize(bool indent = false)
     {
@@ -178,11 +179,6 @@ public class IndoorSimData
     {
         indoorTiling = new IndoorTiling(indoorData, new SimpleIDGenerator("VTX"), new SimpleIDGenerator("BDR"), new SimpleIDGenerator("SPC"));
 
-        SimData simData = new SimData("default simulation");
-        simData.active = true;
-        simDataList.Add(simData);
-        currentSimData = simData;
-
 
         activeHistory = history;
         activeInstructionInterpreter = instructionInterpreter;
@@ -309,9 +305,14 @@ public class IndoorSimData
         }
 
         SimData newSimData = new SimData(name);
+        newSimData.OnAgentCreate = OnAgentCreate;
+        newSimData.OnAgentRemoved = OnAgentRemoved;
+        newSimData.OnAgentUpdated = OnAgentUpdated;
         newSimData.active = true;
         simDataList.Add(newSimData);
         currentSimData = newSimData;
+        activeHistory = currentSimData.history;
+        activeInstructionInterpreter = currentSimData.instructionInterpreter;
 
         OnSimulationListUpdated?.Invoke(simDataList);
 
@@ -348,10 +349,11 @@ public class IndoorSimData
         {
             List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
             Debug.Log("interpret instruction: " + reverseIns);
-            // activeHistory.IgnoreDo = true;  // TODO: remove
             activeInstructionInterpreter.Execute(reverseIns);
-            // activeHistory.IgnoreDo = false;  // TODO: remove
-            OnIndoorDataUpdated?.Invoke(indoorData);
+            if (activeHistory == history)
+                OnIndoorDataUpdated?.Invoke(indoorData);
+            else
+                OnSimulationListUpdated?.Invoke(simDataList);
             return true;
         }
         else
@@ -367,10 +369,11 @@ public class IndoorSimData
         if (instructions.Count > 0)
         {
             Debug.Log("interpret instruction: " + instructions);
-            // activeHistory.IgnoreDo = true;  // TODO: remove
             activeInstructionInterpreter.Execute(instructions);
-            // activeHistory.IgnoreDo = false;  // TODO: remove
-            OnIndoorDataUpdated?.Invoke(indoorData);
+            if (activeHistory == history)
+                OnIndoorDataUpdated?.Invoke(indoorData);
+            else
+                OnSimulationListUpdated?.Invoke(simDataList);
             return true;
         }
         else
@@ -472,37 +475,25 @@ public class IndoorSimData
     public void AddAgent(AgentDescriptor agent)
     {
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
-        currentSimData.agents.Add(agent);
+
+        currentSimData.AddAgent(agent);
         currentSimData.history.DoCommit(ReducedInstruction.AddAgent(agent));
-        OnAgentCreate?.Invoke(agent);
         OnSimulationListUpdated?.Invoke(simDataList);
-        Debug.Log(currentSimData.active);
     }
 
     public void RemoveAgent(AgentDescriptor agent)
     {
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
 
-        int index = currentSimData.agents.FindIndex(a => a == agent);
-        if (index < 0) throw new ArgumentException("can not find the agent");
-
-        currentSimData.agents.RemoveAt(index);
-
+        currentSimData.RemoveAgentEqualsTo(agent);
         currentSimData.history.DoCommit(ReducedInstruction.RemoveAgent(agent));
-
-        OnAgentRemoved?.Invoke(agent);
         OnSimulationListUpdated?.Invoke(simDataList);
     }
 
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
     {
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
-
-        int index = currentSimData.agents.FindIndex(agent => agent == oldAgent);
-        if (index < 0) throw new ArgumentException("can not find the agent");
-
-        currentSimData.agents[index] = newAgent.Clone();
-
+        currentSimData.UpdateAgent(oldAgent, newAgent);
         currentSimData.history.DoCommit(ReducedInstruction.UpdateAgent(oldAgent, newAgent));
     }
 }
