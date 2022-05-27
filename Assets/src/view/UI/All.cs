@@ -55,9 +55,21 @@ public class All : MonoBehaviour
         // hierarchy panel
         var hierarchyPanelController = GetComponent<HierarchyPanelController>();
         var hierarchyPanel = root.Q<ScrollView>("FoldoutContainer");
-        hierarchyPanelController.Init(hierarchyPanel, (simName) => {
-            eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "add", message = simName, type = UIEventType.Simulation });
-        });
+
+        hierarchyPanelController.Init(hierarchyPanel);
+
+        hierarchyPanelController.OnAddSimulation += simName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "add simulation", message = simName, type = UIEventType.Hierarchy });
+
+        hierarchyPanelController.OnSelectSimulation += simName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select simulation", message = simName, type = UIEventType.Hierarchy });
+
+        hierarchyPanelController.OnSelectIndoorMap += () =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select indoor map", type = UIEventType.Hierarchy });
+
+        hierarchyPanelController.OnSelectGridMap += gridName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select grid map", message = gridName , type = UIEventType.Hierarchy });
+
         eventDispatcher.eventListener += hierarchyPanelController.EventListener;
     }
 

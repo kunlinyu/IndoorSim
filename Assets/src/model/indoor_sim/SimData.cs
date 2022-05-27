@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 public class SimData
 {
     [JsonProperty] public string name;
+    [JsonProperty] public bool active;
     [JsonProperty] public List<AgentDescriptor> agents = new List<AgentDescriptor>();
     [JsonProperty] public List<Task> tasks = new List<Task>();
     [JsonProperty] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();

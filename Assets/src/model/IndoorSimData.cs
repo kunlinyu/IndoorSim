@@ -179,6 +179,7 @@ public class IndoorSimData
         indoorTiling = new IndoorTiling(indoorData, new SimpleIDGenerator("VTX"), new SimpleIDGenerator("BDR"), new SimpleIDGenerator("SPC"));
 
         SimData simData = new SimData("default simulation");
+        simData.active = true;
         simDataList.Add(simData);
         currentSimData = simData;
 
@@ -265,32 +266,50 @@ public class IndoorSimData
 
     }
 
-    public void SelectMapOrSimulation(int index)
+    public void SelectMap()
     {
-        if (index >= simDataList.Count) throw new ArgumentException($"simulation index({index}) out of range(-1 - {simDataList.Count})");
-        if (index < -1) throw new ArgumentException($"simulation index({index}) out of range(-1 - {simDataList.Count})");
-        if (index == -1)
+        activeHistory = history;
+        activeInstructionInterpreter = instructionInterpreter;
+        if (currentSimData != null)
         {
-            activeHistory = history;
-            activeInstructionInterpreter = instructionInterpreter;
-            currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+            Debug.Log("going to remove agent");
+            currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+            currentSimData.active = false;
             currentSimData = null;
-        }
-        else
-        {
-            currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
-            currentSimData = simDataList[index];
-            activeHistory = currentSimData.history;
-            activeInstructionInterpreter = currentSimData.instructionInterpreter;
-            currentSimData.agents.ForEach(agent => OnAgentCreate?.Invoke(agent));
         }
     }
 
-    public SimData AddSimulation(string name)
+    public void SelectSimulation(string simName)
     {
-        currentSimData?.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+        int index = simDataList.FindIndex(sim => sim.name == simName);
+        if (index < 0) throw new ArgumentException("can not find simulation with name: " + simName);
+
+        if (currentSimData != null)
+        {
+            currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+            currentSimData.active = false;
+        }
+        currentSimData = simDataList[index];
+        currentSimData.active = true;
+
+        activeHistory = currentSimData.history;
+        activeInstructionInterpreter = currentSimData.instructionInterpreter;
+        currentSimData.agents.ForEach(agent => OnAgentCreate?.Invoke(agent));
+
+        OnSimulationListUpdated?.Invoke(simDataList);
+    }
+
+    public SimData? AddSimulation(string name)
+    {
+        if (simDataList.Any(sim => sim.name == name)) return null;
+        if (currentSimData != null)
+        {
+            currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
+            currentSimData.active = false;
+        }
 
         SimData newSimData = new SimData(name);
+        newSimData.active = true;
         simDataList.Add(newSimData);
         currentSimData = newSimData;
 
@@ -457,6 +476,7 @@ public class IndoorSimData
         currentSimData.history.DoCommit(ReducedInstruction.AddAgent(agent));
         OnAgentCreate?.Invoke(agent);
         OnSimulationListUpdated?.Invoke(simDataList);
+        Debug.Log(currentSimData.active);
     }
 
     public void RemoveAgent(AgentDescriptor agent)

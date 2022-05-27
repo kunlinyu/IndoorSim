@@ -42,7 +42,7 @@ public class SimulationController : MonoBehaviour
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {
             List<SimData> noHistorySims = new List<SimData>();
-            sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { agents = sim.agents, tasks = sim.tasks, history = null }));
+            sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { active = sim.active, agents = sim.agents, tasks = sim.tasks, history = null }));
 
             JsonSerializerSettings settings = new JsonSerializerSettings
             {
@@ -261,9 +261,18 @@ public class SimulationController : MonoBehaviour
         }
         else if (e.type == UIEventType.Simulation)
         {
-            if (e.name == "add")
-                indoorSimData.AddSimulation(e.message);
         }
+        else if (e.type == UIEventType.Hierarchy)
+        {
+            if (e.name == "add simulation")
+                indoorSimData.AddSimulation(e.message);
+            if (e.name == "select simulation")
+                indoorSimData.SelectSimulation(e.message);
+            if (e.name == "select indoor map")
+                indoorSimData.SelectMap();
+            // if (e.name == "select grid map")
+        }
+
     }
 
     string LoadFromFile()

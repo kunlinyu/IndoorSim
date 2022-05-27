@@ -12,7 +12,10 @@ public class HierarchyPanelController : MonoBehaviour
     private List<Foldout> simFoldouts;
     TextField createSim;
 
-    private Action<string> OnAddSimulation;
+    public Action<string> OnAddSimulation;
+    public Action<string> OnSelectSimulation;
+    public Action OnSelectIndoorMap;
+    public Action<string> OnSelectGridMap;
 
     private string placeHolderText = "new simulation name";
 
@@ -21,11 +24,9 @@ public class HierarchyPanelController : MonoBehaviour
 
     }
 
-    public void Init(ScrollView FoldoutContainer, Action<string> OnAddSimulation)
+    public void Init(ScrollView FoldoutContainer)
     {
         foldoutContainer = FoldoutContainer;
-        this.OnAddSimulation = OnAddSimulation;
-
 
         var tf = new TextField();
 
@@ -39,7 +40,13 @@ public class HierarchyPanelController : MonoBehaviour
 
         indoorMapFoldout = new Foldout();
         indoorMapFoldout.text = "map";
-        indoorMapFoldout.Add(new TextElement() { text = "SPC0" });
+        indoorMapFoldout.RegisterCallback<ClickEvent>(evt =>
+        {
+            Debug.Log("indoorMap clicked");
+            CollapsesAll();
+            indoorMapFoldout.SetValueWithoutNotify(true);
+            OnSelectIndoorMap?.Invoke();
+        });
         foldoutContainer.Add(indoorMapFoldout);
 
         simFoldouts = new List<Foldout>();
@@ -65,7 +72,7 @@ public class HierarchyPanelController : MonoBehaviour
 
     }
 
-    public void UpdateContent(string json)
+    public void UpdateGridMap(string json)
     {
         var jsonData = JArray.Parse(json);
         foreach (var assetJson in jsonData.Children())
@@ -76,6 +83,8 @@ public class HierarchyPanelController : MonoBehaviour
     public void UpdateIndoorData(string json)
     {
         indoorMapFoldout.Clear();
+        CollapsesAll();
+        indoorMapFoldout.SetValueWithoutNotify(true);
 
         var jsonData = JObject.Parse(json);
         foreach (var vertexJson in jsonData["vertexPool"].Children())
@@ -90,17 +99,27 @@ public class HierarchyPanelController : MonoBehaviour
     {
         simFoldouts.ForEach(sim => foldoutContainer.Remove(sim));
         simFoldouts.Clear();
+        CollapsesAll();
         foldoutContainer.Remove(createSim);
-
-        var jsonData = JArray.Parse(json);
         Debug.Log(json);
+        var jsonData = JArray.Parse(json);
         foreach (var simulationJson in jsonData.Children())
         {
             Foldout simFoldout = new Foldout();
             simFoldout.text = simulationJson["name"].Value<string>();
+
+            bool active = simulationJson["active"].Value<bool>();
+            simFoldout.SetValueWithoutNotify(active);
+
             simFoldouts.Add(simFoldout);
             foldoutContainer.Add(simFoldout);
-
+            simFoldout.RegisterCallback<ClickEvent>(evt =>
+            {
+                Debug.Log("simFoldout clicked");
+                CollapsesAll();
+                simFoldout.SetValueWithoutNotify(true);
+                OnSelectSimulation?.Invoke(simFoldout.text);
+            });
             foreach (var agent in simulationJson["agents"])
                 simFoldout.Add(new TextElement() { text = agent["name"].Value<string>() });
         }
@@ -108,10 +127,17 @@ public class HierarchyPanelController : MonoBehaviour
         foldoutContainer.Add(createSim);
     }
 
+    private void CollapsesAll()
+    {
+        gridMapFoldout.SetValueWithoutNotify(false);
+        indoorMapFoldout.SetValueWithoutNotify(false);
+        simFoldouts.ForEach(foldout => foldout.SetValueWithoutNotify(false));
+    }
+
     public void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.Hierarchy && e.name == "gridmap")
-            UpdateContent(e.message);
+            UpdateGridMap(e.message);
         else if (e.type == UIEventType.Hierarchy && e.name == "indoordata")
             UpdateIndoorData(e.message);
         else if (e.type == UIEventType.Hierarchy && e.name == "simulation")
