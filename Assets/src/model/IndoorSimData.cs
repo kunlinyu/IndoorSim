@@ -94,7 +94,6 @@ public class IndoorSimData
         {
             indoorSimData.indoorData = new IndoorData();
             indoorSimData.simDataList = new List<SimData>();
-            // indoorSimData.history.Uuundo();
         }
         else
         {

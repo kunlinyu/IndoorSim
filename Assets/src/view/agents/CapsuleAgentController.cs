@@ -3,23 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CapsuleAgentController : MonoBehaviour, RobotHW
+public class CapsuleAgentController : MonoBehaviour, IAgentHW
 {
     private Action<ISensorData> listener;
 
     void Update()
     {
         listener?.Invoke(new Position() { x = transform.position.x, y = transform.position.z });
-
     }
 
     public void RegisterSensorDataListener(Action<ISensorData> listener)
     {
-        this.listener = listener;
+        this.listener += listener;
     }
 
     public void SetControlCommand(IControlCommand command)
     {
+
 
     }
 }

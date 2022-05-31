@@ -1,5 +1,7 @@
 using System;
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using UnityEngine;
 
 [Serializable]
@@ -26,15 +28,21 @@ public struct UIEvent
 public class UIEventDispatcher : MonoBehaviour
 {
     public delegate void EventListener(object sender, UIEvent e);
-
     public event EventListener eventListener;
+    private ConcurrentQueue<UIEvent> eventQueue = new ConcurrentQueue<UIEvent>();
 
     public void Raise(object sender, UIEvent e)
     {
-        lock (this)
-        {
-            eventListener?.Invoke(sender, e);
-        }
+        eventQueue.Enqueue(e);
+    }
+
+    void Update()
+    {
+        while (eventQueue.TryDequeue(out var evt))
+            eventListener?.Invoke(this, evt);
+
+            // New thread created in Parallel.ForEach cause UI element "can only be called from the main thread." exceptions
+            // Parallel.ForEach(eventListener?.GetInvocationList(), inv => inv.DynamicInvoke(this, evt));
     }
 
 }

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 #nullable enable
 
-public interface IExecutor
+public interface IInstructionExecutor
 {
     public Predicate Predicate();
     public SubjectType Subject();
     public void Execute(ReducedInstruction ins);
 }
 
-public class MatcherExecutor : IExecutor
+public class MatcherExecutor : IInstructionExecutor
 {
     private Predicate predicate;
     private SubjectType subject;
@@ -31,9 +31,9 @@ public class MatcherExecutor : IExecutor
 
 public class InstructionInterpreter
 {
-    private List<IExecutor> executors = new List<IExecutor>();
+    private List<IInstructionExecutor> executors = new List<IInstructionExecutor>();
 
-    public void RegisterExecutor(IExecutor exe)
+    public void RegisterExecutor(IInstructionExecutor exe)
         => executors.Add(exe);
 
     public void RegisterExecutor(Predicate predicate, SubjectType subject, Action<ReducedInstruction> executor)
@@ -49,7 +49,7 @@ public class InstructionInterpreter
 
     public void Execute(ReducedInstruction instruction)
     {
-        IExecutor? exe = executors.FirstOrDefault(exe => exe.Predicate() == instruction.predicate && exe.Subject() == instruction.subject);
+        IInstructionExecutor? exe = executors.FirstOrDefault(exe => exe.Predicate() == instruction.predicate && exe.Subject() == instruction.subject);
         if (exe == null)
             throw new InvalidOperationException($"can not find executor match predicate({instruction.predicate}) and subject({instruction.subject})");
         exe.Execute(instruction);
