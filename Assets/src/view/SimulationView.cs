@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,8 +29,9 @@ public class SimulationView : MonoBehaviour
 
             GameObject prefab = Resources.Load<GameObject>("Agent/" + prefabName);
             GameObject agentObj = Instantiate(prefab, agentParentObj.transform);
-            agentObj.transform.position = new Vector3(agentDesc.x, 0.0f, agentDesc.y);
-            agentObj.transform.rotation = Quaternion.Euler(0.0f, agentDesc.theta, 0.0f);
+            IAgentHW agentHW = agentObj.GetComponent(typeof(IAgentHW)) as IAgentHW;
+            agentHW.AgentDescriptor = agentDesc;
+            agentHW.ResetToInitStatus();
             agent2Obj[agentDesc] = agentObj;
         };
         indoorSimData.OnAgentRemoved += (agent) =>
@@ -39,6 +40,9 @@ public class SimulationView : MonoBehaviour
             agent2Obj.Remove(agent);
         };
     }
+
+    public List<IAgentHW> GetAgentHWs()
+        => agent2Obj.Values.Select(obj => obj.GetComponent(typeof(IAgentHW)) as IAgentHW).ToList();
 
     void Update()
     {

@@ -1,27 +1,23 @@
 using System;
-using System.Collections.Generic;
-using UnityEngine;
+using System.Threading;
 
 #nullable enable
 
-public abstract class TaskPlanningExecutor : IExecutor<Task, object, Task?, AgentStatus>, ICapability
+public class TaskPlanningAgent : IAgent
 {
     public Task? goal = null;
     Action<Task, object>? OnFinish;
     Action<Task, object>? OnGiveUp;
 
     private AbstractActionPlanner planner;
-    private AbstractActionExecutor actionExecutor;
+    private IExecutor<AgentAction, object?, object?, ActionExecutorStatus> actionExecutor;
 
 
-    public TaskPlanningExecutor()
+    public TaskPlanningAgent(AbstractActionPlanner planner, IExecutor<AgentAction, object?, object?, ActionExecutorStatus> actionExecutor)
     {
-        planner = Planner();
-        actionExecutor = ActionExecutor();
+        this.planner = planner;
+        this.actionExecutor = actionExecutor;
     }
-
-    protected abstract AbstractActionPlanner Planner();
-    protected abstract AbstractActionExecutor ActionExecutor();
 
     public AgentStatus Status()
     {
@@ -36,10 +32,10 @@ public abstract class TaskPlanningExecutor : IExecutor<Task, object, Task?, Agen
         }
     }
 
-    public bool SetGoal(Task goal, Action<Task, object> OnFinish, Action<Task, object> OnGiveUp)
+    public void SetGoal(Task goal, Action<Task, object> OnFinish, Action<Task, object> OnGiveUp)
     {
-        if (Status() != AgentStatus.Idle) return false;
-        if (!Accept(goal)) return false;
+        if (Status() != AgentStatus.Idle) throw new InvalidOperationException("another task is running");
+        if (!Accept(goal)) throw new ArgumentException("we don't accept the task");
 
         this.goal = goal;
         this.OnFinish = OnFinish;
@@ -48,8 +44,6 @@ public abstract class TaskPlanningExecutor : IExecutor<Task, object, Task?, Agen
         var planResult = planner.Plan(this, goal);
 
         planResult.ForEach(action => actionExecutor.SetGoal(action, (action, obj) => { }, (action, obj) => { }));
-
-        return true;
     }
 
     public bool Accept(Task goal) => true;
@@ -74,5 +68,24 @@ public abstract class TaskPlanningExecutor : IExecutor<Task, object, Task?, Agen
     public Capability Capability()
     {
         return new Capability();
+    }
+
+    public bool Execute(Task goal, out object? result)
+    {
+        if (Status() != AgentStatus.Idle) throw new InvalidOperationException("another task is running");
+        if (!Accept(goal)) throw new ArgumentException("we don't accept the task");
+
+        this.goal = goal;
+
+        var planResult = planner.Plan(this, goal);
+
+        result = null;
+        foreach (var action in planResult)
+        {
+            bool ret = actionExecutor.Execute(action, out var res);
+            if (!ret) return false;
+        }
+
+        return true;
     }
 }

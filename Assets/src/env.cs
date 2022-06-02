@@ -7,15 +7,20 @@ public class env : MonoBehaviour
     private IndoorSimData indoorSimData = new IndoorSimData();  // model
     public MapView mapView;  // view
     public SimulationView simulationView;  // view
-    public SimDataController simController;  // controller
+    public SimDataController simDataController;  // controller
+
+    private SimulationController simController;  // controller
 
     void OnEnable()
     {
         mapView.indoorTiling = indoorSimData.indoorTiling;
         simulationView.indoorSimData = indoorSimData;
 
+        simDataController.indoorSimData = indoorSimData;
+        simDataController.mapView = mapView;
+
         simController.indoorSimData = indoorSimData;
-        simController.mapView = mapView;
+        simController.simulationView = simulationView;
     }
 
     // Update is called once per frame

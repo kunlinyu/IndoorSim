@@ -24,6 +24,8 @@ public class HierarchyPanelController : MonoBehaviour
 
     }
 
+    // TODO: prevent switch simulation during simulation
+
     public void Init(ScrollView FoldoutContainer)
     {
         foldoutContainer = FoldoutContainer;

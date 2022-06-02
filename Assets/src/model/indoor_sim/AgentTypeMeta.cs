@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public enum MovingMode
 {
     Move2D,
@@ -9,8 +5,7 @@ public enum MovingMode
     AnyTwist,
 }
 
-[CreateAssetMenu]
-public class AgentTypeMeta : ScriptableObject
+public class AgentTypeMeta
 {
     public string typeName = "";
     public float collisionRadius;

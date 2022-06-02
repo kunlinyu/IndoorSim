@@ -20,7 +20,7 @@ public class IndoorSimData
 
 
     [JsonPropertyAttribute] public List<SimData> simDataList = new List<SimData>();
-    [JsonIgnore] public SimData? currentSimData;
+    [JsonIgnore] public SimData? currentSimData { get; private set;  }
 
     [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
     [JsonIgnore] private InstructionInterpreter instructionInterpreter = new InstructionInterpreter();

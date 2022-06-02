@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CapsuleAgentController : MonoBehaviour, IAgentHW
 {
+    public AgentDescriptor AgentDescriptor { get; set; }
     private Action<ISensorData> listener;
 
     void Update()
@@ -21,5 +22,11 @@ public class CapsuleAgentController : MonoBehaviour, IAgentHW
     {
 
 
+    }
+
+    public void ResetToInitStatus()
+    {
+        transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
+        transform.rotation = Quaternion.Euler(0.0f, AgentDescriptor.theta, 0.0f);
     }
 }

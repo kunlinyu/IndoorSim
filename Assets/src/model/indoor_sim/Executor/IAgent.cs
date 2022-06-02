@@ -10,7 +10,7 @@ public enum AgentStatus
     Running,
 };
 
-public interface IAgent : IExecutor<Task, object, Task?, AgentStatus>, ICapability
+public interface IAgent : IExecutor<Task, object?, Task?, AgentStatus>, ICapability
 {
 
 }

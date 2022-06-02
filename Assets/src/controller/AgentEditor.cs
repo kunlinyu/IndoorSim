@@ -25,7 +25,7 @@ public class AgentEditor : MonoBehaviour, ITool
         shadow.transform.SetParent(transform);
         shadow.GetComponent<AgentShadowController>().freeMat = Resources.Load<Material>("Materials/agent shadow free");
         shadow.GetComponent<AgentShadowController>().collidedMat = Resources.Load<Material>("Materials/agent shadow collided");
-        shadow.GetComponent<AgentShadowController>().radius = Resources.Load<AgentTypeMeta>("AgentTypeMeta/" + agentType).collisionRadius;
+        shadow.GetComponent<AgentShadowController>().radius = Resources.Load<AgentTypeMetaUnity>("AgentTypeMeta/" + agentType).collisionRadius;
     }
 
     void Update()
