@@ -9,7 +9,7 @@ public class env : MonoBehaviour
     public SimulationView simulationView;  // view
     public SimDataController simDataController;  // controller
 
-    private SimulationController simController;  // controller
+    public SimulationController simController;  // controller
 
     void OnEnable()
     {

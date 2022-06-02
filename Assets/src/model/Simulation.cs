@@ -12,6 +12,8 @@ public class Simulation
     private TaskAllocator taskAllocator = null;
     private TasksPlayer player = null;
 
+    double startTime = 0.0f;
+
 
     public Simulation(IndoorData indoorData, SimData simData, List<IAgentHW> agentHWs)
     {
@@ -60,6 +62,8 @@ public class Simulation
 
         player = new TasksPlayer(simData.tasks, taskAllocator.AddTask);
         player.Reset(startTime);
+
+        this.startTime = startTime;
     }
 
     public void TikTok(double currentTime)

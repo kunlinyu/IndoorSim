@@ -6,66 +6,85 @@ public class SimulationController : MonoBehaviour
 {
     public IndoorSimData indoorSimData;
     public SimulationView simulationView;
-    public Simulation simulation;
+    public Simulation simulation = null;
 
     public UIEventDispatcher eventDispatcher;
 
-    public float timeScale = 1.0f;
+    private float timeScale = 1.0f;
 
+    void Start()
+    {
+        eventDispatcher.eventListener += EventListener;
+    }
 
     void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.Simulation)
         {
-            if (e.message == "play")
+            if (e.name == "play pause")
             {
-                if (indoorSimData.currentSimData == null)
+                if (simulation == null)  // play
                 {
-                    Debug.LogWarning("not select one simulation");
-                    return;
+                    if (indoorSimData.currentSimData == null)
+                    {
+                        Debug.LogWarning("not select one simulation");
+                        return;
+                    }
+                    simulation = new Simulation(indoorSimData.indoorData, indoorSimData.currentSimData, simulationView.GetAgentHWs());
+                    timeScale = 1.0f;
+                    Time.timeScale = timeScale;
+                    simulation.UpAll(Time.time);
+                    Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" up all services");
                 }
-                simulation = new Simulation(indoorSimData.indoorData, indoorSimData.currentSimData, simulationView.GetAgentHWs());
-                timeScale = 1.0f;
-                Time.timeScale = timeScale;
-                simulation.UpAll(Time.time);
+                else if (Time.timeScale == 0.0f)  // continue
+                {
+                    Time.timeScale = timeScale;
+                    Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" paused");
+                }
+                else  // pause
+                {
+                    Time.timeScale = 0.0f;
+                    Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" continue");
+                }
             }
 
-            if (e.message == "pause")
-                Time.timeScale = 0.0f;
-
-            if (e.message == "continue")
-                Time.timeScale = timeScale;
-
-            if (e.message == "stop")
-                simulation.ResetAll();
-
-            if (e.message == "speed up")
+            if (e.name == "stop")
             {
-                if (timeScale >= 1.0f)
-                    timeScale += 1.0f;
-                else timeScale *= 2.0f;
+                simulation?.ResetAll();
+                simulation = null;
+                Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" stopped");
+            }
+
+            if (e.name == "fast")
+            {
+                if (simulation != null)
+                {
+                    if (timeScale >= 1.0f)
+                        timeScale += 1.0f;
+                    else timeScale *= 2.0f;
+                }
 
                 if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
                     timeScale = 1.0f;
                 Time.timeScale = timeScale;
+                Debug.Log("simulation speed: " + timeScale);
             }
 
-            if (e.message == "speed down")
+            if (e.name == "slow")
             {
-                if (timeScale > 1.0f)
-                    timeScale -= 1.0f;
-                else timeScale /= 2.0f;
+                if (simulation != null)
+                {
+                    if (timeScale > 1.0f)
+                        timeScale -= 1.0f;
+                    else timeScale /= 2.0f;
+                }
 
                 if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
                     timeScale = 1.0f;
                 Time.timeScale = timeScale;
+                Debug.Log("simulation speed: " + timeScale);
             }
         }
-    }
-
-    void Start()
-    {
-        eventDispatcher.eventListener += EventListener;
     }
 
     void Update()
