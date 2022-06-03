@@ -47,6 +47,13 @@ public class Simulation
                 var agent = new TaskPlanningAgent(new DummyPlanner(), QueueCachedActionExecutor);
                 agents.Add(agent);
             }
+            else if (agentHW.AgentDescriptor.type == "bronto")
+            {
+                var actionExecutor = new IdCoorActionExecutor(agentHW, mapService);
+                var QueueCachedActionExecutor = new QueuedCachedExecutor<AgentAction, object, object, ActionExecutorStatus>(actionExecutor);
+                var agent = new TaskPlanningAgent(new DummyPlanner(), QueueCachedActionExecutor);
+                agents.Add(agent);
+            }
             else
             {
                 throw new ArgumentException("unsupported agent type: " + agentHW.AgentDescriptor.type);

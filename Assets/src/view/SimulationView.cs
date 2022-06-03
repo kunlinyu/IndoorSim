@@ -24,6 +24,8 @@ public class SimulationView : MonoBehaviour
                 prefabName = "capsule";
             if (agentDesc.type == "boxcapsule")
                 prefabName = "boxcapsule";
+            if (agentDesc.type == "bronto")
+                prefabName = "bronto";
             if (prefabName == "unknown")
                 throw new System.Exception("unknown agent type: " + agentDesc.type);
 

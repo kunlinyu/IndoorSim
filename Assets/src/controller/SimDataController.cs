@@ -225,6 +225,18 @@ public class SimDataController : MonoBehaviour
                     Debug.Log("Switch to tool boxcapsule");
                 }
             }
+            else if (e.name == "bronto")
+            {
+                if (oldToolName != "bronto")
+                {
+                    toolObj = new GameObject("bronto");
+                    var agentEditor = toolObj.AddComponent<AgentEditor>();
+                    agentEditor.agentType = "bronto";
+                    currentTool = agentEditor;
+
+                    Debug.Log("Switch to tool bronto");
+                }
+            }
             else if (e.name == "save")
             {
                 SaveToFile(indoorSimData.Serialize(true));
