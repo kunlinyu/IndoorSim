@@ -31,6 +31,8 @@ public class SimulationController : MonoBehaviour
                         return;
                     }
 
+                    indoorSimData.currentSimData.tasks.Clear();
+
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
                         new ActionMoveToCoor(1.0f, 1.0f),
                         new ActionMoveToCoor(-1.0f, 1.0f),

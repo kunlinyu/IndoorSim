@@ -8,7 +8,7 @@ public class CapsuleAgentController : MonoBehaviour, IAgentHW
     public AgentDescriptor AgentDescriptor { get; set; }
     private Action<ISensorData> listener;
 
-    void Update()
+    void FixedUpdate()
     {
         listener?.Invoke(new Position() { x = transform.position.x, y = transform.position.z });
     }
