@@ -30,6 +30,37 @@ public class SimulationController : MonoBehaviour
                         Debug.LogWarning("not select one simulation");
                         return;
                     }
+
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
+                        new ActionMoveToCoor(1.0f, 1.0f),
+                        new ActionMoveToCoor(-1.0f, 1.0f),
+                        new ActionMoveToCoor(-1.0f, -1.0f),
+                        new ActionMoveToCoor(1.0f, -1.0f),
+                        new ActionMoveToCoor(1.0f, 1.0f),
+                    }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(2.0d, new List<AgentAction>() {
+                        new ActionMoveToCoor(2.0f, 2.0f),
+                        new ActionMoveToCoor(-2.0f, 2.0f),
+                        new ActionMoveToCoor(-2.0f, -2.0f),
+                        new ActionMoveToCoor(2.0f, -2.0f),
+                        new ActionMoveToCoor(2.0f, 2.0f),
+                    }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(3.0d, new List<AgentAction>() {
+                        new ActionMoveToCoor(3.0f, 3.0f),
+                        new ActionMoveToCoor(-3.0f, 3.0f),
+                        new ActionMoveToCoor(-3.0f, -3.0f),
+                        new ActionMoveToCoor(3.0f, -3.0f),
+                        new ActionMoveToCoor(3.0f, 3.0f),
+                    }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(4.0d, new List<AgentAction>() {
+                        new ActionMoveToCoor(4.0f, 4.0f),
+                        new ActionMoveToCoor(-4.0f, 4.0f),
+                        new ActionMoveToCoor(-4.0f, -4.0f),
+                        new ActionMoveToCoor(4.0f, -4.0f),
+                        new ActionMoveToCoor(4.0f, 4.0f),
+                    }));
+
+
                     simulation = new Simulation(indoorSimData.indoorData, indoorSimData.currentSimData, simulationView.GetAgentHWs());
                     timeScale = 1.0f;
                     Time.timeScale = timeScale;

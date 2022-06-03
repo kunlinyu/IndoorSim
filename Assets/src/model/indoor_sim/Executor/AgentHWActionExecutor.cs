@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 
+using UnityEngine;
+
 #nullable enable
 
 using ActionExecutor = IExecutor<AgentAction, object?, object?, ActionExecutorStatus>;

@@ -2,12 +2,15 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 
+using UnityEngine;
+
 #nullable enable
 
 public class TaskAllocator
 {
     private List<IAgent> agents;
-    private Queue<Task>? taskQueue = null;
+
+    private TaskStatusManager? taskStatusManager = null;
 
     Thread thread;
     bool join = false;
@@ -21,38 +24,36 @@ public class TaskAllocator
 
     public void Start()
     {
-        taskQueue = new Queue<Task>();
+        taskStatusManager = new TaskStatusManager();
         join = false;
         thread.Start();
     }
 
     public void AddTask(Task task)
     {
-        if (taskQueue == null) throw new InvalidOperationException("Start task allocation first");
-        lock (taskQueue)
-        {
-            taskQueue.Enqueue(task);
-        }
+        if (taskStatusManager == null) throw new InvalidOperationException("Start task allocation first");
+        taskStatusManager.Add(task);
     }
 
     void AllocationLoop()
     {
-        if (taskQueue == null) throw new InvalidOperationException("Start task allocation first");
+        if (taskStatusManager == null) throw new InvalidOperationException("Start task allocation first");
         while (!join)
         {
-            lock (taskQueue)
+            var waitingTasks = taskStatusManager.Tasks(TaskStatus.Waiting);
+            if (waitingTasks.Count > 0)
             {
-                if (taskQueue.Count > 0)
+                IAgent? idleAgent = agents.Find(agent => agent.Status() == AgentStatus.Idle);
+                if (idleAgent != null)
                 {
-                    IAgent? idleAgent = agents.Find(agent => agent.Status() == AgentStatus.Idle);
-                    if (idleAgent != null)
-                    {
-                        var task = taskQueue.Dequeue();
-                        idleAgent.SetGoal(task, (task, result) => { }, (task, result) => { });
-                    }
+                    var task = waitingTasks[0];
+                    taskStatusManager.Execute(task);
+                    idleAgent.SetGoal(task,
+                                     (task, result) => { taskStatusManager.Finish(task); },
+                                     (task, result) => { taskStatusManager.GiveUp(task); });
                 }
             }
-            Thread.Sleep(10);
+            Thread.Sleep(1000);
         }
     }
 
@@ -60,8 +61,8 @@ public class TaskAllocator
     {
         join = true;
         thread.Join();
-        taskQueue?.Clear();
-        taskQueue = null;
+        taskStatusManager?.Clear();
+        taskStatusManager = null;
     }
 
 }

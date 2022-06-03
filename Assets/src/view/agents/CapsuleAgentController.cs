@@ -20,8 +20,11 @@ public class CapsuleAgentController : MonoBehaviour, IAgentHW
 
     public void SetControlCommand(IControlCommand command)
     {
-
-
+        SpeedVec speed = command as SpeedVec ?? throw new ArgumentException("accept only speed vector command");
+        Vector3 position = transform.position;
+        position.x += (float)speed.x * Time.deltaTime;
+        position.z += (float)speed.y * Time.deltaTime;
+        transform.position = position;
     }
 
     public void ResetToInitStatus()
