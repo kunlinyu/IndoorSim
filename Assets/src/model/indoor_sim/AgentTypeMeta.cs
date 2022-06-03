@@ -1,6 +1,7 @@
 public enum MovingMode
 {
     Move2D,
+    Twist2,
     TwoWheel,
     AnyTwist,
 }

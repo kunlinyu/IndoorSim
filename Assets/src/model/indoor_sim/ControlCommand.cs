@@ -5,7 +5,7 @@ using UnityEngine;
 public enum ControlCommandType
 {
     SpeedVec,
-    Twist,
+    Twist2,
 }
 
 public interface IControlCommand
@@ -24,10 +24,10 @@ public class SpeedVec : IControlCommand
     public IControlCommand Zero() => new SpeedVec() { x = 0.0d, y = 0.0d };
 }
 
-public class Twist : IControlCommand
+public class Twist2 : IControlCommand
 {
     public double v_x;
     public double omega_z;
-    public ControlCommandType type() => ControlCommandType.Twist;
-    public IControlCommand Zero() => new Twist() { v_x = 0.0d, omega_z = 0.0d };
+    public ControlCommandType type() => ControlCommandType.Twist2;
+    public IControlCommand Zero() => new Twist2() { v_x = 0.0d, omega_z = 0.0d };
 }

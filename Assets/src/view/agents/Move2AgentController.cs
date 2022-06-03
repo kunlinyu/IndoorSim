@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CapsuleAgentController : MonoBehaviour, IAgentHW
+public class Move2AgentController : MonoBehaviour, IAgentHW
 {
     public AgentDescriptor AgentDescriptor { get; set; }
     private Action<ISensorData> listener;
