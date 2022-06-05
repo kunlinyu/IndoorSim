@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,15 +9,27 @@ public class AgentTypeMetaUnity : ScriptableObject
     public string typeName = "";
     public float collisionRadius;
     public float height;
-    public MovingMode MovingMode;
+    public MovingMode movingMode;
 
-    AgentTypeMeta ToNoneUnity()
+    public AgentTypeMetaUnity(AgentTypeMeta meta)
     {
-        return new AgentTypeMeta() {
+        typeName = meta.typeName;
+        collisionRadius = meta.collisionRadius;
+        height = meta.height;
+        movingMode = meta.movingMode;
+    }
+
+    public override bool Equals(object obj)
+        => obj is AgentTypeMetaUnity another && ToNoneUnity().Equals(another.ToNoneUnity());
+
+    public override int GetHashCode() => ToNoneUnity().GetHashCode();
+
+    public AgentTypeMeta ToNoneUnity()
+        => new AgentTypeMeta()
+        {
             typeName = typeName,
             collisionRadius = collisionRadius,
             height = height,
-            MovingMode = MovingMode
+            movingMode = movingMode
         };
-    }
 }

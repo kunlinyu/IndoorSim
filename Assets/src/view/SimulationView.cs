@@ -19,16 +19,7 @@ public class SimulationView : MonoBehaviour
 
         indoorSimData.OnAgentCreate += (agentDesc) =>
         {
-            string prefabName = "unknown";
-            if (agentDesc.type == "capsule")
-                prefabName = "capsule";
-            if (agentDesc.type == "boxcapsule")
-                prefabName = "boxcapsule";
-            if (agentDesc.type == "bronto")
-                prefabName = "bronto";
-            if (prefabName == "unknown")
-                throw new System.Exception("unknown agent type: " + agentDesc.type);
-
+            string prefabName = agentDesc.type;
             GameObject prefab = Resources.Load<GameObject>("Agent/" + prefabName);
             GameObject agentObj = Instantiate(prefab, agentParentObj.transform);
             IAgentHW agentHW = agentObj.GetComponent(typeof(IAgentHW)) as IAgentHW;

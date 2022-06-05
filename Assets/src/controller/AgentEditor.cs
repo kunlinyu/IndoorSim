@@ -16,6 +16,7 @@ public class AgentEditor : MonoBehaviour, ITool
 
 #pragma warning disable CS8618
     public GameObject shadow;
+    public AgentTypeMetaUnity meta;
 #pragma warning restore CS8618
 
     void Start()
@@ -25,7 +26,9 @@ public class AgentEditor : MonoBehaviour, ITool
         shadow.transform.SetParent(transform);
         shadow.GetComponent<AgentShadowController>().freeMat = Resources.Load<Material>("Materials/agent shadow free");
         shadow.GetComponent<AgentShadowController>().collidedMat = Resources.Load<Material>("Materials/agent shadow collided");
-        shadow.GetComponent<AgentShadowController>().radius = Resources.Load<AgentTypeMetaUnity>("AgentTypeMeta/" + agentType).collisionRadius;
+
+        meta = Resources.Load<AgentTypeMetaUnity>("AgentTypeMeta/" + agentType);
+        shadow.GetComponent<AgentShadowController>().radius = meta.collisionRadius;
     }
 
     void Update()
@@ -51,7 +54,7 @@ public class AgentEditor : MonoBehaviour, ITool
             agent.y = mousePosition.Value.z;
             agent.theta = 0.0f;
             agent.containerId = null;
-            IndoorSimData?.AddAgent(agent);
+            IndoorSimData?.AddAgent(agent, meta.ToNoneUnity());
         }
     }
 }

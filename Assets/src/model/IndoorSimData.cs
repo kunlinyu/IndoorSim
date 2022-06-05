@@ -19,7 +19,8 @@ public class IndoorSimData
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
 
 
-    [JsonPropertyAttribute] public List<SimData> simDataList = new List<SimData>();
+    [JsonPropertyAttribute] private List<SimData> simDataList = new List<SimData>();
+    [JsonPropertyAttribute] public Dictionary<string, AgentTypeMeta> agentMetaList = new Dictionary<string, AgentTypeMeta>();
     [JsonIgnore] public SimData? currentSimData { get; private set;  }
 
     [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
@@ -471,13 +472,16 @@ public class IndoorSimData
         indoorTiling.UpdateRLinePassType(rLines, fr, to, passType);
     }
 
-    public void AddAgent(AgentDescriptor agent)
+    public void AddAgent(AgentDescriptor agent, AgentTypeMeta meta)
     {
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
 
         currentSimData.AddAgent(agent);
         currentSimData.history.DoCommit(ReducedInstruction.AddAgent(agent));
         OnSimulationListUpdated?.Invoke(simDataList);
+
+        if (!agentMetaList.ContainsKey(meta.typeName))
+            agentMetaList.Add(meta.typeName, meta);
     }
 
     public void RemoveAgent(AgentDescriptor agent)
@@ -487,6 +491,9 @@ public class IndoorSimData
         currentSimData.RemoveAgentEqualsTo(agent);
         currentSimData.history.DoCommit(ReducedInstruction.RemoveAgent(agent));
         OnSimulationListUpdated?.Invoke(simDataList);
+
+        if (!currentSimData.agents.Any(a => a.type == agent.type))
+            agentMetaList.Remove(agent.type);
     }
 
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
