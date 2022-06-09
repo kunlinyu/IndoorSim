@@ -22,7 +22,7 @@ public class SimulationView : MonoBehaviour
             string prefabName = agentDesc.type;
             GameObject prefab = Resources.Load<GameObject>("Agent/" + prefabName);
             GameObject agentObj = Instantiate(prefab, agentParentObj.transform);
-            IAgentHW agentHW = agentObj.GetComponent(typeof(IAgentHW)) as IAgentHW;
+            IActuatorSensor agentHW = agentObj.GetComponent(typeof(IActuatorSensor)) as IActuatorSensor;
             agentHW.AgentDescriptor = agentDesc;
             agentHW.ResetToInitStatus();
             agent2Obj[agentDesc] = agentObj;
@@ -34,8 +34,8 @@ public class SimulationView : MonoBehaviour
         };
     }
 
-    public List<IAgentHW> GetAgentHWs()
-        => agent2Obj.Values.Select(obj => obj.GetComponent(typeof(IAgentHW)) as IAgentHW).ToList();
+    public List<IActuatorSensor> GetAgentHWs()
+        => agent2Obj.Values.Select(obj => obj.GetComponent(typeof(IActuatorSensor)) as IActuatorSensor).ToList();
 
     void Update()
     {

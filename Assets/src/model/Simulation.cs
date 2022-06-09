@@ -5,21 +5,21 @@ public class Simulation
 {
     private IndoorData indoorData;
     private SimData simData;
-    private List<IAgentHW> agentHWs = null;
+    private List<IActuatorSensor> HWs = null;
 
     private MapService mapService = null;
-    private List<IAgent> agents = new List<IAgent>();
+    private List<AbstractAgent> agents = new List<AbstractAgent>();
     private TaskAllocator taskAllocator = null;
     private TasksPlayer player = null;
 
     double startTime = 0.0f;
 
 
-    public Simulation(IndoorData indoorData, SimData simData, List<IAgentHW> agentHWs)
+    public Simulation(IndoorData indoorData, SimData simData, List<IActuatorSensor> agentHWs)
     {
         this.indoorData = indoorData;
         this.simData = simData;
-        this.agentHWs = agentHWs;
+        this.HWs = agentHWs;
     }
 
     private void MapServiceUp()
@@ -31,27 +31,30 @@ public class Simulation
     {
         if (mapService == null) throw new InvalidOperationException("Up map service first");
         agents.Clear();
-        foreach (var agentHW in agentHWs)
+        foreach (var agentHW in HWs)
         {
             if (agentHW.AgentDescriptor.type == "capsule")
             {
-                var actionExecutor = new IdCoorActionExecutor(agentHW, mapService);
-                var QueueCachedActionExecutor = new QueuedCachedExecutor<AgentAction, object, object, ActionExecutorStatus>(actionExecutor);
-                var agent = new TaskPlanningAgent(new DummyPlanner(), QueueCachedActionExecutor);
+                var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
+                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
             }
             else if (agentHW.AgentDescriptor.type == "boxcapsule")
             {
-                var actionExecutor = new IdCoorActionExecutor(agentHW, mapService);
-                var QueueCachedActionExecutor = new QueuedCachedExecutor<AgentAction, object, object, ActionExecutorStatus>(actionExecutor);
-                var agent = new TaskPlanningAgent(new DummyPlanner(), QueueCachedActionExecutor);
+                var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
+                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
             }
             else if (agentHW.AgentDescriptor.type == "bronto")
             {
-                var actionExecutor = new IdCoorActionExecutor(agentHW, mapService);
-                var QueueCachedActionExecutor = new QueuedCachedExecutor<AgentAction, object, object, ActionExecutorStatus>(actionExecutor);
-                var agent = new TaskPlanningAgent(new DummyPlanner(), QueueCachedActionExecutor);
+                var motionExecutor = new TwistToCoorMotionExecutor(agentHW);
+                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
             }
             else
@@ -89,8 +92,8 @@ public class Simulation
     {
         player.Reset(0.0d);
         taskAllocator.Stop();
-        agents.ForEach(agent => agent.AbortAll());
-        agentHWs.ForEach(agentHW => agentHW.ResetToInitStatus());
+        agents.ForEach(agent => agent.Reset());
+        HWs.ForEach(agentHW => agentHW.ResetToInitStatus());
     }
 
 }

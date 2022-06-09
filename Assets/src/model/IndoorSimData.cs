@@ -27,8 +27,6 @@ public class IndoorSimData
     [JsonIgnore] private InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
     [JsonIgnore] private InstructionInterpreter activeInstructionInterpreter;
 
-    [JsonIgnore] public Simulation? simulation = null;
-
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
 

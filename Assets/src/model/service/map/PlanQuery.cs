@@ -5,8 +5,8 @@ using NetTopologySuite.Geometries;
 public class CoorToContainerQuery
 {
     // source description is a joint state. coordinate may generate a source description
-    public float x;
-    public float y;
+    public double x;
+    public double y;
 
     // TODO: target description is a joint state. We support target container id currently
     public string targetContainerId;

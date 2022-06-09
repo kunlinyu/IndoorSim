@@ -62,7 +62,6 @@ public class SimulationController : MonoBehaviour
                         new ActionMoveToCoor(4.0f, 4.0f),
                     }));
 
-
                     simulation = new Simulation(indoorSimData.indoorData, indoorSimData.currentSimData, simulationView.GetAgentHWs());
                     timeScale = 1.0f;
                     Time.timeScale = timeScale;

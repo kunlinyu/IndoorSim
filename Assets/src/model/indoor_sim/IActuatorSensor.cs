@@ -1,9 +1,9 @@
 using System;
 
-public interface IAgentHW
+public interface IActuatorSensor
 {
     public AgentDescriptor AgentDescriptor { get; set; }
     public void ResetToInitStatus();
-    public void SetControlCommand(IControlCommand command);
+    public void Execute(IActuatorCommand command);
     public void RegisterSensorDataListener(Action<ISensorData> listener);
 }

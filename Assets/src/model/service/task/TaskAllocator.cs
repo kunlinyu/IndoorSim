@@ -2,13 +2,11 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 
-using UnityEngine;
-
 #nullable enable
 
 public class TaskAllocator
 {
-    private List<IAgent> agents;
+    private List<AbstractAgent> agents;
 
     private TaskStatusManager? taskStatusManager = null;
 
@@ -16,7 +14,7 @@ public class TaskAllocator
     bool join = false;
 
 
-    public TaskAllocator(List<IAgent> agents)
+    public TaskAllocator(List<AbstractAgent> agents)
     {
         this.agents = agents;
         thread = new Thread(new ThreadStart(AllocationLoop));
@@ -43,7 +41,7 @@ public class TaskAllocator
             var waitingTasks = taskStatusManager.Tasks(TaskStatus.Waiting);
             if (waitingTasks.Count > 0)
             {
-                IAgent? idleAgent = agents.Find(agent => agent.Status() == AgentStatus.Idle);
+                AbstractAgent? idleAgent = agents.Find(agent => agent.Status() == AgentStatus.Idle);
                 if (idleAgent != null)
                 {
                     var task = waitingTasks[0];

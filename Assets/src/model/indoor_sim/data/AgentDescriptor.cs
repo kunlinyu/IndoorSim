@@ -5,7 +5,8 @@ using System;
 public class AgentDescriptor
 {
     public string name = "";
-    public string type = "";
+    public string type = "";  // bronto, capsule
+    public string ai = "builtin";
     public float x;
     public float y;
     public float theta;

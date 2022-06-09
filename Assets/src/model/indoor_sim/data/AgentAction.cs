@@ -1,7 +1,7 @@
 #nullable enable
 public enum ActionType
 {
-    MoveToId,
+    MoveToContainer,
     MoveToCoor,
 }
 
@@ -10,13 +10,13 @@ public class AgentAction
     public ActionType type;
 }
 
-public class ActionMoveToId : AgentAction
+public class ActionMoveToContainer : AgentAction
 {
     public string id;
 
-    public ActionMoveToId(string id)
+    public ActionMoveToContainer(string id)
     {
-        type = ActionType.MoveToId;
+        type = ActionType.MoveToContainer;
         this.id = id;
     }
 }
