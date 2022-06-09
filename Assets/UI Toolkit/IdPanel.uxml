@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/IdPanel.uss?fileID=7433441132597879392&amp;guid=c7f86c8b886adf62bbef1de29aa197a4&amp;type=3#IdPanel" />
+    <ui:VisualElement name="IdPanel" style="background-color: rgba(200, 200, 200, 0.62); border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;">
+        <ui:TextField picking-mode="Ignore" label="ID of Space as Container" name="spaceId" style="color: rgb(0, 0, 0);" />
+        <ui:TextField picking-mode="Ignore" label="ID of sons of the   Space" name="sonsId" style="color: rgb(0, 0, 0);" />
+        <ui:VisualElement style="flex-direction: row; justify-content: flex-end; align-items: stretch;">
+            <ui:Button text="Cancel" display-tooltip-when-elided="true" name="cancel" />
+            <ui:Button text="Save" display-tooltip-when-elided="true" name="save" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

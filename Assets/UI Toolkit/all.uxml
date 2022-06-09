@@ -2,10 +2,11 @@
     <ui:Template name="ToolBar" src="project://database/Assets/UI%20Toolkit/ToolBar.uxml?fileID=9197481963319205126&amp;guid=b37453758b475c87ba6236a5e748f459&amp;type=3#ToolBar" />
     <ui:Template name="hierarchyPanel" src="project://database/Assets/UI%20Toolkit/hierarchyPanel.uxml?fileID=9197481963319205126&amp;guid=ac38d1460669a90f8ae765f6356f16fa&amp;type=3#hierarchyPanel" />
     <ui:Template name="LogWindow" src="project://database/Assets/UI%20Toolkit/LogWindow.uxml?fileID=9197481963319205126&amp;guid=b5fa3b0122337c1f6b0f8bd66bd6fa0e&amp;type=3#LogWindow" />
+    <ui:Template name="SimulationPanel" src="project://database/Assets/UI%20Toolkit/SimulationPanel.uxml?fileID=9197481963319205126&amp;guid=15eba074682e5eef58ef7a3b74153696&amp;type=3#SimulationPanel" />
     <ui:Template name="AssetsPanel" src="project://database/Assets/UI%20Toolkit/AssetsPanel.uxml?fileID=9197481963319205126&amp;guid=f3a361a23bf731f348b3c78d834dce58&amp;type=3#AssetsPanel" />
     <ui:Template name="CursorTip" src="project://database/Assets/UI%20Toolkit/CursorTip.uxml?fileID=9197481963319205126&amp;guid=74044d9cb1a8d1c4ca98d036881596c8&amp;type=3#CursorTip" />
     <ui:Template name="version" src="project://database/Assets/UI%20Toolkit/version.uxml?fileID=9197481963319205126&amp;guid=112f8c16a6e9a853884d7cf30adb4e23&amp;type=3#version" />
-    <ui:Template name="SimulationPanel" src="project://database/Assets/UI%20Toolkit/SimulationPanel.uxml?fileID=9197481963319205126&amp;guid=15eba074682e5eef58ef7a3b74153696&amp;type=3" />
+    <ui:Template name="IdPanel" src="project://database/Assets/UI%20Toolkit/IdPanel.uxml?fileID=9197481963319205126&amp;guid=9a55d28941fb8bfc8a57c60c96b7c168&amp;type=3#IdPanel" />
     <ui:VisualElement style="justify-content: flex-start; height: auto; width: auto; min-width: auto; min-height: auto; left: 0; top: 0; right: 0; bottom: 0; flex-basis: auto; flex-grow: 1; flex-shrink: 1; flex-direction: column; align-items: stretch;">
         <ui:VisualElement name="Header">
             <ui:Instance template="ToolBar" name="ToolBarContainer" />
@@ -26,5 +27,6 @@
             <AttributeOverrides element-name="Tip" text="cursor tip" />
         </ui:Instance>
         <ui:Instance template="version" name="version" style="position: absolute; right: 0; bottom: 0;" />
+        <ui:Instance template="IdPanel" name="IdPanel" style="position: absolute; top: auto; left: 200px; width: 400px; bottom: 300px;" />
     </ui:VisualElement>
 </ui:UXML>

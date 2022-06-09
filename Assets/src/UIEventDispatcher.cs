@@ -14,6 +14,7 @@ public enum UIEventType
     Asset,              // Scene -> UI (bidirectional?)
     Hierarchy,          // Scene -> UI
     Simulation,         // UI -> Scene
+    PopUp,              // Scene -> UI (bidirectional?)
 }
 
 [Serializable]

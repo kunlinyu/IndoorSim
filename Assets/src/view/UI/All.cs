@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(LogWindow))]
 [RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
+[RequireComponent(typeof(IdPanel))]
 public class All : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
@@ -81,6 +82,13 @@ public class All : MonoBehaviour
             eventDispatcher.Raise(this, new UIEvent() { name = "slow", message = "", type = UIEventType.Simulation });
         root.Q<Button>("stop").clicked += () =>
             eventDispatcher.Raise(this, new UIEvent() { name = "stop", message = "", type = UIEventType.Simulation });
+
+        // id panel
+        var idPanel = GetComponent<IdPanel>();
+        idPanel.Init(root.Q<VisualElement>("IdPanel"));
+        eventDispatcher.eventListener += idPanel.EventListener;
+
+
     }
 
     void Update()

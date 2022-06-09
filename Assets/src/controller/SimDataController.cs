@@ -185,6 +185,29 @@ public class SimDataController : MonoBehaviour
                     Debug.Log("Switch to tool shelves2");
                 }
             }
+            else if (e.name == "id")
+            {
+                if (oldToolName != "id")
+                {
+                    toolObj = new GameObject("id");
+                    IDEditor idEditor = toolObj.AddComponent<IDEditor>();
+                    idEditor.PopContainerIdPanel = (x, y) =>
+                    {
+                        eventDispatcher.Raise(idEditor, new UIEvent()
+                        {
+                            name = "id panel",
+                            message = $"{{\"predicate\":\"popup\", \"x\":{x}, \"y\":{y}}}",
+                            type = UIEventType.PopUp
+                        });
+                    };
+                    idEditor.HideContainerIdPanel = () =>
+                    {
+                        eventDispatcher.Raise(idEditor, new UIEvent() { name = "id panel", message = "{\"predicate\":\"hide\"}", type = UIEventType.PopUp });
+                    };
+                    currentTool = idEditor;
+                    Debug.Log("Switch to tool id editor");
+                }
+            }
             else if (e.name == "apply asset")
             {
                 // if (oldToolName != "apply asset")
