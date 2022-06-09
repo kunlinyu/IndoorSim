@@ -46,16 +46,12 @@ public class TwistToCoorMotionExecutor : AbstractMotionExecutor
 
         Twist2 twist = new Twist2();
 
+        twist.v_x = speedNormal - dTheta * dTheta * 5.0f;
+        if (twist.v_x < 0.0f) twist.v_x = 0.0f;
 
-        if (Math.Abs(dTheta) < 0.05d)
-            twist.v_x = speedNormal;
-        else if (Math.Abs(dTheta) < 0.1d)
-            twist.v_x = speedNormal * 0.6;
-        else if (Math.Abs(dTheta) < 0.2d)
-            twist.v_x = speedNormal * 0.2;
-        else twist.v_x = 0.0d;
-
-        twist.omega_z = dTheta * 0.5d;
+        twist.omega_z = dTheta * 2.0d;
+        if (twist.omega_z > 2.0d) twist.omega_z = 2.0d;
+        if (twist.omega_z <-2.0d) twist.omega_z =-2.0d;
 
         return twist;
     }
