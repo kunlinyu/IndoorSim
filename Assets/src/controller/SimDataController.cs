@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using SFB;
 
@@ -307,7 +308,23 @@ public class SimDataController : MonoBehaviour
                 indoorSimData.SelectMap();
             // if (e.name == "select grid map")
         }
+        else if (e.type == UIEventType.IndoorSimData)
+        {
+            if (e.name == "container id")
+            {
+                if (toolObj.name == "id")
+                {
+                    var idEditor = toolObj.GetComponent<IDEditor>();
+                    var jsonData = JObject.Parse(e.message);
+                    idEditor.SetContainerId(jsonData["containerId"].Value<string>(), jsonData["childrenId"].Value<string>());
+                }
+                else
+                {
+                    Debug.LogWarning("receive container id but current tool is not \"idEditor\" but: " + toolObj.name);
+                }
 
+            }
+        }
     }
 
     string LoadFromFile()

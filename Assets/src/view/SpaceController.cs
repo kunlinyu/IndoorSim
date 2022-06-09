@@ -131,7 +131,8 @@ public class SpaceController : MonoBehaviour, Selectable
         return DebugTip() + "\n" +
                 $"id: {space.Id}\n" +
                 $"navigable: {space.Navigable}\n" +
-                $"container id: {space.containerId}";
+                $"container id: {space.containerId}\n" +
+                $"children count: {space.children.Count}";
     }
 
     void OnDestroy()

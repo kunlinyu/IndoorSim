@@ -162,8 +162,11 @@ public class IndoorData
     public CellSpace? FindSpaceGeom(Coordinate coor)
         => spacePool.FirstOrDefault(space => space.Polygon.Contains(new Point(coor)));
 
-    public CellSpace? FindSpaceId(string id)
+    public CellSpace? FindContainerId(string id)
         => spacePool.FirstOrDefault(space => space.Contains(id));
+
+    public CellSpace? FindSpaceId(string id)
+        => spacePool.FirstOrDefault(space => space.Id == id);
 
     public RepresentativeLine? FindRLine(LineString ls, out RLineGroup? rLineGroup)
     {

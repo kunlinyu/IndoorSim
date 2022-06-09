@@ -25,7 +25,7 @@ public class IDEditor : MonoBehaviour, ITool
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !MouseOnUI)
             if (MousePickController.PointedSpace != null)
             {
                 currentSpaceId = MousePickController.PointedSpace.Space.Id;
@@ -35,13 +35,14 @@ public class IDEditor : MonoBehaviour, ITool
         if (Input.GetMouseButtonDown(1))
             HideContainerIdPanel?.Invoke();
     }
-
-    void SetContainerId(string containerId, List<string> sonsId)
+    public void SetContainerId(string containerId, string childrenIdStr)
     {
+        List<string> childrenId = new List<string>(childrenIdStr.Split(',', ' ', '\t', '\n'));
         CellSpace? space = IndoorSimData?.indoorData.FindSpaceId(currentSpaceId);
         if (space == null) throw new Exception("can not find cellspace with id : " + currentSpaceId);
         space.containerId = containerId;
         space.children.Clear();
-        sonsId.ForEach(sonId => space.children.Add(new Container(sonId)));
+        childrenId.ForEach(childId => space.children.Add(new Container(childId)));
+        Debug.Log("container id set");
     }
 }

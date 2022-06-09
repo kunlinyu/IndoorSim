@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(LogWindow))]
 [RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
-[RequireComponent(typeof(IdPanel))]
+[RequireComponent(typeof(IdPanelController))]
 public class All : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
@@ -84,10 +84,19 @@ public class All : MonoBehaviour
             eventDispatcher.Raise(this, new UIEvent() { name = "stop", message = "", type = UIEventType.Simulation });
 
         // id panel
-        var idPanel = GetComponent<IdPanel>();
-        idPanel.Init(root.Q<VisualElement>("IdPanel"));
-        eventDispatcher.eventListener += idPanel.EventListener;
-
+        var idPanelCtr = GetComponent<IdPanelController>();
+        var idPanel = root.Q<VisualElement>("IdPanel");
+        idPanelCtr.Init(idPanel, (containerId, childrenId) =>
+            { eventDispatcher.Raise(this, new UIEvent() {
+                name = "container id",
+                message = $"{{\"containerId\":\"{containerId}\",\"childrenId\":\"{childrenId}\"}}",
+                type = UIEventType.IndoorSimData });
+            });
+        eventDispatcher.eventListener += idPanelCtr.EventListener;
+        idPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        idPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
 
     }
 

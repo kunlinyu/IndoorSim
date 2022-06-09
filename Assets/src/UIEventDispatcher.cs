@@ -15,6 +15,7 @@ public enum UIEventType
     Hierarchy,          // Scene -> UI
     Simulation,         // UI -> Scene
     PopUp,              // Scene -> UI (bidirectional?)
+    IndoorSimData,      // UI -> Scene
 }
 
 [Serializable]
