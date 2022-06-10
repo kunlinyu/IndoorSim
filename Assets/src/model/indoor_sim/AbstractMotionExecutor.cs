@@ -15,8 +15,8 @@ public enum MotionExecutorStatus
 public abstract class AbstractMotionExecutor : IGroupExecutor<Motion, object?, MotionExecutorStatus>
 {
     MotionExecutorStatus status = MotionExecutorStatus.Idle;
-    private IActuatorSensor hw;
-    private Motion? currentGoal = null;
+    public IActuatorSensor hw;
+    public Motion? currentGoal = null;
     private Action<Motion, object?>? OnEachFinish;
     private Action<Motion, object?>? OnAnyGiveUp;
     private Action? OnAllFinish;

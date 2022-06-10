@@ -36,15 +36,15 @@ public class SimulationController : MonoBehaviour
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
                         new ActionMoveToCoor(1.0f, 1.0f),
                         new ActionMoveToCoor(-1.0f, 1.0f),
-                        new ActionMoveToCoor(-1.0f, -1.0f),
                         new ActionMoveToCoor(1.0f, -1.0f),
+                        new ActionMoveToCoor(-1.0f, -1.0f),
                         new ActionMoveToCoor(1.0f, 1.0f),
                     }));
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(2.0d, new List<AgentAction>() {
                         new ActionMoveToCoor(2.0f, 2.0f),
                         new ActionMoveToCoor(-2.0f, 2.0f),
-                        new ActionMoveToCoor(-2.0f, -2.0f),
                         new ActionMoveToCoor(2.0f, -2.0f),
+                        new ActionMoveToCoor(-2.0f, -2.0f),
                         new ActionMoveToCoor(2.0f, 2.0f),
                     }));
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(3.0d, new List<AgentAction>() {
@@ -56,9 +56,9 @@ public class SimulationController : MonoBehaviour
                     }));
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(4.0d, new List<AgentAction>() {
                         new ActionMoveToCoor(4.0f, 4.0f),
-                        new ActionMoveToCoor(-4.0f, 4.0f),
-                        new ActionMoveToCoor(-4.0f, -4.0f),
                         new ActionMoveToCoor(4.0f, -4.0f),
+                        new ActionMoveToCoor(-4.0f, -4.0f),
+                        new ActionMoveToCoor(-4.0f, 4.0f),
                         new ActionMoveToCoor(4.0f, 4.0f),
                     }));
 
@@ -66,6 +66,7 @@ public class SimulationController : MonoBehaviour
                     timeScale = 1.0f;
                     Time.timeScale = timeScale;
                     simulation.UpAll(Time.time);
+
                     Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" up all services");
                 }
                 else if (Time.timeScale == 0.0f)  // continue

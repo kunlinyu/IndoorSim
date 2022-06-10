@@ -10,7 +10,7 @@ public abstract class AbstractActionExecutor : IBlockExecutor<AgentAction, objec
 {
     protected ActionExecutorStatus status = ActionExecutorStatus.Idle;
 
-    protected AbstractMotionExecutor motionExe;
+    public AbstractMotionExecutor motionExe;
     public AbstractActionExecutor(AbstractMotionExecutor me)
     {
         this.motionExe = me;

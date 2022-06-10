@@ -8,7 +8,7 @@ public class Simulation
     private List<IActuatorSensor> HWs = null;
 
     private MapService mapService = null;
-    private List<AbstractAgent> agents = new List<AbstractAgent>();
+    public List<AbstractAgent> agents = new List<AbstractAgent>();
     private TaskAllocator taskAllocator = null;
     private TasksPlayer player = null;
 
@@ -40,6 +40,8 @@ public class Simulation
                 var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
                 var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
+
+                agentHW.motionExecutor = motionExecutor;
             }
             else if (agentHW.AgentDescriptor.type == "boxcapsule")
             {
@@ -48,6 +50,8 @@ public class Simulation
                 var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
                 var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
+
+                agentHW.motionExecutor = motionExecutor;
             }
             else if (agentHW.AgentDescriptor.type == "bronto")
             {
@@ -56,6 +60,8 @@ public class Simulation
                 var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
                 var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
                 agents.Add(agent);
+
+                agentHW.motionExecutor = motionExecutor;
             }
             else
             {
