@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NetTopologySuite.Geometries;
 using UnityEngine;
 
@@ -132,7 +133,7 @@ public class SpaceController : MonoBehaviour, Selectable
                 $"id: {space.Id}\n" +
                 $"navigable: {space.Navigable}\n" +
                 $"container id: {space.containerId}\n" +
-                $"children count: {space.children.Count}";
+                $"children id: {string.Join(',', space.children.Select(child => child.containerId))}";
     }
 
     void OnDestroy()

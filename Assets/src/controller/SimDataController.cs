@@ -192,12 +192,12 @@ public class SimDataController : MonoBehaviour
                 {
                     toolObj = new GameObject("id");
                     IDEditor idEditor = toolObj.AddComponent<IDEditor>();
-                    idEditor.PopContainerIdPanel = (x, y) =>
+                    idEditor.PopContainerIdPanel = (x, y, containerId, childrenId) =>
                     {
                         eventDispatcher.Raise(idEditor, new UIEvent()
                         {
                             name = "id panel",
-                            message = $"{{\"predicate\":\"popup\", \"x\":{x}, \"y\":{y}}}",
+                            message = $"{{\"predicate\":\"popup\", \"x\":{x}, \"y\":{y}, \"containerId\":\"{containerId}\", \"childrenId\":\"{childrenId}\"}}",
                             type = UIEventType.PopUp
                         });
                     };

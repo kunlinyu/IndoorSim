@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,9 +15,11 @@ public class IDEditor : MonoBehaviour, ITool
     public bool MouseOnUI { set; get; }
 
 
-    public Action<int, int>? PopContainerIdPanel;
+    public Action<int, int, string, string>? PopContainerIdPanel;
     public Action? HideContainerIdPanel;
     private string currentSpaceId = "";
+
+    private CellSpace? currentSpace;
 
     void Start()
     {
@@ -28,21 +31,26 @@ public class IDEditor : MonoBehaviour, ITool
         if (Input.GetMouseButtonDown(0) && !MouseOnUI)
             if (MousePickController.PointedSpace != null)
             {
-                currentSpaceId = MousePickController.PointedSpace.Space.Id;
-                PopContainerIdPanel?.Invoke((int)Input.mousePosition.x, (int)Input.mousePosition.y);
+                currentSpace = MousePickController.PointedSpace.Space;
+                string childrenIds = string.Join(',', currentSpace.children.Select(child => child.containerId));
+                PopContainerIdPanel?.Invoke((int)Input.mousePosition.x, (int)Input.mousePosition.y, currentSpace.containerId, childrenIds);
             }
 
         if (Input.GetMouseButtonDown(1))
+        {
             HideContainerIdPanel?.Invoke();
+            currentSpace = null;
+        }
     }
     public void SetContainerId(string containerId, string childrenIdStr)
     {
         List<string> childrenId = new List<string>(childrenIdStr.Split(',', ' ', '\t', '\n'));
-        CellSpace? space = IndoorSimData?.indoorData.FindSpaceId(currentSpaceId);
-        if (space == null) throw new Exception("can not find cellspace with id : " + currentSpaceId);
-        space.containerId = containerId;
-        space.children.Clear();
-        childrenId.ForEach(childId => space.children.Add(new Container(childId)));
+        childrenId.RemoveAll(childId => childId.Length == 0);
+
+        if (currentSpace == null) throw new Exception("never select one space");
+        currentSpace.containerId = containerId;
+        currentSpace.children.Clear();
+        childrenId.ForEach(childId => currentSpace.children.Add(new Container(childId)));
         Debug.Log("container id set");
     }
 }
