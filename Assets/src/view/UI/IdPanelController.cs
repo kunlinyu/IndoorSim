@@ -42,7 +42,7 @@ public class IdPanelController : MonoBehaviour
     public void Init(VisualElement idPanel, Action<string, string> OnSave)
     {
         this.idPanel = idPanel;
-        // this.idPanel.visible = false;
+        this.idPanel.visible = false;
         var containerIdField = this.idPanel.Q<TextField>("containerId");
         var childrenIdField = this.idPanel.Q<TextField>("childrenId");
         this.idPanel.Q<Button>("cancel").clicked += () =>

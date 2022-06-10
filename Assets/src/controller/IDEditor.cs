@@ -48,9 +48,9 @@ public class IDEditor : MonoBehaviour, ITool
         childrenId.RemoveAll(childId => childId.Length == 0);
 
         if (currentSpace == null) throw new Exception("never select one space");
-        currentSpace.containerId = containerId;
-        currentSpace.children.Clear();
-        childrenId.ForEach(childId => currentSpace.children.Add(new Container(childId)));
+
+        IndoorSimData?.UpdateSpaceId(currentSpace, containerId, childrenId);
+
         Debug.Log("container id set");
     }
 }

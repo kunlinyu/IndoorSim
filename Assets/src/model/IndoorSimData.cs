@@ -21,7 +21,7 @@ public class IndoorSimData
 
     [JsonPropertyAttribute] private List<SimData> simDataList = new List<SimData>();
     [JsonPropertyAttribute] public Dictionary<string, AgentTypeMeta> agentMetaList = new Dictionary<string, AgentTypeMeta>();
-    [JsonIgnore] public SimData? currentSimData { get; private set;  }
+    [JsonIgnore] public SimData? currentSimData { get; private set; }
 
     [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
     [JsonIgnore] private InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
@@ -250,6 +250,16 @@ public class IndoorSimData
                 throw new ArgumentException("can not find space contain point: " + ins.oldParam.coor().ToString());
             indoorTiling.UpdateSpaceNavigable(space, ins.newParam.naviInfo().navigable);
         });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.SpaceId, (ins) =>
+        {
+            CellSpace? space = indoorData.FindSpaceGeom(ins.oldParam.coor());
+            if (space == null)
+                throw new ArgumentException("can not find space contain point: " + ins.oldParam.coor().ToString());
+            space.containerId = ins.newParam.containerId();
+            space.children.Clear();
+            List<string> childrenId = new List<string>(ins.newParam.childrenId().Split(','));
+            childrenId.ForEach(childId => space.children.Add(new Container(childId)));
+        });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.RLine, (ins) =>
         {
             RepresentativeLine? rLine = indoorData.FindRLine(ins.oldParam.lineString(), out var rLineGroup);
@@ -463,6 +473,18 @@ public class IndoorSimData
     {
         history.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
         indoorTiling.UpdateSpaceNavigable(space, navigable);
+    }
+
+    public void UpdateSpaceId(CellSpace space, string newContainerId, List<string> childrenId)
+    {
+        var oldContainerId = space.containerId;
+        var oldChildrenId = string.Join(',', space.children.Select(child => child.containerId));
+        var newChildrenId = string.Join(',', childrenId);
+        history.DoCommit(ReducedInstruction.UpdateSpaceId(space.Polygon.InteriorPoint.Coordinate, oldContainerId, oldChildrenId, newContainerId, newChildrenId));
+
+        space.containerId = newContainerId;
+        space.children.Clear();
+        childrenId.ForEach(childId => space.children.Add(new Container(childId)));
     }
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {

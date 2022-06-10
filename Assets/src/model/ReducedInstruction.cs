@@ -21,6 +21,7 @@ public enum SubjectType
     BoundaryNavigable,
     SpaceNavigable,
     RLine,
+    SpaceId,
 
     GripMap,  // TODO:: create and interpret
 
@@ -54,6 +55,8 @@ public struct Parameters
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
     [JsonPropertyAttribute] public Task? task;
     [JsonPropertyAttribute] public AgentDescriptor? agent;
+    [JsonPropertyAttribute] public string? containerId;
+    [JsonPropertyAttribute] public string? childrenId;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -67,6 +70,8 @@ public static class ParameterExtension
     public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
     public static AgentDescriptor agent(this Parameters? param) => param!.Value.agent!;
     public static Task task(this Parameters? param) => param!.Value.task!;
+    public static string containerId(this Parameters? param) => param!.Value.containerId!;
+    public static string childrenId(this Parameters? param) => param!.Value.childrenId!;
 }
 
 [Serializable]
@@ -209,6 +214,18 @@ public class ReducedInstruction
         return ri;
     }
 
+    public static ReducedInstruction UpdateSpaceId(Coordinate spaceInterior, string oldContainerId, string oldChildrenId, string newContainerId, string newChildrenId)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.SpaceId;
+        ri.predicate = Predicate.Update;
+
+        ri.oldParam = new Parameters() { containerId = oldContainerId, childrenId = oldChildrenId, coor = spaceInterior };
+        ri.newParam = new Parameters() { containerId = newContainerId, childrenId = newChildrenId };
+
+        return ri;
+    }
+
     static public List<ReducedInstruction> Reverse(List<ReducedInstruction> instructions)
     {
         var result = new List<ReducedInstruction>();
@@ -256,6 +273,11 @@ public class ReducedInstruction
                 if (predicate == Predicate.Update)
                     return UpdateSpaceNavigable(oldParam.coor(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
                 else throw new ArgumentException("space navigable can only update.");
+
+            case SubjectType.SpaceId:
+                if (predicate == Predicate.Update)
+                    return UpdateSpaceId(oldParam.coor(), newParam.containerId(), newParam.childrenId(), oldParam.containerId(), oldParam.childrenId());
+                else throw new ArgumentException("space id can only update.");
 
             case SubjectType.RLine:
                 if (predicate == Predicate.Update)
