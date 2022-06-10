@@ -31,7 +31,19 @@ public class Move2AgentModel : MonoBehaviour, IActuatorSensor
             transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
             transform.rotation = Quaternion.Euler(0.0f, AgentDescriptor.theta, 0.0f);
         }
+    }
 
+    void Update()
+    {
+        var lr = GetComponentInChildren<LineRenderer>();
+        lr.positionCount = 2;
+        Vector3 position = transform.position;
+        lr.SetPosition(0, position);
+        lock (speed)
+        {
+            Vector3 speedTarget = position + new Vector3((float)speed.x, 0.0f, (float)speed.y);
+            lr.SetPosition(1, speedTarget);
+        }
     }
 
     public void RegisterSensorDataListener(Action<ISensorData> listener)

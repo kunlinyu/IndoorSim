@@ -34,6 +34,6 @@ public class MapService
         => indoorData.FindSpaceGeom(currentCoor);
 
     public CellSpace? FindContainerId(string id)
-        => indoorData.FindSpaceId(id);
+        => indoorData.FindContainerId(id);
 
 }
