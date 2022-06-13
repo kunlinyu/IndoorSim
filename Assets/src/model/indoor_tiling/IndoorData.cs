@@ -201,7 +201,8 @@ public class IndoorData
         spacePool.ForEach(s => s.allBoundaries.ForEach(b => b.PartialBound(s)));
 
         spacePool.ForEach(s => s.rLines = null);
-        rLinePool.ForEach(rl => rl.space.rLines = rl);
+        rLinePool.ForEach(rls => rls.space.rLines = rls);
+        rLinePool.ForEach(rls => rls.rLines.ForEach(rl => rl.UpdateGeom(rls.space)));
 
         boundary2RLines.Clear();
         boundaryPool.ForEach(b => boundary2RLines[b] = new HashSet<RepresentativeLine>());
@@ -243,7 +244,7 @@ public class IndoorData
         // return JsonConvert.SerializeObject(this);
     }
 
-    public static IndoorData? Deserialize(string json)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
+    public static IndoorData? Deserialize(string json)
     {
         IndoorData? indoorData = JsonConvert.DeserializeObject<IndoorData>(json, new WKTConverter(), new CoorConverter());
         if (indoorData != null)

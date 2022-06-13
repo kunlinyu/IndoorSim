@@ -76,6 +76,7 @@ public class IndoorSimData
         simDataList = indoorSimData.simDataList;
         assets = indoorSimData.assets;
         history = indoorSimData.history;
+        activeHistory = history;
         OnAssetUpdated?.Invoke(assets);
         OnIndoorDataUpdated?.Invoke(indoorData);
 

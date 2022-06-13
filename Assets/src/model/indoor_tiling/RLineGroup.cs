@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 using UnityEngine;
 
@@ -26,6 +27,8 @@ public class RLineGroup
     public RLineGroup() { }  // for deserialize only
 #pragma warning restore CS8618
 
+    [OnDeserialized] internal void OnDeserializedMethod(StreamingContext context) => FillDefaultRLines();
+
     private void FillDefaultRLines()
     {
         int rLineCount = space.allBoundaries.Count * (space.allBoundaries.Count - 1);
@@ -34,8 +37,13 @@ public class RLineGroup
             foreach (var fr in space.allBoundaries)
                 foreach (var to in space.allBoundaries)
                     if (fr != to)
-                        if (udRL.FirstOrDefault(rl => rl.fr == fr && rl.to == to) == null)
+                    {
+                        var unDefault = udRL.FirstOrDefault(rl => rl.fr == fr && rl.to == to);
+                        if (unDefault == null)
                             rLines.Add(new RepresentativeLine(fr, to, space, defaultPassType));
+                        else
+                            rLines.Add(unDefault);
+                    }
         }
 
         if (rLines.Count != rLineCount)
@@ -48,6 +56,7 @@ public class RLineGroup
         var inbound = space.InBound();
         var outbound = space.OutBound();
         FillDefaultRLines();
+        rLines.ForEach(rl => rl.UpdateGeom(space));
     }
 
     public PassType passType(CellBoundary fr, CellBoundary to)

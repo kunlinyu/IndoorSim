@@ -13,7 +13,7 @@ public class RepresentativeLine
     [JsonPropertyAttribute] public CellBoundary fr { get; private set; }
     [JsonPropertyAttribute] public CellBoundary to { get; private set; }
     [JsonPropertyAttribute] public PassType pass { get; set; }
-    [JsonIgnore] public LineString geom { get; private set; }
+    [JsonIgnore] public LineString? geom { get; private set; }
 
     public bool IllForm(CellSpace through)
         => !through.InBound().Contains(fr) || !through.OutBound().Contains(to);
@@ -32,7 +32,6 @@ public class RepresentativeLine
         if (!through.allBoundaries.Contains(fr)) throw new ArgumentException("the \"fr\" boundary should bound the \"through\" space");
         if (!through.allBoundaries.Contains(to)) throw new ArgumentException("the \"to\" boundary should bound the \"through\" space");
 
-        geom = UpdateGeom(through);
     }
 
     public LineString UpdateGeom(CellSpace through)

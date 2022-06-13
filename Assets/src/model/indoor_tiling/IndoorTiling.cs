@@ -95,7 +95,7 @@ public class IndoorTiling
         this.indoorData.spacePool.ForEach(s => s.Id = IdGenSpace!.Gen());
     }
 
-    public bool DeserializeInPlace(string json, bool historyOnly = false)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
+    public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
         foreach (var v in indoorData.vertexPool)
             OnVertexRemoved?.Invoke(v);
@@ -138,7 +138,7 @@ public class IndoorTiling
         return true;
     }
 
-    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
+    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)
     {
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
         if (indoorTiling == null) return null;
