@@ -65,27 +65,32 @@ public interface NodeBreaker<NodeType>
 public class AStar<NodeType, AdjacentNodeFinder, Breaker> where AdjacentNodeFinder : AdjacentFinder<NodeType> where Breaker : NodeBreaker<NodeType>
 {
     public static List<NodeType> search(NodeType initNode,
+                                        double initCost,
                                         AdjacentNodeFinder adjacentFinder,
                                         Action<NodeType> consumer, Breaker breaker)
-        => search(initNode, adjacentFinder, consumer, breaker, node => 0);
+        => search(initNode, initCost, adjacentFinder, consumer, breaker, node => 0);
 
     public static List<NodeType> search(NodeType initNode,
+                                        double initCost,
                                         AdjacentNodeFinder adjacentFinder,
                                         Action<NodeType> consumer, Breaker breaker,
                                         Func<NodeType, double> heuristic)
-        => searchMultiInit(new List<NodeType>() { initNode }, adjacentFinder, consumer, breaker, heuristic);
+        => searchMultiInit(new List<NodeType>() { initNode }, new List<double>() { initCost }, adjacentFinder, consumer, breaker, heuristic);
     public static List<NodeType> searchMultiInit(List<NodeType> initNodes,
+                                                 List<double> initCost,
                                                  AdjacentNodeFinder adjacentFinder,
                                                  Action<NodeType> consumer,
                                                  Breaker breaker)
-        => searchMultiInit(initNodes, adjacentFinder, consumer, breaker, node => 0);
+        => searchMultiInit(initNodes, initCost, adjacentFinder, consumer, breaker, node => 0);
 
     static public List<NodeType> searchMultiInit(List<NodeType> initNodes,
+                                                 List<double> initCost,
                                                  AdjacentNodeFinder adjacentFinder,
                                                  Action<NodeType> consumer,
                                                  Breaker breaker,
                                                  Func<NodeType, Double> heuristic)
     {
+        if (initNodes.Count != initCost.Count) throw new ArgumentException("count of initNodes should equal to count of initNodes");
         Dictionary<NodeType, Double> nodeCostMap = new Dictionary<NodeType, Double>();
         Dictionary<NodeType, NodeType> parentMap = new Dictionary<NodeType, NodeType>();
 
@@ -95,10 +100,10 @@ public class AStar<NodeType, AdjacentNodeFinder, Breaker> where AdjacentNodeFind
 
         HashSet<NodeType> exploredNodes = new HashSet<NodeType>(initNodes);
 
-        foreach (NodeType node in initNodes)
+        for (int i = 0; i < initNodes.Count; i++)
         {
-            nodeCostMap.Add(node, 0.0);  // TODO(future feature): add parameter about initCost
-            nodeQueue.Add(node);
+            nodeCostMap.Add(initNodes[i], initCost[i]);
+            nodeQueue.Add(initNodes[i]);
         }
 
         int index = 0;

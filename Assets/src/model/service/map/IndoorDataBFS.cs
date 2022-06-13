@@ -43,14 +43,16 @@ public class IndoorDataAStar
         adjacentFinder = new IndoorDataAdjacentFinder(indoorData);
     }
 
-    public PlanResult Search(CellSpace sourceSpace, CellSpace targetSpace)
+    public PlanResult Search(Coordinate sourceCoor, CellSpace targetSpace)
     {
+        CellSpace sourceSpace = indoorTS.FindSpaceGeom(sourceCoor) ?? throw new ArgumentException("source coordinate should lay on one space");
         IndoorTSNodeBreaker breaker = new IndoorTSNodeBreaker(targetSpace);
 
         List<CellBoundary> initNodes = sourceSpace.OutBound();
+        List<double> initCosts = initNodes.Select(cb => cb.geom.Centroid.Coordinate.Distance(sourceCoor)).ToList();
 
         List<CellBoundary> resultBoundaries =
-            AStar<CellBoundary, IndoorDataAdjacentFinder, IndoorTSNodeBreaker>.searchMultiInit(initNodes, adjacentFinder, (node) => { }, breaker);
+            AStar<CellBoundary, IndoorDataAdjacentFinder, IndoorTSNodeBreaker>.searchMultiInit(initNodes, initCosts, adjacentFinder, (node) => { }, breaker);
 
         if (resultBoundaries.Count > 0)
         {
@@ -77,6 +79,11 @@ public class IndoorDataAStar
         {
             return new PlanResult(targetSpace);
         }
+    }
+
+    public PlanResult Search(CellSpace sourceSpace, CellSpace targetSpace)
+    {
+        return Search(sourceSpace.Geom!.Centroid.Coordinate, targetSpace);
     }
 
 }

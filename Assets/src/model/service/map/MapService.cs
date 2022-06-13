@@ -17,14 +17,9 @@ public class MapService
         CellSpace? current = FindContainerGeom(new Coordinate(query.x, query.y));
         CellSpace? target = FindContainerId(query.targetContainerId);
         if (current != null && target != null)
-        {
-            IndoorDataAStar AStar = new IndoorDataAStar(indoorData);
-            return AStar.Search(current, target);
-        }
+            return new IndoorDataAStar(indoorData).Search(new Coordinate(query.x, query.y), target);
         else
-        {
             return null;
-        }
     }
 
     public PlanSimpleResult? PathSimple(CoorToContainerQuery query)
