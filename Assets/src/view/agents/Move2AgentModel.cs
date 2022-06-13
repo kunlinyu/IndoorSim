@@ -38,25 +38,33 @@ public class Move2AgentModel : MonoBehaviour, IActuatorSensor
     void Update()
     {
         var speedLR = transform.Find("AgentSpeedLineRenderer").gameObject.GetComponent<LineRenderer>();
-        speedLR.positionCount = 2;
-        speedLR.SetPosition(0, transform.position);
-        lock (speed)
-        {
-            Vector3 speedTarget = transform.position + new Vector3((float)speed.x, 0.0f, (float)speed.y);
-            speedLR.SetPosition(1, speedTarget);
-        }
+        UpdateSpeedCommandLineRender(speedLR);
 
         var motionLR = transform.Find("AgentMotionLineRenderer").gameObject.GetComponent<LineRenderer>();
+        UpdateMotionLineRender(motionLR);
+    }
+
+    void UpdateSpeedCommandLineRender(LineRenderer lr)
+    {
+        lr.positionCount = 2;
+        lr.SetPosition(0, transform.position);
+        Vector3 speedTarget;
+        lock (speed)
+            speedTarget = transform.position + new Vector3((float)speed.x, 0.0f, (float)speed.y);
+        lr.SetPosition(1, speedTarget);
+    }
+
+    void UpdateMotionLineRender(LineRenderer lr)
+    {
         if (motionExecutor != null && motionExecutor.currentGoal != null)
         {
             if (motionExecutor.currentGoal.type == MotionType.Move)
             {
-                motionLR.positionCount = 2;
-                motionLR.SetPosition(0, transform.position);
-                var moveToCoor = motionExecutor.currentGoal as MoveToCoorMotion;
-                if (moveToCoor == null) throw new Exception("can not cast to MoveToCoorMotion");
+                lr.positionCount = 2;
+                lr.SetPosition(0, transform.position);
+                var moveToCoor = motionExecutor.currentGoal as MoveToCoorMotion ?? throw new Exception("can not cast to MoveToCoorMotion");
                 Vector3 target = new Vector3((float)moveToCoor.x, 0.0f, (float)moveToCoor.y);
-                motionLR.SetPosition(1, target);
+                lr.SetPosition(1, target);
             }
             else
             {
@@ -65,9 +73,8 @@ public class Move2AgentModel : MonoBehaviour, IActuatorSensor
         }
         else
         {
-            motionLR.positionCount = 0;
+            lr.positionCount = 0;
         }
-
     }
 
     public void RegisterSensorDataListener(Action<ISensorData> listener)

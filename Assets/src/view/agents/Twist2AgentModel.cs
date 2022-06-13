@@ -41,6 +41,16 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
 
     void Update()
     {
+        var twistLR = transform.Find("AgentVelLineRenderer").gameObject.GetComponent<LineRenderer>();
+        var dirLR = transform.Find("AgentOmgLineRenderer").gameObject.GetComponent<LineRenderer>();
+        UpdateTwistCommandLineRender(twistLR, dirLR);
+
+        var motionLR = transform.Find("AgentMotionLineRenderer").gameObject.GetComponent<LineRenderer>();
+        UpdateMotionLineRender(motionLR);
+    }
+
+    void UpdateTwistCommandLineRender(LineRenderer velLR, LineRenderer dirLR)
+    {
         Twist2 twist2;
         lock (twist)
             twist2 = new Twist2() { v_x = twist.v_x, omega_z = twist.omega_z };
@@ -48,12 +58,10 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
         int segments = 10;
         float timeForecast = 1.0f;
 
-        var twistLR = transform.Find("AgentVelLineRenderer").gameObject.GetComponent<LineRenderer>();
-        twistLR.positionCount = 2;
-        twistLR.SetPosition(0, transform.position);
-        twistLR.SetPosition(1, transform.position + (transform.right * (float)twist2.v_x));
+        velLR.positionCount = 2;
+        velLR.SetPosition(0, transform.position);
+        velLR.SetPosition(1, transform.position + (transform.right * (float)twist2.v_x));
 
-        var dirLR = transform.Find("AgentOmgLineRenderer").gameObject.GetComponent<LineRenderer>();
         dirLR.positionCount = segments + 1;
         float omega = (float)(-twist2.omega_z / Math.PI * 180.0);
         for (int i = 0; i < segments; i++)
@@ -64,18 +72,20 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
             dirLR.SetPosition(i, transform.position + rotatedDir);
         }
         dirLR.SetPosition(segments, transform.position);
+    }
 
-        var motionLR = transform.Find("AgentMotionLineRenderer").gameObject.GetComponent<LineRenderer>();
+    void UpdateMotionLineRender(LineRenderer lr)
+    {
         if (motionExecutor != null && motionExecutor.currentGoal != null)
         {
             if (motionExecutor.currentGoal.type == MotionType.Move)
             {
-                motionLR.positionCount = 2;
-                motionLR.SetPosition(0, transform.position);
+                lr.positionCount = 2;
+                lr.SetPosition(0, transform.position);
                 var moveToCoor = motionExecutor.currentGoal as MoveToCoorMotion;
                 if (moveToCoor == null) throw new Exception("can not cast to MoveToCoorMotion");
                 Vector3 target = new Vector3((float)moveToCoor.x, 0.0f, (float)moveToCoor.y);
-                motionLR.SetPosition(1, target);
+                lr.SetPosition(1, target);
             }
             else
             {
@@ -84,7 +94,7 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
         }
         else
         {
-            motionLR.positionCount = 0;
+            lr.positionCount = 0;
         }
     }
 

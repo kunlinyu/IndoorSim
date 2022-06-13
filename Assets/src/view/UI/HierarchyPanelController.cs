@@ -108,7 +108,7 @@ public class HierarchyPanelController : MonoBehaviour
         foreach (var simulationJson in jsonData.Children())
         {
             Foldout simFoldout = new Foldout();
-            simFoldout.text = simulationJson["name"].Value<string>();
+            simFoldout.text = "simulation " + simulationJson["name"].Value<string>();
 
             bool active = simulationJson["active"].Value<bool>();
             simFoldout.SetValueWithoutNotify(active);
