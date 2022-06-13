@@ -95,7 +95,7 @@ public class IndoorTiling
         this.indoorData.spacePool.ForEach(s => s.Id = IdGenSpace!.Gen());
     }
 
-    public bool DeserializeInPlace(string json, bool historyOnly = false)  // TODO: do not use id from file
+    public bool DeserializeInPlace(string json, bool historyOnly = false)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
     {
         foreach (var v in indoorData.vertexPool)
             OnVertexRemoved?.Invoke(v);
@@ -138,7 +138,7 @@ public class IndoorTiling
         return true;
     }
 
-    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)  // TODO: do not use id from file
+    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
     {
         IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
         if (indoorTiling == null) return null;
@@ -324,7 +324,7 @@ public class IndoorTiling
     {
         if (!indoorData.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
         if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
-        // TODO: check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries
+        // TODO(robust): check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries
         Debug.Log("split boundary");
 
         // Remove spaces
@@ -650,7 +650,7 @@ public class IndoorTiling
         AddSpaceInternal(current);
     }
 
-    // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
+    // TODO(coding optimization): we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
     private List<CellSpace> CreateCellSpaceMulti(List<JumpInfo> path)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);
@@ -680,7 +680,7 @@ public class IndoorTiling
         return result;
     }
 
-    // TODO: we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
+    // TODO(coding optimization): we should merge CreateCellSpaceMulti and CreateCellSpaceWithHole to one function
     private CellSpace CreateCellSpaceWithHole(List<JumpInfo> path, Navigable navigable = Navigable.Navigable)
     {
         List<List<JumpInfo>> rings = PSLGPolygonSearcher.Jumps2Rings(path, SplitRingType.SplitByRepeatedVertex);

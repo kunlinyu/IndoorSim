@@ -83,7 +83,7 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
                 var executor = actionExecutors.FirstOrDefault(exe => exe.Accept(action));
                 if (executor == null) throw new Exception("no action executor accept this action");
                 Debug.Log("agent execute action");
-                executor.Execute(action, ref join, out var result);  // TODO: how can i abort it and reset agent ################################
+                executor.Execute(action, ref join, out var result);
                 if (join) break;
             }
 

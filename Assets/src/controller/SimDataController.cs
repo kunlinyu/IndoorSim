@@ -84,7 +84,7 @@ public class SimDataController : MonoBehaviour
         if (e.type == UIEventType.ToolButtonClick)
         {
             string oldToolName = "";
-            if (toolObj != null && e.name != "save asset")  // TODO: fuck
+            if (toolObj != null && e.name != "save asset")  // TODO(mess): fuck
             {
                 oldToolName = toolObj.name;
                 Debug.Log("Disable tool " + toolObj.name);

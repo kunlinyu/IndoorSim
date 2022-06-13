@@ -169,7 +169,8 @@ public class IndoorSimData
         // indoorData.vertexPool.ForEach(v => AddVertexInternal(v));
         // indoorData.boundaryPool.ForEach(b => AddBoundaryInternal(b));
         // indoorData.spacePool.ForEach(s => AddSpaceInternal(s));
-        // TODO: apply rLine in asset
+
+        // TODO(debt): apply rLine in asset
 
         history.SessionCommit();
     }

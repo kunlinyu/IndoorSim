@@ -102,7 +102,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     public void updateRenderer(Vector3[] positions)
     {
-        // TODO use prefab
+        // TODO(extract resource) use prefab
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.geom.NumPoints;
         lr.SetPositions(positions);

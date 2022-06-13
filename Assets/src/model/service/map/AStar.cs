@@ -97,7 +97,7 @@ public class AStar<NodeType, AdjacentNodeFinder, Breaker> where AdjacentNodeFind
 
         foreach (NodeType node in initNodes)
         {
-            nodeCostMap.Add(node, 0.0);  // TODO: add parameter about initCost
+            nodeCostMap.Add(node, 0.0);  // TODO(future feature): add parameter about initCost
             nodeQueue.Add(node);
         }
 

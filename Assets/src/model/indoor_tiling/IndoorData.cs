@@ -243,7 +243,7 @@ public class IndoorData
         // return JsonConvert.SerializeObject(this);
     }
 
-    public static IndoorData? Deserialize(string json)  // TODO: do not use id from file
+    public static IndoorData? Deserialize(string json)  // TODO: do not use id from file (I think I finish this TODO but I'm not sure)
     {
         IndoorData? indoorData = JsonConvert.DeserializeObject<IndoorData>(json, new WKTConverter(), new CoorConverter());
         if (indoorData != null)

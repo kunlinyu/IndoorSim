@@ -23,10 +23,10 @@ public enum SubjectType
     RLine,
     SpaceId,
 
-    GripMap,  // TODO:: create and interpret
+    GripMap,  // TODO(future feature):: create and interpret
 
     Agent,
-    Task,  // TODO:: create and interpret
+    Task,  // TODO(future feature):: create and interpret
 }
 
 // Following instructions are valid:

@@ -66,7 +66,7 @@ public class CellSpace : Container
 
     [OnDeserialized] internal void OnDeserializedMethod(StreamingContext context) => UpdateFromVertex();
     [OnSerializing] private void OnSerializingMethod(StreamingContext context) => Geom = null;
-    [OnSerialized] private void OnSerializedMethod(StreamingContext context) => UpdateFromVertex();  // TODO: too heavy to re update for serialization
+    [OnSerialized] private void OnSerializedMethod(StreamingContext context) => UpdateFromVertex();  // TODO(performance optimization): too heavy to re update for serialization
 
     public CellSpace(Polygon polygon, ICollection<CellVertex> sortedVertices, ICollection<CellBoundary> boundaries, string id = "") : base(id)
     {
@@ -87,7 +87,7 @@ public class CellSpace : Container
         return new CellSpace(new GeometryFactory().CreatePolygon(Polygon.Shell), shellVertices, shellBoundaries, "shell cell space");
     }
 
-    // TODO: we should use UpdateFromBoundary to support complex boundary geometry
+    // TODO(to support future feature): we should use UpdateFromBoundary to support complex boundary geometry
     public Polygon UpdateFromVertex()
     {
         List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);
@@ -287,7 +287,7 @@ public class CellSpace : Container
             return;
         }
 
-        // TODO: this code may work but we should change the name of the method (P.S. we remove the hole contain the argument)
+        // TODO(naming): this code may work but we should change the name of the method (P.S. we remove the hole contain the argument)
         CellSpace? hole = Holes.FirstOrDefault(hole => hole.Geom!.Contains(cellspace.Geom));
         if (hole == null)
         {
