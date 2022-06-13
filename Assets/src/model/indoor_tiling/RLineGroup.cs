@@ -93,10 +93,14 @@ public class RLineGroup
     }
 
     public List<BoundaryWithGeom> next(CellBoundary fr)
-        => rLines.Where(rLine => rLine.pass == PassType.AllowedToPass)
-                 .Where(rLine => rLine.fr == fr)
-                 .Select(rLine => new BoundaryWithGeom() { boundary = rLine.to, rLineGeom = rLine.geom} )
-                 .ToList();
+    {
+        if (space.navigable != Navigable.Navigable) return new List<BoundaryWithGeom>();
+        return rLines.Where(rLine => rLine.fr == fr)
+                     .Where(rLine => !rLine.IllForm(space))
+                     .Where(rLine => rLine.pass == PassType.AllowedToPass)
+                     .Select(rLine => new BoundaryWithGeom() { boundary = rLine.to, rLineGeom = rLine.geom })
+                     .ToList();
+    }
 
     public void UpdateGeom()
         => rLines.ForEach(rl => rl.UpdateGeom(space));

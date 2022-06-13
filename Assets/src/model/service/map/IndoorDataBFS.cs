@@ -17,8 +17,9 @@ public class IndoorDataAdjacentFinder : AdjacentFinder<CellBoundary>
 
     public List<NodeWithCost<CellBoundary>> adjacentWithCost(CellBoundary boundary, CellBoundary? predecessor)
     {
-        return boundary.Spaces().Select(space => space.rLines!)  // get rLines
-                       .Select(rls => rls.next(boundary)).SelectMany(bg => bg) // get next BoundaryWithGeoms
+        return boundary.Spaces()
+                       .Select(space => space.rLines!)  // get rLines
+                       .Select(rls => rls.next(boundary)).SelectMany(bg => bg)  // get next BoundaryWithGeoms
                        .Select(bg => new NodeWithCost<CellBoundary>(bg.boundary, bg.rLineGeom.Length))
                        .ToList();
     }

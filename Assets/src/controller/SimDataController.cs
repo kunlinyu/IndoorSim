@@ -237,6 +237,18 @@ public class SimDataController : MonoBehaviour
                     Debug.Log("Switch to tool capsule");
                 }
             }
+            else if (e.name == "astar")
+            {
+                if (oldToolName != "astar")
+                {
+                    GameObject prefab = Resources.Load<GameObject>("ToolObj/AStarTool");
+                    toolObj = Instantiate(prefab, transform);
+                    var astarTool = toolObj.AddComponent<AStarTool>();
+                    currentTool = astarTool;
+
+                    Debug.Log("Switch to tool astar");
+                }
+            }
             else if (e.name == "boxcapsule")
             {
                 if (oldToolName != "boxcapsule")
