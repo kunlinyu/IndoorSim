@@ -44,6 +44,13 @@ public class RLineController : MonoBehaviour, Selectable
            $"passType: {rLine.pass}";
 
     public float scrollSpeed = 1.0f;
+    Vector2 textureOffset = new Vector2();
+    LineRenderer lr;
+
+    void Start()
+    {
+        lr = GetComponent<LineRenderer>();
+    }
     void Update()
     {
 
@@ -56,10 +63,11 @@ public class RLineController : MonoBehaviour, Selectable
         else
             throw new System.Exception("unknown pass type: " + rLine.pass);
 
-        if (rLine.pass == PassType.AllowedToPass)
+        if (rLine.pass == PassType.AllowedToPass && highLight)
         {
-            float offset = Time.time * -1.0f * scrollSpeed;
-            GetComponent<LineRenderer>().material.SetTextureOffset("_MainTex", new Vector2(offset, 0));
+            textureOffset.x = (Time.time * -1.0f * scrollSpeed) % 1.0f;
+            textureOffset.y = 0.0f;
+            lr.material.SetTextureOffset("_MainTex", textureOffset);
         }
     }
 }
