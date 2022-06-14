@@ -335,7 +335,7 @@ public class CellSpace : Container
                 else
                     return false;
             }
-            else throw new Exception("space contain the boundary but it is neighter the left nor the right side of boundary");
+            else throw new Exception("space contain the boundary but it is neither the left nor the right side of boundary");
         }).ToList();
     }
 
@@ -372,7 +372,10 @@ public class CellSpace : Container
                 else
                     return false;
             }
-            else throw new Exception("space contain the boundary but it is neighter the left nor the right side of boundary");
+            else throw new Exception("space contain the boundary but it is neither the left nor the right side of boundary");
         }).ToList();
     }
+
+    public List<CellBoundary> StopBound()
+        => allBoundaries.Where(b => b.SmartNavigable() != Navigable.Navigable).ToList();
 }

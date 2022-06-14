@@ -16,7 +16,7 @@ public class RepresentativeLine
     [JsonIgnore] public LineString? geom { get; private set; }
 
     public bool IllForm(CellSpace through)
-        => !through.InBound().Contains(fr) || !through.OutBound().Contains(to);
+        => !through.InBound().Contains(fr) || (!through.OutBound().Contains(to) && !through.StopBound().Contains(to));
 
 #pragma warning disable CS8618
     public RepresentativeLine() { }  // for deserialize only
@@ -26,7 +26,6 @@ public class RepresentativeLine
     {
         this.fr = fr;
         this.to = to;
-        // this.through = through;
         this.pass = passType;
 
         if (!through.allBoundaries.Contains(fr)) throw new ArgumentException("the \"fr\" boundary should bound the \"through\" space");

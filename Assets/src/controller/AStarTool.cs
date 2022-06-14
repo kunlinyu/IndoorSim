@@ -122,7 +122,7 @@ public class AStarTool : MonoBehaviour, ITool
             {
                 PlanSimpleResult simpleResult = result.ToSimple();
                 path = simpleResult.boundaryCentroids.Select(p => Utils.Coor2Vec(p.Coordinate)).ToList();
-                Debug.Log("get path");
+                Debug.Log("get path : " + path.Count);
             }
             else
             {
@@ -131,38 +131,22 @@ public class AStarTool : MonoBehaviour, ITool
             }
         }
 
-        DrawSourcePoint(transform.Find("Source").gameObject, sourcePoint);
-        DrawTargetPoint(transform.Find("Target").gameObject, targetPoint);
+        DrawPoint(transform.Find("Source").gameObject, sourcePoint);
+        DrawPoint(transform.Find("Target").gameObject, targetPoint);
         DrawPath(transform.Find("Path").gameObject, path);
     }
 
-    private static void DrawSourcePoint(GameObject obj, Vector3? sourcePoint)
+    private static void DrawPoint(GameObject obj, Vector3? sourcePoint)
     {
         var sr = obj.GetComponent<SpriteRenderer>();
         if (sourcePoint == null)
         {
-            sr.sprite = null;
+            sr.enabled = false;
         }
         else
         {
-            sr.sprite = Resources.Load<Sprite>("astar/astar_node");
+            sr.enabled = true;
             obj.transform.position = sourcePoint.Value;
-            obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-        }
-    }
-
-    private static void DrawTargetPoint(GameObject obj, Vector3? targetPoint)
-    {
-        var sr = obj.GetComponent<SpriteRenderer>();
-        if (targetPoint == null)
-        {
-            sr.sprite = null;
-        }
-        else
-        {
-            sr.sprite = Resources.Load<Sprite>("astar/astar_node");
-            obj.transform.position = targetPoint.Value;
-            obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
         }
     }
 
