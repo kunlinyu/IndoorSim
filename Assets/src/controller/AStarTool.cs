@@ -121,7 +121,10 @@ public class AStarTool : MonoBehaviour, ITool
             if (result != null)
             {
                 PlanSimpleResult simpleResult = result.ToSimple();
-                path = simpleResult.boundaryCentroids.Select(p => Utils.Coor2Vec(p.Coordinate)).ToList();
+                path.Clear();
+                path.Add(sourcePoint.Value);
+                path.AddRange(simpleResult.boundaryCentroids.Select(p => Utils.Coor2Vec(p.Coordinate)));
+                path.Add(targetPoint!.Value);
                 Debug.Log("get path : " + path.Count);
             }
             else
