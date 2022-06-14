@@ -41,7 +41,11 @@ public class MoveToContainerActionExecutor : AbstractActionExecutor
             throw new Exception("unknown motion executor type");
 
         PlanResult? planResult = Plan(position, action2Container.id);
-        if (planResult == null) return false;
+        if (planResult == null)
+        {
+            Debug.Log("plan failed");
+            return false;
+        }
 
         PlanSimpleResult simpleResult = planResult.ToSimple();
 

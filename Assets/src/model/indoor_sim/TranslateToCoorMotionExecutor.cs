@@ -20,13 +20,13 @@ public class TranslateToCoorMotionExecutor : AbstractMotionExecutor
 
     protected override IActuatorCommand SensorDataListener(ISensorData sensorData, Motion? goal)
     {
+        position = sensorData as Position ?? throw new Exception("need position data");
+
         if (goal == null)
         {
             distance = Double.MaxValue;
             return StopCommand();
         }
-
-        position = sensorData as Position ?? throw new Exception("need position data");
         MoveToCoorMotion action2Coor = goal as MoveToCoorMotion ?? throw new ArgumentException("action type mismatch");
 
         double dx = action2Coor.x - position.x;

@@ -21,13 +21,13 @@ public class TwistToCoorMotionExecutor : AbstractMotionExecutor
 
     protected override IActuatorCommand SensorDataListener(ISensorData sensorData, Motion? goal)
     {
+        pose = sensorData as Pose2 ?? throw new Exception("need Pose2 data");
+
         if (goal == null)
         {
             distance = Double.MaxValue;
             return StopCommand();
         }
-
-        pose = sensorData as Pose2 ?? throw new Exception("need Pose2 data");
         MoveToCoorMotion action2Coor = goal as MoveToCoorMotion ?? throw new ArgumentException("action type mismatch");
 
         double dx = action2Coor.x - pose.x;
