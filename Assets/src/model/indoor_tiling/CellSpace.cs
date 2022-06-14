@@ -377,5 +377,13 @@ public class CellSpace : Container
     }
 
     public List<CellBoundary> StopBound()
-        => allBoundaries.Where(b => b.SmartNavigable() != Navigable.Navigable).ToList();
+    {
+        return allBoundaries.Where(b =>
+        {
+            CellSpace? another = b.Another(this);
+            if (another == null) return false;
+            if (another.navigable == Navigable.PhysicallyNonNavigable) return true;
+            else return false;
+        }).ToList();
+    }
 }

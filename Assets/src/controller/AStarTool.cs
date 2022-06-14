@@ -118,9 +118,9 @@ public class AStarTool : MonoBehaviour, ITool
             Debug.Log("run A*");
             shouldRunAStar = false;
             PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(Utils.Vec2Coor(sourcePoint!.Value), targetSpace!);
-            if (result != null)
+            PlanSimpleResult? simpleResult = result?.ToSimple();
+            if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)
             {
-                PlanSimpleResult simpleResult = result.ToSimple();
                 path.Clear();
                 path.Add(sourcePoint.Value);
                 path.AddRange(simpleResult.boundaryCentroids.Select(p => Utils.Coor2Vec(p.Coordinate)));
