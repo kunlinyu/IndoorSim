@@ -38,12 +38,12 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
     }
     public SelectableType type { get => SelectableType.Agent; }
 
-    public string Tip() => "agent ";
+    public string Tip() => AgentDescriptor.type;
 
     public float Distance(Vector3 vec)
     {
         float distanceToCenter = (vec - new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y)).magnitude;
-        distanceToCenter -= meta.collisionRadius;
+        distanceToCenter -= meta!.collisionRadius;
         if (distanceToCenter < 0.0f) distanceToCenter = 0.0f;
         return distanceToCenter;
     }
@@ -54,14 +54,14 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     public void Execute(IActuatorCommand cmd)
     {
-        lock (command) command = cmd;
+        lock (command!) command = cmd;
     }
 
     void FixedUpdate()
     {
         listener?.Invoke(GetSensorData());
 
-        lock (command) UpdateTransform(command, transform);
+        lock (command!) UpdateTransform(command, transform);
 
         if (reset)
         {
@@ -75,13 +75,8 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     protected abstract void UpdateTransform(IActuatorCommand command, Transform transform);
 
-    void Start()
+    protected void Start()
     {
         meta = Resources.Load<AgentTypeMetaUnity>("AgentTypeMeta/" + AgentDescriptor.type);
-    }
-
-    void Update()
-    {
-
     }
 }

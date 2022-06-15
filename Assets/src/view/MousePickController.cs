@@ -12,7 +12,8 @@ public enum CurrentPickType : short
     Boundary = 2,
     Space = 4,
     RLine = 8,
-    All = 15,
+    Agent = 16,
+    All = 31,
 }
 
 public class MousePickController : MonoBehaviour
@@ -35,6 +36,9 @@ public class MousePickController : MonoBehaviour
     static private RLineController? pointedRLine = null;
     static public RLineController? PointedRLine { get => pointedRLine; }
 
+    static private AgentController? pointedAgent = null;
+    static private AgentController? PointedAgent { get => pointedAgent; }
+
     public UIEventDispatcher? eventDispatcher;
 
     static public CurrentPickType pickType { get; set; } = CurrentPickType.All;
@@ -53,17 +57,19 @@ public class MousePickController : MonoBehaviour
         BoundaryController? nearestBoundary = null;
         SpaceController? nearestSpace = null;
         RLineController? nearestRLine = null;
+        AgentController? nearestAgent = null;
         float vertexMinDistance = float.MaxValue;
         float boundaryMinDistance = float.MaxValue;
         float spaceMinDistance = float.MaxValue;
         float rLineMinDistance = float.MaxValue;
+        float agentMinDistance = float.MaxValue;
 
 
         foreach (RaycastHit hit in hits)
         {
-            if (hit.collider.gameObject.GetComponent<VertexController>() != null)
+            var vc = hit.collider.gameObject.GetComponent<VertexController>();
+            if (vc != null)
             {
-                VertexController vc = hit.collider.gameObject.GetComponent<VertexController>();
                 float distance = vc.Distance(mousePositionOnGround);
                 if (vertexMinDistance > distance)
                 {
@@ -71,9 +77,9 @@ public class MousePickController : MonoBehaviour
                     vertexMinDistance = distance;
                 }
             }
-            if (hit.collider.gameObject.GetComponent<BoundaryController>() != null)
+            var bc = hit.collider.gameObject.GetComponent<BoundaryController>();
+            if (bc != null)
             {
-                BoundaryController bc = hit.collider.gameObject.GetComponent<BoundaryController>();
                 float distance = bc.Distance(mousePositionOnGround);
                 if (boundaryMinDistance > distance)
                 {
@@ -81,9 +87,9 @@ public class MousePickController : MonoBehaviour
                     boundaryMinDistance = distance;
                 }
             }
-            if (hit.collider.gameObject.GetComponent<SpaceController>() != null)
+            var sc = hit.collider.gameObject.GetComponent<SpaceController>();
+            if (sc != null)
             {
-                SpaceController sc = hit.collider.gameObject.GetComponent<SpaceController>();
                 float distance = sc.Distance(mousePositionOnGround);
                 if (spaceMinDistance > distance)
                 {
@@ -91,14 +97,25 @@ public class MousePickController : MonoBehaviour
                     spaceMinDistance = distance;
                 }
             }
-            if (hit.collider.gameObject.GetComponent<RLineController>() != null)
+            var rc = hit.collider.gameObject.GetComponent<RLineController>();
+            if (rc != null)
             {
-                RLineController rc = hit.collider.gameObject.GetComponent<RLineController>();
                 float distance = rc.Distance(mousePositionOnGround);
                 if (rLineMinDistance > distance)
                 {
                     nearestRLine = rc;
                     rLineMinDistance = distance;
+                }
+            }
+
+            var ac = hit.collider.gameObject.GetComponentInParent(typeof(AgentController)) as AgentController;
+            if (ac != null)
+            {
+                float distance = ac.Distance(mousePositionOnGround);
+                if (rLineMinDistance > distance)
+                {
+                    nearestAgent = ac;
+                    agentMinDistance = distance;
                 }
             }
         }
@@ -107,6 +124,7 @@ public class MousePickController : MonoBehaviour
         pointedBoundary = nearestBoundary;
         pointedSpace = nearestSpace;
         pointedRLine = nearestRLine;
+        pointedAgent = nearestAgent;
 
         Selectable? nearestEntity = null;
 
@@ -125,6 +143,10 @@ public class MousePickController : MonoBehaviour
         if ((pickType & CurrentPickType.Vertex) == CurrentPickType.Vertex)
             if (nearestVertex != null)
                 nearestEntity = nearestVertex;
+
+        if ((pickType & CurrentPickType.Agent) == CurrentPickType.Agent)
+            if (nearestAgent != null)
+                nearestEntity = nearestAgent;
 
         if (nearestEntity != pointedEntity)
         {

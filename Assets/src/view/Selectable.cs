@@ -8,6 +8,7 @@ public enum SelectableType
     Boundary,
     Space,
     RLine,
+    Agent,
 }
 public interface Selectable
 {

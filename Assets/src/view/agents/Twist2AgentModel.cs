@@ -1,13 +1,13 @@
 using System;
-using Newtonsoft.Json;
 using UnityEngine;
 
 #nullable enable
 
 public class Twist2AgentModel : AgentController
 {
-    void Start()
+    new void Start()
     {
+        base.Start();
         command = new Twist2() { v_x = 0.0d, omega_z = 0.0d };
     }
 

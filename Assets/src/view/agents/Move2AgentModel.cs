@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class Move2AgentModel : AgentController
 {
-    void Start()
+    new void Start()
     {
+        base.Start();
         command = new SpeedVec() { x = 0.0d, y = 0.0d };
     }
     protected override ISensorData GetSensorData()
