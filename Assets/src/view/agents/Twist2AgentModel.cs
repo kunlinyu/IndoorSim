@@ -1,42 +1,54 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 #nullable enable
 
-public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
+public class Twist2AgentModel : AgentController
 {
-    public AgentDescriptor AgentDescriptor { get; set; }
-    private Action<ISensorData> listener;
-
-    private Twist2 twist = new Twist2() { v_x = 0.0f, omega_z = 0.0f };
-    private bool reset = false;
-
-    public AbstractMotionExecutor? motionExecutor { get; set; }
-
-    void FixedUpdate()
+    void Start()
     {
-        listener?.Invoke(new Pose2()
+        command = new Twist2() { v_x = 0.0d, omega_z = 0.0d };
+    }
+
+    protected override ISensorData GetSensorData()
+        => new Pose2()
         {
             x = transform.position.x,
             y = transform.position.z,
             theta = -transform.rotation.eulerAngles.y / 180.0f * Math.PI,
-        });
+        };
 
-        lock (twist)
-        {
-            TwistToTransform(transform, twist, Time.deltaTime, out Vector3 position, out Quaternion rotation);
-            transform.position = position;
-            transform.rotation = rotation;
-        }
+    protected override void UpdateTransform(IActuatorCommand cmd, Transform transform)
+    {
+        Twist2 command = cmd as Twist2 ?? throw new ArgumentException("accept only twist");
+        float v = (float)command.v_x;
+        float omega = (float)command.omega_z;
+        float dir = -transform.rotation.eulerAngles.y / 180.0f * Mathf.PI;
 
-        if (reset)
+        float Arc = v * Time.deltaTime;
+        float theta = omega * Time.deltaTime;
+        float secantDir = dir + theta / 2.0f;
+        float lastDir = dir + theta;
+
+        float secantLength;
+        if (Math.Abs(theta) > 1e-3)
         {
-            reset = false;
-            transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
-            transform.rotation = Quaternion.Euler(0.0f, -AgentDescriptor.theta / Mathf.PI * 180.0f, 0.0f);
+            float R = Math.Abs(v / omega);
+            secantLength = Mathf.Sign(v) * Mathf.Sqrt(2.0f * (1 - Mathf.Cos(theta))) * R;  // The Law of Cosines (c^2 == a^2 + b^2 - 2ab*Cos(theta))
         }
+        else
+        {
+            secantLength = Arc;
+        }
+        Vector3 secant = new Vector3(Mathf.Cos(secantDir), 0.0f, Mathf.Sin(secantDir)) * secantLength;
+
+        var position = transform.position + secant;
+        var rotation = Quaternion.Euler(0.0f, -lastDir / Mathf.PI * 180.0f, 0.0f);
+
+
+        transform.position = position;
+        transform.rotation = rotation;
     }
 
     void Update()
@@ -52,8 +64,11 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
     void UpdateTwistCommandLineRender(LineRenderer velLR, LineRenderer dirLR)
     {
         Twist2 twist2;
-        lock (twist)
+        lock (command)
+        {
+            Twist2 twist = command as Twist2 ?? throw new ArgumentException("accept only twist");
             twist2 = new Twist2() { v_x = twist.v_x, omega_z = twist.omega_z };
+        }
 
         int segments = 10;
         float timeForecast = 1.0f;
@@ -96,48 +111,5 @@ public class Twist2AgentModel : MonoBehaviour, IActuatorSensor
         {
             lr.positionCount = 0;
         }
-    }
-
-    public void RegisterSensorDataListener(Action<ISensorData> listener)
-    {
-        this.listener += listener;
-    }
-
-    public void Execute(IActuatorCommand command)
-    {
-        lock (twist)
-            twist = command as Twist2 ?? throw new ArgumentException("accept only twist two wheel command");
-    }
-
-    public void ResetToInitStatus()
-    {
-        reset = true;
-    }
-
-    private static void TwistToTransform(Transform transform, Twist2 twist, float t, out Vector3 position, out Quaternion rotation)
-    {
-        float v = (float)twist.v_x;
-        float omega = (float)twist.omega_z;
-        float dir = -transform.rotation.eulerAngles.y / 180.0f * Mathf.PI;
-
-        float Arc = v * t;
-        float theta = omega * t;
-        float secantDir = dir + theta / 2.0f;
-        float lastDir = dir + theta;
-
-        float secantLength;
-        if (Math.Abs(theta) > 1e-3)
-        {
-            float R = Math.Abs(v / omega);
-            secantLength = Mathf.Sign(v) * Mathf.Sqrt(2.0f * (1 - Mathf.Cos(theta))) * R;  // The Law of Cosines (c^2 == a^2 + b^2 - 2ab*Cos(theta))
-        }
-        else
-        {
-            secantLength = Arc;
-        }
-        Vector3 secant = new Vector3(Mathf.Cos(secantDir), 0.0f, Mathf.Sin(secantDir)) * secantLength;
-
-        position = transform.position + secant;
-        rotation = Quaternion.Euler(0.0f, -lastDir / Mathf.PI * 180.0f, 0.0f);
     }
 }

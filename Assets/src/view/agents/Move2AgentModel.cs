@@ -1,38 +1,24 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 #nullable enable
 
-public class Move2AgentModel : MonoBehaviour, IActuatorSensor
+public class Move2AgentModel : AgentController
 {
-    public AgentDescriptor AgentDescriptor { get; set; }
-    private Action<ISensorData> listener;
-    private SpeedVec speed = new SpeedVec() { x = 0.0f, y = 0.0f };
-    private bool reset = false;
-
-    public AbstractMotionExecutor? motionExecutor { get; set; }
-
-
-    void FixedUpdate()
+    void Start()
     {
-        listener?.Invoke(new Position() { x = transform.position.x, y = transform.position.z });
+        command = new SpeedVec() { x = 0.0d, y = 0.0d };
+    }
+    protected override ISensorData GetSensorData()
+        => new Position() { x = transform.position.x, y = transform.position.z };
 
-        lock (speed)
-        {
-            Vector3 position = transform.position;
-            position.x += (float)speed.x * Time.deltaTime;
-            position.z += (float)speed.y * Time.deltaTime;
-            transform.position = position;
-        }
-
-        if (reset)
-        {
-            reset = false;
-            transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
-            transform.rotation = Quaternion.Euler(0.0f, AgentDescriptor.theta, 0.0f);
-        }
+    protected override void UpdateTransform(IActuatorCommand cmd, Transform transform)
+    {
+        SpeedVec command = cmd as SpeedVec ?? throw new ArgumentException("accept only speed vector");
+        Vector3 position = transform.position;
+        position.x += (float)command.x * Time.deltaTime;
+        position.z += (float)command.y * Time.deltaTime;
+        transform.position = position;
     }
 
     void Update()
@@ -49,8 +35,11 @@ public class Move2AgentModel : MonoBehaviour, IActuatorSensor
         lr.positionCount = 2;
         lr.SetPosition(0, transform.position);
         Vector3 speedTarget;
-        lock (speed)
+        lock (command)
+        {
+            SpeedVec speed = command as SpeedVec ?? throw new ArgumentException("accept only speed vector");
             speedTarget = transform.position + new Vector3((float)speed.x, 0.0f, (float)speed.y);
+        }
         lr.SetPosition(1, speedTarget);
     }
 
@@ -77,19 +66,4 @@ public class Move2AgentModel : MonoBehaviour, IActuatorSensor
         }
     }
 
-    public void RegisterSensorDataListener(Action<ISensorData> listener)
-    {
-        this.listener += listener;
-    }
-
-    public void Execute(IActuatorCommand command)
-    {
-        lock (speed)
-            speed = command as SpeedVec ?? throw new ArgumentException("accept only speed vector command");
-    }
-
-    public void ResetToInitStatus()
-    {
-        reset = true;
-    }
 }
