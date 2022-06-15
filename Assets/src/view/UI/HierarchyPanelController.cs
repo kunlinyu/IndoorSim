@@ -19,6 +19,8 @@ public class HierarchyPanelController : MonoBehaviour
 
     private string placeHolderText = "new simulation name";
 
+    private string simFoldoutPrefix = "simulation ";
+
     void Start()
     {
 
@@ -108,7 +110,7 @@ public class HierarchyPanelController : MonoBehaviour
         foreach (var simulationJson in jsonData.Children())
         {
             Foldout simFoldout = new Foldout();
-            simFoldout.text = "simulation " + simulationJson["name"].Value<string>();
+            simFoldout.text = simFoldoutPrefix + simulationJson["name"].Value<string>();
 
             bool active = simulationJson["active"].Value<bool>();
             simFoldout.SetValueWithoutNotify(active);
@@ -120,7 +122,7 @@ public class HierarchyPanelController : MonoBehaviour
                 Debug.Log("simFoldout clicked");
                 CollapsesAll();
                 simFoldout.SetValueWithoutNotify(true);
-                OnSelectSimulation?.Invoke(simFoldout.text);
+                OnSelectSimulation?.Invoke(simFoldout.text.Substring(simFoldoutPrefix.Length));
             });
             foreach (var agent in simulationJson["agents"])
                 simFoldout.Add(new TextElement() { text = agent["name"].Value<string>() });
