@@ -74,10 +74,13 @@ public class IndoorSimData
 
         indoorData = indoorSimData.indoorData;
         simDataList = indoorSimData.simDataList;
+        simDataList.ForEach(sim => sim.active = false);
         assets = indoorSimData.assets;
         history = indoorSimData.history;
+        currentSimData = null;
         activeHistory = history;
         OnAssetUpdated?.Invoke(assets);
+        OnSimulationListUpdated?.Invoke(simDataList);
         OnIndoorDataUpdated?.Invoke(indoorData);
 
         indoorTiling.AssignIndoorData(indoorData);
