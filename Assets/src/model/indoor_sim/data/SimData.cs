@@ -13,7 +13,6 @@ public class SimData
     [JsonIgnore] public InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
-    [JsonIgnore] public Action<AgentDescriptor> OnAgentUpdated = (a) => { };
 
     public SimData(string name)
     {
@@ -59,7 +58,8 @@ public class SimData
     {
         int index = agents.FindIndex(a => a.Equals(oldAgent));
         if (index < 0) throw new ArgumentException("can not find the agent to be updated");
+        OnAgentRemoved?.Invoke(oldAgent);
         agents[index].CopyFrom(newAgent);
-        OnAgentUpdated?.Invoke(agents[index]);
+        OnAgentCreate?.Invoke(agents[index]);
     }
 }

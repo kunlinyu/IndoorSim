@@ -31,6 +31,7 @@ public class SelectDrag : MonoBehaviour, ITool
     private List<VertexController> selectedVertices = new List<VertexController>();
     private List<BoundaryController> selectedBoundaries = new List<BoundaryController>();
     private List<SpaceController> selectedSpaces = new List<SpaceController>();
+    private List<AgentController> selectedAgents = new List<AgentController>();
 
     private Vector3? mouseDownPosition = null;
 
@@ -84,7 +85,7 @@ public class SelectDrag : MonoBehaviour, ITool
                                 if (boundary.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
                         }
-                        else
+                        else if (pointedEntity.type == SelectableType.Space)
                         {
                             CellSpace space = ((SpaceController)pointedEntity).Space;
                             selectedSpaces.Add((SpaceController)pointedEntity);
@@ -94,6 +95,14 @@ public class SelectDrag : MonoBehaviour, ITool
                             foreach (var entry in mapView.boundary2Obj)
                                 if (space.allBoundaries.Contains(entry.Key))
                                     selectedBoundaries.Add(entry.Value.GetComponent<BoundaryController>());
+                        }
+                        else if (pointedEntity.type == SelectableType.Agent)
+                        {
+                            selectedAgents.Add((AgentController)pointedEntity);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("unknown selectable type");
                         }
                         SwitchStatus(SelectStatus.Dragging);
                     }
@@ -195,13 +204,14 @@ public class SelectDrag : MonoBehaviour, ITool
                         // no CTRL key pressed, clear selected
                         if (!Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
                         {
-                            foreach (var vc in selectedVertices)
-                                vc.selected = false;
+                            selectedVertices.ForEach(vc => vc.selected = false);
                             selectedVertices.Clear();
-                            foreach (var bc in selectedBoundaries)
-                                bc.selected = false;
+                            selectedBoundaries.ForEach(bc => bc.selected = false);
                             selectedBoundaries.Clear();
+                            selectedSpaces.ForEach(sc => sc.selected = false);
                             selectedSpaces.Clear();
+                            selectedAgents.ForEach(ac => ac.selected = false);
+                            selectedAgents.Clear();
                         }
 
                         // if CTRL key pressed, add new selected entities
@@ -210,13 +220,14 @@ public class SelectDrag : MonoBehaviour, ITool
                 }
                 else if (Input.GetMouseButtonUp(1))
                 {
-                    foreach (var vc in selectedVertices)
-                        vc.selected = false;
+                    selectedVertices.ForEach(vc => vc.selected = false);
                     selectedVertices.Clear();
-                    foreach (var bc in selectedBoundaries)
-                        bc.selected = false;
+                    selectedBoundaries.ForEach(bc => bc.selected = false);
                     selectedBoundaries.Clear();
+                    selectedSpaces.ForEach(sc => sc.selected = false);
                     selectedSpaces.Clear();
+                    selectedAgents.ForEach(ac => ac.selected = false);
+                    selectedAgents.Clear();
 
                     SwitchStatus(SelectStatus.Idle);
                 }
@@ -237,34 +248,50 @@ public class SelectDrag : MonoBehaviour, ITool
 
                 if (currentPosition != null)
                 {
-                    Vector3? delta = currentPosition - mouseDownPosition;
-                    List<Coordinate> newCoor = new List<Coordinate>();
+                    Vector3 delta = (currentPosition - mouseDownPosition)!.Value;
+                    List<Coordinate> newVertexCoor = new List<Coordinate>();
+                    List<Coordinate> newAgentCoor = new List<Coordinate>();
                     foreach (VertexController vc in selectedVertices)
                     {
                         Vector3? newPosition = Utils.Coor2Vec(vc.Vertex.Coordinate) + delta;
                         if (Input.GetMouseButtonUp(0))
-                            newCoor.Add(Utils.Vec2Coor(newPosition!.Value));
+                            newVertexCoor.Add(Utils.Vec2Coor(newPosition!.Value));
                         else
                             vc.updateRenderer(newPosition!.Value);
                     }
                     foreach (BoundaryController bc in selectedBoundaries)
                     {
-                        Vector3[] positions = bc.Boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta!.Value).ToArray();
+                        Vector3[] positions = bc.Boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta).ToArray();
                         bc.updateRenderer(positions);
                     }
                     foreach (SpaceController sc in selectedSpaces)
                     {
-                        sc.updateRenderer(delta!.Value);
+                        sc.updateRenderer(delta);
+                    }
+                    foreach (AgentController ac in selectedAgents)
+                    {
+                        Vector3 position = new Vector3(ac.AgentDescriptor.x, 0.0f, ac.AgentDescriptor.y);
+                        ac.transform.position = position + delta;
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
-                        IndoorSimData.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newCoor);
+                        if (selectedVertices.Count > 0)
+                            IndoorSimData.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newVertexCoor);
+
+                        foreach (AgentController ac in selectedAgents)
+                        {
+                            var newAgentDesc = ac.AgentDescriptor.Clone();
+                            newAgentDesc.x += delta.x;
+                            newAgentDesc.y += delta.z;
+                            IndoorSimData.UpdateAgent(ac.AgentDescriptor, newAgentDesc);
+                        }
                         if (adhoc)
                         {
                             adhoc = false;
                             selectedVertices.Clear();
                             selectedBoundaries.Clear();
                             selectedSpaces.Clear();
+                            selectedAgents.Clear();
                             SwitchStatus(SelectStatus.Idle);
                         }
                         else
@@ -279,15 +306,14 @@ public class SelectDrag : MonoBehaviour, ITool
         if (Input.GetMouseButtonDown(1))
         {
             status = SelectStatus.Idle;
-            foreach (var vc in selectedVertices)
-                vc.selected = false;
-            foreach (var bc in selectedBoundaries)
-                bc.selected = false;
-            foreach (var sc in selectedSpaces)
-                sc.selected = false;
+            selectedVertices.ForEach(vc => vc.selected = false);
             selectedVertices.Clear();
+            selectedBoundaries.ForEach(bc => bc.selected = false);
             selectedBoundaries.Clear();
+            selectedSpaces.ForEach(sc => sc.selected = false);
             selectedSpaces.Clear();
+            selectedAgents.ForEach(ac => ac.selected = false);
+            selectedAgents.Clear();
             GetComponent<LineRenderer>().positionCount = 0;
         }
 
@@ -295,15 +321,14 @@ public class SelectDrag : MonoBehaviour, ITool
 
     void OnDestroy()
     {
-        foreach (var vc in selectedVertices)
-            vc.selected = false;
-        foreach (var bc in selectedBoundaries)
-            bc.selected = false;
-        foreach (var sc in selectedSpaces)
-            sc.selected = false;
+        selectedVertices.ForEach(vc => vc.selected = false);
         selectedVertices.Clear();
+        selectedBoundaries.ForEach(bc => bc.selected = false);
         selectedBoundaries.Clear();
+        selectedSpaces.ForEach(sc => sc.selected = false);
         selectedSpaces.Clear();
+        selectedAgents.ForEach(ac => ac.selected = false);
+        selectedAgents.Clear();
     }
 
     private static string ScreenShotName(int width, int height)

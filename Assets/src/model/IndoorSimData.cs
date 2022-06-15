@@ -36,7 +36,6 @@ public class IndoorSimData
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
-    [JsonIgnore] public Action<AgentDescriptor> OnAgentUpdated = (a) => { };
 
     public string Serialize(bool indent = false)
     {
@@ -321,7 +320,6 @@ public class IndoorSimData
         SimData newSimData = new SimData(name);
         newSimData.OnAgentCreate = OnAgentCreate;
         newSimData.OnAgentRemoved = OnAgentRemoved;
-        newSimData.OnAgentUpdated = OnAgentUpdated;
         newSimData.active = true;
         simDataList.Add(newSimData);
         currentSimData = newSimData;
@@ -362,7 +360,7 @@ public class IndoorSimData
         if (instructions.Count > 0)
         {
             List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
-            Debug.Log("interpret instruction: " + reverseIns);
+            reverseIns.ForEach(ins => { Debug.Log(ins.predicate + " " + ins.subject); });
             activeInstructionInterpreter.Execute(reverseIns);
             if (activeHistory == history)
                 OnIndoorDataUpdated?.Invoke(indoorData);
@@ -508,6 +506,8 @@ public class IndoorSimData
 
         if (!agentMetaList.ContainsKey(meta.typeName))
             agentMetaList.Add(meta.typeName, meta);
+
+        // OnAgentCreate?.Invoke(agent);
     }
 
     public void RemoveAgent(AgentDescriptor agent)
@@ -525,7 +525,7 @@ public class IndoorSimData
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
     {
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
-        currentSimData.UpdateAgent(oldAgent, newAgent);
         currentSimData.history.DoCommit(ReducedInstruction.UpdateAgent(oldAgent, newAgent));
+        currentSimData.UpdateAgent(oldAgent, newAgent);
     }
 }
