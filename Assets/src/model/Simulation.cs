@@ -35,33 +35,54 @@ public class Simulation
         {
             if (agentHW.AgentDescriptor.type == "capsule")
             {
-                var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
-                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
-                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
-                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
-                agents.Add(agent);
+                if (agentHW.AgentDescriptor.ai == "builtin")
+                {
+                    var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
+                    var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                    var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                    var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
+                    agents.Add(agent);
 
-                agentHW.motionExecutor = motionExecutor;
+                    agentHW.motionExecutor = motionExecutor;
+                }
+                else
+                {
+                    throw new Exception("unsupported ai : " + agentHW.AgentDescriptor.ai);
+                }
             }
             else if (agentHW.AgentDescriptor.type == "boxcapsule")
             {
-                var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
-                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
-                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
-                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
-                agents.Add(agent);
+                if (agentHW.AgentDescriptor.ai == "builtin")
+                {
+                    var motionExecutor = new TranslateToCoorMotionExecutor(agentHW);
+                    var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                    var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                    var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
+                    agents.Add(agent);
 
-                agentHW.motionExecutor = motionExecutor;
+                    agentHW.motionExecutor = motionExecutor;
+                }
+                else
+                {
+                    throw new Exception("unsupported ai : " + agentHW.AgentDescriptor.ai);
+                }
             }
             else if (agentHW.AgentDescriptor.type == "bronto")
             {
-                var motionExecutor = new TwistToCoorMotionExecutor(agentHW);
-                var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
-                var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
-                var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
-                agents.Add(agent);
+                if (agentHW.AgentDescriptor.ai == "builtin")
+                {
+                    var motionExecutor = new TwistToCoorMotionExecutor(agentHW);
+                    var idActionExecutor = new MoveToContainerActionExecutor(motionExecutor, mapService);
+                    var coorActionExecutor = new MoveToCoorActionExecutor(motionExecutor);
+                    var agent = new DummyAgent(new DummyPlanner(), idActionExecutor, coorActionExecutor);
+                    agents.Add(agent);
 
-                agentHW.motionExecutor = motionExecutor;
+                    agentHW.motionExecutor = motionExecutor;
+                }
+                else
+                {
+                    throw new Exception("unsupported ai : " + agentHW.AgentDescriptor.ai);
+                }
             }
             else
             {
