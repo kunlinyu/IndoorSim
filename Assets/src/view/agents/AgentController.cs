@@ -14,11 +14,7 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
         set
         {
             agentDescriptor = value;
-            agentDescriptor.OnUpdate += () =>
-            {
-                transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
-                transform.rotation = Quaternion.Euler(0.0f, (float)AgentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
-            };
+            agentDescriptor.OnUpdate += UpdateTransform;
         }
     }
     public AbstractMotionExecutor? motionExecutor { get; set; }
@@ -78,9 +74,14 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
         if (reset)
         {
             reset = false;
-            transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
-            transform.rotation = Quaternion.Euler(0.0f, (float)AgentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
+            UpdateTransform();
         }
+    }
+
+    void UpdateTransform()
+    {
+        transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
+        transform.rotation = Quaternion.Euler(0.0f, (float)AgentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
     }
 
     protected abstract ISensorData GetSensorData();
@@ -98,5 +99,11 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     protected void Update()
     {
+    }
+
+    void OnDestroy()
+    {
+        if (agentDescriptor != null)
+            agentDescriptor.OnUpdate -= UpdateTransform;
     }
 }
