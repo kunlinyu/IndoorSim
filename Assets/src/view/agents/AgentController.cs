@@ -13,7 +13,7 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     protected IActuatorCommand? command = null;
 
-    AgentTypeMetaUnity? meta = null;
+    public AgentTypeMetaUnity? meta = null;
 
     private bool _highLight = false;
     private bool needUpdateRenderer = true;
@@ -75,8 +75,16 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     protected abstract void UpdateTransform(IActuatorCommand command, Transform transform);
 
+
+    protected void OnEnable()
+    {
+        GetComponentInChildren<AgentShadowController>().meta = meta;
+    }
     protected void Start()
     {
-        meta = Resources.Load<AgentTypeMetaUnity>("AgentTypeMeta/" + AgentDescriptor.type);
+    }
+
+    protected void Update()
+    {
     }
 }

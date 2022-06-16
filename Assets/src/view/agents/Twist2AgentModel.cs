@@ -51,8 +51,9 @@ public class Twist2AgentModel : AgentController
         transform.rotation = rotation;
     }
 
-    void Update()
+    new void Update()
     {
+        base.Update();
         var twistLR = transform.Find("AgentVelLineRenderer").gameObject.GetComponent<LineRenderer>();
         var dirLR = transform.Find("AgentOmgLineRenderer").gameObject.GetComponent<LineRenderer>();
         UpdateTwistCommandLineRender(twistLR, dirLR);

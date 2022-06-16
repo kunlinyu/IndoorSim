@@ -5,11 +5,11 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class AgentShadowController : MonoBehaviour
 {
-    public float radius;
     public Material freeMat;
     public Material collidedMat;
     public bool collided = false;
-    public Vector3 center;
+    public AgentTypeMetaUnity meta;
+    public Vector3 center = new Vector3(0.0f, 0.0f, 0.0f);
 
     private static Vector3[] CirclePosition(Vector3 center, float radius, int step)
     {
@@ -27,19 +27,13 @@ public class AgentShadowController : MonoBehaviour
 
     void Start()
     {
-        var lr = GetComponent<LineRenderer>();
-        lr.positionCount = 30;
-        lr.SetPositions(CirclePosition(center, radius, 30));
-        lr.material = freeMat;
     }
 
     void Update()
     {
-        if (collided)
-            GetComponent<LineRenderer>().material = collidedMat;
-        else
-            GetComponent<LineRenderer>().material = freeMat;
-
-        GetComponent<LineRenderer>().SetPositions(CirclePosition(center, radius, 30));
+        var lr = GetComponent<LineRenderer>();
+        lr.material = collided ? collidedMat : freeMat;
+        lr.positionCount = 30;
+        lr.SetPositions(CirclePosition(center, meta.collisionRadius, 30));
     }
 }

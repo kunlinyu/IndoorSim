@@ -22,6 +22,7 @@ public class SimulationView : MonoBehaviour
             string prefabName = agentDesc.type;
             GameObject prefab = Resources.Load<GameObject>("Agent/" + prefabName);
             GameObject agentObj = Instantiate(prefab, agentParentObj.transform);
+            agentObj.transform.Find("AgentShadow").gameObject.SetActive(false);
             IActuatorSensor agentHW = agentObj.GetComponent(typeof(IActuatorSensor)) as IActuatorSensor;
             agentHW.AgentDescriptor = agentDesc;
             agentHW.ResetToInitStatus();

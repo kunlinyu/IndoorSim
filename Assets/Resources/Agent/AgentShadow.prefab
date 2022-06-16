@@ -9,15 +9,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7441340175770365787}
-  - component: {fileID: 7441340175770365786}
-  - component: {fileID: 7441340175770365785}
+  - component: {fileID: 7725204021633066513}
+  - component: {fileID: 7589894817202814784}
   m_Layer: 0
   m_Name: AgentShadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7441340175770365787
 Transform:
   m_ObjectHideFlags: 0
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!120 &7441340175770365786
+--- !u!120 &7725204021633066513
 LineRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
@@ -74,7 +74,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 5
   m_Positions: []
   m_Parameters:
     serializedVersion: 3
@@ -84,7 +84,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.10954094
+        value: 0.1
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -123,18 +123,18 @@ LineRenderer:
       m_Mode: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 2
-    numCapVertices: 0
-    alignment: 1
+    numCornerVertices: 0
+    numCapVertices: 3
+    alignment: 0
     textureMode: 0
     textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
   m_MaskInteraction: 0
-  m_UseWorldSpace: 1
+  m_UseWorldSpace: 0
   m_Loop: 1
   m_ApplyActiveColorSpace: 1
---- !u!114 &7441340175770365785
+--- !u!114 &7589894817202814784
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,8 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a7ea75bf4584d78b70829b4605e7bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 0.5
   freeMat: {fileID: 2100000, guid: 1589dad803578fa9f83f29a9968511f5, type: 2}
   collidedMat: {fileID: 2100000, guid: 6d02a73ae9bddc4c291b3abc133a2fdf, type: 2}
   collided: 0
-  center: {x: 4.660963, y: 0, z: 6.686959}
+  meta: {fileID: 0}
+  center: {x: 0, y: 0, z: 0}

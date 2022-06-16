@@ -227,7 +227,7 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "capsule")
             {
-                if (oldToolName != "capsule")
+                if (oldToolName != "capsule" && indoorSimData.currentSimData!= null)
                 {
                     toolObj = new GameObject("capsule");
                     var agentEditor = toolObj.AddComponent<AgentEditor>();
@@ -235,6 +235,18 @@ public class SimDataController : MonoBehaviour
                     currentTool = agentEditor;
 
                     Debug.Log("Switch to tool capsule");
+                }
+            }
+            else if (e.name == "bronto")
+            {
+                if (oldToolName != "bronto" && indoorSimData.currentSimData!= null)
+                {
+                    toolObj = new GameObject("bronto");
+                    var agentEditor = toolObj.AddComponent<AgentEditor>();
+                    agentEditor.agentType = "bronto";
+                    currentTool = agentEditor;
+
+                    Debug.Log("Switch to tool bronto");
                 }
             }
             else if (e.name == "astar")
@@ -247,30 +259,6 @@ public class SimDataController : MonoBehaviour
                     currentTool = astarTool;
 
                     Debug.Log("Switch to tool astar");
-                }
-            }
-            else if (e.name == "boxcapsule")
-            {
-                if (oldToolName != "boxcapsule")
-                {
-                    toolObj = new GameObject("boxcapsule");
-                    var agentEditor = toolObj.AddComponent<AgentEditor>();
-                    agentEditor.agentType = "boxcapsule";
-                    currentTool = agentEditor;
-
-                    Debug.Log("Switch to tool boxcapsule");
-                }
-            }
-            else if (e.name == "bronto")
-            {
-                if (oldToolName != "bronto")
-                {
-                    toolObj = new GameObject("bronto");
-                    var agentEditor = toolObj.AddComponent<AgentEditor>();
-                    agentEditor.agentType = "bronto";
-                    currentTool = agentEditor;
-
-                    Debug.Log("Switch to tool bronto");
                 }
             }
             else if (e.name == "save")

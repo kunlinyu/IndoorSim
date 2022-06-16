@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: bronto
   m_EditorClassIdentifier: 
   typeName: bronto
-  collisionRadius: 0.4
+  collisionRadius: 0.5
   height: 1.2
-  MovingMode: 1
+  movingMode: 1

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: capsule
   m_EditorClassIdentifier: 
   typeName: capsule
-  prefabName: capsule
-  collisionRadius: 0.5
+  collisionRadius: 0.7
   height: 1
-  MovingMode: 0
+  movingMode: 0
