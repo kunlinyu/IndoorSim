@@ -18,6 +18,7 @@ public class SelectDrag : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { get; set; }
     public MapView? mapView { get; set; }
+    public SimulationView? simView { set; get; }
     public int sortingLayerId { get; set; }
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
@@ -64,6 +65,7 @@ public class SelectDrag : MonoBehaviour, ITool
     void Update()
     {
         if (mapView == null) throw new InvalidOperationException("mapView null");
+        if (simView == null) throw new InvalidOperationException("simView null");
         if (IndoorSimData == null) throw new InvalidOperationException("IndoorSim null");
         Selectable? pointedEntity = MousePickController.PointedEntity;
 
@@ -158,9 +160,17 @@ public class SelectDrag : MonoBehaviour, ITool
                             if (!selectedSpaces.Contains(sc))
                                 selectedSpaces.Add(sc);
                         }
+                    foreach (var entry in simView.agent2Obj)
+                        if (selectBox.Contains(new Point(entry.Key.x, entry.Key.y)))
+                        {
+                            var ac = entry.Value.GetComponent<AgentController>();
+                            ac.selected = true;
+                            if (!selectedAgents.Contains(ac))
+                                selectedAgents.Add(ac);
+                        }
 
 
-                    if (selectedVertices.Count > 0)
+                    if (selectedVertices.Count > 0 || selectedAgents.Count > 0)
                         SwitchStatus(SelectStatus.Selected);
                     else
                         SwitchStatus(SelectStatus.Idle);
@@ -278,13 +288,15 @@ public class SelectDrag : MonoBehaviour, ITool
                         if (selectedVertices.Count > 0)
                             IndoorSimData.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newVertexCoor);
 
-                        foreach (AgentController ac in selectedAgents)
+                        var oldAgentDescs = selectedAgents.Select(ac => ac.AgentDescriptor).ToList();
+                        var newAgentDescs = oldAgentDescs.Select(ad =>
                         {
-                            var newAgentDesc = ac.AgentDescriptor.Clone();
+                            var newAgentDesc = ad.Clone();
                             newAgentDesc.x += delta.x;
                             newAgentDesc.y += delta.z;
-                            IndoorSimData.UpdateAgent(ac.AgentDescriptor, newAgentDesc);
-                        }
+                            return newAgentDesc;
+                        }).ToList();
+                        IndoorSimData.UpdateAgents(oldAgentDescs, newAgentDescs);
                         if (adhoc)
                         {
                             adhoc = false;

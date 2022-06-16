@@ -8,7 +8,7 @@ public class SimulationView : MonoBehaviour
 
     private GameObject agentParentObj;
 
-    private Dictionary<AgentDescriptor, GameObject> agent2Obj = new Dictionary<AgentDescriptor, GameObject>();
+    public Dictionary<AgentDescriptor, GameObject> agent2Obj = new Dictionary<AgentDescriptor, GameObject>();
 
     void Start()
     {

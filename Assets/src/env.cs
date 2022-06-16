@@ -18,6 +18,7 @@ public class env : MonoBehaviour
 
         simDataController.indoorSimData = indoorSimData;
         simDataController.mapView = mapView;
+        simDataController.simView = simulationView;
 
         simController.indoorSimData = indoorSimData;
         simController.simulationView = simulationView;

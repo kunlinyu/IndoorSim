@@ -12,6 +12,7 @@ public class SimDataController : MonoBehaviour
 {
     public IndoorSimData indoorSimData;
     public MapView mapView;
+    public SimulationView simView;
     GameObject toolObj;
     ITool currentTool;
 
@@ -284,6 +285,7 @@ public class SimDataController : MonoBehaviour
             if (currentTool != null)
             {
                 currentTool.mapView = mapView;
+                currentTool.simView = simView;
                 currentTool.IndoorSimData = indoorSimData;
             }
         }

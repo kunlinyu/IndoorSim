@@ -6,7 +6,21 @@ using UnityEngine;
 
 public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectable
 {
-    public AgentDescriptor AgentDescriptor { get; set; }
+    public AgentDescriptor agentDescriptor;
+
+    public AgentDescriptor AgentDescriptor
+    {
+        get => agentDescriptor;
+        set
+        {
+            agentDescriptor = value;
+            agentDescriptor.OnUpdate += () =>
+            {
+                transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
+                transform.rotation = Quaternion.Euler(0.0f, (float)AgentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
+            };
+        }
+    }
     public AbstractMotionExecutor? motionExecutor { get; set; }
     private bool reset = false;
     private Action<ISensorData> listener;
@@ -16,14 +30,12 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
     public AgentTypeMetaUnity? meta = null;
 
     private bool _highLight = false;
-    private bool needUpdateRenderer = true;
     public bool highLight
     {
         get => _highLight;
         set
         {
             _highLight = value;
-            needUpdateRenderer = true;
         }
     }
     private bool _selected = false;
@@ -33,7 +45,7 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
         set
         {
             _selected = value;
-            needUpdateRenderer = true;
+            transform.Find("AgentShadow").gameObject.SetActive(_selected);
         }
     }
     public SelectableType type { get => SelectableType.Agent; }

@@ -506,8 +506,6 @@ public class IndoorSimData
 
         if (!agentMetaList.ContainsKey(meta.typeName))
             agentMetaList.Add(meta.typeName, meta);
-
-        // OnAgentCreate?.Invoke(agent);
     }
 
     public void RemoveAgent(AgentDescriptor agent)
@@ -527,5 +525,18 @@ public class IndoorSimData
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
         currentSimData.history.DoCommit(ReducedInstruction.UpdateAgent(oldAgent, newAgent));
         currentSimData.UpdateAgent(oldAgent, newAgent);
+    }
+
+    public void UpdateAgents(List<AgentDescriptor> oldAgents, List<AgentDescriptor> newAgents)
+    {
+        if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
+        if (oldAgents.Count != newAgents.Count) throw new ArgumentException("old agents count != new agents count");
+        currentSimData.history.SessionStart();
+        for (int i = 0; i < oldAgents.Count; i++)
+        {
+            currentSimData.history.DoStep(ReducedInstruction.UpdateAgent(oldAgents[i], newAgents[i]));
+            currentSimData.UpdateAgent(oldAgents[i], newAgents[i]);
+        }
+        currentSimData.history.SessionCommit();
     }
 }

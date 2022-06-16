@@ -41,7 +41,7 @@ public class SimData
     }
     public void RemoveAgentEqualsTo(AgentDescriptor agent)
     {
-        int index = agents.FindIndex(a => a.Equals(agent));
+        int index = agents.FindIndex(a => a.ValueEquals(agent));
         if (index < 0) throw new ArgumentException("can not find the agent to be removed");
         AgentDescriptor goingToRemoved = agents[index];
         agents.RemoveAt(index);
@@ -56,10 +56,8 @@ public class SimData
     }
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
     {
-        int index = agents.FindIndex(a => a.Equals(oldAgent));
+        int index = agents.FindIndex(a => a.ValueEquals(oldAgent));
         if (index < 0) throw new ArgumentException("can not find the agent to be updated");
-        OnAgentRemoved?.Invoke(oldAgent);
         agents[index].CopyFrom(newAgent);
-        OnAgentCreate?.Invoke(agents[index]);
     }
 }
