@@ -51,7 +51,7 @@ public class MousePickController : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float radius = Camera.main.transform.position.y * radiusFactor;
-        RaycastHit[] hits = Physics.SphereCastAll(Camera.main.transform.position, radius, ray.direction, 100.0f, LayerMask.NameToLayer("Default"));
+        RaycastHit[] hits = Physics.SphereCastAll(Camera.main.transform.position, radius, ray.direction, 100.0f, LayerMask.GetMask("Default"));
 
         VertexController? nearestVertex = null;
         BoundaryController? nearestBoundary = null;

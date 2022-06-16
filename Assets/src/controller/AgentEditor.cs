@@ -19,8 +19,15 @@ public class AgentEditor : MonoBehaviour, ITool
     {
         GameObject agentPrefab = Resources.Load<GameObject>("Agent/" + agentType);
         agent = Instantiate(agentPrefab, transform);
-        agent.layer = LayerMask.NameToLayer("ToolDraft");
+        SetLayerRecursively(agent, LayerMask.NameToLayer("ToolDraft"));
     }
+
+    public static void SetLayerRecursively(GameObject obj, int layerNumber)
+    {
+        foreach (Transform trans in obj.GetComponentsInChildren<Transform>(true))
+            trans.gameObject.layer = layerNumber;
+    }
+
 
     void Update()
     {
