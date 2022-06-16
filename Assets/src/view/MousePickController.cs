@@ -37,7 +37,7 @@ public class MousePickController : MonoBehaviour
     static public RLineController? PointedRLine { get => pointedRLine; }
 
     static private AgentController? pointedAgent = null;
-    static private AgentController? PointedAgent { get => pointedAgent; }
+    static public AgentController? PointedAgent { get => pointedAgent; }
 
     public UIEventDispatcher? eventDispatcher;
 
