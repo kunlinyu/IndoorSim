@@ -22,6 +22,7 @@ public class IndoorSimData
     [JsonPropertyAttribute] private List<SimData> simDataList = new List<SimData>();
     [JsonPropertyAttribute] public Dictionary<string, AgentTypeMeta> agentMetaList = new Dictionary<string, AgentTypeMeta>();
     [JsonIgnore] public SimData? currentSimData { get; private set; }
+    [JsonIgnore] public bool simulating = false;
 
     [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
     [JsonIgnore] private InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
@@ -277,6 +278,7 @@ public class IndoorSimData
 
     public void SelectMap()
     {
+        if (simulating) return;
         activeHistory = history;
         activeInstructionInterpreter = instructionInterpreter;
         if (currentSimData != null)
@@ -290,6 +292,7 @@ public class IndoorSimData
 
     public void SelectSimulation(string simName)
     {
+        if (simulating) return;
         int index = simDataList.FindIndex(sim => sim.name == simName);
         if (index < 0) throw new ArgumentException("can not find simulation with name: " + simName);
 
@@ -310,6 +313,7 @@ public class IndoorSimData
 
     public SimData? AddSimulation(string name)
     {
+        if (simulating) return null;
         if (simDataList.Any(sim => sim.name == name)) return null;
         if (currentSimData != null)
         {
@@ -333,6 +337,7 @@ public class IndoorSimData
 
     public void RemoveSimulation(int index)
     {
+        if (simulating) return;
         if (index >= simDataList.Count) throw new ArgumentException("simulation index out of range");
         simDataList.RemoveAt(index);
         OnSimulationListUpdated?.Invoke(simDataList);
@@ -340,6 +345,7 @@ public class IndoorSimData
 
     public void RemoveSimulation(string name)
     {
+        if (simulating) return;
         int index = simDataList.FindIndex(simData => simData.name == name);
         if (index < 0) throw new ArgumentException("can not find simulation with name: " + name);
         simDataList.RemoveAt(index);
@@ -348,6 +354,7 @@ public class IndoorSimData
 
     public void RenameSimulation(string oldName, string newName)
     {
+        if (simulating) return;
         int index = simDataList.FindIndex(simData => simData.name == oldName);
         if (index < 0) throw new ArgumentException("can not find simulation with name: " + oldName);
         simDataList[index].name = newName;
@@ -356,6 +363,7 @@ public class IndoorSimData
 
     public bool Undo()
     {
+        if (simulating) return false;
         var instructions = activeHistory.Undo(out var snapShot);
         if (instructions.Count > 0)
         {
@@ -377,6 +385,7 @@ public class IndoorSimData
 
     public bool Redo()
     {
+        if (simulating) return false;
         var instructions = activeHistory.Redo(out var snapShot);
         if (instructions.Count > 0)
         {

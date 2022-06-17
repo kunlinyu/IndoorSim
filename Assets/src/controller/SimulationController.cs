@@ -31,11 +31,12 @@ public class SimulationController : MonoBehaviour
                         return;
                     }
 
+                    indoorSimData.simulating = true;
                     indoorSimData.currentSimData.tasks.Clear();
 
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
-                        new ActionMoveToContainer("123"),
-                    }));
+                    // indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
+                    //     new ActionMoveToContainer("123"),
+                    // }));
                     // indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
                     //     new ActionMoveToContainer("123"),
                     // }));
@@ -91,6 +92,7 @@ public class SimulationController : MonoBehaviour
             {
                 simulation?.ResetAll();
                 simulation = null;
+                indoorSimData.simulating = false;
                 Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" stopped");
             }
 

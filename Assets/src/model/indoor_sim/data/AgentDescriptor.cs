@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 #nullable enable
 
@@ -13,7 +14,7 @@ public class AgentDescriptor
     public string? containerId;  // if containerId != null, them there should be one container with this id in IndoorData.
                                  // And the x, y will be the Centroid of the container.geom
 
-    public Action OnUpdate = () => { };
+    [JsonIgnore] public Action OnUpdate = () => { };
 
     public AgentDescriptor Clone()
     {

@@ -120,8 +120,6 @@ public class HierarchyPanelController : MonoBehaviour
             simFoldout.RegisterCallback<ClickEvent>(evt =>
             {
                 Debug.Log("simFoldout clicked");
-                CollapsesAll();
-                simFoldout.SetValueWithoutNotify(true);
                 OnSelectSimulation?.Invoke(simFoldout.text.Substring(simFoldoutPrefix.Length));
             });
             foreach (var agent in simulationJson["agents"])
