@@ -525,6 +525,7 @@ public class IndoorSimData
         if (currentSimData == null) throw new InvalidOperationException("switch to one of simulation first");
         currentSimData.history.DoCommit(ReducedInstruction.UpdateAgent(oldAgent, newAgent));
         currentSimData.UpdateAgent(oldAgent, newAgent);
+        OnSimulationListUpdated?.Invoke(simDataList);
     }
 
     public void UpdateAgents(List<AgentDescriptor> oldAgents, List<AgentDescriptor> newAgents)
@@ -538,5 +539,6 @@ public class IndoorSimData
             currentSimData.UpdateAgent(oldAgents[i], newAgents[i]);
         }
         currentSimData.history.SessionCommit();
+        OnSimulationListUpdated?.Invoke(simDataList);
     }
 }

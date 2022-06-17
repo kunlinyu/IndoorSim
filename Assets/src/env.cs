@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class env : MonoBehaviour
@@ -24,9 +22,7 @@ public class env : MonoBehaviour
         simController.simulationView = simulationView;
     }
 
-    // Update is called once per frame
     void Update()
     {
-
     }
 }

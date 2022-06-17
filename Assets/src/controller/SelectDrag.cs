@@ -288,15 +288,19 @@ public class SelectDrag : MonoBehaviour, ITool
                         if (selectedVertices.Count > 0)
                             IndoorSimData.UpdateVertices(selectedVertices.Select(vc => vc.Vertex).ToList(), newVertexCoor);
 
-                        var oldAgentDescs = selectedAgents.Select(ac => ac.AgentDescriptor).ToList();
-                        var newAgentDescs = oldAgentDescs.Select(ad =>
+                        if (selectedAgents.Count > 0)
                         {
-                            var newAgentDesc = ad.Clone();
-                            newAgentDesc.x += delta.x;
-                            newAgentDesc.y += delta.z;
-                            return newAgentDesc;
-                        }).ToList();
-                        IndoorSimData.UpdateAgents(oldAgentDescs, newAgentDescs);
+                            var oldAgentDescs = selectedAgents.Select(ac => ac.AgentDescriptor).ToList();
+                            var newAgentDescs = oldAgentDescs.Select(ad =>
+                            {
+                                var newAgentDesc = ad.Clone();
+                                newAgentDesc.x += delta.x;
+                                newAgentDesc.y += delta.z;
+                                return newAgentDesc;
+                            }).ToList();
+                            IndoorSimData.UpdateAgents(oldAgentDescs, newAgentDescs);
+                        }
+
                         if (adhoc)
                         {
                             adhoc = false;
