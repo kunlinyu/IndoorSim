@@ -47,28 +47,34 @@ public class RLineController : MonoBehaviour, Selectable
     Vector2 textureOffset = new Vector2();
     LineRenderer lr;
 
+    Material lastMat = null;
+
     void Start()
     {
         lr = GetComponent<LineRenderer>();
     }
     void Update()
     {
+        Material currentMat;
 
         if (highLight)
-            GetComponent<LineRenderer>().material = materialHighlight;
+            currentMat = materialHighlight;
         else if (rLine.pass == PassType.AllowedToPass)
-            GetComponent<LineRenderer>().material = material;
+            currentMat = material;
         else if (rLine.pass == PassType.DoNotPass)
-            GetComponent<LineRenderer>().material = materialDark;
+            currentMat = materialDark;
         else
             throw new System.Exception("unknown pass type: " + rLine.pass);
 
-        if (rLine.pass == PassType.AllowedToPass && highLight)
+        if (currentMat != lastMat)
         {
-            textureOffset.x = (Time.time * -1.0f * scrollSpeed) % 1.0f;
-            textureOffset.y = 0.0f;
-            lr.material.SetTextureOffset("_MainTex", textureOffset);
+            GetComponent<LineRenderer>().material = currentMat;
+            lastMat = currentMat;
         }
+
+        textureOffset.x = (Time.time * -1.0f * scrollSpeed) % 1.0f;
+        textureOffset.y = 0.0f;
+        lr.material.SetTextureOffset("_MainTex", textureOffset);
     }
 }
 
