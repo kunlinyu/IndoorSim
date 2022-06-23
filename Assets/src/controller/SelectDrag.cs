@@ -185,12 +185,6 @@ public class SelectDrag : MonoBehaviour, ITool
                         LineRenderer lr = GetComponent<LineRenderer>();
                         lr.positionCount = 4;
                         lr.SetPositions(square.ToArray());
-                        lr.useWorldSpace = true;
-                        lr.loop = true;
-                        lr.startWidth = 0.1f;
-                        lr.endWidth = 0.1f;
-                        lr.material = draftMaterial;
-                        lr.sortingOrder = 1;
                     }
                     else
                     {

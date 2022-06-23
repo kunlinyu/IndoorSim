@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 #nullable enable
 
-public class Shelves2 : MonoBehaviour, ITool
+public class ShelvesEditor2 : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
@@ -48,15 +48,11 @@ public class Shelves2 : MonoBehaviour, ITool
     // Start is called before the first frame update
     void Start()
     {
-        firstToSecondObj = new GameObject("first to second");
-        firstToSecondObj.transform.SetParent(transform);
-        firstToSecondObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
-        firstToSecondObj.AddComponent<LineRenderer>();
+        firstToSecondObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+        firstToSecondObj.name = "first to second";
 
-        rectangleObj = new GameObject("rectangle");
-        rectangleObj.transform.SetParent(transform);
-        rectangleObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
-        rectangleObj.AddComponent<LineRenderer>();
+        rectangleObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+        rectangleObj.name = "rectangle";
     }
 
     void Update()
@@ -177,9 +173,9 @@ public class Shelves2 : MonoBehaviour, ITool
         {
             if (status == 3)
                 if (splitCount > 1)
-                    splitCount --;
+                    splitCount--;
                 else
-                    status --;
+                    status--;
             else if (status > 0) status--;
             if (status == 0) firstIsShelf = true;
         }
@@ -190,28 +186,17 @@ public class Shelves2 : MonoBehaviour, ITool
         // first to second
         if (status > 0)
         {
-            LineRenderer lr = firstToSecondObj.GetComponent<LineRenderer>();
 
             if (status == 1 && mouseSnapPosition == null)
-                lr.positionCount = 0;
+            {
+                firstToSecondObj.GetComponent<LineRenderer>().positionCount = 0;
+            }
             else
             {
+                var lr = firstToSecondObj.GetComponent<LineRenderer>();
                 lr.positionCount = 2;
                 lr.SetPosition(0, firstPoint);
                 lr.SetPosition(1, secondPoint);
-
-                lr.alignment = LineAlignment.TransformZ;
-                lr.useWorldSpace = true;
-
-                lr.loop = false;
-                lr.startWidth = 0.05f;
-                lr.endWidth = 0.05f;
-                lr.numCapVertices = 3;
-
-                lr.sortingLayerID = sortingLayerId;
-                lr.sortingOrder = 10;
-
-                lr.material = draftMaterial;
             }
         }
         else
@@ -221,30 +206,19 @@ public class Shelves2 : MonoBehaviour, ITool
 
         if (status > 1)
         {
-            LineRenderer lr = rectangleObj.GetComponent<LineRenderer>();
 
             if (status == 2 && mouseSnapPosition == null)
-                lr.positionCount = 0;
+            {
+                rectangleObj.GetComponent<LineRenderer>().positionCount = 0;
+            }
             else
             {
+                var lr = rectangleObj.GetComponent<LineRenderer>();
                 lr.positionCount = 4;
                 lr.SetPosition(0, firstPoint);
                 lr.SetPosition(1, firstPoint - secondPoint + lastPoint);
                 lr.SetPosition(2, lastPoint);
                 lr.SetPosition(3, secondPoint);
-
-                lr.alignment = LineAlignment.TransformZ;
-                lr.useWorldSpace = true;
-
-                lr.loop = false;
-                lr.startWidth = 0.05f;
-                lr.endWidth = 0.05f;
-                lr.numCapVertices = 3;
-
-                lr.sortingLayerID = sortingLayerId;
-                lr.sortingOrder = 10;
-
-                lr.material = draftMaterial;
             }
         }
         else
@@ -268,27 +242,15 @@ public class Shelves2 : MonoBehaviour, ITool
                     if (isShelf(firstIsShelf, shelvesObj.Count))
                         objName = "shelf";
                     objName += " " + shelvesObj.Count.ToString();
-                    GameObject obj = new GameObject(objName);
-                    obj.transform.SetParent(transform);
-                    obj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
+                    GameObject obj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+                    obj.name = objName;
                     shelvesObj.Add(obj);
-                    LineRenderer lr = obj.AddComponent<LineRenderer>();
-                    lr.alignment = LineAlignment.TransformZ;
-                    lr.useWorldSpace = true;
-                    lr.loop = false;
-                    lr.startWidth = 0.05f;
-                    lr.endWidth = 0.05f;
-                    lr.numCapVertices = 3;
-                    lr.sortingLayerID = sortingLayerId;
-                    lr.sortingOrder = 10;
-                    lr.material = draftMaterial;
                 }
                 while (shelvesObj.Count > spaceVectors.Count)
                 {
                     Destroy(shelvesObj[shelvesObj.Count - 1]);
                     shelvesObj.RemoveAt(shelvesObj.Count - 1);
                 }
-
                 for (int i = 0; i < shelvesObj.Count; i++)
                 {
                     shelvesObj[i].GetComponent<LineRenderer>().positionCount = 4;

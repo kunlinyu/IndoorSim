@@ -4,7 +4,7 @@ using NetTopologySuite.Geometries;
 using UnityEngine;
 #nullable enable
 
-public class Shelves : MonoBehaviour, ITool
+public class ShelvesEditor : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
@@ -48,20 +48,14 @@ public class Shelves : MonoBehaviour, ITool
 
     void Start()
     {
-        firstToSecondObj = new GameObject("first to second");
-        firstToSecondObj.transform.SetParent(transform);
-        firstToSecondObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
-        firstToSecondObj.AddComponent<LineRenderer>();
+        firstToSecondObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+        firstToSecondObj.name = "first to second";
 
-        shelfWidthLineObj = new GameObject("shelf width line");
-        shelfWidthLineObj.transform.SetParent(transform);
-        shelfWidthLineObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
-        shelfWidthLineObj.AddComponent<LineRenderer>();
+        shelfWidthLineObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+        shelfWidthLineObj.name = "shelf width line";
 
-        corridorWidthLineObj = new GameObject("corridor width line");
-        corridorWidthLineObj.transform.SetParent(transform);
-        corridorWidthLineObj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
-        corridorWidthLineObj.AddComponent<LineRenderer>();
+        corridorWidthLineObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+        corridorWidthLineObj.name = "corridor width line";
     }
 
 
@@ -217,28 +211,17 @@ public class Shelves : MonoBehaviour, ITool
         // first to second
         if (status > 0)
         {
-            LineRenderer lr = firstToSecondObj.GetComponent<LineRenderer>();
 
             if (status == 1 && mouseSnapPosition == null)
-                lr.positionCount = 0;
+            {
+                firstToSecondObj.GetComponent<LineRenderer>().positionCount = 0;
+            }
             else
             {
+                var lr = firstToSecondObj.GetComponent<LineRenderer>();
                 lr.positionCount = 2;
                 lr.SetPosition(0, firstPoint);
                 lr.SetPosition(1, secondPoint);
-
-                lr.alignment = LineAlignment.TransformZ;
-                lr.useWorldSpace = true;
-
-                lr.loop = false;
-                lr.startWidth = 0.05f;
-                lr.endWidth = 0.05f;
-                lr.numCapVertices = 3;
-
-                lr.sortingLayerID = sortingLayerId;
-                lr.sortingOrder = 10;
-
-                lr.material = draftMaterial;
             }
         }
         else
@@ -249,11 +232,10 @@ public class Shelves : MonoBehaviour, ITool
         // shelf width
         if (status == 2 || status == 3)
         {
-            LineRenderer lr = shelfWidthLineObj.GetComponent<LineRenderer>();
 
             if (status == 2 && mouseSnapPosition == null)
             {
-                lr.positionCount = 0;
+                shelfWidthLineObj.GetComponent<LineRenderer>().positionCount = 0;
             }
             else
             {
@@ -262,25 +244,12 @@ public class Shelves : MonoBehaviour, ITool
                 Vector3 firstRight = firstPoint - right * shelfWidth;
                 Vector3 secondRight = secondPoint - right * shelfWidth;
 
+                var lr = shelfWidthLineObj.GetComponent<LineRenderer>();
                 lr.positionCount = 4;
-
                 lr.SetPosition(0, firstPoint);
                 lr.SetPosition(1, firstRight);
                 lr.SetPosition(2, secondRight);
                 lr.SetPosition(3, secondPoint);
-
-                lr.alignment = LineAlignment.TransformZ;
-                lr.useWorldSpace = true;
-
-                lr.loop = false;
-                lr.startWidth = 0.05f;
-                lr.endWidth = 0.05f;
-                lr.numCapVertices = 3;
-
-                lr.sortingLayerID = sortingLayerId;
-                lr.sortingOrder = 10;
-
-                lr.material = draftMaterial;
             }
         }
         else
@@ -291,11 +260,10 @@ public class Shelves : MonoBehaviour, ITool
         // corridor width
         if (status == 3)
         {
-            LineRenderer lr = corridorWidthLineObj.GetComponent<LineRenderer>();
 
             if (mouseSnapPosition == null)
             {
-                lr.positionCount = 0;
+                corridorWidthLineObj.GetComponent<LineRenderer>().positionCount = 0;
             }
             else
             {
@@ -303,7 +271,7 @@ public class Shelves : MonoBehaviour, ITool
 
                 if (corridorWidth == 0.0f)
                 {
-                    lr.positionCount = 0;
+                    corridorWidthLineObj.GetComponent<LineRenderer>().positionCount = 0;
                 }
                 else
                 {
@@ -313,25 +281,12 @@ public class Shelves : MonoBehaviour, ITool
                     Vector3 firstRightRight = firstRight - right * corridorWidth;
                     Vector3 secondRightRight = secondRight - right * corridorWidth;
 
+                    var lr = corridorWidthLineObj.GetComponent<LineRenderer>();
                     lr.positionCount = 4;
-
                     lr.SetPosition(0, firstRight);
                     lr.SetPosition(1, firstRightRight);
                     lr.SetPosition(2, secondRightRight);
                     lr.SetPosition(3, secondRight);
-
-                    lr.alignment = LineAlignment.TransformZ;
-                    lr.useWorldSpace = true;
-
-                    lr.loop = false;
-                    lr.startWidth = 0.05f;
-                    lr.endWidth = 0.05f;
-                    lr.numCapVertices = 3;
-
-                    lr.sortingLayerID = sortingLayerId;
-                    lr.sortingOrder = 10;
-
-                    lr.material = draftMaterial;
                 }
             }
         }
@@ -356,20 +311,9 @@ public class Shelves : MonoBehaviour, ITool
                     if (isShelf(firstIsShelf, shelvesObj.Count))
                         objName = "shelf";
                     objName += " " + shelvesObj.Count.ToString();
-                    GameObject obj = new GameObject(objName);
-                    obj.transform.SetParent(transform);
-                    obj.transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
+                    GameObject obj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesLineRenderer"), this.transform);
+                    obj.name = objName;
                     shelvesObj.Add(obj);
-                    LineRenderer lr = obj.AddComponent<LineRenderer>();
-                    lr.alignment = LineAlignment.TransformZ;
-                    lr.useWorldSpace = true;
-                    lr.loop = false;
-                    lr.startWidth = 0.05f;
-                    lr.endWidth = 0.05f;
-                    lr.numCapVertices = 3;
-                    lr.sortingLayerID = sortingLayerId;
-                    lr.sortingOrder = 10;
-                    lr.material = draftMaterial;
                 }
                 while (shelvesObj.Count > spaceVectors.Count)
                 {

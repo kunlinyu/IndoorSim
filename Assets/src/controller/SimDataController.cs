@@ -18,8 +18,6 @@ public class SimDataController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
 
-    public Camera screenshotCamera;
-
     void Start()
     {
         eventDispatcher.eventListener += EventListener;
@@ -100,9 +98,9 @@ public class SimDataController : MonoBehaviour
             {
                 if (oldToolName != "lineString")
                 {
-                    toolObj = new GameObject("lineString");
-                    currentTool = toolObj.AddComponent<LineStringEditor>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
+                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/LineStringEditor"), this.transform);
+                    toolObj.name = "lineString";
+                    currentTool = toolObj.GetComponent<LineStringEditor>();
                     Debug.Log("Switch to tool lineString");
                 }
             }
@@ -110,12 +108,9 @@ public class SimDataController : MonoBehaviour
             {
                 if (oldToolName != "select drag")
                 {
-                    toolObj = new GameObject("select drag");
-                    SelectDrag selectDrag = toolObj.AddComponent<SelectDrag>();
-                    selectDrag.draftMaterial = Resources.Load<Material>("Materials/tool select drag");
-                    selectDrag.screenshotCamera = screenshotCamera;
-
-                    currentTool = selectDrag;
+                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SelectDrag"), this.transform);
+                    toolObj.name = "select drag";
+                    currentTool = toolObj.GetComponent<SelectDrag>();
                     Debug.Log("Switch to tool select drag");
                 }
             }
@@ -171,9 +166,9 @@ public class SimDataController : MonoBehaviour
             {
                 if (oldToolName != "shelves")
                 {
-                    toolObj = new GameObject("shelves");
-                    currentTool = toolObj.AddComponent<Shelves>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
+                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor"), this.transform);
+                    toolObj.name = "shelves";
+                    currentTool = toolObj.GetComponent<ShelvesEditor>();
                     Debug.Log("Switch to tool shelves");
                 }
             }
@@ -181,9 +176,9 @@ public class SimDataController : MonoBehaviour
             {
                 if (oldToolName != "shelves2")
                 {
-                    toolObj = new GameObject("shelves2");
-                    currentTool = toolObj.AddComponent<Shelves2>();
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
+                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor2"), this.transform);
+                    toolObj.name = "shelves2";
+                    currentTool = toolObj.GetComponent<ShelvesEditor2>();
                     Debug.Log("Switch to tool shelves2");
                 }
             }

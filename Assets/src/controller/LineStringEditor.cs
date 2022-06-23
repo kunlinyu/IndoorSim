@@ -9,8 +9,8 @@ public class LineStringEditor : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { set; get; }
-    public Material? draftMaterial { set; get; }
+    public int sortingLayerId { set; get; }  // TODO Remove
+    public Material? draftMaterial { set; get; }  // TODO Remove
     public bool MouseOnUI { set; get; }
     private Coordinate? lastCoor = null;
     private CellVertex? lastVertex = null;
@@ -123,18 +123,6 @@ public class LineStringEditor : MonoBehaviour, ITool
             lr.positionCount = 2;
             lr.SetPosition(0, Utils.Coor2Vec(mousePosition));
             lr.SetPosition(1, Utils.Coor2Vec(lastCoor));
-            lr.alignment = LineAlignment.TransformZ;    // border should face to sky
-            lr.useWorldSpace = true;
-
-            lr.loop = false;
-            lr.startWidth = 0.05f;
-            lr.endWidth = 0.05f;
-            lr.numCapVertices = 3;
-
-            lr.sortingLayerID = sortingLayerId;
-            lr.sortingOrder = 10;
-
-            lr.material = draftMaterial;
         }
     }
 }
