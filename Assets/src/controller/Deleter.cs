@@ -14,13 +14,13 @@ public class Deleter : MonoBehaviour, ITool
     public bool MouseOnUI { set; get; }
 
     private Texture2D? cursorTexture;
-    private Vector2 hotspot;
+    private Vector2 hotSpot;
     // Start is called before the first frame update
     void Start()
     {
         cursorTexture = Resources.Load<Texture2D>("cursor/delete");
-        hotspot = new Vector2(0.0f, 0.0f);
-        UnityEngine.Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
+        hotSpot = new Vector2(0.0f, 0.0f);
+        UnityEngine.Cursor.SetCursor(cursorTexture, hotSpot, CursorMode.Auto);
         MousePickController.pickType = CurrentPickType.Boundary | CurrentPickType.Agent;
     }
 
@@ -29,9 +29,9 @@ public class Deleter : MonoBehaviour, ITool
     {
         if (MousePickController.PointedEntity != null &&
            (MousePickController.PointedEntity.type == SelectableType.Boundary || MousePickController.PointedEntity.type == SelectableType.Agent))
-            UnityEngine.Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
+            UnityEngine.Cursor.SetCursor(cursorTexture, hotSpot, CursorMode.Auto);
         else
-            UnityEngine.Cursor.SetCursor(null, hotspot, CursorMode.Auto);
+            UnityEngine.Cursor.SetCursor(null, hotSpot, CursorMode.Auto);
 
         if (Input.GetMouseButtonUp(0) && MousePickController.PointedEntity != null && MousePickController.PointedEntity.type == SelectableType.Boundary)
             IndoorSimData!.RemoveBoundary(((BoundaryController)MousePickController.PointedEntity).Boundary);

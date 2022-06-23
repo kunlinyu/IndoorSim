@@ -15,17 +15,17 @@ public class LineStringEditor : MonoBehaviour, ITool
     private Coordinate? lastCoor = null;
     private CellVertex? lastVertex = null;
 
-    private Texture2D? cursurTexture;
-    private Vector2 hotspot;
+    private Texture2D? cursorTexture;
+    private Vector2 hotSpot;
 
     void Awake()
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
         GetComponent<LineRenderer>().positionCount = 0;
 
-        cursurTexture = Resources.Load<Texture2D>("cursor/pen");
-        hotspot = new Vector2(0.0f, 0.0f);
-        UnityEngine.Cursor.SetCursor(cursurTexture, hotspot, CursorMode.Auto);
+        cursorTexture = Resources.Load<Texture2D>("cursor/pen");
+        hotSpot = new Vector2(0.0f, 0.0f);
+        UnityEngine.Cursor.SetCursor(cursorTexture, hotSpot, CursorMode.Auto);
     }
     void Update()
     {

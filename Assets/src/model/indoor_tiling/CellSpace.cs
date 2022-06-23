@@ -157,7 +157,7 @@ public class CellSpace : Container
     public static CellSpace MergeOrMinusCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)
     {
         // If the two arguments touches with each other, this function will merge them.
-        // If one argument contain another, this function will minus the inner one from the outter one.
+        // If one argument contain another, this function will minus the inner one from the outer one.
         // And there is no need to distinguish with case we need to solve because the code are same for both cases.
 
         // looking for nonCommonBoundaries
@@ -250,12 +250,12 @@ public class CellSpace : Container
                         holesSet.Remove(hole1);
                         holesSet.Remove(hole2);
                         holesSet.Add(MergeOrMinusCellSpace(hole1, hole2));
-                        goto aftermerge;
+                        goto AFTER_MERGE;
                     }
                 }
             }
 
-        aftermerge:;
+        AFTER_MERGE:;
 
         } while (merge);
 

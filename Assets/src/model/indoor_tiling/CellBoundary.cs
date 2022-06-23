@@ -190,13 +190,13 @@ public class CellBoundary
         int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P0));
         int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P1));
 
-        bool leftside = P0Index < P1Index;
+        bool leftSide = P0Index < P1Index;
         if (Math.Abs(P0Index - P1Index) != 1)
-            leftside = !leftside;
+            leftSide = !leftSide;
         if (!partOfShell)
-            leftside = !leftside;
+            leftSide = !leftSide;
 
-        if (leftside)
+        if (leftSide)
             leftSpace = space;
         else
             rightSpace = space;

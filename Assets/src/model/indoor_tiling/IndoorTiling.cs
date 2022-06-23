@@ -388,7 +388,7 @@ public class IndoorTiling
                     if (b1.geom.Crosses(b2.geom))
                     {
                         valid = false;
-                        goto validresult;
+                        goto VALID_RESULT;
                     }
         }
 
@@ -409,7 +409,7 @@ public class IndoorTiling
                     if (s1.Polygon.Relate(s2.Geom, kInnerInterSectionDE9IMPatter))
                     {
                         valid = false;
-                        goto validresult;
+                        goto VALID_RESULT;
                     }
 
         }
@@ -419,11 +419,11 @@ public class IndoorTiling
                 if (!s.ShellCellSpace().Polygon.Contains(hole.Polygon.Shell))
                 {
                     valid = false;
-                    goto validresult;
+                    goto VALID_RESULT;
                 }
         }
 
-    validresult:
+    VALID_RESULT:
 
         if (valid)
         {
@@ -732,7 +732,7 @@ public class IndoorTiling
         {
             Debug.Log(expectDigest);
             Debug.Log(increaseDigest);
-            throw new Exception("full Polygonizer mistmatch");
+            throw new Exception("full Polygonizer mismatch");
         }
     }
 

@@ -113,7 +113,7 @@ public class PSLGPolygonSearcher
         JumpInfo currentJump = initJump;
         JumpInfo? lastJump = null;
 
-        CellBoundary? combackBoundary = null;
+        CellBoundary? comebackBoundary = null;
 
         if (forceComebackDirection)
         {
@@ -128,7 +128,7 @@ public class PSLGPolygonSearcher
 
             Next(currentJump.target.Geom, closestPoints, startIndex, out int CWNextIndex, out int CCWNextIndex);
 
-            combackBoundary = ccw ? jumpInfos[CWNextIndex].through : jumpInfos[CCWNextIndex].through;
+            comebackBoundary = ccw ? jumpInfos[CWNextIndex].through : jumpInfos[CCWNextIndex].through;
         }
 
         int loopCount = 0;
@@ -183,7 +183,7 @@ public class PSLGPolygonSearcher
             if (forceComebackDirection)
             {
                 finish = System.Object.ReferenceEquals(currentJump.target, target)  &&
-                         System.Object.ReferenceEquals(currentJump.through, combackBoundary);
+                         System.Object.ReferenceEquals(currentJump.through, comebackBoundary);
             }
             else
             {

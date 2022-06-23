@@ -11,7 +11,7 @@ public class ConsistencyTest
 {
     private string extension = ".indoor.json";
 
-    public void GenericCase(string prefix, string caseName, bool fulltest)
+    public void GenericCase(string prefix, string caseName, bool fullTest)
     {
         if (!caseName.StartsWith(prefix + "_"))
             throw new ArgumentException($"case name should starts with \"{prefix}\"");
@@ -28,7 +28,7 @@ public class ConsistencyTest
         Debug.Log(expectDigest);
         Debug.Log("---");
         Debug.Log(offlineIndoorSimData.digestCache);
-        if (fulltest)
+        if (fullTest)
         {
             Assert.AreEqual(expectDigest, offlineIndoorSimData.digestCache);      // old cache
             Assert.AreEqual(expectDigest, offlineIndoorSimData.indoorData.CalcDigest());     // old calc

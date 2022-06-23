@@ -30,7 +30,7 @@ public class RLineEditor : MonoBehaviour, ITool
             else if (pointedRLine.rLine.pass == PassType.AllowedToPass)
                 IndoorSimData?.UpdateRLinePassType(pointedRLine.rLines, pointedRLine.fr, pointedRLine.to, PassType.DoNotPass);
             else
-                throw new System.Exception("unknown passtype");
+                throw new System.Exception("unknown pass type");
         }
     }
 }
