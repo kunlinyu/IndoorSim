@@ -117,25 +117,19 @@ public class VertexController : MonoBehaviour, Selectable
     {
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = step;
-        lr.alignment = LineAlignment.TransformZ;
-        lr.useWorldSpace = true;
-        lr.loop = true;
         lr.startWidth = width;
         lr.endWidth = width;
-        lr.numCapVertices = 0;
-        lr.numCornerVertices = 0;
-        lr.sortingLayerID = sortingLayerId;
-        lr.sortingOrder = sortingOrder;
         lr.SetPositions(CirclePosition(position, radius, step));
         lr.material = material;
 
+        // TODO: do not assign material if nothing changed
         if (selected)
         {
             lr.material = selectedMaterial;
         }
         else if (highLight)
         {
-            lr.SetPositions(CirclePosition(position, radius * 1.5f, step));
+            lr.SetPositions(CirclePosition(position, radius * 1.5f, step));  // TODO: maybe change scale is better
             lr.material = highLightMaterial;
             lr.startWidth = width * 1.5f;
             lr.endWidth = width * 1.5f;

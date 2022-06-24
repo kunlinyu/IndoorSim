@@ -102,20 +102,14 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     public void updateRenderer(Vector3[] positions)
     {
-        // TODO(extract resource) use prefab
         LineRenderer lr = GetComponent<LineRenderer>();
         lr.positionCount = boundary.geom.NumPoints;
         lr.SetPositions(positions);
-        lr.alignment = LineAlignment.TransformZ;
-        lr.useWorldSpace = true;
-        lr.loop = false;
         lr.startWidth = width;
         lr.endWidth = width;
-        lr.numCapVertices = 5;
-        lr.numCornerVertices = 0;
         lr.material = material;
-        lr.sortingOrder = 2;
 
+        // TODO: do not assign material if nothing changed
         if (selected)
             lr.material = selectedMaterial;
         else if (highLight)
@@ -156,8 +150,6 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             sr.sprite = null;
         }
-        sr.sortingOrder = 3;
-        sr.drawMode = SpriteDrawMode.Sliced;
 
         float arrowSizeFactor = 0.2f;
         float maxSpriteSize = 0.2f;

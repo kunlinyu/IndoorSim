@@ -47,18 +47,8 @@ public class SpaceController : MonoBehaviour, Selectable
     [SerializeField] public Material selectedMaterial;
     [SerializeField] public Material triangulationMaterial;
 
-    private GameObject polygonRenderObj;
-
     public float Distance(Vector3 vec)
     => (float)space.Polygon.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
-
-    void Awake()
-    {
-        polygonRenderObj = new GameObject("polygon render obj");
-        polygonRenderObj.transform.SetParent(transform);
-        polygonRenderObj.transform.localPosition = Vector3.zero;
-        polygonRenderObj.AddComponent<PolygonRenderer>();
-    }
 
     void Start()
     {
@@ -80,7 +70,7 @@ public class SpaceController : MonoBehaviour, Selectable
 
     void ReTriangulate()
     {
-        PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
+        PolygonRenderer pr = GetComponent<PolygonRenderer>();
         Mesh mesh = pr.UpdatePolygon(space.Polygon);
         Mesh triMesh = new Mesh();
         triMesh.Clear();
@@ -93,8 +83,8 @@ public class SpaceController : MonoBehaviour, Selectable
 
     public void updateRenderer(Vector3 offset)
     {
-        PolygonRenderer pr = polygonRenderObj.GetComponent<PolygonRenderer>();
-        polygonRenderObj.transform.localPosition = offset;
+        PolygonRenderer pr = GetComponent<PolygonRenderer>();
+        transform.localPosition = offset;
         pr.enableBorder = false;
         if (selected)
             pr.interiorMaterial = selectedMaterial;

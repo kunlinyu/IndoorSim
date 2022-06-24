@@ -42,52 +42,24 @@ public class MapView : MonoBehaviour
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
-            var obj = new GameObject(vertex.Id);
-            obj.transform.SetParent(vertexParentObj.transform);
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localRotation = Quaternion.identity;
+            var obj = Instantiate(Resources.Load<GameObject>("BasicShape/Vertex"), vertexParentObj.transform);
+            obj.name = vertex.Id;
+            obj.GetComponent<VertexController>().Vertex = vertex;
             vertex2Obj[vertex] = obj;
-
-            var controller = obj.AddComponent<VertexController>();
-            controller.Vertex = vertex;
-            controller.material = Resources.Load<Material>("Materials/vertex material");
-            controller.highLightMaterial = Resources.Load<Material>("Materials/vertex highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("Materials/vertex selected material");
-            controller.sortingLayerId = SortingLayer.NameToID("traffic");
         };
         indoorTiling.OnBoundaryCreated += (boundary) =>
         {
-            var obj = new GameObject(boundary.Id);
-            obj.transform.SetParent(boundaryParentObj.transform);
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localRotation = Quaternion.identity;
+            var obj = Instantiate(Resources.Load<GameObject>("BasicShape/Boundary"), boundaryParentObj.transform);
+            obj.name = boundary.Id;
+            obj.GetComponent<BoundaryController>().Boundary = boundary;
             boundary2Obj[boundary] = obj;
-
-            var controller = obj.AddComponent<BoundaryController>();
-            controller.material = Resources.Load<Material>("Materials/boundary material");
-            controller.logNonNaviMat = Resources.Load<Material>("Materials/boundary log non navi");
-            controller.phyNonNaviMat = Resources.Load<Material>("Materials/boundary phy non navi");
-            controller.highLightMaterial = Resources.Load<Material>("Materials/boundary highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("Materials/boundary selected material");
-            controller.Boundary = boundary;
         };
         indoorTiling.OnSpaceCreated += (space) =>
         {
-            var obj = new GameObject(space.Id);
-            obj.transform.SetParent(spaceParentObj.transform);
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localRotation = Quaternion.identity;
+            var obj = Instantiate(Resources.Load<GameObject>("BasicShape/Space"), spaceParentObj.transform);
+            obj.name = space.Id;
+            obj.GetComponent<SpaceController>().Space = space;
             cellspace2Obj[space] = obj;
-
-            var controller = obj.AddComponent<SpaceController>();
-            controller.material = Resources.Load<Material>("Materials/space material");
-            controller.logNonNaviMat = Resources.Load<Material>("Materials/space log non navi");
-            controller.phyNonNaviMat = Resources.Load<Material>("Materials/space phy non navi");
-
-            controller.highLightMaterial = Resources.Load<Material>("Materials/space highlight material");
-            controller.selectedMaterial = Resources.Load<Material>("Materials/space selected material");
-            controller.triangulationMaterial = Resources.Load<Material>("Materials/space triangulation material");
-            controller.Space = space;
         };
         indoorTiling.OnRLinesCreated += (rLines) =>
         {
