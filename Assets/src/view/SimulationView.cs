@@ -12,10 +12,7 @@ public class SimulationView : MonoBehaviour
 
     void Start()
     {
-        agentParentObj = new GameObject("agent parent");
-        agentParentObj.transform.SetParent(transform);
-        agentParentObj.transform.localPosition = Vector3.zero;
-        agentParentObj.transform.localRotation = Quaternion.identity;
+        agentParentObj = transform.Find("Agents").gameObject;
 
         indoorSimData.OnAgentCreate += (agentDesc) =>
         {

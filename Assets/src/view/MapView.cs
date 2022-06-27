@@ -19,26 +19,10 @@ public class MapView : MonoBehaviour
 
     void Start()
     {
-        vertexParentObj = new GameObject("vertex parent");
-        vertexParentObj.transform.SetParent(transform);
-        vertexParentObj.transform.localPosition = Vector3.zero;
-        vertexParentObj.transform.localRotation = Quaternion.identity;
-
-        boundaryParentObj = new GameObject("boundary parent");
-        boundaryParentObj.transform.SetParent(transform);
-        boundaryParentObj.transform.localPosition = Vector3.zero;
-        boundaryParentObj.transform.localRotation = Quaternion.identity;
-
-        spaceParentObj = new GameObject("space parent");
-        spaceParentObj.transform.SetParent(transform);
-        spaceParentObj.transform.localPosition = Vector3.zero;
-        spaceParentObj.transform.localRotation = Quaternion.identity;
-
-        rLineParentObj = new GameObject("rLine parent");
-        rLineParentObj.transform.SetParent(transform);
-        rLineParentObj.transform.localPosition = Vector3.zero;
-        rLineParentObj.transform.localRotation = Quaternion.identity;
-
+        vertexParentObj = transform.Find("Vertices").gameObject;
+        boundaryParentObj = transform.Find("Boundaries").gameObject;
+        spaceParentObj = transform.Find("Spaces").gameObject;
+        rLineParentObj = transform.Find("RLines").gameObject;
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
