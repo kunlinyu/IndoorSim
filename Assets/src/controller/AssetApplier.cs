@@ -40,19 +40,8 @@ public class AssetApplier : MonoBehaviour, ITool
             boundaryRenderObjs.Clear();
             foreach (var boundary in assetIndoorData.boundaryPool)
             {
-                GameObject obj = new GameObject("asset boundary");
-                obj.transform.SetParent(transform);
-                obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-                LineRenderer lr = obj.AddComponent<LineRenderer>();
-                lr.material = draftMaterial;
-                lr.alignment = LineAlignment.TransformZ;    // border should face to sky
-                lr.useWorldSpace = true;
-                lr.loop = false;
-                lr.startWidth = 0.05f;
-                lr.endWidth = 0.05f;
-                lr.numCapVertices = 3;
-                lr.sortingLayerID = sortingLayerId;
-                lr.sortingOrder = 10;
+                var obj = Instantiate(Resources.Load<GameObject>("BasicShape/BoundaryBare"), this.transform);
+                obj.name = "boundary draft";
                 boundaryRenderObjs.Add(obj);
             }
 
