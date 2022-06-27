@@ -23,8 +23,6 @@ public class SelectDrag : MonoBehaviour, ITool
     public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
 
-    public Camera? screenshotCamera;
-
     private SelectStatus status = SelectStatus.Idle;
 
     private bool adhoc = false;
@@ -54,6 +52,12 @@ public class SelectDrag : MonoBehaviour, ITool
 
         dragCursorTexture = Resources.Load<Texture2D>("cursor/drag");
         dragHotSpot = new Vector2(0, 0);
+
+        if (mapView == null) throw new System.Exception("mapView null");
+        selectedVertices = mapView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
+        selectedBoundaries = mapView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
+        selectedSpaces = mapView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
+        // TODO: selected agents
     }
 
     void SwitchStatus(SelectStatus status)
@@ -331,84 +335,16 @@ public class SelectDrag : MonoBehaviour, ITool
 
     void OnDestroy()
     {
-        selectedVertices.ForEach(vc => vc.selected = false);
-        selectedVertices.Clear();
-        selectedBoundaries.ForEach(bc => bc.selected = false);
-        selectedBoundaries.Clear();
-        selectedSpaces.ForEach(sc => sc.selected = false);
-        selectedSpaces.Clear();
-        selectedAgents.ForEach(ac => ac.selected = false);
-        selectedAgents.Clear();
+        // selectedVertices.ForEach(vc => vc.selected = false);
+        // selectedVertices.Clear();
+        // selectedBoundaries.ForEach(bc => bc.selected = false);
+        // selectedBoundaries.Clear();
+        // selectedSpaces.ForEach(sc => sc.selected = false);
+        // selectedSpaces.Clear();
+        // selectedAgents.ForEach(ac => ac.selected = false);
+        // selectedAgents.Clear();
     }
 
-    private static string ScreenShotName(int width, int height)
-    {
-        return string.Format("{0}/screen_{1}x{2}_{3}.png",
-                             Application.dataPath,
-                             width, height,
-                             System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-    }
-    private string capture(float maxX, float minX, float maxY, float minY)
-    {
-        if (mapView == null)
-            return "";
-        if (screenshotCamera == null)
-            return "";
-
-        foreach (var entry in mapView.vertex2Obj)
-            if (!entry.Value.GetComponent<VertexController>().selected)
-                entry.Value.SetActive(false);
-        foreach (var entry in mapView.boundary2Obj)
-            if (!entry.Value.GetComponent<BoundaryController>().selected)
-                entry.Value.SetActive(false);
-        foreach (var entry in mapView.cellspace2Obj)
-            if (!entry.Value.GetComponent<SpaceController>().selected)
-                entry.Value.SetActive(false);
-
-        int resWidth = 128;
-        int resHeight = 128;
-        RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
-
-        screenshotCamera.orthographicSize = Mathf.Max(maxX - minX, maxY - minY);
-        Vector3 position = screenshotCamera.transform.position;
-        position.x = (maxX + minX) / 2.0f;
-        position.z = (maxY + minY) / 2.0f;
-        screenshotCamera.transform.position = position;
-
-        screenshotCamera.targetTexture = rt;
-        Texture2D screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
-        screenshotCamera.Render();
-        RenderTexture.active = rt;
-        screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
-        screenshotCamera.targetTexture = null;
-        RenderTexture.active = null;
-        Destroy(rt);
-        byte[] bytes = screenShot.EncodeToPNG();
-        string filename = ScreenShotName(resWidth, resHeight);
-        System.IO.File.WriteAllBytes(filename, bytes);
-        Debug.Log(string.Format("Took screenshot to: {0}", filename));
-
-
-        foreach (var entry in mapView.vertex2Obj)
-            entry.Value.SetActive(true);
-        foreach (var entry in mapView.boundary2Obj)
-            entry.Value.SetActive(true);
-        foreach (var entry in mapView.cellspace2Obj)
-            entry.Value.SetActive(true);
-        return Convert.ToBase64String(bytes);
-    }
-
-    public void ExtractSelected2Asset()
-    {
-        if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
-            IndoorSimData?.ExtractAsset("untitled asdf",
-                selectedVertices.Select(vc => vc.Vertex).ToList(),
-                selectedBoundaries.Select(bc => bc.Boundary).ToList(),
-                selectedSpaces.Select(sc => sc.Space).ToList(),
-                capture);
-        else
-            Debug.LogWarning("nothing can be save as asset");
-    }
 
     List<Vector3> SquareFromCursor()
     {

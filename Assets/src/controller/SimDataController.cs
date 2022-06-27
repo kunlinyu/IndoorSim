@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -80,10 +81,10 @@ public class SimDataController : MonoBehaviour
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.type == UIEventType.ToolButtonClick)
+        if (e.type == UIEventType.ToolButton)
         {
             string oldToolName = "";
-            if (toolObj != null && e.name != "save asset")  // TODO(mess): fuck
+            if (toolObj != null)  // TODO(mess): fuck
             {
                 oldToolName = toolObj.name;
                 Debug.Log("Disable tool " + toolObj.name);
@@ -96,120 +97,101 @@ public class SimDataController : MonoBehaviour
 
             if (e.name == "line string")
             {
-                if (oldToolName != "lineString")
-                {
-                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/LineStringEditor"), this.transform);
-                    toolObj.name = "lineString";
-                    currentTool = toolObj.GetComponent<LineStringEditor>();
-                    Debug.Log("Switch to tool lineString");
-                }
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/LineStringEditor"), this.transform);
+                toolObj.name = "lineString";
+                currentTool = toolObj.GetComponent<LineStringEditor>();
+                Debug.Log("Switch to tool lineString");
             }
             else if (e.name == "select drag")
             {
-                if (oldToolName != "select drag")
-                {
-                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SelectDrag"), this.transform);
-                    toolObj.name = "select drag";
-                    currentTool = toolObj.GetComponent<SelectDrag>();
-                    Debug.Log("Switch to tool select drag");
-                }
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SelectDrag"), this.transform);
+                toolObj.name = "select drag";
+                currentTool = toolObj.GetComponent<SelectDrag>();
+                Debug.Log("Switch to tool select drag");
             }
             else if (e.name == "save asset")
             {
-                if (toolObj != null && toolObj.name == "select drag")
-                {
-                    Debug.Log("going to save asset");
-                    ((SelectDrag)currentTool).ExtractSelected2Asset();
-                }
-                else
-                {
-                    Debug.LogWarning("use select & drag tool to select something before save asset");
-                }
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/AssetSaver"), this.transform);
+                toolObj.name = "asset saver";
+                toolObj.transform.SetParent(this.transform);
+                var assetSaver = toolObj.AddComponent<AssetSaver>();
+                assetSaver.mapView = mapView;
+                assetSaver.simView = simView;
+                assetSaver.IndoorSimData = indoorSimData;
+                assetSaver.ExtractSelected2Asset();
+                Debug.Log("Use tool AssetSaver");
+                toolObj = null;
+                currentTool = null;
             }
             else if (e.name == "delete")
             {
-                if (oldToolName != "delete")
-                {
-                    toolObj = new GameObject("delete");
-                    currentTool = toolObj.AddComponent<Deleter>();
-                    Debug.Log("Switch to tool deleter");
-                }
+                toolObj = new GameObject("delete");
+                toolObj.transform.SetParent(this.transform);
+                currentTool = toolObj.AddComponent<Deleter>();
+                Debug.Log("Switch to tool deleter");
             }
             else if (e.name == "navigable")
             {
-                if (oldToolName != "navigable")
-                {
-                    toolObj = new GameObject("navigable");
-                    currentTool = toolObj.AddComponent<NavigableEditor>();
-                    Debug.Log("Switch to tool navigable");
-                }
+                toolObj = new GameObject("navigable");
+                toolObj.transform.SetParent(this.transform);
+                currentTool = toolObj.AddComponent<NavigableEditor>();
+                Debug.Log("Switch to tool navigable");
             }
             else if (e.name == "direction")
             {
-                if (oldToolName != "direction")
-                {
-                    toolObj = new GameObject("boundary direction");
-                    currentTool = toolObj.AddComponent<BoundaryDirectionEditor>();
-                    Debug.Log("Switch to tool boundary direction");
-                }
+                toolObj = new GameObject("boundary direction");
+                toolObj.transform.SetParent(this.transform);
+                currentTool = toolObj.AddComponent<BoundaryDirectionEditor>();
+                Debug.Log("Switch to tool boundary direction");
             }
             else if (e.name == "rline")
             {
-                if (oldToolName != "rline")
-                {
-                    toolObj = new GameObject("rline");
-                    currentTool = toolObj.AddComponent<RLineEditor>();
-                    Debug.Log("Switch to tool rline");
-                }
+                toolObj = new GameObject("rline");
+                toolObj.transform.SetParent(this.transform);
+                currentTool = toolObj.AddComponent<RLineEditor>();
+                Debug.Log("Switch to tool rline");
             }
             else if (e.name == "shelves")
             {
-                if (oldToolName != "shelves")
-                {
-                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor"), this.transform);
-                    toolObj.name = "shelves";
-                    currentTool = toolObj.GetComponent<ShelvesEditor>();
-                    Debug.Log("Switch to tool shelves");
-                }
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor"), this.transform);
+                toolObj.name = "shelves";
+                currentTool = toolObj.GetComponent<ShelvesEditor>();
+                Debug.Log("Switch to tool shelves");
             }
             else if (e.name == "shelves2")
             {
-                if (oldToolName != "shelves2")
-                {
-                    toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor2"), this.transform);
-                    toolObj.name = "shelves2";
-                    currentTool = toolObj.GetComponent<ShelvesEditor2>();
-                    Debug.Log("Switch to tool shelves2");
-                }
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/ShelvesEditor2"), this.transform);
+                toolObj.name = "shelves2";
+                currentTool = toolObj.GetComponent<ShelvesEditor2>();
+                Debug.Log("Switch to tool shelves2");
             }
             else if (e.name == "id")
             {
-                if (oldToolName != "id")
+                toolObj = new GameObject("id");
+                toolObj.transform.SetParent(this.transform);
+                IDEditor idEditor = toolObj.AddComponent<IDEditor>();
+                idEditor.PopContainerIdPanel = (x, y, containerId, childrenId) =>
                 {
-                    toolObj = new GameObject("id");
-                    IDEditor idEditor = toolObj.AddComponent<IDEditor>();
-                    idEditor.PopContainerIdPanel = (x, y, containerId, childrenId) =>
+                    eventDispatcher.Raise(idEditor, new UIEvent()
                     {
-                        eventDispatcher.Raise(idEditor, new UIEvent()
-                        {
-                            name = "id panel",
-                            message = $"{{\"predicate\":\"popup\", \"x\":{x}, \"y\":{y}, \"containerId\":\"{containerId}\", \"childrenId\":\"{childrenId}\"}}",
-                            type = UIEventType.PopUp
-                        });
-                    };
-                    idEditor.HideContainerIdPanel = () =>
-                    {
-                        eventDispatcher.Raise(idEditor, new UIEvent() { name = "id panel", message = "{\"predicate\":\"hide\"}", type = UIEventType.PopUp });
-                    };
-                    currentTool = idEditor;
-                    Debug.Log("Switch to tool id editor");
-                }
+                        name = "id panel",
+                        message = $"{{\"predicate\":\"popup\", \"x\":{x}, \"y\":{y}, \"containerId\":\"{containerId}\", \"childrenId\":\"{childrenId}\"}}",
+                        type = UIEventType.PopUp
+                    });
+                };
+                idEditor.HideContainerIdPanel = () =>
+                {
+                    eventDispatcher.Raise(idEditor, new UIEvent() { name = "id panel", message = "{\"predicate\":\"hide\"}", type = UIEventType.PopUp });
+                };
+                currentTool = idEditor;
+                Debug.Log("Switch to tool id editor");
             }
             else if (e.name == "apply asset")
             {
                 // if (oldToolName != "apply asset")
                 {
                     toolObj = new GameObject("apply asset");
+                    toolObj.transform.SetParent(this.transform);
                     AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
                     assetApplier.assetId = Int32.Parse(e.message);
                     currentTool = assetApplier;
@@ -223,9 +205,10 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "capsule")
             {
-                if (oldToolName != "capsule" && indoorSimData.currentSimData!= null)
+                if (indoorSimData.currentSimData != null)
                 {
                     toolObj = new GameObject("capsule");
+                    toolObj.transform.SetParent(this.transform);
                     var agentEditor = toolObj.AddComponent<AgentEditor>();
                     agentEditor.agentType = "capsule";
                     currentTool = agentEditor;
@@ -235,9 +218,10 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "bronto")
             {
-                if (oldToolName != "bronto" && indoorSimData.currentSimData!= null)
+                if (indoorSimData.currentSimData != null)
                 {
                     toolObj = new GameObject("bronto");
+                    toolObj.transform.SetParent(this.transform);
                     var agentEditor = toolObj.AddComponent<AgentEditor>();
                     agentEditor.agentType = "bronto";
                     currentTool = agentEditor;
@@ -247,15 +231,12 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "astar")
             {
-                if (oldToolName != "astar")
-                {
-                    GameObject prefab = Resources.Load<GameObject>("ToolObj/AStarTool");
-                    toolObj = Instantiate(prefab, transform);
-                    var astarTool = toolObj.AddComponent<AStarTool>();
-                    currentTool = astarTool;
+                GameObject prefab = Resources.Load<GameObject>("ToolObj/AStarTool");
+                toolObj = Instantiate(prefab, transform);
+                var astarTool = toolObj.AddComponent<AStarTool>();
+                currentTool = astarTool;
 
-                    Debug.Log("Switch to tool astar");
-                }
+                Debug.Log("Switch to tool astar");
             }
             else if (e.name == "save")
             {
@@ -274,9 +255,6 @@ public class SimDataController : MonoBehaviour
                 indoorSimData.Undo();
             }
 
-
-
-            toolObj?.transform.SetParent(transform);
             if (currentTool != null)
             {
                 currentTool.mapView = mapView;

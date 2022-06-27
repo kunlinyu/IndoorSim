@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public enum UIEventType
 {
-    ToolButtonClick,    // UI -> Scene
+    ToolButton,    // UI -> Scene
     EnterLeaveUIPanel,  // UI -> Scene
     SceneTip,           // Scene -> UI
     UITip,              // Scene -> UI

@@ -6,8 +6,9 @@ using UnityEngine.UIElements;
 public class ToolBarController : MonoBehaviour
 {
     [SerializeField] private VisualTreeAsset m_ToolBarButtonTemplate;
+    private Button activeButton = null;
 
-    public void LoadButtons(VisualElement toolBar, Action<Button, ToolButtonData> onClicked)
+    public void LoadButtons(VisualElement toolBar, Action<Button, ToolButtonData> onClicked, Action onCancel)
     {
         List<ToolButtonData> allToolButton = new List<ToolButtonData>(Resources.LoadAll<ToolButtonData>("ToolButtonData"));
         allToolButton.Sort((tbd1, tbd2) => { return tbd1.m_SortingOrder - tbd2.m_SortingOrder; });
@@ -21,7 +22,20 @@ public class ToolBarController : MonoBehaviour
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
             button.AddManipulator(new ToolTipManipulator(toolBar));
-            button.clicked += () => { onClicked(button, tbd); };
+            button.clicked += () =>
+            {
+                if (button != activeButton)
+                {
+                    onClicked?.Invoke(button, tbd);
+                    activeButton = button;
+                }
+                else
+                {
+                    onCancel?.Invoke();
+                    activeButton = null;
+                }
+            };
+            button.tabIndex = -1;
             toolBar.Add(buttonContainer);
         }
     }

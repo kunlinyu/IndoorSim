@@ -12,16 +12,18 @@ using UnityEngine.UIElements;
 public class All : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    VisualElement root;
 
     void Start()
     {
-        VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+        root = GetComponent<UIDocument>().rootVisualElement;
 
         // toolBar
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
-        ToolBarController toolBarController = GetComponent<ToolBarController>();
-        toolBarController.LoadButtons(toolBar, (button, tbd) =>
-            { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ToolButtonClick }); });
+        var toolBarController = GetComponent<ToolBarController>();
+        toolBarController.LoadButtons(toolBar,
+            (button, tbd) => { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ToolButton }); },
+            () => { eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
         toolBar.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>
@@ -48,8 +50,8 @@ public class All : MonoBehaviour
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
         assetsPanelController.Init(
             assetsPanel,
-            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); },
-            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButtonClick }); }
+            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButton }); },
+            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButton }); }
         );
         eventDispatcher.eventListener += assetsPanelController.EventListener;
 
@@ -102,6 +104,8 @@ public class All : MonoBehaviour
 
     void Update()
     {
-
+        Button? focusButton = root.focusController.focusedElement as Button;
+        // if (focusButton != null)
+        //     Debug.Log(focusButton.tooltip);
     }
 }
