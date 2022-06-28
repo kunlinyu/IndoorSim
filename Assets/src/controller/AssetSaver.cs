@@ -49,7 +49,10 @@ public class AssetSaver : MonoBehaviour, ITool
                 entry.Value.SetActive(false);
         foreach (var entry in mapView.cellspace2Obj)
             if (!entry.Value.GetComponent<SpaceController>().selected)
+            {
                 entry.Value.SetActive(false);
+                mapView.cellspace2RLineObj[entry.Key.rLines].SetActive(false);
+            }
 
         int resWidth = 128;
         int resHeight = 128;
@@ -80,6 +83,8 @@ public class AssetSaver : MonoBehaviour, ITool
         foreach (var entry in mapView.boundary2Obj)
             entry.Value.SetActive(true);
         foreach (var entry in mapView.cellspace2Obj)
+            entry.Value.SetActive(true);
+        foreach (var entry in mapView.cellspace2RLineObj)
             entry.Value.SetActive(true);
         return Convert.ToBase64String(bytes);
     }
