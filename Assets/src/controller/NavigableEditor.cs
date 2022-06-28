@@ -9,8 +9,6 @@ public class NavigableEditor : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { set; get; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { set; get; }
-    public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
 
     void Start()

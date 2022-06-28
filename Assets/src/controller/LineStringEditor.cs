@@ -9,8 +9,6 @@ public class LineStringEditor : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { set; get; }  // TODO Remove
-    public Material? draftMaterial { set; get; }  // TODO Remove
     public bool MouseOnUI { set; get; }
     private Coordinate? lastCoor = null;
     private CellVertex? lastVertex = null;

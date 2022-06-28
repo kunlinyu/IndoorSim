@@ -195,7 +195,6 @@ public class SimDataController : MonoBehaviour
                     AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
                     assetApplier.assetId = Int32.Parse(e.message);
                     currentTool = assetApplier;
-                    currentTool.draftMaterial = Resources.Load<Material>("Materials/tool linestring");
                     Debug.Log("Switch to asset applier");
                 }
             }

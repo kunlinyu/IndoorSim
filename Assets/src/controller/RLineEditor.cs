@@ -9,8 +9,6 @@ public class RLineEditor : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { set; get; }
-    public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
 
     void Start()

@@ -19,8 +19,6 @@ public class SelectDrag : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { get; set; }
     public MapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { get; set; }
-    public Material? draftMaterial { get; set; }
     public bool MouseOnUI { get; set; }
 
     private SelectStatus status = SelectStatus.Idle;

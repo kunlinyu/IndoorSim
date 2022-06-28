@@ -9,8 +9,6 @@ public class AssetSaver : MonoBehaviour, ITool
     public IndoorSimData? IndoorSimData { set; get; }
     public MapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
-    public int sortingLayerId { set; get; }
-    public Material? draftMaterial { set; get; }
     public bool MouseOnUI { set; get; }
 
     public void ExtractSelected2Asset()
@@ -19,7 +17,7 @@ public class AssetSaver : MonoBehaviour, ITool
         var selectedVertices = mapView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
         var selectedBoundaries = mapView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
         var selectedSpaces = mapView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
-        // TODO: selected agents
+        // TODO(debt): selected agents
 
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
             IndoorSimData?.ExtractAsset("untitled asdf",
