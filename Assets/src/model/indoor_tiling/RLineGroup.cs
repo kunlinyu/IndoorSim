@@ -96,6 +96,7 @@ public class RLineGroup
     {
         if (space.navigable != Navigable.Navigable) return new List<BoundaryWithGeom>();
         return rLines.Where(rLine => rLine.fr == fr)
+                     .Where(rLine => rLine.to.Navigable == Navigable.Navigable)
                      .Where(rLine => !rLine.IllForm(space))
                      .Where(rLine => rLine.pass == PassType.AllowedToPass)
                      .Select(rLine => new BoundaryWithGeom() { boundary = rLine.to, rLineGeom = rLine.geom })
