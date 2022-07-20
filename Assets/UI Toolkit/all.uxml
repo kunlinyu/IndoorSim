@@ -16,7 +16,7 @@
                 <ui:Instance template="hierarchyPanel" />
             </ui:VisualElement>
             <ui:VisualElement name="middle" style="width: auto; flex-direction: column-reverse; justify-content: flex-start; align-items: center;">
-                <ui:Instance template="LogWindow" name="LogWindow" tooltip="double click to copy" style="position: relative; right: auto; bottom: auto; max-width: none; max-height: 200px; min-width: auto; min-height: 100px; justify-content: flex-end;" />
+                <ui:Instance template="LogWindow" name="LogWindow" tooltip="double click to copy" style="position: relative; right: auto; bottom: auto; max-width: none; max-height: 100px; min-width: auto; min-height: 50px; justify-content: flex-end;" />
                 <ui:Instance template="SimulationPanel" />
             </ui:VisualElement>
             <ui:VisualElement name="right" style="width: 200px;">
