@@ -3,13 +3,26 @@ using System.Collections.Generic;
 
 public struct GridMapInfo
 {
-    public string pngBase64;
-    public double cell_x;  // coordinate of left-bottom corner cell
-    public double cell_y;  // coordinate of left-bottom corner cell
-    public double cell_width;  // width of each cell
+    public string id;
+    public int width;
+    public int height;
+    public double resolution;
+    public MapOrigin localOrigin;
+    public MapOrigin globalOrigin;
+    public GridMapImageFormat format;
+    public string imageBase64;
+}
 
-    // pose of the grid map put on canvas
-    public double canvas_x;
-    public double canvas_y;
-    public double canvas_theta;
+
+public struct MapOrigin
+{
+    double x;
+    double y;
+    double theta;
+}
+
+public enum GridMapImageFormat
+{
+    PGM,
+    PNG,
 }

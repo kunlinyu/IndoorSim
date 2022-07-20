@@ -84,7 +84,7 @@ public class SimDataController : MonoBehaviour
         if (e.type == UIEventType.ToolButton)
         {
             string oldToolName = "";
-            if (toolObj != null)  // TODO(mess): fuck
+            if (toolObj != null)
             {
                 oldToolName = toolObj.name;
                 Debug.Log("Disable tool " + toolObj.name);
@@ -301,6 +301,7 @@ public class SimDataController : MonoBehaviour
         }
     }
 
+    // TODO: Do not pop open file panel here. move it to view
     string LoadFromFile()
     {
         if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
@@ -311,6 +312,7 @@ public class SimDataController : MonoBehaviour
         return "";
     }
 
+    // TODO: Do not pop open file panel here. move it to view
     void SaveToFile(string content)
     {
         if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)

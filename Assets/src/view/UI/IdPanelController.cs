@@ -39,6 +39,7 @@ public class IdPanelController : MonoBehaviour
         }
     }
 
+    // TODO: Create Id panel after click polygon instead of show the exist one and move it to cursor
     public void Init(VisualElement idPanel, Action<string, string> OnSave)
     {
         this.idPanel = idPanel;
