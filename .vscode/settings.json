@@ -1,5 +1,6 @@
 {
     "omnisharp.useGlobalMono":"always",
+    "files.trimTrailingWhitespace": true,
     "files.exclude":
     {
         "**/.DS_Store":true,
