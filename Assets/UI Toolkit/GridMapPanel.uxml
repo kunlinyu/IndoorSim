@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="m">
+        <ui:Button tabindex="-1" text="Browse" display-tooltip-when-elided="true" name="browse" />
+        <ui:TextField picking-mode="Ignore" label="name" value="filler text" text="file name" name="id" readonly="false" />
+        <ui:IntegerField label="width" value="0" name="width" readonly="true" />
+        <ui:IntegerField label="hight" value="0" name="hight" readonly="true" />
+        <ui:EnumField label="file type" type="GridMapImageFormat, model" name="file_type" />
+        <ui:DoubleField label="resolution" value="0.02" name="resolution" />
+        <ui:Vector2Field label="origin" name="origin" x="-12" y="-15" />
+        <ui:DoubleField label="origin theta" value="0" name="origin_theta" />
+    </ui:VisualElement>
+    <ui:VisualElement />
+    <ui:Button tabindex="-1" text="Import" display-tooltip-when-elided="true" name="import" />
+</ui:UXML>
