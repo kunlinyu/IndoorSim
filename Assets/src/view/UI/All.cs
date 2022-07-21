@@ -1,7 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+using SFB;
 
 [RequireComponent(typeof(ToolBarController))]
 [RequireComponent(typeof(CursorTip))]
@@ -17,6 +18,8 @@ public class All : MonoBehaviour
     void Start()
     {
         root = GetComponent<UIDocument>().rootVisualElement;
+
+        eventDispatcher.eventListener += this.EventListener;
 
         // toolBar
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
@@ -71,7 +74,7 @@ public class All : MonoBehaviour
             eventDispatcher.Raise(this, new UIEvent() { name = "select indoor map", type = UIEventType.Hierarchy });
 
         hierarchyPanelController.OnSelectGridMap += gridName =>
-            eventDispatcher.Raise(this, new UIEvent() { name = "select grid map", message = gridName , type = UIEventType.Hierarchy });
+            eventDispatcher.Raise(this, new UIEvent() { name = "select grid map", message = gridName, type = UIEventType.Hierarchy });
 
         eventDispatcher.eventListener += hierarchyPanelController.EventListener;
 
@@ -89,10 +92,13 @@ public class All : MonoBehaviour
         var idPanelCtr = GetComponent<IdPanelController>();
         var idPanel = root.Q<VisualElement>("IdPanel");
         idPanelCtr.Init(idPanel, (containerId, childrenId) =>
-            { eventDispatcher.Raise(this, new UIEvent() {
-                name = "container id",
-                message = $"{{\"containerId\":\"{containerId}\",\"childrenId\":\"{childrenId}\"}}",
-                type = UIEventType.IndoorSimData });
+            {
+                eventDispatcher.Raise(this, new UIEvent()
+                {
+                    name = "container id",
+                    message = $"{{\"containerId\":\"{containerId}\",\"childrenId\":\"{childrenId}\"}}",
+                    type = UIEventType.IndoorSimData
+                });
             });
         eventDispatcher.eventListener += idPanelCtr.EventListener;
         idPanel.RegisterCallback<MouseEnterEvent>(e =>
@@ -100,6 +106,33 @@ public class All : MonoBehaviour
         idPanel.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
 
+    }
+
+    private void EventListener(object sender, UIEvent e)
+    {
+        if (e.type == UIEventType.ToolButton && e.name == "load")
+        {
+            string fileContent = LoadFromFile();
+            eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
+        }
+        else if (e.type == UIEventType.Resources && e.name == "save")
+        {
+            SaveToFile(e.message);
+        }
+
+    }
+
+    private string LoadFromFile()
+    {
+        string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
+        return File.ReadAllText(path[0]);
+    }
+
+    private void SaveToFile(string content)
+    {
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");
+        Debug.Log("save file to: " + path);
+        File.WriteAllText(path, content);
     }
 
     void Update()

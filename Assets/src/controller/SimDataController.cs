@@ -239,11 +239,8 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "save")
             {
-                SaveToFile(indoorSimData.Serialize(true));
-            }
-            else if (e.name == "load")
-            {
-                indoorSimData.DeserializeInPlace(LoadFromFile(), false);
+                string content = indoorSimData.Serialize(true);
+                eventDispatcher.Raise(this, new UIEvent() { name = "save", message = content, type = UIEventType.Resources });
             }
             else if (e.name == "redo")
             {
@@ -260,6 +257,10 @@ public class SimDataController : MonoBehaviour
                 currentTool.simView = simView;
                 currentTool.IndoorSimData = indoorSimData;
             }
+        }
+        else if (e.type == UIEventType.Resources && e.name == "load")
+        {
+            indoorSimData.DeserializeInPlace(e.message, false);
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)
         {
@@ -298,28 +299,6 @@ public class SimDataController : MonoBehaviour
                 }
 
             }
-        }
-    }
-
-    // TODO: Do not pop open file panel here. move it to view
-    string LoadFromFile()
-    {
-        if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
-        {
-            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
-            return File.ReadAllText(path[0]);
-        }
-        return "";
-    }
-
-    // TODO: Do not pop open file panel here. move it to view
-    void SaveToFile(string content)
-    {
-        if (UnityEngine.Application.platform == RuntimePlatform.LinuxPlayer || UnityEngine.Application.platform == RuntimePlatform.LinuxEditor)
-        {
-            string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");
-            Debug.Log("save file to: " + path);
-            File.WriteAllText(path, content);
         }
     }
 

@@ -16,6 +16,7 @@ public enum UIEventType
     Simulation,         // UI -> Scene
     PopUp,              // Scene -> UI (bidirectional?)
     IndoorSimData,      // UI -> Scene
+    Resources,          // bidirection
 }
 
 [Serializable]
