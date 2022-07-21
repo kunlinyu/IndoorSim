@@ -11,8 +11,8 @@ using UnityEngine;
 
 public class IndoorSimData
 {
-    [JsonPropertyAttribute] public List<GridMapInfo> gridMapInfos = new List<GridMapInfo>();
-    [JsonIgnore] GridMapInfo currentGridMapInfo;
+    [JsonPropertyAttribute] public List<GridMap> gridMapInfos = new List<GridMap>();
+    [JsonIgnore] GridMap currentGridMapInfo;
 
     [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
     [JsonIgnore] public IndoorTiling indoorTiling;
@@ -32,7 +32,7 @@ public class IndoorSimData
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
-    [JsonIgnore] public Action<List<GridMapInfo>> OnGridMapUpdated = (grid) => { };
+    [JsonIgnore] public Action<List<GridMap>> OnGridMapUpdated = (grid) => { };
     [JsonIgnore] public Action<IndoorData> OnIndoorDataUpdated = (indoor) => { };
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };

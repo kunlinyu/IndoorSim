@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -112,20 +113,21 @@ public class All : MonoBehaviour
     {
         if (e.type == UIEventType.ToolButton && e.name == "load")
         {
-            string fileContent = LoadFromFile();
+            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
+            string fileContent = File.ReadAllText(path[0]);
             eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
         }
         else if (e.type == UIEventType.Resources && e.name == "save")
         {
             SaveToFile(e.message);
         }
+        else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
+        {
+            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[]{new ExtensionFilter("", "pgm", "png")}, false);
+            string fileContentBase64 = Convert.ToBase64String(File.ReadAllBytes(path[0]));
+            eventDispatcher.Raise(this, new UIEvent() { name = "gridmap", message = fileContentBase64, type = UIEventType.Resources });
+        }
 
-    }
-
-    private string LoadFromFile()
-    {
-        string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
-        return File.ReadAllText(path[0]);
     }
 
     private void SaveToFile(string content)
