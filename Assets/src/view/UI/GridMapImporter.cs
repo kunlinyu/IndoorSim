@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Newtonsoft.Json;
@@ -19,7 +20,7 @@ public class GridMapImporter : MonoBehaviour
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
         root.Q<TextField>("file_name").value = filename;
-        root.Q<TextField>("id").value = filename;
+        root.Q<TextField>("id").value = Path.GetFileName(filename);
         root.Q<IntegerField>("width").value = width;
         root.Q<IntegerField>("height").value = height;
         root.Q<Button>("import").clicked += () => importAction(Serialize(zippedBase64Image));

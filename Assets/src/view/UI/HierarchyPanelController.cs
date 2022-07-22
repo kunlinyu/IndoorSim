@@ -37,9 +37,6 @@ public class HierarchyPanelController : MonoBehaviour
 
         gridMapFoldout = new Foldout();
         gridMapFoldout.text = "gridmap";
-
-        gridMapFoldout.Add(new TextElement() { text = "fake grid map 1.png" });
-        gridMapFoldout.Add(new TextElement() { text = "fake grid map 2.png" });
         foldoutContainer.Add(gridMapFoldout);
 
         indoorMapFoldout = new Foldout();
@@ -76,12 +73,16 @@ public class HierarchyPanelController : MonoBehaviour
 
     }
 
-    public void UpdateGridMap(string json)
+    public void UpdateGridMap(string gridmapIdList)
     {
-        var jsonData = JArray.Parse(json);
-        foreach (var assetJson in jsonData.Children())
-        {
-        }
+        List<string> gridMapIds = new List<string>(gridmapIdList.Split('\n'));
+
+        gridMapFoldout.Clear();
+        CollapsesAll();
+        gridMapFoldout.SetValueWithoutNotify(true);
+
+        foreach (var id in gridMapIds)
+            gridMapFoldout.Add(new TextElement() { text = id });
     }
 
     public void UpdateIndoorData(string json)

@@ -72,6 +72,14 @@ public class SimDataController : MonoBehaviour
 
             eventDispatcher?.Raise(this, e);
         };
+        indoorSimData.OnGridMapUpdated += (gridMaps) =>
+        {
+            var e = new UIEvent();
+            e.type = UIEventType.Hierarchy;
+            e.name = "gridmap";
+            e.message = String.Join('\n', gridMaps.Select(gridMaps => gridMaps.id));
+            eventDispatcher?.Raise(this, e);
+        };
 
         indoorSimData.OnAgentCreate += (agent) =>
         {
