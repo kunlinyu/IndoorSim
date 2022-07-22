@@ -1,14 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="m">
-        <ui:Button tabindex="-1" text="Browse" display-tooltip-when-elided="true" name="browse" />
-        <ui:TextField picking-mode="Ignore" label="name" value="filler text" text="file name" name="id" readonly="false" />
-        <ui:IntegerField label="width" value="0" name="width" readonly="true" />
-        <ui:IntegerField label="hight" value="0" name="hight" readonly="true" />
-        <ui:EnumField label="file type" type="GridMapImageFormat, model" name="file_type" />
-        <ui:DoubleField label="resolution" value="0.02" name="resolution" />
-        <ui:Vector2Field label="origin" name="origin" x="-12" y="-15" />
-        <ui:DoubleField label="origin theta" value="0" name="origin_theta" />
+    <ui:VisualElement name="full_screen" style="align-items: center; height: auto; width: auto; left: 0; top: 0; right: 0; bottom: 0; position: absolute; flex-direction: column; justify-content: center;">
+        <ui:VisualElement name="import_window" style="width: 500px; height: auto; border-left-width: 10px; border-right-width: 10px; border-top-width: 10px; border-bottom-width: 10px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; background-color: rgba(200, 200, 200, 0.62); max-height: none; min-height: auto; flex-wrap: nowrap; flex-direction: column; align-items: stretch; position: absolute;">
+            <ui:TextField picking-mode="Ignore" label="file name" value="file name" text="file name" name="file_name" readonly="true" />
+            <ui:TextField picking-mode="Ignore" label="id" value="filler text" name="id" readonly="false" />
+            <ui:IntegerField label="width" value="0" name="width" readonly="true" />
+            <ui:IntegerField label="height" value="0" name="height" readonly="true" />
+            <ui:EnumField label="file type" type="GridMapImageFormat, model" name="file_type" />
+            <ui:DoubleField label="resolution" value="0.02" name="resolution" />
+            <ui:Vector2Field label="origin" name="origin" x="-12" y="-15" />
+            <ui:DoubleField label="origin theta" value="0" name="origin_theta" />
+            <ui:Button tabindex="-1" text="import" display-tooltip-when-elided="true" name="import" />
+        </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement />
-    <ui:Button tabindex="-1" text="Import" display-tooltip-when-elided="true" name="import" />
 </ui:UXML>

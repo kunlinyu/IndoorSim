@@ -1,31 +1,47 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 
-public struct GridMap
+public class GridMap
 {
     // mutable
     public string id;
     public MapOrigin globalOrigin;
 
-    // immutable
 
-    public int width;  // depends on imageBase64
-    public int height;  // depends on imageBase64
-    public GridMapImageFormat format;  // depends on imageBase64
+    // public int width;  // the user should parse imageBase64 to get width
+    // public int height;  // the user should parse imageBase64 to get height
+
+    // immutable
+    public GridMapImageFormat format;
     public string imageBase64;
 
     // immutable after loading
+    public double resolution;  // set by user during importing
+    public MapOrigin localOrigin;  // set by user during importing
 
-    public double resolution;  // set by user during loading
-    public MapOrigin localOrigin;  // set by user during loading
+    public GridMap Clone()
+    {
+        return new GridMap() {
+            id = id,
+            globalOrigin = globalOrigin.Clone(),
+            // width = width,
+            // height = height,
+            format = format,
+            imageBase64 = (string)imageBase64.Clone(),
+            resolution = resolution,
+            localOrigin = localOrigin.Clone(),
+        };
+    }
 }
 
 
 public struct MapOrigin
 {
-    double x;
-    double y;
-    double theta;
+    public double x;
+    public double y;
+    public double theta;
+
+    public MapOrigin Clone() => new MapOrigin() { x = x, y = y, theta = theta };
 }
 
 public enum GridMapImageFormat

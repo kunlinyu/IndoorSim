@@ -16,6 +16,11 @@ public class All : MonoBehaviour
     public UIEventDispatcher eventDispatcher;
     VisualElement root;
 
+
+    // pop up panels
+    GameObject idPanelObj;  // TODO: do not put it in All.uxml, but load it as prefab
+    GameObject gridMapImportPanelObj;
+
     void Start()
     {
         root = GetComponent<UIDocument>().rootVisualElement;
@@ -124,10 +129,35 @@ public class All : MonoBehaviour
         else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
         {
             string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[]{new ExtensionFilter("", "pgm", "png")}, false);
-            string fileContentBase64 = Convert.ToBase64String(File.ReadAllBytes(path[0]));
-            eventDispatcher.Raise(this, new UIEvent() { name = "gridmap", message = fileContentBase64, type = UIEventType.Resources });
+            byte[] imageBytes = File.ReadAllBytes(path[0]);
+            string fileContentBase64 = Convert.ToBase64String(imageBytes);
+
+            PGMImage pgm = new PGMImage();
+            pgm.Load(imageBytes);
+
+            GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
+            gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
+
+            GridMapImageFormat fileFormat = GridMapImageFormat.PGM;
+            if (path[0].EndsWith("pgm"))
+                fileFormat = GridMapImageFormat.PGM;
+            else if (path[0].EndsWith("png"))
+                fileFormat = GridMapImageFormat.PNG;
+            else
+                Debug.LogError("unrecognize file format: " + path[0]);
+            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, this.PublishGridMapLoadInfo);
+        }
+        else if (e.type == UIEventType.Resources && e.name == "gridmap")
+        {
+            Destroy(gridMapImportPanelObj);
+            gridMapImportPanelObj = null;
         }
 
+    }
+
+    private void PublishGridMapLoadInfo(string serializedGridMapInfo)
+    {
+        eventDispatcher.Raise(this, new UIEvent() { name = "gridmap", message = serializedGridMapInfo, type = UIEventType.Resources });
     }
 
     private void SaveToFile(string content)

@@ -131,6 +131,16 @@ public class SimulationController : MonoBehaviour
                 Debug.Log("simulation speed: " + timeScale);
             }
         }
+        else if (e.type == UIEventType.Resources)
+        {
+            if (e.name == "gridmap")
+            {
+
+                Debug.Log("controller get gridmap");
+                Debug.Log(e.message);
+
+            }
+        }
     }
 
     void Update()

@@ -11,8 +11,7 @@ using UnityEngine;
 
 public class IndoorSimData
 {
-    [JsonPropertyAttribute] public List<GridMap> gridMapInfos = new List<GridMap>();
-    [JsonIgnore] GridMap currentGridMapInfo;
+    [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
     [JsonIgnore] public IndoorTiling indoorTiling;
@@ -32,7 +31,7 @@ public class IndoorSimData
     [JsonPropertyAttribute] public string digestCache = "";
 
     [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
-    [JsonIgnore] public Action<List<GridMap>> OnGridMapUpdated = (grid) => { };
+    [JsonIgnore] public Action<List<GridMap>> OnGridMapUpdated = (gridMaps) => { };
     [JsonIgnore] public Action<IndoorData> OnIndoorDataUpdated = (indoor) => { };
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
@@ -273,8 +272,78 @@ public class IndoorSimData
                 throw new ArgumentException("can not find representative line: " + ins.oldParam.lineString());
             indoorTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, ins.newParam.naviInfo().passType);
         });
-
     }
+
+    public bool AddGridMap(GridMap gridmap)
+    {
+        if (gridMaps.Any(map => map.id == gridmap.id)) return false;
+        gridMaps.Insert(0, gridmap.Clone());
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+    public bool RemoveGridMap(int index)
+    {
+        if (index < 0 || index >= gridMaps.Count) return false;
+        gridMaps.RemoveAt(index);
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+    public bool RemoveGridMap(string id)
+    {
+        int index = gridMaps.FindIndex(map => map.id == id);
+        if (index < 0) return false;
+
+        gridMaps.RemoveAt(index);
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+    public bool MoveGridMap(int index, MapOrigin newOrigin)
+    {
+        if (index < 0 || index >= gridMaps.Count) return false;
+        gridMaps[index].globalOrigin = newOrigin.Clone();
+        return true;
+    }
+
+    public bool MoveGridMap(string id, MapOrigin newOrigin)
+    {
+        int index = gridMaps.FindIndex(map => map.id == id);
+        if (index < 0) return false;
+        gridMaps[index].globalOrigin = newOrigin.Clone();
+        return true;
+    }
+
+    public bool RenameGridMap(string oldName, string newName)
+    {
+        int index = gridMaps.FindIndex(map => map.id == oldName);
+        if (index < 0) return false;
+
+        gridMaps[index].id = newName;
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+    public bool RenameGridMap(int index, string newName)
+    {
+        if (index < 0 || index >= gridMaps.Count) return false;
+        gridMaps[index].id = newName;
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+    public bool UseGridMap(int index)
+    {
+        if (index < 0 || index >= gridMaps.Count) return false;
+        var temp = gridMaps[index];
+        gridMaps.RemoveAt(index);
+        gridMaps.Insert(0, temp);
+        OnGridMapUpdated?.Invoke(gridMaps);
+        return true;
+    }
+
+
 
     public void SelectMap()
     {
