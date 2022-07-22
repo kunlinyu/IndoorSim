@@ -144,7 +144,7 @@ public class SimulationController : MonoBehaviour
                 var jsonData = JObject.Parse(e.message);
                 gridMap.id = jsonData["id"].Value<string>();
                 gridMap.resolution = jsonData["resolution"].Value<double>();
-                gridMap.imageBase64 = jsonData["base64Content"].Value<string>();
+                gridMap.zippedBase64Image = jsonData["zipBase64Image"].Value<string>();
                 gridMap.localOrigin.x = jsonData["origin_x"].Value<double>();
                 gridMap.localOrigin.y = jsonData["origin_y"].Value<double>();
                 gridMap.localOrigin.theta = jsonData["origin_theta"].Value<double>();

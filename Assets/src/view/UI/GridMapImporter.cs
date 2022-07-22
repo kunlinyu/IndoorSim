@@ -9,24 +9,24 @@ struct GridMapInfo {
     public double origin_x;
     public double origin_y;
     public double origin_theta;
-    public string base64Content;
+    public string zipBase64Image;
 }
 
 [RequireComponent(typeof(UIDocument))]
 public class GridMapImporter : MonoBehaviour
 {
-    public void Init(string filename, int width, int height, GridMapImageFormat format, string base64Content, Action<string> importAction)
+    public void Init(string filename, int width, int height, GridMapImageFormat format, string zippedBase64Image, Action<string> importAction)
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
         root.Q<TextField>("file_name").value = filename;
         root.Q<TextField>("id").value = filename;
         root.Q<IntegerField>("width").value = width;
         root.Q<IntegerField>("height").value = height;
-        root.Q<Button>("import").clicked += () => importAction(Serialize(base64Content));
+        root.Q<Button>("import").clicked += () => importAction(Serialize(zippedBase64Image));
 
     }
 
-    string Serialize(string base64Content)
+    string Serialize(string zipBase64Image)
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
         GridMapInfo gridMapInfo = new GridMapInfo();
@@ -36,7 +36,7 @@ public class GridMapImporter : MonoBehaviour
         gridMapInfo.origin_x = root.Q<Vector2Field>("origin").value.x;
         gridMapInfo.origin_y = root.Q<Vector2Field>("origin").value.y;
         gridMapInfo.origin_theta = root.Q<DoubleField>("origin_theta").value;
-        gridMapInfo.base64Content = base64Content;
+        gridMapInfo.zipBase64Image = zipBase64Image;
         return JsonConvert.SerializeObject(gridMapInfo);
     }
 

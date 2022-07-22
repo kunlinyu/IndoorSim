@@ -13,7 +13,7 @@ public class GridMap
 
     // immutable
     public GridMapImageFormat format;
-    public string imageBase64;
+    public string zippedBase64Image;
 
     // immutable after loading
     public double resolution;  // set by user during importing
@@ -27,7 +27,7 @@ public class GridMap
             // width = width,
             // height = height,
             format = format,
-            imageBase64 = (string)imageBase64.Clone(),
+            zippedBase64Image = (string)zippedBase64Image.Clone(),
             resolution = resolution,
             localOrigin = localOrigin.Clone(),
         };

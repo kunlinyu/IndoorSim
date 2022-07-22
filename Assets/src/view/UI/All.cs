@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.IO.Compression;
 
 using SFB;
 
@@ -128,9 +129,10 @@ public class All : MonoBehaviour
         }
         else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
         {
-            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[]{new ExtensionFilter("", "pgm", "png")}, false);
+            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[] { new ExtensionFilter("", "pgm", "png") }, false);
             byte[] imageBytes = File.ReadAllBytes(path[0]);
-            string fileContentBase64 = Convert.ToBase64String(imageBytes);
+            byte[] zipBytes = Compress(imageBytes);
+            string zippedBase64Image = Convert.ToBase64String(zipBytes);
 
             PGMImage pgm = new PGMImage();
             pgm.Load(imageBytes);
@@ -145,7 +147,7 @@ public class All : MonoBehaviour
                 fileFormat = GridMapImageFormat.PNG;
             else
                 Debug.LogError("unrecognize file format: " + path[0]);
-            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, fileContentBase64, this.PublishGridMapLoadInfo);
+            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo);
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
         {
@@ -153,6 +155,16 @@ public class All : MonoBehaviour
             gridMapImportPanelObj = null;
         }
 
+    }
+
+    public static byte[] Compress(byte[] bytes)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            using (var gzipStream = new GZipStream(memoryStream, System.IO.Compression.CompressionLevel.Optimal))
+                gzipStream.Write(bytes, 0, bytes.Length);
+            return memoryStream.ToArray();
+        }
     }
 
     private void PublishGridMapLoadInfo(string serializedGridMapInfo)
