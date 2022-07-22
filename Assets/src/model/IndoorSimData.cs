@@ -279,6 +279,7 @@ public class IndoorSimData
         if (gridMaps.Any(map => map.id == gridmap.id)) return false;
         gridMaps.Insert(0, gridmap.Clone());
         OnGridMapUpdated?.Invoke(gridMaps);
+        Debug.Log("Grid map added");
         return true;
     }
 

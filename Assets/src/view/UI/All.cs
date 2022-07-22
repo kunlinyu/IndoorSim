@@ -145,7 +145,7 @@ public class All : MonoBehaviour
                 fileFormat = GridMapImageFormat.PNG;
             else
                 Debug.LogError("unrecognize file format: " + path[0]);
-            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, this.PublishGridMapLoadInfo);
+            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, fileContentBase64, this.PublishGridMapLoadInfo);
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
         {

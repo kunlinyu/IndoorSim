@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Newtonsoft.Json.Linq;
+
 public class SimulationController : MonoBehaviour
 {
     public IndoorSimData indoorSimData;
@@ -137,8 +139,17 @@ public class SimulationController : MonoBehaviour
             {
 
                 Debug.Log("controller get gridmap");
-                Debug.Log(e.message);
+                GridMap gridMap = new GridMap();
 
+                var jsonData = JObject.Parse(e.message);
+                gridMap.id = jsonData["id"].Value<string>();
+                gridMap.resolution = jsonData["resolution"].Value<double>();
+                gridMap.imageBase64 = jsonData["base64Content"].Value<string>();
+                gridMap.localOrigin.x = jsonData["origin_x"].Value<double>();
+                gridMap.localOrigin.y = jsonData["origin_y"].Value<double>();
+                gridMap.localOrigin.theta = jsonData["origin_theta"].Value<double>();
+
+                indoorSimData.AddGridMap(gridMap);
             }
         }
     }
