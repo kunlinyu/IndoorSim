@@ -3,7 +3,7 @@ using UnityEngine;
 public class env : MonoBehaviour
 {
     private IndoorSimData indoorSimData = new IndoorSimData();  // model
-    public MapView mapView;  // view
+    public IndoorMapView mapView;  // view
     public SimulationView simulationView;  // view
     public SimDataController simDataController;  // controller
 

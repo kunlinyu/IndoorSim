@@ -6,7 +6,7 @@ using UnityEngine;
 public interface ITool
 {
     IndoorSimData? IndoorSimData { set; get; }
-    MapView? mapView { set; get; }
+    IndoorMapView? mapView { set; get; }
     SimulationView? simView { set; get; }
     bool MouseOnUI { set; get; }
 }

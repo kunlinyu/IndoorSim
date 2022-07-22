@@ -7,7 +7,7 @@ using UnityEngine;
 public class AssetSaver : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
-    public MapView? mapView { get; set; }
+    public IndoorMapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
     public bool MouseOnUI { set; get; }
 
@@ -34,7 +34,7 @@ public class AssetSaver : MonoBehaviour, ITool
         return capture(mapView, GetComponent<Camera>(), maxX, minX, maxY, minY);
     }
 
-    public static string capture(MapView? mapView, Camera? screenshotCamera, float maxX, float minX, float maxY, float minY)
+    public static string capture(IndoorMapView? mapView, Camera? screenshotCamera, float maxX, float minX, float maxY, float minY)
     {
         if (mapView == null) return "";
         if (screenshotCamera == null) return "";

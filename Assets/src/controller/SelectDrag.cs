@@ -17,7 +17,7 @@ enum SelectStatus
 public class SelectDrag : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { get; set; }
-    public MapView? mapView { get; set; }
+    public IndoorMapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
     public bool MouseOnUI { get; set; }
 

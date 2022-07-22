@@ -7,7 +7,7 @@ using UnityEngine;
 public class NavigableEditor : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
-    public MapView? mapView { set; get; }
+    public IndoorMapView? mapView { set; get; }
     public SimulationView? simView { set; get; }
     public bool MouseOnUI { set; get; }
 

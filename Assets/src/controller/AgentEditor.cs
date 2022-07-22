@@ -4,7 +4,7 @@ using UnityEngine;
 public class AgentEditor : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
-    public MapView? mapView { get; set; }
+    public IndoorMapView? mapView { get; set; }
     public SimulationView? simView { set; get; }
     public bool MouseOnUI { set; get; }
 

@@ -12,7 +12,7 @@ using SFB;
 public class SimDataController : MonoBehaviour
 {
     public IndoorSimData indoorSimData;
-    public MapView mapView;
+    public IndoorMapView mapView;
     public SimulationView simView;
     GameObject toolObj;
     ITool currentTool;
