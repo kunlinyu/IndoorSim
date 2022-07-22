@@ -22,7 +22,7 @@ public class SimDataController : MonoBehaviour
     void Start()
     {
         eventDispatcher.eventListener += EventListener;
-        indoorSimData.OnAssetUpdated += (assets) =>
+        indoorSimData.OnAssetListUpdated += (assets) =>
         {
             var e = new UIEvent();
             e.type = UIEventType.Asset;
@@ -72,7 +72,7 @@ public class SimDataController : MonoBehaviour
 
             eventDispatcher?.Raise(this, e);
         };
-        indoorSimData.OnGridMapUpdated += (gridMaps) =>
+        indoorSimData.OnGridMapListUpdated += (gridMaps) =>
         {
             var e = new UIEvent();
             e.type = UIEventType.Hierarchy;
@@ -306,6 +306,26 @@ public class SimDataController : MonoBehaviour
                     Debug.LogWarning("receive container id but current tool is not \"idEditor\" but: " + toolObj.name);
                 }
 
+            }
+        }
+        else if (e.type == UIEventType.Resources)
+        {
+            if (e.name == "gridmap")
+            {
+                Debug.Log("controller get gridmap");
+                GridMap gridMap = new GridMap();
+
+                var jsonData = JObject.Parse(e.message);
+                gridMap.id = jsonData["id"].Value<string>();
+                gridMap.resolution = jsonData["resolution"].Value<double>();
+                gridMap.zippedBase64Image = jsonData["zipBase64Image"].Value<string>();
+                gridMap.localOrigin.x = jsonData["origin_x"].Value<double>();
+                gridMap.localOrigin.y = jsonData["origin_y"].Value<double>();
+                gridMap.localOrigin.theta = jsonData["origin_theta"].Value<double>();
+
+                while (indoorSimData.gridMaps.Count > 0)  // TODO: we need to support multiple grid map
+                    indoorSimData.RemoveGridMap(0);
+                indoorSimData.AddGridMap(gridMap);
             }
         }
     }

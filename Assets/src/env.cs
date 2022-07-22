@@ -3,19 +3,22 @@ using UnityEngine;
 public class env : MonoBehaviour
 {
     private IndoorSimData indoorSimData = new IndoorSimData();  // model
-    public IndoorMapView mapView;  // view
-    public SimulationView simulationView;  // view
-    public SimDataController simDataController;  // controller
 
+    public GridMapView gridMapView;  // view
+    public IndoorMapView indoorMapView;  // view
+    public SimulationView simulationView;  // view
+
+    public SimDataController simDataController;  // controller
     public SimulationController simController;  // controller
 
     void OnEnable()
     {
-        mapView.indoorTiling = indoorSimData.indoorTiling;
+        gridMapView.indoorSimData = indoorSimData;
+        indoorMapView.indoorTiling = indoorSimData.indoorTiling;
         simulationView.indoorSimData = indoorSimData;
 
         simDataController.indoorSimData = indoorSimData;
-        simDataController.mapView = mapView;
+        simDataController.mapView = indoorMapView;
         simDataController.simView = simulationView;
 
         simController.indoorSimData = indoorSimData;

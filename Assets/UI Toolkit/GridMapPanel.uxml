@@ -7,7 +7,7 @@
             <ui:IntegerField label="height" value="0" name="height" readonly="true" />
             <ui:EnumField label="file type" type="GridMapImageFormat, model" name="file_type" />
             <ui:DoubleField label="resolution" value="0.02" name="resolution" />
-            <ui:Vector2Field label="origin" name="origin" x="-12" y="-15" />
+            <ui:Vector2Field label="origin" name="origin" x="0" y="0" />
             <ui:DoubleField label="origin theta" value="0" name="origin_theta" />
             <ui:Button tabindex="-1" text="import" display-tooltip-when-elided="true" name="import" />
         </ui:VisualElement>

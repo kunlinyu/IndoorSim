@@ -30,8 +30,10 @@ public class IndoorSimData
     [JsonPropertyAttribute] public List<Asset> assets = new List<Asset>();
     [JsonPropertyAttribute] public string digestCache = "";
 
-    [JsonIgnore] public Action<List<Asset>> OnAssetUpdated = (a) => { };
-    [JsonIgnore] public Action<List<GridMap>> OnGridMapUpdated = (gridMaps) => { };
+    [JsonIgnore] public Action<List<Asset>> OnAssetListUpdated = (a) => { };
+    [JsonIgnore] public Action<List<GridMap>> OnGridMapListUpdated = (gridMaps) => { };
+    [JsonIgnore] public Action<GridMap> OnGridMapCreated = (gridmap) => { };
+    [JsonIgnore] public Action<GridMap> OnGridMapRemoved = (gridmap) => { };
     [JsonIgnore] public Action<IndoorData> OnIndoorDataUpdated = (indoor) => { };
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
@@ -78,7 +80,7 @@ public class IndoorSimData
         history = indoorSimData.history;
         currentSimData = null;
         activeHistory = history;
-        OnAssetUpdated?.Invoke(assets);
+        OnAssetListUpdated?.Invoke(assets);
         OnSimulationListUpdated?.Invoke(simDataList);
         OnIndoorDataUpdated?.Invoke(indoorData);
 
@@ -141,7 +143,7 @@ public class IndoorSimData
             centerY = centroid.Y,
         };
         assets.Add(asset);
-        OnAssetUpdated?.Invoke(assets);
+        OnAssetListUpdated?.Invoke(assets);
 
         return asset;
     }
@@ -151,14 +153,14 @@ public class IndoorSimData
         IndoorData? indoorData = IndoorData.Deserialize(asset.json);
         if (indoorData == null) throw new ArgumentException("can not deserialize the asset");
         assets.Add(asset);
-        OnAssetUpdated?.Invoke(assets);
+        OnAssetListUpdated?.Invoke(assets);
     }
 
     public void RemoveAsset(Asset asset)
     {
         if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset: " + asset.name);
         assets.Remove(asset);
-        OnAssetUpdated?.Invoke(assets);
+        OnAssetListUpdated?.Invoke(assets);
     }
 
     public void ApplyAsset(Asset asset, Coordinate center, float rotation)
@@ -278,7 +280,8 @@ public class IndoorSimData
     {
         if (gridMaps.Any(map => map.id == gridmap.id)) return false;
         gridMaps.Insert(0, gridmap.Clone());
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
+        OnGridMapCreated?.Invoke(gridMaps[0]);
         Debug.Log("Grid map added");
         return true;
     }
@@ -286,8 +289,10 @@ public class IndoorSimData
     public bool RemoveGridMap(int index)
     {
         if (index < 0 || index >= gridMaps.Count) return false;
+        var tobeRemoved = gridMaps[index];
         gridMaps.RemoveAt(index);
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
+        OnGridMapRemoved?.Invoke(tobeRemoved);
         return true;
     }
 
@@ -295,9 +300,11 @@ public class IndoorSimData
     {
         int index = gridMaps.FindIndex(map => map.id == id);
         if (index < 0) return false;
+        var tobeRemoved = gridMaps[index];
 
         gridMaps.RemoveAt(index);
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
+        OnGridMapRemoved?.Invoke(tobeRemoved);
         return true;
     }
 
@@ -322,7 +329,7 @@ public class IndoorSimData
         if (index < 0) return false;
 
         gridMaps[index].id = newName;
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
         return true;
     }
 
@@ -330,7 +337,7 @@ public class IndoorSimData
     {
         if (index < 0 || index >= gridMaps.Count) return false;
         gridMaps[index].id = newName;
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
         return true;
     }
 
@@ -340,11 +347,9 @@ public class IndoorSimData
         var temp = gridMaps[index];
         gridMaps.RemoveAt(index);
         gridMaps.Insert(0, temp);
-        OnGridMapUpdated?.Invoke(gridMaps);
+        OnGridMapListUpdated?.Invoke(gridMaps);
         return true;
     }
-
-
 
     public void SelectMap()
     {

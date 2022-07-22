@@ -133,25 +133,6 @@ public class SimulationController : MonoBehaviour
                 Debug.Log("simulation speed: " + timeScale);
             }
         }
-        else if (e.type == UIEventType.Resources)
-        {
-            if (e.name == "gridmap")
-            {
-
-                Debug.Log("controller get gridmap");
-                GridMap gridMap = new GridMap();
-
-                var jsonData = JObject.Parse(e.message);
-                gridMap.id = jsonData["id"].Value<string>();
-                gridMap.resolution = jsonData["resolution"].Value<double>();
-                gridMap.zippedBase64Image = jsonData["zipBase64Image"].Value<string>();
-                gridMap.localOrigin.x = jsonData["origin_x"].Value<double>();
-                gridMap.localOrigin.y = jsonData["origin_y"].Value<double>();
-                gridMap.localOrigin.theta = jsonData["origin_theta"].Value<double>();
-
-                indoorSimData.AddGridMap(gridMap);
-            }
-        }
     }
 
     void Update()
