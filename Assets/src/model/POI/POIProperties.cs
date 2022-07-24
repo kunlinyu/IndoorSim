@@ -1,6 +1,8 @@
 using System;
 
 // https://opengeospatial.github.io/poi/spec/poi-core.html
+namespace poi {
+
 public class POIProperties
 {
     public string id;
@@ -16,4 +18,6 @@ public class POIProperties
     public POIProperties rights;
     public string term;
     public Uri scheme;
+}
+
 }

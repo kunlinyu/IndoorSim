@@ -1,10 +1,14 @@
 // https://opengeospatial.github.io/poi/spec/poi-core.html
+namespace poi {
+
 public class Location : POIProperties
 {
-    Geometry point;
-    Geometry line;
-    Geometry polygon;
-    POIProperties address;
-    Relationship relationship;
-    object undetermined;
+    public Geometry point;
+    public Geometry line;
+    public Geometry polygon;
+    public POIProperties address;
+    public Relationship relationship;
+    public object undetermined;
+}
+
 }

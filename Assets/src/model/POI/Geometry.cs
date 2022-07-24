@@ -1,5 +1,10 @@
 // https://opengeospatial.github.io/poi/spec/poi-core.html
+
+namespace poi {
+
 public class Geometry : POIProperties
 {
-    NetTopologySuite.Geometries.Geometry geometry;
+    public NetTopologySuite.Geometries.Geometry geometry;
+}
+
 }
