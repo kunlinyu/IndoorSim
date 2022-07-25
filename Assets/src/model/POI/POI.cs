@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 // https://opengeospatial.github.io/poi/spec/poi-core.html
 namespace poi
@@ -33,6 +34,8 @@ namespace poi
 
             this.label.Add(label);
         }
+
+        public bool LabelContains(string value) => label.Any(label => label.value == value);
 
         public void AddDescription(string value) => AddDescription(value, "en-US");
         public void AddDescription(string value, string lang)
