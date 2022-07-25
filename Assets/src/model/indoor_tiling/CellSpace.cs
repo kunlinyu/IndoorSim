@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
 using UnityEngine;
+
 #nullable enable
 
 
@@ -17,6 +18,7 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] public string Id { get; set; } = "";
+    [JsonPropertyAttribute] private List<IndoorPOI> pois = new List<IndoorPOI>();
 
     [JsonIgnore]
     public Navigable Navigable
@@ -385,5 +387,18 @@ public class CellSpace : Container
             if (another.navigable == Navigable.PhysicallyNonNavigable && b.Navigable == Navigable.Navigable) return true;
             else return false;
         }).ToList();
+    }
+
+    public void AddPOI(IndoorPOI poi)
+    {
+        pois.Add(poi);
+        OnUpdate?.Invoke();
+    }
+
+    public void RemovePOI(IndoorPOI poi)
+    {
+        if (!pois.Contains(poi)) throw new ArgumentException($"space({Id}) don't contain this poi: " + poi.id);
+        pois.Remove(poi);
+        OnUpdate?.Invoke();
     }
 }

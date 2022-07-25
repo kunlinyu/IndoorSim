@@ -181,7 +181,7 @@ public class All : MonoBehaviour
 
     void Update()
     {
-        Button? focusButton = root.focusController.focusedElement as Button;
+        // Button? focusButton = root.focusController.focusedElement as Button;
         // if (focusButton != null)
         //     Debug.Log(focusButton.tooltip);
     }

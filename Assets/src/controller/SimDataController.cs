@@ -64,7 +64,6 @@ public class SimDataController : MonoBehaviour
             }
             string simsJson = sw.ToString();
 
-
             var e = new UIEvent();
             e.type = UIEventType.Hierarchy;
             e.name = "simulation";

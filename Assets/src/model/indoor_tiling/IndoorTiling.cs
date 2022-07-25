@@ -32,6 +32,8 @@ public class IndoorTiling
     public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
     public Action<CellSpace> OnSpaceRemoved = (s) => { };
     public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
+    public Action<IndoorPOI> OnPOICreated = (poi) => { };
+    public Action<IndoorPOI> OnPOIRemoved = (poi) => { };
 
 #pragma warning disable CS8618
     public IndoorTiling() { }  // for deserialize only
@@ -564,6 +566,18 @@ public class IndoorTiling
             Debug.LogError(cv.Id);
             throw new Exception(cv.Id);
         }
+    }
+
+    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    {
+        indoorData.AddPOI(poi, spaces);
+        OnPOICreated?.Invoke(poi);
+    }
+
+    public void RemovePOI(IndoorPOI poi)
+    {
+        indoorData.RemovePOI(poi);
+        OnPOIRemoved?.Invoke(poi);
     }
 
     private void AddVertexInternal(CellVertex vertex)

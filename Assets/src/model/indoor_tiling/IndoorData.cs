@@ -14,6 +14,7 @@ using NetTopologySuite.Operation.Polygonize;
 [Serializable]
 public class IndoorData
 {
+    [JsonPropertyAttribute] public List<IndoorPOI> pois = new List<IndoorPOI>();
     [JsonPropertyAttribute] public List<CellVertex> vertexPool { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool { get; private set; } = new List<CellSpace>();
@@ -23,11 +24,13 @@ public class IndoorData
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
+    [JsonIgnore] private Dictionary<IndoorPOI, HashSet<CellSpace>> poi2Spaces = new Dictionary<IndoorPOI, HashSet<CellSpace>>();
 
     public bool Contains(CellVertex vertex) => vertexPool.Contains(vertex);
     public bool Contains(CellBoundary boundary) => boundaryPool.Contains(boundary);
     public bool Contains(CellSpace space) => spacePool.Contains(space);
     public bool Contains(RLineGroup rLines) => rLinePool.Contains(rLines);
+    public bool Contains(IndoorPOI poi) => pois.Contains(poi);
 
     public bool CrossesBoundaries(LineString ls) => boundaryPool.Any(b => b.geom.Crosses(ls));
 
@@ -114,6 +117,22 @@ public class IndoorData
         rLineGroup.space.rLines = null;
 
         rLineGroup.rLines.ForEach(rl => { boundary2RLines[rl.fr].Remove(rl); boundary2RLines[rl.to].Remove(rl); });
+    }
+
+    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    {
+        pois.Add(poi);
+        poi2Spaces.Add(poi, new HashSet<CellSpace>(spaces));
+        spaces.ForEach(space => space.AddPOI(poi));
+    }
+
+    public void RemovePOI(IndoorPOI poi)
+    {
+        if (!pois.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);
+        foreach (var space in poi2Spaces[poi])
+            space.RemovePOI(poi);
+        poi2Spaces.Remove(poi);
+        pois.Remove(poi);
     }
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
