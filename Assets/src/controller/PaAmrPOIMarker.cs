@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using NetTopologySuite.Geometries;
-
 #nullable enable
 
 enum PaAmrPoiMarkerStatus
@@ -14,6 +12,8 @@ enum PaAmrPoiMarkerStatus
     // PickingAgentPoiMarked
 
 }
+
+
 
 public class PaAmrPOIMarker : MonoBehaviour, ITool
 {
@@ -28,6 +28,8 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     private Vector3 paAmrPoiPosition;
 
     private PaAmrPoiMarkerStatus status = PaAmrPoiMarkerStatus.ContainerSelecting;
+
+    public static float PaAmrFunctionDirection = Mathf.PI;
 
     void Start()
     {
@@ -132,10 +134,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 foreach (var obj in pickingAgent2ContainerObj)
                     obj.GetComponent<LineRenderer>().SetPosition(1, paAmrPoiPosition);
 
-                // PaAmr sprite
-                GameObject PaAmrSpriteObj = transform.Find("PaAmrSprite").gameObject;
-                PaAmrSpriteObj.transform.position = paAmrPoiPosition;
-
                 // picking agent sprite
                 GameObject PickingAgentSpriteObj = transform.Find("PickingAgentSprite").gameObject;
                 PickingAgentSpriteObj.GetComponent<SpriteRenderer>().enabled = true;
@@ -143,6 +141,13 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     PickingAgentSpriteObj.transform.position = mousePosition.Value;
                 else
                     PickingAgentSpriteObj.transform.position = paAmrPoiPosition;
+
+                // PaAmr sprite
+                GameObject PaAmrSpriteObj = transform.Find("PaAmrSprite").gameObject;
+                PaAmrSpriteObj.transform.position = paAmrPoiPosition;
+                Vector3 delta = PickingAgentSpriteObj.transform.position - paAmrPoiPosition;
+                float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
+                PaAmrSpriteObj.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, rotation);
 
                 // line renderer between them
                 GameObject PaAmr2PickingAgentObj = transform.Find("PaAmr2PickingAgent").gameObject;
