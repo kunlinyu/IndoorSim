@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1224357919816116134}
-  - component: {fileID: 1224357919816116129}
+  - component: {fileID: 8982172315990148284}
   m_Layer: 0
-  m_Name: PaAmrPOI
+  m_Name: PaAmrPOIMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35,7 +35,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!114 &1224357919816116129
+--- !u!114 &8982172315990148284
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1224357919816116131}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11dba0071aafd2866be72a2c8e5aef06, type: 3}
+  m_Script: {fileID: 11500000, guid: 0ccdc5e977e1a501784cdfa4d7327840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1224357920004302091

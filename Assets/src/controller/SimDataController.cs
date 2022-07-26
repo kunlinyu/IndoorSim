@@ -193,6 +193,13 @@ public class SimDataController : MonoBehaviour
                 currentTool = idEditor;
                 Debug.Log("Switch to tool id editor");
             }
+            else if (e.name == "paamrpoi")
+            {
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/PaAmrPOIMarker"), this.transform);
+                toolObj.name = "PaAmrPOIMarker";
+                currentTool = toolObj.GetComponent<PaAmrPOIMarker>();
+                Debug.Log("Switch to tool PaAmrPOIMarker");
+            }
             else if (e.name == "apply asset")
             {
                 // if (oldToolName != "apply asset")

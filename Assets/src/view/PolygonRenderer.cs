@@ -31,8 +31,6 @@ public class PolygonRenderer : MonoBehaviour
     public void UpdateRenderer()
     {
         GetComponent<MeshRenderer>().materials = new Material[] { interiorMaterial, triangulationMaterial };
-        GetComponent<MeshRenderer>().sortingLayerID = sortingLayerId;
-        GetComponent<MeshRenderer>().sortingOrder = sortingOrder;
     }
 
     public Mesh UpdatePolygon(Polygon polygon)
@@ -62,8 +60,6 @@ public class PolygonRenderer : MonoBehaviour
             lr.numCornerVertices = 3;
 
             lr.material = boundaryMaterial;
-            lr.sortingLayerID = sortingLayerId;
-            lr.sortingOrder = sortingOrder + 1;
         }
         else
         {
