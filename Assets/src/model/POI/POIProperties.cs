@@ -6,7 +6,7 @@ namespace poi {
 public class POIProperties
 {
     public string id;
-    public Uri uri;
+    public Uri href;
     public string value;
     public Uri Base;
     public string type;

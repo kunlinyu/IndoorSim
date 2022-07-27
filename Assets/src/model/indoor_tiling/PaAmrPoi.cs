@@ -7,11 +7,9 @@ using POIS = poi.POIS;
 
 public class PaAmrPoi : POIS
 {
-    private float amrFunctionalDir;
-
     public Action OnUpdate;
 
-    PaAmrPoi(Point amrPoint, Point pickingAgentPoint, float amrFunctionalDir)
+    PaAmrPoi(Point amrPoint, Point pickingAgentPoint)
     {
         POI amrPoi = new POI();
         amrPoi.AddLabel("amr");
@@ -22,8 +20,6 @@ public class PaAmrPoi : POIS
         pickingAgentPoi.AddLabel("picking");
         pickingAgentPoi.location.point.geometry = pickingAgentPoint;
         this.poi.Add(pickingAgentPoi);
-
-        this.amrFunctionalDir = amrFunctionalDir;
     }
 
     public void SetAmrPoint(Point point)
