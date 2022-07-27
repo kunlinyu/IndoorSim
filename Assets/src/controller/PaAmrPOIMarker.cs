@@ -77,6 +77,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     if (PickingAgentPoiSpace(sc))
                     {
                         // TODO: insert
+                        IndoorSimData.Add
                         selectedSpace.Clear();
                         status = PaAmrPoiMarkerStatus.ContainerSelecting;
                     }

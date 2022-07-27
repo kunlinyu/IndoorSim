@@ -625,4 +625,18 @@ public class IndoorSimData
         currentSimData.history.SessionCommit();
         OnSimulationListUpdated?.Invoke(simDataList);
     }
+
+    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    {
+        indoorData.AddPOI(poi, spaces);
+
+        // TODO: undo redo instruction
+    }
+
+    public void RemovePOI(IndoorPOI poi)
+    {
+        indoorData.RemovePOI(poi);
+
+        // TODO: undo redo instruction
+    }
 }
