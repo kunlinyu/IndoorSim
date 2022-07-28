@@ -49,6 +49,7 @@ public class IndoorMapView : MonoBehaviour
         };
         indoorTiling.OnRLinesCreated += (rLines) =>
         {
+            // TODO: make rline game object to be prefab
             var obj = new GameObject(rLines.space.Id + " rLines");
             obj.transform.SetParent(rLineParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
@@ -63,7 +64,18 @@ public class IndoorMapView : MonoBehaviour
         };
         indoorTiling.OnPOICreated += (poi) =>
         {
+            string poiObjPath;
+            if (poi.LabelContains("PaAmr"))
+                poiObjPath = "POIObj/PaAmrPOI";
+            else if (poi.LabelContains("picking"))
+                poiObjPath = "POIObj/PickingPOI";
+            else
+                poiObjPath = "POIObj/DefaultPOI";
 
+            var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), spaceParentObj.transform);
+            obj.name = poi.id;
+            obj.GetComponent<POIController>().Poi = poi;
+            poi2Obj[poi] = obj;
         };
 
         indoorTiling.OnVertexRemoved += (vertex) =>
@@ -85,6 +97,11 @@ public class IndoorMapView : MonoBehaviour
         {
             Destroy(rLine2Obj[rLines]);
             rLine2Obj.Remove(rLines);
+        };
+        indoorTiling.OnPOIRemoved += (poi) =>
+        {
+            Destroy(poi2Obj[poi]);
+            poi2Obj.Remove(poi);
         };
     }
 

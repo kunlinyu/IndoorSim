@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2053242386835501641}
   - component: {fileID: 2053242386835501642}
+  - component: {fileID: 5208991389158938158}
   m_Layer: 0
   m_Name: PosePOI
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_Sprite: {fileID: 21300000, guid: 76ce93ad29d221cd0bf510e39fc00fef, type: 3}
   m_Color: {r: 0.06808474, g: 0.3577369, b: 0.8490566, a: 1}
   m_FlipX: 0
@@ -84,3 +85,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &5208991389158938158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2053242386835501643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b1b7cc67bd1e3479a94764515492f82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

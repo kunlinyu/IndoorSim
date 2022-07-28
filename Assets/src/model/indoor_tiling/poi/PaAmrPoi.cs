@@ -5,7 +5,7 @@ public class PaAmrPoi : IndoorPOI
 {
     public Action OnUpdate;
 
-    private PickingPOI pickingPOI;
+    public PickingPOI pickingPOI;
 
     public PaAmrPoi(Point amrPoint, PickingPOI pickingPOI)
     {
