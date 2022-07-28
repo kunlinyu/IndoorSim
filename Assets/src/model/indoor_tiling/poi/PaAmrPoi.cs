@@ -7,7 +7,7 @@ public class PaAmrPoi : IndoorPOI
 
     private PickingPOI pickingPOI;
 
-    PaAmrPoi(Point amrPoint, PickingPOI pickingPOI)
+    public PaAmrPoi(Point amrPoint, PickingPOI pickingPOI)
     {
         location.point.geometry = amrPoint;
         AddLabel("PaAmr");

@@ -76,8 +76,12 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     SpaceController? sc = MousePickController.PointedSpace;
                     if (PickingAgentPoiSpace(sc))
                     {
-                        // TODO: insert
-                        IndoorSimData.Add
+                        // insert
+                        Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
+                        PickingPOI pickingPoi = new PickingPOI(Utils.Vec2Point(pickingPoiPosition));
+                        IndoorSimData!.AddPOI(pickingPoi, sc!.Space);
+                        IndoorSimData.AddPOI(new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), pickingPoi), sc!.Space);
+                        Debug.Log("POI inserted");
                         selectedSpace.Clear();
                         status = PaAmrPoiMarkerStatus.ContainerSelecting;
                     }
@@ -95,9 +99,9 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     {
         while (pickingAgent2ContainerObj.Count < selectedSpace.Count)
         {
-            var obj = Instantiate<GameObject>(Resources.Load<GameObject>("BasicShape/PickingAgent2Container"), this.transform);
+            var obj = Instantiate<GameObject>(Resources.Load<GameObject>("POIObj/Container2POI"), this.transform);
             int index = pickingAgent2ContainerObj.Count;
-            obj.name = "PickingAgent2Container " + index;
+            obj.name = "Container2POI " + index;
             pickingAgent2ContainerObj.Add(obj);
             obj.GetComponent<LineRenderer>().positionCount = 2;
             obj.GetComponent<LineRenderer>().SetPosition(0, Utils.Coor2Vec(selectedSpace[index].Space.Geom!.Centroid.Coordinate));
@@ -116,8 +120,8 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 {
                     foreach (var obj in pickingAgent2ContainerObj)
                         obj.GetComponent<LineRenderer>().SetPosition(1, mousePosition.Value);
-                    transform.Find("PaAmrSprite").gameObject.GetComponent<SpriteRenderer>().enabled = true;
-                    transform.Find("PaAmrSprite").position = mousePosition.Value;
+                    transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                    transform.Find("PosePOI").position = mousePosition.Value;
                 }
                 else
                 {
@@ -126,17 +130,17 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         LineRenderer lr = obj.GetComponent<LineRenderer>();
                         lr.SetPosition(1, lr.GetPosition(0));
                     }
-                    transform.Find("PaAmrSprite").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                    transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = false;
                 }
-                transform.Find("PickingAgentSprite").gameObject.GetComponent<SpriteRenderer>().enabled = false;
-                transform.Find("PaAmr2PickingAgent").gameObject.GetComponent<LineRenderer>().enabled = false;
+                transform.Find("PickingPOI").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                transform.Find("PaAmr2Picking").gameObject.GetComponent<LineRenderer>().enabled = false;
                 break;
             case PaAmrPoiMarkerStatus.PaAmrPoiMarked:
                 foreach (var obj in pickingAgent2ContainerObj)
                     obj.GetComponent<LineRenderer>().SetPosition(1, paAmrPoiPosition);
 
                 // picking agent sprite
-                GameObject PickingAgentSpriteObj = transform.Find("PickingAgentSprite").gameObject;
+                GameObject PickingAgentSpriteObj = transform.Find("PickingPOI").gameObject;
                 PickingAgentSpriteObj.GetComponent<SpriteRenderer>().enabled = true;
                 if (mousePosition != null)
                     PickingAgentSpriteObj.transform.position = mousePosition.Value;
@@ -144,14 +148,14 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     PickingAgentSpriteObj.transform.position = paAmrPoiPosition;
 
                 // PaAmr sprite
-                GameObject PaAmrSpriteObj = transform.Find("PaAmrSprite").gameObject;
+                GameObject PaAmrSpriteObj = transform.Find("PosePOI").gameObject;
                 PaAmrSpriteObj.transform.position = paAmrPoiPosition;
                 Vector3 delta = PickingAgentSpriteObj.transform.position - paAmrPoiPosition;
                 float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
-                PaAmrSpriteObj.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, rotation);
+                PaAmrSpriteObj.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, rotation);
 
                 // line renderer between them
-                GameObject PaAmr2PickingAgentObj = transform.Find("PaAmr2PickingAgent").gameObject;
+                GameObject PaAmr2PickingAgentObj = transform.Find("PaAmr2Picking").gameObject;
                 PaAmr2PickingAgentObj.GetComponent<LineRenderer>().enabled = true;
                 PaAmr2PickingAgentObj.GetComponent<LineRenderer>().positionCount = 2;
                 PaAmr2PickingAgentObj.GetComponent<LineRenderer>().SetPosition(0, PaAmrSpriteObj.transform.position);

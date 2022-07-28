@@ -626,16 +626,17 @@ public class IndoorSimData
         OnSimulationListUpdated?.Invoke(simDataList);
     }
 
+    public void AddPOI(IndoorPOI poi, params CellSpace[] spaces) => AddPOI(poi, new List<CellSpace>(spaces));
     public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
     {
-        indoorData.AddPOI(poi, spaces);
+        indoorTiling.AddPOI(poi, spaces);
 
         // TODO: undo redo instruction
     }
 
     public void RemovePOI(IndoorPOI poi)
     {
-        indoorData.RemovePOI(poi);
+        indoorTiling.RemovePOI(poi);
 
         // TODO: undo redo instruction
     }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1224357919816116134}
   - component: {fileID: 1224357919816116129}
   m_Layer: 0
-  m_Name: PaAmrPOI
+  m_Name: PaAmrPOI-Remove
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -120,7 +120,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 883ccfb514f67493f96cb0d35473d470, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e872b68c035504ded93020dcd0539a0a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

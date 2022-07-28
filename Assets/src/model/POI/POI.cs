@@ -12,7 +12,7 @@ namespace poi
         public List<POIProperties> category = new List<POIProperties>();
         public List<POIProperties> time = new List<POIProperties>();
         public List<POIProperties> link = new List<POIProperties>();
-        public Location location;
+        public Location location = new Location();
         public List<POIProperties> metadata = new List<POIProperties>();
 
         public void AddLabel(string value) => AddLabel(value, "en-US", "primary");

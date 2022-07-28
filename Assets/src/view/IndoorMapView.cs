@@ -11,11 +11,13 @@ public class IndoorMapView : MonoBehaviour
     private GameObject boundaryParentObj;
     private GameObject spaceParentObj;
     private GameObject rLineParentObj;
+    private GameObject POIParentObj;
 
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
     public Dictionary<CellSpace, GameObject> cellspace2Obj = new Dictionary<CellSpace, GameObject>();
-    public Dictionary<RLineGroup, GameObject> cellspace2RLineObj = new Dictionary<RLineGroup, GameObject>();
+    public Dictionary<RLineGroup, GameObject> rLine2Obj = new Dictionary<RLineGroup, GameObject>();
+    public Dictionary<IndoorPOI, GameObject> poi2Obj = new Dictionary<IndoorPOI, GameObject>();
 
     void Start()
     {
@@ -51,13 +53,17 @@ public class IndoorMapView : MonoBehaviour
             obj.transform.SetParent(rLineParentObj.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
-            cellspace2RLineObj[rLines] = obj;
+            rLine2Obj[rLines] = obj;
 
             var controller = obj.AddComponent<RLinesController>();
             controller.material = Resources.Load<Material>("Materials/arrow");
             controller.materialDark = Resources.Load<Material>("Materials/arrow dark");
             controller.materialHighlight = Resources.Load<Material>("Materials/arrow highlight");
             controller.RLines = rLines;
+        };
+        indoorTiling.OnPOICreated += (poi) =>
+        {
+
         };
 
         indoorTiling.OnVertexRemoved += (vertex) =>
@@ -77,8 +83,8 @@ public class IndoorMapView : MonoBehaviour
         };
         indoorTiling.OnRLinesRemoved += (rLines) =>
         {
-            Destroy(cellspace2RLineObj[rLines]);
-            cellspace2RLineObj.Remove(rLines);
+            Destroy(rLine2Obj[rLines]);
+            rLine2Obj.Remove(rLines);
         };
     }
 
