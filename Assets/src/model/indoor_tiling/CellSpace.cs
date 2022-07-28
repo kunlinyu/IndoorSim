@@ -18,7 +18,7 @@ public class CellSpace : Container
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] public string Id { get; set; } = "";
-    [JsonPropertyAttribute] private List<IndoorPOI> pois = new List<IndoorPOI>();
+    [JsonIgnore] public List<IndoorPOI> pois = new List<IndoorPOI>();
 
     [JsonIgnore]
     public Navigable Navigable

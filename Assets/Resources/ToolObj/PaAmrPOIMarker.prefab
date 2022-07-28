@@ -188,7 +188,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: PosePOI
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 5208991389158938158, guid: f8db59e93a9edb269a2df1baf7f538af, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5208991389158938158, guid: f8db59e93a9edb269a2df1baf7f538af, type: 3}
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: f8db59e93a9edb269a2df1baf7f538af, type: 3}
 --- !u!4 &6768484690963839481 stripped
@@ -328,7 +333,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: PickingPOI
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7312347014885623240, guid: cb7fc2669a439f4299736be73dd731e7, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 7312347014885623240, guid: cb7fc2669a439f4299736be73dd731e7, type: 3}
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: cb7fc2669a439f4299736be73dd731e7, type: 3}
 --- !u!4 &5043087123910445516 stripped

@@ -25,6 +25,7 @@ public class IndoorMapView : MonoBehaviour
         boundaryParentObj = transform.Find("Boundaries").gameObject;
         spaceParentObj = transform.Find("Spaces").gameObject;
         rLineParentObj = transform.Find("RLines").gameObject;
+        POIParentObj = transform.Find("POIs").gameObject;
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
@@ -72,7 +73,7 @@ public class IndoorMapView : MonoBehaviour
             else
                 poiObjPath = "POIObj/DefaultPOI";
 
-            var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), spaceParentObj.transform);
+            var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), POIParentObj.transform);
             obj.name = poi.id;
             obj.GetComponent<POIController>().Poi = poi;
             poi2Obj[poi] = obj;

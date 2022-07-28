@@ -14,7 +14,7 @@ using NetTopologySuite.Operation.Polygonize;
 [Serializable]
 public class IndoorData
 {
-    [JsonPropertyAttribute] public List<IndoorPOI> pois = new List<IndoorPOI>();
+    [JsonIgnore] public List<IndoorPOI> pois = new List<IndoorPOI>();
     [JsonPropertyAttribute] public List<CellVertex> vertexPool { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool { get; private set; } = new List<CellSpace>();
