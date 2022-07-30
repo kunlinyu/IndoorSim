@@ -120,8 +120,22 @@ public class All : MonoBehaviour
         if (e.type == UIEventType.ToolButton && e.name == "load")
         {
             string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
-            string fileContent = File.ReadAllText(path[0]);
-            eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
+            if (path.Length > 0 && path[0].Length > 0)
+            {
+                if (File.Exists(path[0]))
+                {
+                    string fileContent = File.ReadAllText(path[0]);
+                    eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
+                }
+                else
+                {
+                    Debug.LogWarning(path[0] + " don't exist");
+                }
+            }
+            else
+            {
+                Debug.Log("no map file selected");
+            }
         }
         else if (e.type == UIEventType.Resources && e.name == "save")
         {
@@ -155,11 +169,11 @@ public class All : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log(path[0] + "don't exist");
+                    Debug.LogWarning(path[0] + " don't exist");
                 }
             }
             else {
-                Debug.LogWarning("not grid map selected");
+                Debug.Log("not grid map selected");
             }
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
