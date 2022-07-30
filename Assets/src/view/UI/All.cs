@@ -130,24 +130,37 @@ public class All : MonoBehaviour
         else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
         {
             string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[] { new ExtensionFilter("", "pgm", "png") }, false);
-            byte[] imageBytes = File.ReadAllBytes(path[0]);
-            byte[] zipBytes = Compress(imageBytes);
-            string zippedBase64Image = Convert.ToBase64String(zipBytes);
+            if (path.Length > 0 && path[0].Length > 0)
+            {
+                if (File.Exists(path[0]))
+                {
+                    byte[] imageBytes = File.ReadAllBytes(path[0]);
+                    byte[] zipBytes = Compress(imageBytes);
+                    string zippedBase64Image = Convert.ToBase64String(zipBytes);
 
-            PGMImage pgm = new PGMImage();
-            pgm.Load(imageBytes);
+                    PGMImage pgm = new PGMImage();
+                    pgm.Load(imageBytes);
 
-            GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
-            gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
+                    GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
+                    gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
 
-            GridMapImageFormat fileFormat = GridMapImageFormat.PGM;
-            if (path[0].EndsWith("pgm"))
-                fileFormat = GridMapImageFormat.PGM;
-            else if (path[0].EndsWith("png"))
-                fileFormat = GridMapImageFormat.PNG;
-            else
-                Debug.LogError("unrecognize file format: " + path[0]);
-            gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo);
+                    GridMapImageFormat fileFormat = GridMapImageFormat.PGM;
+                    if (path[0].EndsWith("pgm"))
+                        fileFormat = GridMapImageFormat.PGM;
+                    else if (path[0].EndsWith("png"))
+                        fileFormat = GridMapImageFormat.PNG;
+                    else
+                        Debug.LogError("unrecognize file format: " + path[0]);
+                    gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo);
+                }
+                else
+                {
+                    Debug.Log(path[0] + "don't exist");
+                }
+            }
+            else {
+                Debug.LogWarning("not grid map selected");
+            }
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
         {
