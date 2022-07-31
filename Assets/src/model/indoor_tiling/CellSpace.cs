@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm;
 
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
@@ -156,11 +157,9 @@ public class CellSpace : Container
         UpdateFromVertex();
     }
 
-    public static CellSpace MergeOrMinusCellSpace(CellSpace cellSpace1, CellSpace cellSpace2)
+    public static CellSpace Merge(CellSpace cellSpace1, CellSpace cellSpace2)
     {
         // If the two arguments touches with each other, this function will merge them.
-        // If one argument contain another, this function will minus the inner one from the outer one.
-        // And there is no need to distinguish with case we need to solve because the code are same for both cases.
 
         // looking for nonCommonBoundaries
         HashSet<CellBoundary> commonBoundaries = new HashSet<CellBoundary>();
@@ -180,29 +179,58 @@ public class CellSpace : Container
                 nonCommonBoundaries.Add(b);
 
         // Search for vertices in ring sequence from boundaries
-        List<CellVertex> vertices = new List<CellVertex>();
+        List<List<CellVertex>> vertices = new List<List<CellVertex>>();
+        List<List<CellBoundary>> boundaries = new List<List<CellBoundary>>();
+
         List<CellBoundary> waitingBoundaries = nonCommonBoundaries.ToList();
 
-        CellBoundary? currentBoundary = waitingBoundaries[0];
-        CellVertex currentVertex = currentBoundary.P0;
-        waitingBoundaries.Remove(currentBoundary);
-        vertices.Add(currentVertex);
+        int ringIndex = 0;
         do
         {
-            currentVertex = currentBoundary.Another(currentVertex);
-            currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
-            vertices.Add(currentVertex);
+            vertices.Add(new List<CellVertex>());
+            boundaries.Add(new List<CellBoundary>());
+
+            CellBoundary? currentBoundary = waitingBoundaries[0];
             waitingBoundaries.Remove(currentBoundary);
+            boundaries[ringIndex].Add(currentBoundary);
+
+            CellVertex currentVertex = currentBoundary.P0;
+            vertices[ringIndex].Add(currentVertex);
+            Debug.Log(ringIndex);
+            do
+            {
+                currentVertex = currentBoundary!.Another(currentVertex);
+                vertices[ringIndex].Add(currentVertex);
+
+                currentBoundary = waitingBoundaries.FirstOrDefault(b => b.Contains(currentVertex));
+                waitingBoundaries.Remove(currentBoundary);
+                if (currentBoundary != null)
+                    boundaries[ringIndex].Add(currentBoundary);
+            } while (currentBoundary != null);
+            ringIndex++;
         } while (waitingBoundaries.Count > 0);
 
-        // check vertices CCW
-        List<CellVertex> tempRing = new List<CellVertex>(vertices);
-        tempRing.Add(vertices[0]);
-        if (!new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray()).IsCCW)
-            vertices.Reverse();
+        List<CellVertex> maxAreaVertices = null;
+        List<CellBoundary> maxAreaBoundaries = null;
+        double maxArea = Double.MinValue;
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            List<CellVertex> tempRing = new List<CellVertex>(vertices[i]);
+            tempRing.Add(vertices[i][0]);
+            LinearRing ring = new GeometryFactory().CreateLinearRing(tempRing.Select(cv => cv.Coordinate).ToArray());
+            if (!ring.IsCCW)
+                vertices[i].Reverse();
+            double area = Area.OfRing(ring.Coordinates);
+            if (maxArea < area)
+            {
+                maxArea = area;
+                maxAreaVertices = vertices[i];
+                maxAreaBoundaries = boundaries[i];
+            }
+        }
 
         // Add merged hole
-        return new CellSpace(vertices, nonCommonBoundaries, "generated temp cellspace");
+        return new CellSpace(maxAreaVertices, maxAreaBoundaries, "generated temp cellspace");
     }
 
     public void AddHole(CellSpace cellSpace)
@@ -251,7 +279,7 @@ public class CellSpace : Container
                         merge = true;
                         holesSet.Remove(hole1);
                         holesSet.Remove(hole2);
-                        holesSet.Add(MergeOrMinusCellSpace(hole1, hole2));
+                        holesSet.Add(Merge(hole1, hole2));
                         goto AFTER_MERGE;
                     }
                 }
