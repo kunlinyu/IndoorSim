@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: delete
   m_EditorClassIdentifier: 
   m_ToolName: delete
-  m_Class: 5
+  m_Class: 0
   m_PortraitImage: {fileID: 21300000, guid: b5782c4b2f49060478378ad1e1695d2d, type: 3}
   m_SortingOrder: 0

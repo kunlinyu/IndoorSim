@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: redo
   m_EditorClassIdentifier: 
   m_ToolName: redo
-  m_Class: 1
+  m_Class: 0
   m_PortraitImage: {fileID: 21300000, guid: 476413ac8f91ea2a896829e3fa19765c, type: 3}
   m_SortingOrder: 1

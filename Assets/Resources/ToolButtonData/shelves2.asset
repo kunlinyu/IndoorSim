@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: shelves2
   m_EditorClassIdentifier: 
   m_ToolName: shelves2
-  m_Class: 4
+  m_Class: 1
   m_PortraitImage: {fileID: 21300000, guid: ddd08ac503added1c828ea669c8f1a99, type: 3}
   m_SortingOrder: 0

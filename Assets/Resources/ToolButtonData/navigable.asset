@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: navigable
   m_EditorClassIdentifier: 
   m_ToolName: navigable
-  m_Class: 5
+  m_Class: 1
   m_PortraitImage: {fileID: 21300000, guid: 5d6d7a1f889cc42c7b266b34111bf869, type: 3}
   m_SortingOrder: 0

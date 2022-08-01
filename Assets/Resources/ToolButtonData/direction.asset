@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: direction
   m_EditorClassIdentifier: 
   m_ToolName: direction
-  m_Class: 5
+  m_Class: 1
   m_PortraitImage: {fileID: 21300000, guid: 517ae38e031a1177d9423868086b608d, type: 3}
   m_SortingOrder: 0
