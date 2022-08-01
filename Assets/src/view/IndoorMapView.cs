@@ -6,6 +6,7 @@ using UnityEngine;
 public class IndoorMapView : MonoBehaviour
 {
     public IndoorTiling indoorTiling;
+    public UIEventDispatcher eventDispatcher;
 
     private GameObject vertexParentObj;
     private GameObject boundaryParentObj;
@@ -21,6 +22,8 @@ public class IndoorMapView : MonoBehaviour
 
     void Start()
     {
+        eventDispatcher.eventListener += EventListener;
+
         vertexParentObj = transform.Find("Vertices").gameObject;
         boundaryParentObj = transform.Find("Boundaries").gameObject;
         spaceParentObj = transform.Find("Spaces").gameObject;
@@ -104,6 +107,14 @@ public class IndoorMapView : MonoBehaviour
             Destroy(poi2Obj[poi]);
             poi2Obj.Remove(poi);
         };
+    }
+
+    void EventListener(object sender, UIEvent e)
+    {
+        if (e.type == UIEventType.ToolButton && e.name == "view rline")
+        {
+            rLineParentObj.SetActive(!rLineParentObj.activeSelf);
+        }
     }
 
 }
