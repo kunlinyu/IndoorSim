@@ -110,6 +110,9 @@ public class RLinesController : MonoBehaviour
         renderObj.ForEach(obj => Destroy(obj));
         renderObj.Clear();
 
+        int validRLineCount = rLines.rLines.Count(rLine => !rLine.IllForm(rLines.space));
+        if (validRLineCount > 12) return;
+
         foreach (var rLine in rLines.rLines)
         {
             if (rLine.IllForm(rLines.space)) continue;
