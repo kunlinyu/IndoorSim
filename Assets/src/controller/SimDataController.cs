@@ -329,6 +329,13 @@ public class SimDataController : MonoBehaviour
                 gridMap.localOrigin.y = jsonData["origin_y"].Value<double>();
                 gridMap.localOrigin.theta = jsonData["origin_theta"].Value<double>();
 
+                if (jsonData["format"].Value<string>() == "PGM")
+                    gridMap.format = GridMapImageFormat.PGM;
+                else if (jsonData["format"].Value<string>() == "PNG")
+                    gridMap.format = GridMapImageFormat.PNG;
+                else
+                    Debug.LogError("unrecognize file format: " + jsonData["format"].Value<string>());
+
                 while (indoorSimData.gridMaps.Count > 0)  // TODO: we need to support multiple grid map
                     indoorSimData.RemoveGridMap(0);
                 indoorSimData.AddGridMap(gridMap);

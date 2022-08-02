@@ -149,16 +149,6 @@ public class All : MonoBehaviour
             {
                 if (File.Exists(path[0]))
                 {
-                    byte[] imageBytes = File.ReadAllBytes(path[0]);
-                    byte[] zipBytes = Compress(imageBytes);
-                    string zippedBase64Image = Convert.ToBase64String(zipBytes);
-
-                    PGMImage pgm = new PGMImage();
-                    pgm.Load(imageBytes);
-
-                    GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
-                    gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
-
                     GridMapImageFormat fileFormat = GridMapImageFormat.PGM;
                     if (path[0].EndsWith("pgm"))
                         fileFormat = GridMapImageFormat.PGM;
@@ -166,23 +156,59 @@ public class All : MonoBehaviour
                         fileFormat = GridMapImageFormat.PNG;
                     else
                         Debug.LogError("unrecognize file format: " + path[0]);
-                    gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], pgm.width(), pgm.height(), fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo);
+
+                    byte[] imageBytes = File.ReadAllBytes(path[0]);
+                    byte[] zipBytes = Compress(imageBytes);
+                    string zippedBase64Image = Convert.ToBase64String(zipBytes);
+
+                    int width, height;
+                    if (fileFormat == GridMapImageFormat.PGM)
+                    {
+                        PGMImage pgm = new PGMImage();
+                        pgm.Load(imageBytes);
+                        width = pgm.width();
+                        height = pgm.height();
+                    }
+                    else if (fileFormat == GridMapImageFormat.PNG)
+                    {
+                        Texture2D tex = new Texture2D(1, 1);
+                        tex.LoadImage(imageBytes);
+                        width = tex.width;
+                        height = tex.height;
+                    }
+                    else
+                    {
+                        Debug.LogError("Unrecognize file format: " + fileFormat);
+                        return;
+                    }
+
+                    GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
+                    gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
+
+                    gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], width, height, fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo, this.DestroyGridMapImportPanel);
                 }
                 else
                 {
                     Debug.LogWarning(path[0] + " don't exist");
                 }
             }
-            else {
+            else
+            {
                 Debug.Log("not grid map selected");
             }
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
         {
-            Destroy(gridMapImportPanelObj);
-            gridMapImportPanelObj = null;
+            DestroyGridMapImportPanel();
         }
 
+    }
+
+    private void DestroyGridMapImportPanel()
+    {
+        root.Focus();  // prevent warning if we focus on visualElement on gridMapImportPanelObj
+        Destroy(gridMapImportPanelObj);
+        gridMapImportPanelObj = null;
     }
 
     public static byte[] Compress(byte[] bytes)
@@ -209,8 +235,6 @@ public class All : MonoBehaviour
 
     void Update()
     {
-        // Button? focusButton = root.focusController.focusedElement as Button;
-        // if (focusButton != null)
-        //     Debug.Log(focusButton.tooltip);
+
     }
 }

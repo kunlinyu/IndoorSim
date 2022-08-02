@@ -20,7 +20,7 @@ public class ToolBarController : MonoBehaviour
             Button button = buttonContainer.Q<Button>("ToolBarButton");
             button.text = "";
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
-            button.tooltip = tbd.m_ToolName + " " + tbd.m_SortingOrder;
+            button.tooltip = tbd.m_ToolName;
             button.AddManipulator(new ToolTipManipulator(toolBar));
             if (tbd.m_Class == ToolType.TriggerAndFinish)
             {

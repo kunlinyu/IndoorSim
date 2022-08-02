@@ -7,9 +7,10 @@
             <ui:IntegerField label="height" value="0" name="height" readonly="true" />
             <ui:EnumField label="file type" type="GridMapImageFormat, model" name="file_type" />
             <ui:DoubleField label="resolution" value="0.02" name="resolution" />
-            <ui:Vector2Field label="origin" name="origin" x="0" y="0" />
-            <ui:DoubleField label="origin theta" value="0" name="origin_theta" />
-            <ui:Button tabindex="-1" text="import" display-tooltip-when-elided="true" name="import" />
+            <ui:Vector2Field label="origin" name="origin" x="0" y="0" style="cursor: initial;" />
+            <ui:DoubleField label="origin theta" value="0" name="origin_theta" style="cursor: initial;" />
+            <ui:Button tabindex="-1" text="Import" display-tooltip-when-elided="true" name="import" />
+            <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="cancel" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
