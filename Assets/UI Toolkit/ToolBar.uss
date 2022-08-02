@@ -1,3 +1,7 @@
+.enable {
+    background-color: rgba(220, 220, 220, 255);
+}
+
 Button:focus {
-    background-color: rgba(150, 150, 150, 255);
+    background-color: rgba(220, 220, 220, 255);
 }

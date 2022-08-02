@@ -15,4 +15,4 @@ MonoBehaviour:
   m_ToolName: select drag
   m_Class: 1
   m_PortraitImage: {fileID: 21300000, guid: a77231e6ebd9f4f4599fcaeec41658e2, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 5

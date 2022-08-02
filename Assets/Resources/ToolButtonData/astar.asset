@@ -15,4 +15,4 @@ MonoBehaviour:
   m_ToolName: astar
   m_Class: 1
   m_PortraitImage: {fileID: 21300000, guid: 1d85b22af6ca166f79b44f5f4715a265, type: 3}
-  m_SortingOrder: 0
+  m_SortingOrder: 11

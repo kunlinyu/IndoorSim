@@ -32,8 +32,9 @@ public class All : MonoBehaviour
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
         var toolBarController = GetComponent<ToolBarController>();
         toolBarController.LoadButtons(toolBar,
-            (button, tbd) => { eventDispatcher.Raise(button, new UIEvent() { name = tbd.m_ToolName, type = UIEventType.ToolButton }); },
-            () => { eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
+            (tbd) => { Debug.Log("trigger"); eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "trigger", type = UIEventType.ToolButton }); },
+            (tbd) => { Debug.Log("enter"); eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enter", type = UIEventType.ToolButton }); },
+            (tbd) => { Debug.Log("cancel"); eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
         toolBar.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>

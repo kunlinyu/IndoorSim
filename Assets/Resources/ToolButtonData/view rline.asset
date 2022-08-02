@@ -15,4 +15,4 @@ MonoBehaviour:
   m_ToolName: view rline
   m_Class: 0
   m_PortraitImage: {fileID: 21300000, guid: 88db9491ec659a168a77e0e2e4b519bb, type: 3}
-  m_SortingOrder: 10
+  m_SortingOrder: 999
