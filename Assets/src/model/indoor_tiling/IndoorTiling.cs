@@ -620,12 +620,16 @@ public class IndoorTiling
 
     private void RemoveSpaceInternal(CellSpace space)
     {
+        List<CellSpace> neighbors = indoorData.Space2Spaces(space);
+
         var rLines = space.rLines!;
         indoorData.RemoveRLines(rLines);
         OnRLinesRemoved?.Invoke(rLines);
 
         indoorData.RemoveSpace(space);
         OnSpaceRemoved?.Invoke(space);
+
+        neighbors.ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
 
     private void UpdateHoleOfSpace(CellSpace space, CellSpace? removeHoleContainThisHole, List<CellSpace> addHoles)
