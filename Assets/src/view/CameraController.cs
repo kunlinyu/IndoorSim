@@ -12,6 +12,8 @@ public class CameraController : MonoBehaviour
 
     private static Plane ground = new Plane(Vector3.up, Vector3.zero);
 
+    static public Vector3 CameraPosition;
+
     Vector3 anchorMouse;
     Quaternion anchorRot;
     Vector3 anchorPosition;
@@ -79,6 +81,8 @@ public class CameraController : MonoBehaviour
             pos.y = minHeight;
             transform.position = pos;
         }
+
+        CameraPosition = Camera.main.transform.position;
     }
 
     void MoveCameraXZ(Vector3 anchorPosition, Vector3 moveVector)

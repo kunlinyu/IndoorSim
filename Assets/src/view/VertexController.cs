@@ -76,7 +76,7 @@ public class VertexController : MonoBehaviour, Selectable
     // Update is called once per frame
     void Update()
     {
-        int newHeightInt = (int)(Camera.main.transform.position.y * 0.5f);
+        int newHeightInt = (int)(CameraController.CameraPosition.y * 0.5f);
         if (lastCameraHeightInt != newHeightInt)
         {
             lastCameraHeightInt = newHeightInt;
