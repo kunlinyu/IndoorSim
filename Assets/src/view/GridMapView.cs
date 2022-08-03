@@ -12,6 +12,7 @@ public class GridMapView : MonoBehaviour
         {
             var obj = Instantiate(Resources.Load<GameObject>("BasicShape/GridMap"), this.transform);
             obj.name = gridMap.id;
+            obj.layer = gameObject.layer;
             obj.GetComponent<GridMapController>().GridMap = gridMap;
             gridMap2Obj[gridMap] = obj;
         };
