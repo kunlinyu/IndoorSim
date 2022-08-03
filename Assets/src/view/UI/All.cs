@@ -32,9 +32,9 @@ public class All : MonoBehaviour
         VisualElement toolBar = root.Q<VisualElement>("ToolBar");
         var toolBarController = GetComponent<ToolBarController>();
         toolBarController.LoadButtons(toolBar,
-            (tbd) => { Debug.Log("trigger"); eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "trigger", type = UIEventType.ToolButton }); },
-            (tbd) => { Debug.Log("enter"); eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enter", type = UIEventType.ToolButton }); },
-            (tbd) => { Debug.Log("cancel"); eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "trigger", type = UIEventType.ToolButton }); },
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enter", type = UIEventType.ToolButton }); },
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
         toolBar.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>
@@ -114,6 +114,16 @@ public class All : MonoBehaviour
         idPanel.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
 
+        // view panel
+        var viewPanelController = GetComponent<ViewPanelController>();
+        var viewPanel = root.Q<VisualElement>("ViewPanel");
+        viewPanelController.Init(viewPanel,
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enable", type = UIEventType.ViewButton }); },
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "disable", type = UIEventType.ViewButton }); });
+        viewPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "view panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        viewPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "view panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
     private void EventListener(object sender, UIEvent e)

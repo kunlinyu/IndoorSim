@@ -12,7 +12,6 @@ public class ToolBarController : MonoBehaviour
     {
         List<ToolButtonData> allToolButton = new List<ToolButtonData>(Resources.LoadAll<ToolButtonData>("ToolButtonData"));
         allToolButton.Sort((tbd1, tbd2) => { return tbd1.m_SortingOrder - tbd2.m_SortingOrder; });
-        // allToolButton.Sort((tbd1, tbd2) => { return tbd1.m_Class - tbd2.m_Class; });
 
         foreach (ToolButtonData tbd in allToolButton)
         {

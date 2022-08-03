@@ -111,7 +111,7 @@ public class IndoorMapView : MonoBehaviour
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.type == UIEventType.ToolButton && e.name == "view rline")
+        if (e.type == UIEventType.ViewButton && e.name == "view rline")
         {
             rLineParentObj.SetActive(!rLineParentObj.activeSelf);
         }
