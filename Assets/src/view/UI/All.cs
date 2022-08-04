@@ -22,7 +22,6 @@ public class All : MonoBehaviour
     public UIEventDispatcher eventDispatcher;
     VisualElement root;
 
-
     // pop up panels
     GameObject idPanelObj;  // TODO: do not put it in All.uxml, but load it as prefab
     GameObject gridMapImportPanelObj;
@@ -143,58 +142,7 @@ public class All : MonoBehaviour
         }
         else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
         {
-            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[] { new ExtensionFilter("", "pgm", "png") }, false);
-            if (path.Length > 0 && path[0].Length > 0)
-            {
-                if (File.Exists(path[0]))
-                {
-                    GridMapImageFormat fileFormat = GridMapImageFormat.PGM;
-                    if (path[0].EndsWith("pgm"))
-                        fileFormat = GridMapImageFormat.PGM;
-                    else if (path[0].EndsWith("png"))
-                        fileFormat = GridMapImageFormat.PNG;
-                    else
-                        Debug.LogError("unrecognize file format: " + path[0]);
-
-                    byte[] imageBytes = File.ReadAllBytes(path[0]);
-                    byte[] zipBytes = Compress(imageBytes);
-                    string zippedBase64Image = Convert.ToBase64String(zipBytes);
-
-                    int width, height;
-                    if (fileFormat == GridMapImageFormat.PGM)
-                    {
-                        PGMImage pgm = new PGMImage();
-                        pgm.Load(imageBytes);
-                        width = pgm.width();
-                        height = pgm.height();
-                    }
-                    else if (fileFormat == GridMapImageFormat.PNG)
-                    {
-                        Texture2D tex = new Texture2D(1, 1);
-                        tex.LoadImage(imageBytes);
-                        width = tex.width;
-                        height = tex.height;
-                    }
-                    else
-                    {
-                        Debug.LogError("Unrecognize file format: " + fileFormat);
-                        return;
-                    }
-
-                    GameObject gridMapImporterPrefab = Resources.Load<GameObject>("UIObj/GridMapImporter");
-                    gridMapImportPanelObj = Instantiate(gridMapImporterPrefab, Vector3.zero, Quaternion.identity);
-
-                    gridMapImportPanelObj.GetComponent<GridMapImporter>().Init(path[0], width, height, fileFormat, zippedBase64Image, this.PublishGridMapLoadInfo, this.DestroyGridMapImportPanel);
-                }
-                else
-                {
-                    Debug.LogWarning(path[0] + " don't exist");
-                }
-            }
-            else
-            {
-                Debug.Log("not grid map selected");
-            }
+            LoadGridMap();
         }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
         {
@@ -241,7 +189,7 @@ public class All : MonoBehaviour
     {
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-        UploadFile(gameObject.name, "OnFileUpload", ".json", false);
+        UploadFile(gameObject.name, "OnMapUpload", ".json", true);
 #else
         string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
         if (path.Length > 0 && path[0].Length > 0)
@@ -263,21 +211,91 @@ public class All : MonoBehaviour
 #endif
     }
 
+    private void LoadGridMap()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        UploadFile(gameObject.name, "OnGridMapUpload", ".png, .pgm", true);
+#else
+        string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", new[] { new ExtensionFilter("", "pgm", "png") }, false);
+        if (path.Length > 0 && path[0].Length > 0)
+        {
+            if (File.Exists(path[0]))
+                PopGridMapImportPanel(path[0], File.ReadAllBytes(path[0]));
+            else
+                Debug.LogWarning(path[0] + " don't exist");
+        }
+        else
+        {
+            Debug.Log("no grid map selected");
+        }
+#endif
+    }
+
+    private void PopGridMapImportPanel(string filePath, byte[] imageBytes)
+    {
+        byte[] zipBytes = Compress(imageBytes);
+        string zippedBase64Image = Convert.ToBase64String(zipBytes);
+
+        GridMapImageFormat format = GridMapImageFormat.PGM;
+        if (filePath.EndsWith("pgm"))
+            format = GridMapImageFormat.PGM;
+        else if (filePath.EndsWith("png"))
+            format = GridMapImageFormat.PNG;
+        else
+            Debug.LogError("unrecognize file format: " + filePath);
+
+        Texture2D tex = new Texture2D(1, 1);
+        if (format == GridMapImageFormat.PNG)
+            tex.LoadImage(imageBytes);
+        else if (format == GridMapImageFormat.PGM)
+            tex.LoadPGMImage(imageBytes);
+        else
+        {
+            Debug.LogError("Unrecognize file format: " + format);
+            return;
+        }
+
+        gridMapImportPanelObj = Instantiate(Resources.Load<GameObject>("UIObj/GridMapImporter"), Vector3.zero, Quaternion.identity);
+        gridMapImportPanelObj.GetComponent<GridMapImporter>()
+            .Init(filePath, tex.width, tex.height, format, zippedBase64Image, this.PublishGridMapLoadInfo, this.DestroyGridMapImportPanel);
+    }
+
     public void OnFileDownload()
     {
         Debug.Log("File Successfully Downloaded");
     }
 
-    public void OnFileUpload(string url)
+    public void OnMapUpload(string url_filePath)
     {
-        StartCoroutine(OutputRoutine(url));
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+           eventDispatcher.Raise(this, new UIEvent() { name = "load", message = request.text, type = UIEventType.Resources }
+        )));
     }
 
-    private IEnumerator OutputRoutine(string url)
+    public void OnGridMapUpload(string url_filePath)
     {
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+            {
+                PopGridMapImportPanel(filePath, request.bytes);
+            }));
+    }
+
+    private IEnumerator OutputRoutine(string url, string filePath, Action<WWW> postAction)
+    {
+        // var request = new UnityWebRequest(url);
+        // request.uploadHandler = new UploadHandlerFile();
+        // yield return request.SendWebRequest();
+        // postAction?.Invoke(request);
+
         var loader = new WWW(url);
         yield return loader;
-        eventDispatcher.Raise(this, new UIEvent() { name = "load", message = loader.text, type = UIEventType.Resources });
+        postAction?.Invoke(loader);
     }
 
     void Update()

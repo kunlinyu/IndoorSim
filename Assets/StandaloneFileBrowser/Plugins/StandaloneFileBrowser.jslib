@@ -40,18 +40,24 @@ var StandaloneFileBrowserWebGLPlugin = {
             for (var i = 0; i < event.target.files.length; i++) {
                 urls.push(URL.createObjectURL(event.target.files[i]));
             }
+            console.log(event.target.files);
+            var filenames = [];
+
+            for (var i = 0; i < event.target.files.length; i++) {
+                filenames.push(event.target.files[i].name);
+            }
+            var params = [];
+            params.push(urls.join());
+            params.push(filenames.join());
             // File selected
-            SendMessage(gameObjectName, methodName, urls.join());
+            SendMessage(gameObjectName, methodName, params.join());
 
             // Remove after file selected
             document.body.removeChild(fileInput);
         }
         document.body.appendChild(fileInput);
 
-        document.onmouseup = function() {
-            fileInput.click();
-            document.onmouseup = null;
-        }
+        fileInput.click();
     },
 
     // Save file
@@ -62,9 +68,9 @@ var StandaloneFileBrowserWebGLPlugin = {
     // byteArray: byte[]
     // byteArraySize: byte[].Length
     DownloadFile: function(gameObjectNamePtr, methodNamePtr, filenamePtr, byteArray, byteArraySize) {
-        gameObjectName = Pointer_stringify(gameObjectNamePtr);
-        methodName = Pointer_stringify(methodNamePtr);
-        filename = Pointer_stringify(filenamePtr);
+        gameObjectName = UTF8ToString(gameObjectNamePtr);
+        methodName = UTF8ToString(methodNamePtr);
+        filename = UTF8ToString(filenamePtr);
 
         var bytes = new Uint8Array(byteArraySize);
         for (var i = 0; i < byteArraySize; i++) {
@@ -77,13 +83,13 @@ var StandaloneFileBrowserWebGLPlugin = {
         downloader.download = filename;
         document.body.appendChild(downloader);
 
-        document.onmouseup = function() {
-            downloader.click();
-            document.body.removeChild(downloader);
-        	document.onmouseup = null;
+        downloader.click();
+        document.body.removeChild(downloader);
+        document.onmouseup = null;
 
-            SendMessage(gameObjectName, methodName);
-        }
+        SendMessage(gameObjectName, methodName);
+        // document.onmouseup = function() {
+        // }
     }
 };
 

@@ -1,17 +1,25 @@
 using UnityEngine;
 
-public class PGM2Texture
+public static class PGM2Texture
 {
-    static public Texture2D Translate(PGMImage pgm)
+    static public bool Translate(Texture2D tex, PGMImage pgm)
     {
-        Texture2D texture = new Texture2D(pgm.width(), pgm.height());
+        bool ret = tex.Reinitialize(pgm.width(), pgm.height());
+        if (!ret) return false;
         for (int i = 0; i < pgm.width(); i++)
             for (int j = 0; j < pgm.height(); j++)
             {
                 float color = (float)pgm.GetPixel(i, j) / pgm.colorMaximumValue();
-                texture.SetPixel(i, j, new Color(color, color, color));
+                tex.SetPixel(i, j, new Color(color, color, color));
             }
-        texture.Apply();
-        return texture;
+        tex.Apply();
+        return tex;
+    }
+    public static bool LoadPGMImage(this Texture2D tex, byte[] data)
+    {
+        PGMImage pgm = new PGMImage();
+        pgm.Load(data);
+        PGM2Texture.Translate(tex, pgm);
+        return true;
     }
 }
