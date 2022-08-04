@@ -1,8 +1,13 @@
 using System;
 using System.IO;
+using System.Text;
+using System.Collections;
+using System.IO.Compression;
+using System.Runtime.InteropServices;
+
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.IO.Compression;
+using UnityEngine.Networking;
 
 using SFB;
 
@@ -130,23 +135,7 @@ public class All : MonoBehaviour
     {
         if (e.type == UIEventType.ToolButton && e.name == "load")
         {
-            string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
-            if (path.Length > 0 && path[0].Length > 0)
-            {
-                if (File.Exists(path[0]))
-                {
-                    string fileContent = File.ReadAllText(path[0]);
-                    eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
-                }
-                else
-                {
-                    Debug.LogWarning(path[0] + " don't exist");
-                }
-            }
-            else
-            {
-                Debug.Log("no map file selected");
-            }
+            LoadFromFile();
         }
         else if (e.type == UIEventType.Resources && e.name == "save")
         {
@@ -238,13 +227,67 @@ public class All : MonoBehaviour
 
     private void SaveToFile(string content)
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        var bytes = Encoding.UTF8.GetBytes(content);
+        DownloadFile(gameObject.name, "OnFileDownload", "unnamed_map.indoor.json", bytes, bytes.Length);
+#else
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");
         Debug.Log("save file to: " + path);
         File.WriteAllText(path, content);
+#endif
+    }
+
+    private void LoadFromFile()
+    {
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        UploadFile(gameObject.name, "OnFileUpload", ".json", false);
+#else
+        string[] path = StandaloneFileBrowser.OpenFilePanel("Load File", "Assets/src/Tests/", "json", false);
+        if (path.Length > 0 && path[0].Length > 0)
+        {
+            if (File.Exists(path[0]))
+            {
+                string fileContent = File.ReadAllText(path[0]);
+                eventDispatcher.Raise(this, new UIEvent() { name = "load", message = fileContent, type = UIEventType.Resources });
+            }
+            else
+            {
+                Debug.LogWarning(path[0] + " don't exist");
+            }
+        }
+        else
+        {
+            Debug.Log("no map file selected");
+        }
+#endif
+    }
+
+    public void OnFileDownload()
+    {
+        Debug.Log("File Successfully Downloaded");
+    }
+
+    public void OnFileUpload(string url)
+    {
+        StartCoroutine(OutputRoutine(url));
+    }
+
+    private IEnumerator OutputRoutine(string url)
+    {
+        var loader = new WWW(url);
+        yield return loader;
+        eventDispatcher.Raise(this, new UIEvent() { name = "load", message = loader.text, type = UIEventType.Resources });
     }
 
     void Update()
     {
 
     }
+
+    [DllImport("__Internal")]
+    private static extern void DownloadFile(string gameObjectName, string methodName, string filename, byte[] byteArray, int byteArraySize);
+
+    [DllImport("__Internal")]
+    private static extern void UploadFile(string gameObjectName, string methodName, string filter, bool multiple);
 }
