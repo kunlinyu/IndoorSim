@@ -98,17 +98,6 @@ public class All : MonoBehaviour
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         idPanel.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
-
-        // view panel
-        var viewPanelController = GetComponent<ViewPanelController>();
-        var viewPanel = root.Q<VisualElement>("ViewPanel");
-        viewPanelController.Init(viewPanel,
-            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enable", type = UIEventType.ViewButton }); },
-            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "disable", type = UIEventType.ViewButton }); });
-        viewPanel.RegisterCallback<MouseEnterEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "view panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
-        viewPanel.RegisterCallback<MouseLeaveEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "view panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
 }

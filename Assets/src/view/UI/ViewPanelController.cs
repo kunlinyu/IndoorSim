@@ -5,10 +5,13 @@ using UnityEngine.UIElements;
 
 public class ViewPanelController : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
+    public UIDocument rootUIDocument;
     [SerializeField] private VisualTreeAsset m_ViewBarButtonTemplate;
 
-    public void Init(VisualElement viewBar, Action<ToolButtonData> onEnable, Action<ToolButtonData> onDisable)
+    void Start()
     {
+        VisualElement viewPanel = rootUIDocument.rootVisualElement.Q<VisualElement>("ViewPanel");
         List<ToolButtonData> allToolButton = new List<ToolButtonData>(Resources.LoadAll<ToolButtonData>("ViewButtonData"));
         foreach (ToolButtonData tbd in allToolButton)
         {
@@ -17,19 +20,23 @@ public class ViewPanelController : MonoBehaviour
             button.text = "";
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
-            button.AddManipulator(new ToolTipManipulator(viewBar));
+            button.AddManipulator(new ToolTipManipulator(viewPanel));
             button.AddToClassList("enable");
             button.clicked += () =>
             {
                 button.ToggleInClassList("enable");
                 if (button.ClassListContains("enable"))
-                    onEnable?.Invoke(tbd);
+                    eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enable", type = UIEventType.ViewButton });
                 else
-                    onDisable?.Invoke(tbd);
-                viewBar.Focus();  // focus on viewBar to release focus on button
+                    eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "disable", type = UIEventType.ViewButton });
+                viewPanel.Focus();  // focus on viewBar to release focus on button
             };
             button.tabIndex = -1;
-            viewBar.Add(buttonContainer);
+            viewPanel.Add(buttonContainer);
         }
+        viewPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "view panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        viewPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "view panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 }
