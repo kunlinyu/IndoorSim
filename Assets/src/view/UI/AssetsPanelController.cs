@@ -7,17 +7,19 @@ using UnityEngine.UIElements;
 
 public class AssetsPanelController : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
+    public UIDocument rootUIDocument;
     [SerializeField] public VisualTreeAsset assetButtonTemplate;
     private VisualElement assetsPanel;
-    private Action<int> OnApply;
-    private Action<int> OnRemove;
 
-
-    public void Init(VisualElement assetsPanel, Action<int> OnApply, Action<int> OnRemove)
+    void Start()
     {
-        this.OnApply = OnApply;
-        this.OnRemove = OnRemove;
-        this.assetsPanel = assetsPanel;
+        eventDispatcher.eventListener += this.EventListener;
+        this.assetsPanel = rootUIDocument.rootVisualElement.Q<VisualElement>("AssetsPanel");
+        this.assetsPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        this.assetsPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
     public void EventListener(object sender, UIEvent e)
@@ -51,10 +53,13 @@ public class AssetsPanelController : MonoBehaviour
             button.style.backgroundImage = tex;
 
             int localIndex = i;
-            button.clicked += () => { OnApply(localIndex); };
+            button.clicked += () =>
+            {
+                eventDispatcher.Raise(this, new UIEvent() { name = "apply asset", message = localIndex.ToString(), type = UIEventType.ToolButton });
+            };
             assetsPanel.Add(assetButtonContainer);
 
-            i ++;
+            i++;
         }
 
     }

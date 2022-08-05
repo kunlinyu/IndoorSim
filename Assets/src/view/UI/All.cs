@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
 [RequireComponent(typeof(IdPanelController))]
 public class All : MonoBehaviour
@@ -14,20 +13,6 @@ public class All : MonoBehaviour
     {
         // TODO: move everthing here to separate object
         root = GetComponent<UIDocument>().rootVisualElement;
-
-        // assets panel
-        var assetsPanelController = GetComponent<AssetsPanelController>();
-        var assetsPanel = root.Q<VisualElement>("AssetsPanel");
-        assetsPanel.RegisterCallback<MouseEnterEvent>(e =>
-            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
-        assetsPanel.RegisterCallback<MouseLeaveEvent>(e =>
-            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
-        assetsPanelController.Init(
-            assetsPanel,
-            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButton }); },
-            (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "remove asset", message = index.ToString(), type = UIEventType.ToolButton }); }
-        );
-        eventDispatcher.eventListener += assetsPanelController.EventListener;
 
         // hierarchy panel
         var hierarchyPanelController = GetComponent<HierarchyPanelController>();
