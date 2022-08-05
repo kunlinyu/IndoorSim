@@ -72,9 +72,6 @@ public class AssetSaver : MonoBehaviour, ITool
         Destroy(rt);
         byte[] bytes = screenShot.EncodeToPNG();
         string filename = ScreenShotName(resWidth, resHeight);
-        System.IO.File.WriteAllBytes(filename, bytes);
-        Debug.Log(string.Format("Took screenshot to: {0}", filename));
-
 
         foreach (var entry in mapView.vertex2Obj)
             entry.Value.SetActive(true);
