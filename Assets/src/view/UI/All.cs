@@ -28,6 +28,7 @@ public class All : MonoBehaviour
 
     void Start()
     {
+        // TODO: move everthing here to separate object
         root = GetComponent<UIDocument>().rootVisualElement;
 
         eventDispatcher.eventListener += this.EventListener;
@@ -130,25 +131,17 @@ public class All : MonoBehaviour
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "view panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
+    // TODO: we should use a standalone module to handle all file import and export
     private void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.ToolButton && e.name == "load")
-        {
             LoadFromFile();
-        }
         else if (e.type == UIEventType.Resources && e.name == "save")
-        {
             SaveToFile(e.message);
-        }
         else if (e.type == UIEventType.ToolButton && e.name == "gridmap")
-        {
             LoadGridMap();
-        }
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
-        {
             DestroyGridMapImportPanel();
-        }
-
     }
 
     private void DestroyGridMapImportPanel()
@@ -210,7 +203,15 @@ public class All : MonoBehaviour
         }
 #endif
     }
-
+    public void OnMapUpload(string url_filePath)
+    {
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+           eventDispatcher.Raise(this, new UIEvent() { name = "load", message = request.text, type = UIEventType.Resources }
+        )));
+    }
     private void LoadGridMap()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -229,6 +230,16 @@ public class All : MonoBehaviour
             Debug.Log("no grid map selected");
         }
 #endif
+    }
+    public void OnGridMapUpload(string url_filePath)
+    {
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+            {
+                PopGridMapImportPanel(filePath, request.bytes);
+            }));
     }
 
     private void PopGridMapImportPanel(string filePath, byte[] imageBytes)
@@ -264,28 +275,6 @@ public class All : MonoBehaviour
     {
         Debug.Log("File Successfully Downloaded");
     }
-
-    public void OnMapUpload(string url_filePath)
-    {
-        string[] array = url_filePath.Split(",");
-        string url = array[0];
-        string filePath = array[1];
-        StartCoroutine(OutputRoutine(url, filePath, (request) =>
-           eventDispatcher.Raise(this, new UIEvent() { name = "load", message = request.text, type = UIEventType.Resources }
-        )));
-    }
-
-    public void OnGridMapUpload(string url_filePath)
-    {
-        string[] array = url_filePath.Split(",");
-        string url = array[0];
-        string filePath = array[1];
-        StartCoroutine(OutputRoutine(url, filePath, (request) =>
-            {
-                PopGridMapImportPanel(filePath, request.bytes);
-            }));
-    }
-
     private IEnumerator OutputRoutine(string url, string filePath, Action<WWW> postAction)
     {
         // var request = new UnityWebRequest(url);
