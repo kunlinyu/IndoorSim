@@ -12,7 +12,6 @@ using UnityEngine.Networking;
 using SFB;
 
 [RequireComponent(typeof(ToolBarController))]
-[RequireComponent(typeof(CursorTip))]
 [RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
 [RequireComponent(typeof(IdPanelController))]
@@ -37,11 +36,6 @@ public class All : MonoBehaviour
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         toolBar.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
-
-        // cursor tip
-        CursorTip cursorTip = GetComponent<CursorTip>();
-        cursorTip.Init(root.Q<Label>("Tip"));
-        eventDispatcher.eventListener += cursorTip.EventListener;
 
         // assets panel
         var assetsPanelController = GetComponent<AssetsPanelController>();

@@ -5,15 +5,19 @@ using UnityEngine.UIElements;
 
 public class CursorTip : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
+    public UIDocument rootUIDocument;
+
     Label tip;
     private string uiMessage;
     private string sceneMessage;
     private bool MouseOnUI;
 
-    public void Init(Label tip)
+    void Start()
     {
-        this.tip = tip;
+        this.tip = rootUIDocument.rootVisualElement.Q<Label>("Tip");
         this.tip.text = "";
+        eventDispatcher.eventListener += this.EventListener;
     }
 
     void Update()
