@@ -43,10 +43,6 @@ public class All : MonoBehaviour
         cursorTip.Init(root.Q<Label>("Tip"));
         eventDispatcher.eventListener += cursorTip.EventListener;
 
-        // version label
-        Label versionLabel = root.Q<Label>("VersionLabel");
-        versionLabel.text = " IndoorSim version: V" + Application.version;
-
         // assets panel
         var assetsPanelController = GetComponent<AssetsPanelController>();
         var assetsPanel = root.Q<VisualElement>("AssetsPanel");
