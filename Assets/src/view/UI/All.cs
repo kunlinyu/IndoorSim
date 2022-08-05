@@ -1,17 +1,7 @@
-using System;
-using System.IO;
-using System.Text;
-using System.Collections;
-using System.IO.Compression;
-using System.Runtime.InteropServices;
 
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Networking;
 
-using SFB;
-
-[RequireComponent(typeof(ToolBarController))]
 [RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
 [RequireComponent(typeof(IdPanelController))]
@@ -25,25 +15,13 @@ public class All : MonoBehaviour
         // TODO: move everthing here to separate object
         root = GetComponent<UIDocument>().rootVisualElement;
 
-        // toolBar
-        VisualElement toolBar = root.Q<VisualElement>("ToolBar");
-        var toolBarController = GetComponent<ToolBarController>();
-        toolBarController.LoadButtons(toolBar,
-            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "trigger", type = UIEventType.ToolButton }); },
-            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enter", type = UIEventType.ToolButton }); },
-            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
-        toolBar.RegisterCallback<MouseEnterEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
-        toolBar.RegisterCallback<MouseLeaveEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
-
         // assets panel
         var assetsPanelController = GetComponent<AssetsPanelController>();
         var assetsPanel = root.Q<VisualElement>("AssetsPanel");
         assetsPanel.RegisterCallback<MouseEnterEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         assetsPanel.RegisterCallback<MouseLeaveEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
+            { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
         assetsPanelController.Init(
             assetsPanel,
             (index) => { eventDispatcher.Raise(assetsPanelController, new UIEvent() { name = "apply asset", message = index.ToString(), type = UIEventType.ToolButton }); },
@@ -85,9 +63,9 @@ public class All : MonoBehaviour
             });
         eventDispatcher.eventListener += idPanelCtr.EventListener;
         idPanel.RegisterCallback<MouseEnterEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+            { eventDispatcher.Raise(idPanel, new UIEvent() { name = "id panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         idPanel.RegisterCallback<MouseLeaveEvent>(e =>
-            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
+            { eventDispatcher.Raise(idPanel, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
 }

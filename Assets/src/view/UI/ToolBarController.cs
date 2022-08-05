@@ -5,9 +5,23 @@ using UnityEngine.UIElements;
 
 public class ToolBarController : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
+    public UIDocument rootUIDocument;
     [SerializeField] private VisualTreeAsset m_ToolBarButtonTemplate;
     private Button activeButton = null;
 
+    void Start()
+    {
+        VisualElement toolBar = rootUIDocument.rootVisualElement.Q<VisualElement>("ToolBar");
+        LoadButtons(toolBar,
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "trigger", type = UIEventType.ToolButton }); },
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = tbd.m_ToolName, message = "enter", type = UIEventType.ToolButton }); },
+            (tbd) => { eventDispatcher.Raise(this, new UIEvent() { name = "tool bar", message = "cancel", type = UIEventType.ToolButton }); });
+        toolBar.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        toolBar.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(toolBar, new UIEvent() { name = "tool bar", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
+    }
     public void LoadButtons(VisualElement toolBar, Action<ToolButtonData> onTrigger, Action<ToolButtonData> onEnter, Action<ToolButtonData> onLeave)
     {
         List<ToolButtonData> allToolButton = new List<ToolButtonData>(Resources.LoadAll<ToolButtonData>("ToolButtonData"));
