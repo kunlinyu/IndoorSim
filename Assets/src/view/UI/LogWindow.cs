@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 
 public class LogWindow : MonoBehaviour
 {
+    public UIDocument rootUIDocument;
     private const int kMaxLogCount = 100;
     private const int kMaxLogLength = 200;
 
@@ -15,12 +16,13 @@ public class LogWindow : MonoBehaviour
 
     void Start()
     {
+        Init();
         Application.logMessageReceived += HandleLog;
     }
 
-    public void Init(ListView listView)
+    public void Init()
     {
-        this.listView = listView;
+        this.listView = rootUIDocument.rootVisualElement.Q<ListView>("LogList");
 
         this.listView.selectionType = SelectionType.Multiple;
 

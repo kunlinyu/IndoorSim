@@ -13,7 +13,6 @@ using SFB;
 
 [RequireComponent(typeof(ToolBarController))]
 [RequireComponent(typeof(CursorTip))]
-[RequireComponent(typeof(LogWindow))]
 [RequireComponent(typeof(AssetsPanelController))]
 [RequireComponent(typeof(HierarchyPanelController))]
 [RequireComponent(typeof(IdPanelController))]
@@ -47,9 +46,6 @@ public class All : MonoBehaviour
         // version label
         Label versionLabel = root.Q<Label>("VersionLabel");
         versionLabel.text = " IndoorSim version: V" + Application.version;
-
-        // log window
-        GetComponent<LogWindow>().Init(root.Q<ListView>("LogList"));
 
         // assets panel
         var assetsPanelController = GetComponent<AssetsPanelController>();
