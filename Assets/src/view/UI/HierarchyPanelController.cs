@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 
 public class HierarchyPanelController : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
+    public UIDocument rootUIDocument;
     private ScrollView foldoutContainer;
     private Foldout gridMapFoldout;
     private Foldout indoorMapFoldout;
@@ -21,19 +23,12 @@ public class HierarchyPanelController : MonoBehaviour
 
     private string simFoldoutPrefix = "simulation ";
 
+    // TODO(robust): prevent switch simulation during simulation
     void Start()
     {
-
-    }
-
-    // TODO(robust): prevent switch simulation during simulation
-
-    public void Init(ScrollView FoldoutContainer)
-    {
-        foldoutContainer = FoldoutContainer;
+        foldoutContainer = rootUIDocument.rootVisualElement.Q<ScrollView>("FoldoutContainer");
 
         var tf = new TextField();
-
 
         gridMapFoldout = new Foldout();
         gridMapFoldout.text = "gridmap";
@@ -70,8 +65,26 @@ public class HierarchyPanelController : MonoBehaviour
 
         foldoutContainer.Add(createSim);
 
+        OnAddSimulation += simName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "add simulation", message = simName, type = UIEventType.Hierarchy });
 
+        OnSelectSimulation += simName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select simulation", message = simName, type = UIEventType.Hierarchy });
+
+        OnSelectIndoorMap += () =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select indoor map", type = UIEventType.Hierarchy });
+
+        OnSelectGridMap += gridName =>
+            eventDispatcher.Raise(this, new UIEvent() { name = "select grid map", message = gridName, type = UIEventType.Hierarchy });
+
+        eventDispatcher.eventListener += this.EventListener;
+
+        foldoutContainer.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "hierarchy panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        foldoutContainer.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "hierarchy panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
+
 
     public void UpdateGridMap(string gridmapIdList)
     {
