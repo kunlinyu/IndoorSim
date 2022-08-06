@@ -4,15 +4,17 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Newtonsoft.Json.Linq;
 
+[RequireComponent(typeof(UIDocument))]
 public class IdPanelController : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
     VisualElement idPanel;
+    TextField containerIdField;
+    TextField childrenIdField;
 
     void Update()
     {
         // This may be a bug of UI Toolkit. We implement backspace logic manually
-        var containerIdField = this.idPanel.Q<TextField>("containerId");
-        var childrenIdField = this.idPanel.Q<TextField>("childrenId");
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
             if (containerIdField.panel.focusController.focusedElement == containerIdField)
@@ -39,51 +41,63 @@ public class IdPanelController : MonoBehaviour
         }
     }
 
-    // TODO: Create Id panel after click polygon instead of show the exist one and move it to cursor
-    public void Init(VisualElement idPanel, Action<string, string> OnSave)
+    public void Init(string containerId, string childrenId, int x, int y, UIEventDispatcher eventDispatcher)
     {
-        this.idPanel = idPanel;
-        this.idPanel.visible = false;
-        var containerIdField = this.idPanel.Q<TextField>("containerId");
-        var childrenIdField = this.idPanel.Q<TextField>("childrenId");
-        this.idPanel.Q<Button>("cancel").clicked += () =>
-        {
-            containerIdField.value = "";
-            childrenIdField.value = "";
-            this.idPanel.visible = false;
-        };
-        this.idPanel.Q<Button>("save").clicked += () =>
-        {
-            OnSave.Invoke(containerIdField.value, childrenIdField.value);
-            containerIdField.value = "";
-            childrenIdField.value = "";
-            this.idPanel.visible = false;
-        };
+        idPanel.style.left = x;
+        idPanel.style.bottom = y;
+        containerIdField.value = containerId;
+        childrenIdField.value = childrenId;
+        this.eventDispatcher = eventDispatcher;
     }
 
-    public void EventListener(object sender, UIEvent e)
+    void Start()
     {
-        if (e.type == UIEventType.PopUp && e.name == "id panel")
+        Debug.Log("Start of IdPanelController");
+    }
+
+    void OnEnable()
+    {
+        Debug.Log("OnEnable of IdPanelController");
+        idPanel = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("IdPanel");
+        Debug.Log(GetComponent<UIDocument>().rootVisualElement.name);
+
+        containerIdField = idPanel.Q<TextField>("containerId");
+        childrenIdField = idPanel.Q<TextField>("childrenId");
+
+        idPanel.Q<Button>("cancel").clicked += () =>
         {
-            var jsonData = JObject.Parse(e.message);
-            string predicate = jsonData["predicate"].Value<string>();
-            if (predicate == "hide")
+            eventDispatcher.Raise(this, new UIEvent()
             {
-                idPanel.visible = false;
-            }
-            else if (predicate == "popup")
+                name = "id panel",
+                message = $"{{\"predicate\":\"hide\"}}",
+                type = UIEventType.PopUp
+            });
+        };
+        idPanel.Q<Button>("save").clicked += () =>
+        {
+            eventDispatcher.Raise(this, new UIEvent()
             {
-                int x = jsonData["x"].Value<int>();
-                int y = jsonData["y"].Value<int>();
-                string containerId = jsonData["containerId"].Value<string>();
-                string childrenId = jsonData["childrenId"].Value<string>();
-                idPanel.visible = true;
-                idPanel.style.left = x;
-                idPanel.style.bottom = y;
-                idPanel.Q<TextField>("containerId").value = containerId;
-                idPanel.Q<TextField>("childrenId").value = childrenId;
-            }
-        }
+                name = "container id",
+                message = $"{{\"containerId\":\"{containerIdField.value}\",\"childrenId\":\"{childrenIdField.value}\"}}",
+                type = UIEventType.IndoorSimData
+            });
+            eventDispatcher.Raise(this, new UIEvent()
+            {
+                name = "id panel",
+                message = $"{{\"predicate\":\"hide\"}}",
+                type = UIEventType.PopUp
+            });
+        };
+
+        idPanel.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(idPanel, new UIEvent() { name = "id panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        idPanel.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(idPanel, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
+    }
+
+    void OnDestroy()
+    {
+        eventDispatcher.Raise(idPanel, new UIEvent() { name = "id panel", message = "leave", type = UIEventType.EnterLeaveUIPanel });
     }
 
 }
