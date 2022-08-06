@@ -10,10 +10,10 @@ using UnityEditor.Build.Reporting;
 public class BuildPlayer : MonoBehaviour
 {
     [MenuItem("Build/Build Linux")]
-    public static void BuildLinux() => Build("../linux64", BuildTarget.StandaloneLinux64, true);
+    public static void BuildLinux() => Build("../release", BuildTarget.StandaloneLinux64, true);
 
     [MenuItem("Build/Build WebGL")]
-    public static void BuildWebGL() => Build("../webgl", BuildTarget.WebGL, true);
+    public static void BuildWebGL() => Build("../release", BuildTarget.WebGL, true);
 
 
     public static void Build(string prefix, BuildTarget target, bool development)
