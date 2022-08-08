@@ -629,10 +629,10 @@ public class IndoorSimData
         OnSimulationListUpdated?.Invoke(simDataList);
     }
 
-    public void AddPOI(IndoorPOI poi, params CellSpace[] spaces) => AddPOI(poi, new List<CellSpace>(spaces));
-    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    public void AddPOI(IndoorPOI poi, params CellSpace[] spaces) => AddPOI(poi);
+    public void AddPOI(IndoorPOI poi)
     {
-        indoorTiling.AddPOI(poi, spaces);
+        indoorTiling.AddPOI(poi);
 
         // TODO: undo redo instruction
     }

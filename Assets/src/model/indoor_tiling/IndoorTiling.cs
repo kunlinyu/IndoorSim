@@ -568,9 +568,9 @@ public class IndoorTiling
         }
     }
 
-    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    public void AddPOI(IndoorPOI poi)
     {
-        indoorData.AddPOI(poi, spaces);
+        indoorData.AddPOI(poi);
         OnPOICreated?.Invoke(poi);
     }
 

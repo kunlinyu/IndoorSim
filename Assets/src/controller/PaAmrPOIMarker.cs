@@ -78,13 +78,17 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     {
                         // insert
                         Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
-                        HumanPOI pickingPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition));
-                        pickingPoi.id = "picking poi";
-                        IndoorSimData!.AddPOI(pickingPoi, selectedSpace.Select(sc => sc.Space).ToList());
 
-                        var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), pickingPoi);
+                        var spaces = selectedSpace.Select(sc => sc.Space).ToList();
+                        var containers = new List<Container>(spaces);
+
+                        HumanPOI pickingPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition), containers);
+                        pickingPoi.id = "picking poi";
+                        IndoorSimData!.AddPOI(pickingPoi);
+
+                        var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), pickingPoi, containers);
                         paAmrPoi.id = "pa amr poi";
-                        IndoorSimData.AddPOI(paAmrPoi, selectedSpace.Select(sc => sc.Space).ToList());
+                        IndoorSimData.AddPOI(paAmrPoi);
                         Debug.Log("POI inserted");
                         selectedSpace.Clear();
                         status = PaAmrPoiMarkerStatus.ContainerSelecting;
@@ -156,7 +160,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 PaAmrSpriteObj.transform.position = paAmrPoiPosition;
                 Vector3 delta = PickingAgentSpriteObj.transform.position - paAmrPoiPosition;
                 float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
-                PaAmrSpriteObj.transform.localRotation = Quaternion.Euler(90.0f, 0.0f, rotation);
+                PaAmrSpriteObj.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, rotation);
 
                 // line renderer between them
                 GameObject PaAmr2PickingAgentObj = transform.Find("PaAmr2Picking").gameObject;

@@ -14,17 +14,17 @@ using NetTopologySuite.Operation.Polygonize;
 [Serializable]
 public class IndoorData
 {
-    [JsonIgnore] public List<IndoorPOI> pois = new List<IndoorPOI>();
     [JsonPropertyAttribute] public List<CellVertex> vertexPool { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> boundaryPool { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> spacePool { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RLineGroup> rLinePool { get; private set; } = new List<RLineGroup>();
+    [JsonPropertyAttribute] public List<IndoorPOI> pois { get; private set; } = new List<IndoorPOI>();
 
     [JsonIgnore] public const double kFindGeomEpsilon = 1e-4;
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
-    [JsonIgnore] private Dictionary<IndoorPOI, HashSet<CellSpace>> poi2Spaces = new Dictionary<IndoorPOI, HashSet<CellSpace>>();
+    [JsonIgnore] private Dictionary<Container, HashSet<IndoorPOI>> space2POIs = new Dictionary<Container, HashSet<IndoorPOI>>();
 
     public bool Contains(CellVertex vertex) => vertexPool.Contains(vertex);
     public bool Contains(CellBoundary boundary) => boundaryPool.Contains(boundary);
@@ -88,6 +88,7 @@ public class IndoorData
         space.Id = id;
         spacePool.Add(space);
         space.allBoundaries.ForEach(b => b.PartialBound(space));
+        space2POIs[space] = new HashSet<IndoorPOI>();
     }
 
     public void RemoveSpace(CellSpace space)
@@ -96,6 +97,11 @@ public class IndoorData
 
         if (space.rLines != null)
             throw new InvalidOperationException("You should remove rLine first");
+
+        if (space2POIs[space].Count == 0)
+            space2POIs.Remove(space);
+        else
+            throw new InvalidOperationException("You should remove all pois connect to this space first");
 
         spacePool.Remove(space);
         space.allBoundaries.ForEach(b => b.PartialUnBound(space));
@@ -119,19 +125,18 @@ public class IndoorData
         rLineGroup.rLines.ForEach(rl => { boundary2RLines[rl.fr].Remove(rl); boundary2RLines[rl.to].Remove(rl); });
     }
 
-    public void AddPOI(IndoorPOI poi, List<CellSpace> spaces)
+    public void AddPOI(IndoorPOI poi)
     {
+        if (pois.Contains(poi)) throw new ArgumentException("add redundant poi");
+
         pois.Add(poi);
-        poi2Spaces.Add(poi, new HashSet<CellSpace>(spaces));
-        spaces.ForEach(space => space.AddPOI(poi));
+        poi.spaces.ForEach(space => space2POIs[space].Add(poi));
     }
 
     public void RemovePOI(IndoorPOI poi)
     {
         if (!pois.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);
-        foreach (var space in poi2Spaces[poi])
-            space.RemovePOI(poi);
-        poi2Spaces.Remove(poi);
+        poi.spaces.ForEach(space => space2POIs[space].Remove(poi));
         pois.Remove(poi);
     }
 

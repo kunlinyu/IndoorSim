@@ -50,8 +50,6 @@ public class SpaceController : MonoBehaviour, Selectable
     [SerializeField] public Material selectedMaterial;
     [SerializeField] public Material triangulationMaterial;
 
-    private List<GameObject> toPOILineObj = new List<GameObject>();
-
     public float Distance(Vector3 vec)
     => (float)space.Polygon.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
 
@@ -109,37 +107,6 @@ public class SpaceController : MonoBehaviour, Selectable
         pr.sortingOrder = 1;
 
         pr.UpdateRenderer();
-
-        // to POI line
-        GameObject linePrefab = Resources.Load<GameObject>("POIObj/Container2POI");
-        while (toPOILineObj.Count < space.pois.Count)
-        {
-            GameObject obj = Instantiate(linePrefab, transform);
-            int index = toPOILineObj.Count;
-            obj.name = "container 2 POI " + index;
-            toPOILineObj.Add(obj);
-        }
-        while (toPOILineObj.Count > space.pois.Count)
-        {
-            Destroy(toPOILineObj[toPOILineObj.Count - 1]);
-            toPOILineObj.RemoveAt(toPOILineObj.Count - 1);
-        }
-
-        for (int i = 0; i < space.pois.Count; i++)
-        {
-            var obj = toPOILineObj[i];
-            var lr = obj.GetComponent<LineRenderer>();
-            if (space.pois[i].indoorPOIType == "PaAmr")
-            {
-                lr.positionCount = 2;
-                lr.SetPosition(0, Utils.Point2Vec(space.Geom.Centroid));
-                lr.SetPosition(1, Utils.Point2Vec((Point)space.pois[i].location.point.geometry));
-            }
-            else
-            {
-                lr.positionCount = 0;
-            }
-        }
 
         needUpdateRenderer = false;
     }
