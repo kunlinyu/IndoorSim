@@ -12,7 +12,7 @@ public class PaAmrPoiController : MonoBehaviour
         set
         {
             paAmrPoi = value;
-            paAmrPoi.OnUpdate += ReRender;
+            // paAmrPoi.OnUpdate += ReRender;
         }
     }
 

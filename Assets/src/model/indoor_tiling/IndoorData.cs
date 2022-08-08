@@ -41,6 +41,8 @@ public class IndoorData
     public List<CellSpace> Space2Spaces(CellSpace space)
         => space.allBoundaries.Select(b => b.Another(space)).Where(s => s != null).Select(s => s!).ToList();
 
+    public HashSet<IndoorPOI> Space2POIs(Container space) => space2POIs[space];
+
     public void AddVertex(CellVertex vertex)
     {
         if (vertexPool.Contains(vertex)) throw new ArgumentException("add redundant cell vertex");

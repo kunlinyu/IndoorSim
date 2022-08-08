@@ -1,4 +1,5 @@
-using System.Collections;
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using NetTopologySuite.Geometries;
@@ -19,6 +20,8 @@ public class POIController : MonoBehaviour
         }
     }
 
+    public Func<Container, HashSet<IndoorPOI>> Space2IndoorPOI;
+
     private List<GameObject> toPOILineObj = new List<GameObject>();
 
     void UpdateRenderer()
@@ -27,11 +30,17 @@ public class POIController : MonoBehaviour
 
         if (poi.indoorPOIType == "PaAmr")
         {
-            PaAmrPoi paAmrPoi = poi as PaAmrPoi;
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
-            lr.SetPosition(0, Utils.Point2Vec((Point)paAmrPoi.pickingPOI.location.point.geometry));
-            lr.SetPosition(1, Utils.Point2Vec((Point)paAmrPoi.location.point.geometry));
+            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI(poi.spaces[0]);
+            foreach (var poi in humanPOIs)
+            {
+                poi.label.ForEach(label => Debug.Log(label.value));
+            }
+            IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
+
+            lr.SetPosition(0, Utils.Point2Vec((Point)humanPoi.location.point.geometry));
+            lr.SetPosition(1, Utils.Point2Vec((Point)poi.location.point.geometry));
 
 
             Vector3 delta = lr.GetPosition(0) - lr.GetPosition(1);

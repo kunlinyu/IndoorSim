@@ -79,6 +79,7 @@ public class IndoorMapView : MonoBehaviour
             var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), POIParentObj.transform);
             obj.name = poi.id;
             obj.GetComponent<POIController>().Poi = poi;
+            obj.GetComponent<POIController>().Space2IndoorPOI = (space) => indoorTiling.indoorData.Space2POIs(space);
             poi2Obj[poi] = obj;
         };
 

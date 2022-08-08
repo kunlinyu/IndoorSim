@@ -86,7 +86,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         pickingPoi.id = "picking poi";
                         IndoorSimData!.AddPOI(pickingPoi);
 
-                        var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), pickingPoi, containers);
+                        var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), containers);
                         paAmrPoi.id = "pa amr poi";
                         IndoorSimData.AddPOI(paAmrPoi);
                         Debug.Log("POI inserted");
