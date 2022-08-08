@@ -69,10 +69,10 @@ public class IndoorMapView : MonoBehaviour
         indoorTiling.OnPOICreated += (poi) =>
         {
             string poiObjPath;
-            if (poi.LabelContains("PaAmr"))
+            if (poi.indoorPOIType == "PaAmr")
                 poiObjPath = "POIObj/PaAmrPOI";
-            else if (poi.LabelContains("picking"))
-                poiObjPath = "POIObj/PickingPOI";
+            else if (poi.indoorPOIType == "human")
+                poiObjPath = "POIObj/HumanPOI";
             else
                 poiObjPath = "POIObj/DefaultPOI";
 

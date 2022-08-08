@@ -26,6 +26,7 @@ public enum SubjectType
     GripMap,  // TODO(future feature):: create and interpret
 
     Agent,
+    POI,
     Task,  // TODO(future feature):: create and interpret
 }
 
@@ -38,6 +39,16 @@ public enum SubjectType
 // 6. Update boundary navigable
 // 7. Update space navigable
 // 8. Update RLine PassType
+// 9. Update SpaceId
+// 10. Add grid map     // TODO
+// 11. Update grid map  // TODO
+// 12. Remove grid map  // TODO
+// 13. Add Agent
+// 14. Update Agent  // TODO
+// 15. Remove Agent
+// 16. Add POI     // doing
+// 17. Update POI  // doing
+// 18. Remove POI  // doing
 
 public struct NaviInfo
 {

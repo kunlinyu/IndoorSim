@@ -23,7 +23,7 @@ public class POIController : MonoBehaviour
     {
         transform.position = Utils.Point2Vec((Point)poi.location.point.geometry);
 
-        if (poi.LabelContains("PaAmrPoi"))
+        if (poi.indoorPOIType == "PaAmr")
         {
             PaAmrPoi paAmrPoi = poi as PaAmrPoi;
             LineRenderer lr = GetComponent<LineRenderer>();

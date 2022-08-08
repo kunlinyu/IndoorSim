@@ -78,7 +78,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     {
                         // insert
                         Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
-                        PickingPOI pickingPoi = new PickingPOI(Utils.Vec2Point(pickingPoiPosition));
+                        HumanPOI pickingPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition));
                         pickingPoi.id = "picking poi";
                         IndoorSimData!.AddPOI(pickingPoi, selectedSpace.Select(sc => sc.Space).ToList());
 

@@ -4,11 +4,10 @@ using UnityEngine;
 
 using NetTopologySuite.Geometries;
 
-public class PickingPOI : IndoorPOI
+public class HumanPOI : IndoorPOI
 {
-    public PickingPOI(Point point)
+    public HumanPOI(Point point) : base("human")
     {
         location.point.geometry = point;
-        AddLabel("picking");
     }
 }

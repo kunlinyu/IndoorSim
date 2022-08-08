@@ -129,7 +129,7 @@ public class SpaceController : MonoBehaviour, Selectable
         {
             var obj = toPOILineObj[i];
             var lr = obj.GetComponent<LineRenderer>();
-            if (space.pois[i].LabelContains("PaAmrPoi"))
+            if (space.pois[i].indoorPOIType == "PaAmr")
             {
                 lr.positionCount = 2;
                 lr.SetPosition(0, Utils.Point2Vec(space.Geom.Centroid));

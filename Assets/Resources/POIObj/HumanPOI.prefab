@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2053242386835501642}
   - component: {fileID: 7312347014885623240}
   m_Layer: 0
-  m_Name: PickingPOI
+  m_Name: HumanPOI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

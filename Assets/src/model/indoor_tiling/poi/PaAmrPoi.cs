@@ -5,13 +5,11 @@ public class PaAmrPoi : IndoorPOI
 {
     public Action OnUpdate;
 
-    public PickingPOI pickingPOI;
+    public HumanPOI pickingPOI;
 
-    public PaAmrPoi(Point amrPoint, PickingPOI pickingPOI)
+    public PaAmrPoi(Point amrPoint, HumanPOI pickingPOI) : base("PaAmr")
     {
         location.point.geometry = amrPoint;
-        AddLabel("PaAmr");
-        AddLabel("PaAmrPoi");
 
         this.pickingPOI = pickingPOI;
         poi.POIProperties linkProperties = new poi.POIProperties()
