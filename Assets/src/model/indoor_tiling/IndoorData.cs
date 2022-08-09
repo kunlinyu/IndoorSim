@@ -194,6 +194,23 @@ public class IndoorData
     public CellSpace? FindSpaceId(string id)
         => spacePool.FirstOrDefault(space => space.Id == id);
 
+    public IndoorPOI FindIndoorPOI(Coordinate coor)
+    {
+        IndoorPOI closest = null;
+        double minDistance = double.MaxValue;
+        foreach (IndoorPOI poi in pois)
+        {
+            if (minDistance > poi.point.Coordinate.Distance(coor))
+            {
+                minDistance = poi.point.Coordinate.Distance(coor);
+                closest = poi;
+            }
+        }
+        if (minDistance > 1e-2)
+            throw new Exception("closest poi too far: " + minDistance);
+        return closest;
+    }
+
     public RepresentativeLine? FindRLine(LineString ls, out RLineGroup? rLineGroup)
     {
         foreach (var rLines in rLinePool)

@@ -277,6 +277,25 @@ public class IndoorSimData
                 throw new ArgumentException("can not find representative line: " + ins.oldParam.lineString());
             indoorTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, ins.newParam.naviInfo().passType);
         });
+        instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.POI, (ins) =>
+        {
+            ICollection<Container> spaces = new List<Container>(ins.newParam.coors().Select(coor => indoorData.FindSpaceGeom(coor)).ToList());
+            if (ins.newParam.value() == "human")
+                indoorTiling.AddPOI(new HumanPOI(new Point(ins.newParam.coor()), spaces));
+            else if (ins.newParam.value() == "PaAmr")
+                indoorTiling.AddPOI(new PaAmrPoi(new Point(ins.newParam.coor()), spaces));
+            else throw new Exception("unknow poi type: " + ins.newParam.value());
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.POI, (ins) =>
+        {
+            IndoorPOI poi = indoorData.FindIndoorPOI(ins.oldParam.coor());
+            indoorTiling.RemovePOI(poi);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.POI, (ins) =>
+        {
+            IndoorPOI poi = indoorData.FindIndoorPOI(ins.oldParam.coor());
+            poi.point = new Point(ins.newParam.coor());
+        });
     }
 
     public bool AddGridMap(GridMap gridmap)
@@ -629,18 +648,25 @@ public class IndoorSimData
         OnSimulationListUpdated?.Invoke(simDataList);
     }
 
-    public void AddPOI(IndoorPOI poi, params CellSpace[] spaces) => AddPOI(poi);
     public void AddPOI(IndoorPOI poi)
     {
         indoorTiling.AddPOI(poi);
 
-        // TODO: undo redo instruction
+        history.DoCommit(
+            ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
+                                            poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                            poi.indoorPOIType));
+        OnIndoorDataUpdated?.Invoke(indoorData);
     }
 
     public void RemovePOI(IndoorPOI poi)
     {
         indoorTiling.RemovePOI(poi);
 
-        // TODO: undo redo instruction
+        history.DoCommit(
+            ReducedInstruction.RemoveIndoorPOI(poi.point.Coordinate,
+                                               poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                               poi.indoorPOIType));
+        OnIndoorDataUpdated?.Invoke(indoorData);
     }
 }

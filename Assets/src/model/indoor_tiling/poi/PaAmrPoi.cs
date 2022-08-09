@@ -5,6 +5,6 @@ public class PaAmrPoi : IndoorPOI
 {
     public PaAmrPoi(Point amrPoint, ICollection<Container> spaces) : base("PaAmr", spaces)
     {
-        location.point.geometry = amrPoint;
+        this.point = amrPoint;
     }
 }

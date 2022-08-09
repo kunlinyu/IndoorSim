@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
-using UnityEngine;
+
 
 #nullable enable
 
@@ -68,6 +69,7 @@ public struct Parameters
     [JsonPropertyAttribute] public AgentDescriptor? agent;
     [JsonPropertyAttribute] public string? containerId;
     [JsonPropertyAttribute] public string? childrenId;
+    [JsonPropertyAttribute] public string? value;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -83,6 +85,7 @@ public static class ParameterExtension
     public static Task task(this Parameters? param) => param!.Value.task!;
     public static string containerId(this Parameters? param) => param!.Value.containerId!;
     public static string childrenId(this Parameters? param) => param!.Value.childrenId!;
+    public static string value(this Parameters? param) => param!.Value.value!;
 }
 
 [Serializable]
@@ -237,6 +240,38 @@ public class ReducedInstruction
         return ri;
     }
 
+    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, string indoorPOIType)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.POI;
+        ri.predicate = Predicate.Add;
+
+        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, value = indoorPOIType };
+
+        return ri;
+    }
+
+    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, string indoorPOIType)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.POI;
+        ri.predicate = Predicate.Remove;
+
+        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, value = indoorPOIType };
+        return ri;
+    }
+
+    public static ReducedInstruction UpdateIndoorPOI(Coordinate oldCoor, Coordinate newCoor)
+    {
+        ReducedInstruction ri = new ReducedInstruction();
+        ri.subject = SubjectType.POI;
+        ri.predicate = Predicate.Update;
+
+        ri.oldParam = new Parameters() { coor = oldCoor };
+        ri.newParam = new Parameters() { coor = newCoor };
+        return ri;
+    }
+
     static public List<ReducedInstruction> Reverse(List<ReducedInstruction> instructions)
     {
         var result = new List<ReducedInstruction>();
@@ -304,6 +339,18 @@ public class ReducedInstruction
                         return AddAgent(oldParam.agent());
                     case Predicate.Update:
                         return UpdateAgent(newParam.agent(), oldParam.agent());
+                    default:
+                        throw new ArgumentException("Unknown predicate");
+                }
+            case SubjectType.POI:
+                switch (predicate)
+                {
+                    case Predicate.Add:
+                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.value());
+                    case Predicate.Update:
+                        return UpdateIndoorPOI(newParam.coor(), oldParam.coor());
+                    case Predicate.Remove:
+                        return RemoveIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.value());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }

@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using Newtonsoft.Json;
 
 public class IndoorPOI : poi.POI
 {
-    public Action OnLocationPointUpdate;
-
     public string indoorPOIType { get; private set; }
 
     public List<Container> spaces;
+    [JsonIgnore] public Action OnLocationPointUpdate;
 
     public IndoorPOI(string type, ICollection<Container> spaces)
     {

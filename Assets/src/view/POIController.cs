@@ -26,7 +26,7 @@ public class POIController : MonoBehaviour
 
     void UpdateRenderer()
     {
-        transform.position = Utils.Point2Vec((Point)poi.location.point.geometry);
+        transform.position = Utils.Point2Vec(poi.point);
 
         if (poi.indoorPOIType == "PaAmr")
         {
@@ -39,8 +39,8 @@ public class POIController : MonoBehaviour
             }
             IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
 
-            lr.SetPosition(0, Utils.Point2Vec((Point)humanPoi.location.point.geometry));
-            lr.SetPosition(1, Utils.Point2Vec((Point)poi.location.point.geometry));
+            lr.SetPosition(0, Utils.Point2Vec(humanPoi.point));
+            lr.SetPosition(1, Utils.Point2Vec(poi.point));
 
 
             Vector3 delta = lr.GetPosition(0) - lr.GetPosition(1);
@@ -71,7 +71,7 @@ public class POIController : MonoBehaviour
             {
                 lr.positionCount = 2;
                 lr.SetPosition(0, Utils.Point2Vec(poi.spaces[i].Geom.Centroid));
-                lr.SetPosition(1, Utils.Point2Vec((Point)poi.location.point.geometry));
+                lr.SetPosition(1, Utils.Point2Vec(poi.point));
             }
             else
             {
