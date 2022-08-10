@@ -135,6 +135,12 @@ public class IndoorData
         poi.spaces.ForEach(space => space2POIs[space].Add(poi));
     }
 
+    public void UpdatePOI(IndoorPOI poi, Coordinate coor)
+    {
+        if (!pois.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);
+        poi.point = new Point(coor);
+    }
+
     public void RemovePOI(IndoorPOI poi)
     {
         if (!pois.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);

@@ -43,7 +43,7 @@ public class POIController : MonoBehaviour, Selectable
             needUpdateRenderer = true;
         }
     }
-    public SelectableType type { get => SelectableType.Boundary; }
+    public SelectableType type { get => SelectableType.POI; }
 
     public float Distance(Vector3 vec)
         => (float)poi.point.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));

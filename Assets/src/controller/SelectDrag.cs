@@ -29,6 +29,7 @@ public class SelectDrag : MonoBehaviour, ITool
     private List<BoundaryController> selectedBoundaries = new List<BoundaryController>();
     private List<SpaceController> selectedSpaces = new List<SpaceController>();
     private List<AgentController> selectedAgents = new List<AgentController>();
+    private List<POIController> selectedPOIs = new List<POIController>();
 
     private Vector3? mouseDownPosition = null;
 
@@ -104,6 +105,10 @@ public class SelectDrag : MonoBehaviour, ITool
                         {
                             selectedAgents.Add((AgentController)pointedEntity);
                         }
+                        else if (pointedEntity.type == SelectableType.POI)
+                        {
+                            selectedPOIs.Add((POIController)pointedEntity);
+                        }
                         else
                         {
                             Debug.LogWarning("unknown selectable type");
@@ -169,6 +174,14 @@ public class SelectDrag : MonoBehaviour, ITool
                             ac.selected = true;
                             if (!selectedAgents.Contains(ac))
                                 selectedAgents.Add(ac);
+                        }
+                    foreach (var entry in mapView.poi2Obj)
+                        if (selectBox.Contains(entry.Key.point))
+                        {
+                            var pc = entry.Value.GetComponent<POIController>();
+                            pc.selected = true;
+                            if (!selectedPOIs.Contains(pc))
+                                selectedPOIs.Add(pc);
                         }
 
 
@@ -279,6 +292,10 @@ public class SelectDrag : MonoBehaviour, ITool
                         Vector3 position = new Vector3(ac.AgentDescriptor.x, 0.0f, ac.AgentDescriptor.y);
                         ac.transform.position = position + delta;
                     }
+                    foreach (POIController pc in selectedPOIs)
+                    {
+                        pc.transform.position = Utils.Point2Vec(pc.Poi.point) + delta;
+                    }
                     if (Input.GetMouseButtonUp(0))
                     {
                         if (selectedVertices.Count > 0)
@@ -297,6 +314,12 @@ public class SelectDrag : MonoBehaviour, ITool
                             IndoorSimData.UpdateAgents(oldAgentDescriptors, newAgentDescriptors);
                         }
 
+                        if (selectedPOIs.Count > 0)
+                        {
+                            foreach (POIController pc in selectedPOIs)
+                                IndoorSimData.UpdatePOI(pc.Poi, Utils.Vec2Coor(pc.transform.position));
+                        }
+
                         if (adhoc)
                         {
                             adhoc = false;
@@ -304,6 +327,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             selectedBoundaries.Clear();
                             selectedSpaces.Clear();
                             selectedAgents.Clear();
+                            selectedPOIs.Clear();
                             SwitchStatus(SelectStatus.Idle);
                         }
                         else
@@ -326,6 +350,8 @@ public class SelectDrag : MonoBehaviour, ITool
             selectedSpaces.Clear();
             selectedAgents.ForEach(ac => ac.selected = false);
             selectedAgents.Clear();
+            selectedPOIs.ForEach(pc => pc.selected = false);
+            selectedPOIs.Clear();
             GetComponent<LineRenderer>().positionCount = 0;
         }
 
@@ -333,14 +359,6 @@ public class SelectDrag : MonoBehaviour, ITool
 
     void OnDestroy()
     {
-        // selectedVertices.ForEach(vc => vc.selected = false);
-        // selectedVertices.Clear();
-        // selectedBoundaries.ForEach(bc => bc.selected = false);
-        // selectedBoundaries.Clear();
-        // selectedSpaces.ForEach(sc => sc.selected = false);
-        // selectedSpaces.Clear();
-        // selectedAgents.ForEach(ac => ac.selected = false);
-        // selectedAgents.Clear();
     }
 
 

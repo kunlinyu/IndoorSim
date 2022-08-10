@@ -565,6 +565,8 @@ public class IndoorSimData
         return vertex;
     }
 
+    // TODO: We should add API to IndoorSimData to support history session start and commit
+
     public bool UpdateVertices(List<CellVertex> vertices, List<Coordinate> newCoors)
     {
         List<Coordinate> oldCoors = vertices.Select(v => v.Coordinate).ToList();
@@ -667,6 +669,12 @@ public class IndoorSimData
                                             poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
                                             poi.indoorPOIType));
         OnIndoorDataUpdated?.Invoke(indoorData);
+    }
+
+    public void UpdatePOI(IndoorPOI poi, Coordinate coor)
+    {
+        history.DoCommit(ReducedInstruction.UpdateIndoorPOI(poi.point.Coordinate, coor));
+        indoorTiling.UpdatePOI(poi, coor);
     }
 
     public void RemovePOI(IndoorPOI poi)

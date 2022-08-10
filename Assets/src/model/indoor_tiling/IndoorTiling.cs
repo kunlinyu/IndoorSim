@@ -576,6 +576,12 @@ public class IndoorTiling
         OnPOICreated?.Invoke(poi);
     }
 
+    public void UpdatePOI(IndoorPOI poi, Coordinate coor)
+    {
+        indoorData.UpdatePOI(poi, coor);
+        // TODO: check poi lay on correct space
+    }
+
     public void RemovePOI(IndoorPOI poi)
     {
         indoorData.RemovePOI(poi);
