@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2053242386835501641}
   - component: {fileID: 2053242386835501642}
   - component: {fileID: 6335631327980499766}
+  - component: {fileID: 8424838552250658269}
   m_Layer: 0
   m_Name: DefaultPOI
   m_TagString: Untagged
@@ -97,3 +98,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1b7cc67bd1e3479a94764515492f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!135 &8424838552250658269
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2053242386835501643}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.1
+  m_Center: {x: 0, y: 0, z: 0}

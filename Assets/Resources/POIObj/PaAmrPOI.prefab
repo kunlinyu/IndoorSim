@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5765784455887156355}
   - component: {fileID: 7001557285986789342}
   - component: {fileID: 6404036083152935795}
+  - component: {fileID: 2700260975108933637}
   m_Layer: 0
   m_Name: PaAmrPOI
   m_TagString: Untagged
@@ -201,3 +202,16 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!135 &2700260975108933637
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5553896945521805719}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.1
+  m_Center: {x: 0, y: 0, z: 0}

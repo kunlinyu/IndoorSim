@@ -9,6 +9,7 @@ public enum SelectableType
     Space,
     RLine,
     Agent,
+    POI,
 }
 public interface Selectable
 {

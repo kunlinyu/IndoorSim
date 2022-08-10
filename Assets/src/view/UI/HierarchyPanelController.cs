@@ -119,7 +119,6 @@ public class HierarchyPanelController : MonoBehaviour
         simFoldouts.Clear();
         CollapsesAll();
         foldoutContainer.Remove(createSim);
-        Debug.Log(json);
         var jsonData = JArray.Parse(json);
         foreach (var simulationJson in jsonData.Children())
         {

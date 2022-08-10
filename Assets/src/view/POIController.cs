@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using NetTopologySuite.Geometries;
 
-public class POIController : MonoBehaviour
+[RequireComponent(typeof(SphereCollider))]
+public class POIController : MonoBehaviour, Selectable
 {
     private IndoorPOI poi;
 
@@ -17,7 +18,40 @@ public class POIController : MonoBehaviour
         {
             poi = value;
             poi.OnLocationPointUpdate += UpdateRenderer;
+            poi.OnLocationPointUpdate += UpdateCollider;
         }
+    }
+
+    private bool _highLight = false;
+    private bool needUpdateRenderer = true;
+    public bool highLight
+    {
+        get => _highLight;
+        set
+        {
+            _highLight = value;
+            needUpdateRenderer = true;
+        }
+    }
+    private bool _selected = false;
+    public bool selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            needUpdateRenderer = true;
+        }
+    }
+    public SelectableType type { get => SelectableType.Boundary; }
+
+    public float Distance(Vector3 vec)
+        => (float)poi.point.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+    public string Tip()
+    {
+        List<string> spaceChildrens = poi.spaces.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
+        return $"type: {poi.indoorPOIType}\n" +
+               $"container: {string.Join(',', spaceChildrens)}";
     }
 
     public Func<Container, HashSet<IndoorPOI>> Space2IndoorPOI;
@@ -33,10 +67,6 @@ public class POIController : MonoBehaviour
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
             HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI(poi.spaces[0]);
-            foreach (var poi in humanPOIs)
-            {
-                poi.label.ForEach(label => Debug.Log(label.value));
-            }
             IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
 
             lr.SetPosition(0, Utils.Point2Vec(humanPoi.point));
@@ -80,18 +110,26 @@ public class POIController : MonoBehaviour
         }
     }
 
+    void UpdateCollider()
+    {
+        GetComponent<SphereCollider>().center = Vector3.zero;
+    }
+
     void Start()
     {
         UpdateRenderer();
+        UpdateCollider();
     }
 
     void Update()
     {
-
+        if (needUpdateRenderer)
+            UpdateRenderer();
     }
 
     void OnDestroy()
     {
         poi.OnLocationPointUpdate -= UpdateRenderer;
+        poi.OnLocationPointUpdate -= UpdateCollider;
     }
 }
