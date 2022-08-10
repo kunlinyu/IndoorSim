@@ -82,9 +82,9 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         var spaces = selectedSpace.Select(sc => sc.Space).ToList();
                         var containers = new List<Container>(spaces);
 
-                        HumanPOI pickingPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition), containers);
-                        pickingPoi.id = "picking poi";
-                        IndoorSimData!.AddPOI(pickingPoi);
+                        HumanPOI humanPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition), containers);
+                        humanPoi.id = "picking poi";
+                        IndoorSimData!.AddPOI(humanPoi);
 
                         var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), containers);
                         paAmrPoi.id = "pa amr poi";

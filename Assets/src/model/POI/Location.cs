@@ -5,8 +5,8 @@ namespace poi
     public class Location : POIProperties
     {
         public Geometry point = new Geometry();
-        public Geometry line = new Geometry();
-        public Geometry polygon = new Geometry();
+        public Geometry line = null;
+        public Geometry polygon = null;
         public POIProperties address;
         public Relationship relationship;
         public object undetermined;

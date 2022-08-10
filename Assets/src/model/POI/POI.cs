@@ -9,12 +9,12 @@ namespace poi
     public class POI : POIProperties
     {
         public List<POIProperties> label = new List<POIProperties>();
-        public List<POIProperties> description = new List<POIProperties>();
-        public List<POIProperties> category = new List<POIProperties>();
-        public List<POIProperties> time = new List<POIProperties>();
-        public List<POIProperties> link = new List<POIProperties>();
+        public List<POIProperties> description = null;
+        public List<POIProperties> category = null;
+        public List<POIProperties> time = null;
+        public List<POIProperties> link = null;
         public Location location = new Location();
-        public List<POIProperties> metadata = new List<POIProperties>();
+        public List<POIProperties> metadata = null;
 
         public void AddLabel(string value) => AddLabel(value, "en-US", "primary");
 
@@ -46,7 +46,7 @@ namespace poi
                 value = value,
                 lang = lang,
             };
-
+            if (this.description == null) this.description = new List<POIProperties>();
             this.description.Add(description);
         }
 
@@ -67,7 +67,7 @@ namespace poi
                 scheme = new System.Uri(scheme),
                 value = value,
             };
-
+            if (this.category == null) this.category = new List<POIProperties>();
             this.category.Add(category);
         }
 

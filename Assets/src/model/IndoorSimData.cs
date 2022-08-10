@@ -49,6 +49,7 @@ public class IndoorSimData
             Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
+            ContractResolver = new ShouldSerializeContractResolver(),
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
