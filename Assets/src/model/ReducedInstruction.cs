@@ -350,7 +350,7 @@ public class ReducedInstruction
                     case Predicate.Update:
                         return UpdateIndoorPOI(newParam.coor(), oldParam.coor());
                     case Predicate.Remove:
-                        return RemoveIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.value());
+                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.value());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }

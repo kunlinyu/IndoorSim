@@ -66,14 +66,17 @@ public class POIController : MonoBehaviour, Selectable
         {
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
+            lr.SetPosition(0, Utils.Point2Vec(poi.point));
+
             HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI(poi.spaces[0]);
             IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
+            if (humanPoi != null)
+                lr.SetPosition(1, Utils.Point2Vec(humanPoi.point));
+            else
+                lr.SetPosition(1, lr.GetPosition(0));
 
-            lr.SetPosition(0, Utils.Point2Vec(humanPoi.point));
-            lr.SetPosition(1, Utils.Point2Vec(poi.point));
 
-
-            Vector3 delta = lr.GetPosition(0) - lr.GetPosition(1);
+            Vector3 delta = Utils.Point2Vec(humanPoi.point) - Utils.Point2Vec(poi.point);
             float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
             transform.localRotation = Quaternion.Euler(90.0f, 0.0f, rotation);
         }
