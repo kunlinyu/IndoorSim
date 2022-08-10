@@ -74,7 +74,10 @@ public class IndoorMapView : MonoBehaviour
             else if (poi.indoorPOIType == "human")
                 poiObjPath = "POIObj/HumanPOI";
             else
+            {
                 poiObjPath = "POIObj/DefaultPOI";
+                Debug.LogWarning("Unknow poi type");
+            }
 
             var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), POIParentObj.transform);
             obj.name = poi.id;

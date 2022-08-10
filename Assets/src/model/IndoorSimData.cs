@@ -95,7 +95,16 @@ public class IndoorSimData
 
     public static IndoorSimData? Deserialize(string json, bool historyOnly = false)
     {
-        IndoorSimData? indoorSimData = JsonConvert.DeserializeObject<IndoorSimData>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter(), new StackConverter() },
+            ContractResolver = new ShouldSerializeContractResolver(),
+        };
+
+        IndoorSimData? indoorSimData = JsonConvert.DeserializeObject<IndoorSimData>(json, settings);
         if (indoorSimData == null) return null;
 
         if (historyOnly)

@@ -80,6 +80,7 @@ public class IndoorTiling
         this.indoorData.boundaryPool.ForEach(b => OnBoundaryRemoved?.Invoke(b));
         this.indoorData.spacePool.ForEach(s => OnSpaceRemoved?.Invoke(s));
         this.indoorData.rLinePool.ForEach(r => OnRLinesRemoved?.Invoke(r));
+        this.indoorData.pois.ForEach(p => OnPOIRemoved?.Invoke(p));
 
         this.indoorData = indoorData;
 
@@ -87,6 +88,7 @@ public class IndoorTiling
         this.indoorData.boundaryPool.ForEach(b => OnBoundaryCreated?.Invoke(b));
         this.indoorData.spacePool.ForEach(s => OnSpaceCreated?.Invoke(s));
         this.indoorData.rLinePool.ForEach(r => OnRLinesCreated?.Invoke(r));
+        this.indoorData.pois.ForEach(p => OnPOICreated?.Invoke(p));
 
 
         IdGenVertex!.Reset();

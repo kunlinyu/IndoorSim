@@ -250,6 +250,10 @@ public class IndoorData
         boundary2RLines.Clear();
         boundaryPool.ForEach(b => boundary2RLines[b] = new HashSet<RepresentativeLine>());
         rLinePool.ForEach(rls => rls.rLines.ForEach(rl => { boundary2RLines[rl.fr].Add(rl); boundary2RLines[rl.to].Add(rl); }));
+
+        space2POIs.Clear();
+        spacePool.ForEach(s => space2POIs[s] = new HashSet<IndoorPOI>());
+        pois.ForEach(poi => poi.spaces.ForEach(space => space2POIs[space].Add(poi)));
     }
 
     public string CalcDigest()
