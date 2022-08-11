@@ -13,6 +13,8 @@ public class env : MonoBehaviour
 
     void OnEnable()
     {
+        UnitySystemConsoleRedirector.Redirect();
+
         gridMapView.indoorSimData = indoorSimData;
         indoorMapView.indoorTiling = indoorSimData.indoorTiling;
         simulationView.indoorSimData = indoorSimData;
