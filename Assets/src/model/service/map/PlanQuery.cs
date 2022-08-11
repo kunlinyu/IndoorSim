@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using NetTopologySuite.Geometries;
-
 public class CoorToContainerQuery
 {
     // source description is a joint state. coordinate may generate a source description

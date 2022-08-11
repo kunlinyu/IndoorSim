@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using NetTopologySuite.Geometries;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]

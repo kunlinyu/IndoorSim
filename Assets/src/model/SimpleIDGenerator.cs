@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class SimpleIDGenerator : IDGenInterface
 {
@@ -57,7 +56,7 @@ public class SimpleIDGenerator : IDGenInterface
             }
         }
         next = maxLast + 1;
-        Debug.Log("Reset: " + Prefix + " next: " + next);
+        Console.WriteLine("Reset: " + Prefix + " next: " + next);
     }
 
     public IDGenInterface clone() => new SimpleIDGenerator(this);

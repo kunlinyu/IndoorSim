@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using UnityEngine;
 #nullable enable
 
 [Serializable]
@@ -52,7 +50,7 @@ public class InstructionHistory<InstructionType>
             {
                 if (uncommittedInstruction!.Count == 0)
                 {
-                    Debug.LogWarning("Do nothing before commit.");
+                    Console.WriteLine("Do nothing before commit.");
                 }
                 else
                 {
@@ -93,7 +91,7 @@ public class InstructionHistory<InstructionType>
     {
         if (uncommittedInstruction != null)
             throw new InvalidOperationException("There are some uncommitted instruction. Should not undo.");
-        Debug.Log("undo history: " + history.Count + " future: " + future.Count);
+        Console.WriteLine("undo history: " + history.Count + " future: " + future.Count);
         if (history.Count > 0)
         {
             var last = history.Peek();
@@ -113,7 +111,7 @@ public class InstructionHistory<InstructionType>
     {
         if (uncommittedInstruction != null)
             throw new InvalidOperationException("There are some uncommitted instruction. Should not redo.");
-        Debug.Log("redo history: " + history.Count + " future: " + future.Count);
+        Console.WriteLine("redo history: " + history.Count + " future: " + future.Count);
         if (future.Count > 0)
         {
             var next = future.Peek();

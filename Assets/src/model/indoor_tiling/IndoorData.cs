@@ -200,9 +200,9 @@ public class IndoorData
     public CellSpace? FindSpaceId(string id)
         => spacePool.FirstOrDefault(space => space.Id == id);
 
-    public IndoorPOI FindIndoorPOI(Coordinate coor)
+    public IndoorPOI? FindIndoorPOI(Coordinate coor)
     {
-        IndoorPOI closest = null;
+        IndoorPOI? closest = null;
         double minDistance = double.MaxValue;
         foreach (IndoorPOI poi in pois)
         {

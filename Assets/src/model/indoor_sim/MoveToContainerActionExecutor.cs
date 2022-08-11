@@ -3,14 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEngine;
 
 public class MoveToContainerActionExecutor : AbstractActionExecutor
 {
     MapService map;
     AbstractMotionExecutor moveToCoorMotionExe;
-
-    int pendingMotionCount = 0;
 
 
     public MoveToContainerActionExecutor(AbstractMotionExecutor me, MapService map) : base(me)
@@ -24,7 +21,7 @@ public class MoveToContainerActionExecutor : AbstractActionExecutor
 
     public override bool Execute(AgentAction goal, ref bool cancel, out object? result)
     {
-        Debug.Log("MoveToContainerActionExecutor execute action");
+        Console.WriteLine("MoveToContainerActionExecutor execute action");
         result = null;
         if (!Accept(goal)) throw new ArgumentException("can not accept the action");
 
@@ -43,7 +40,7 @@ public class MoveToContainerActionExecutor : AbstractActionExecutor
         PlanResult? planResult = Plan(position, action2Container.id);
         if (planResult == null)
         {
-            Debug.Log("plan failed");
+            Console.WriteLine("plan failed");
             return false;
         }
 

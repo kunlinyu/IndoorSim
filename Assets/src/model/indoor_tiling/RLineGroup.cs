@@ -5,8 +5,6 @@ using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-using UnityEngine;
-
 public struct BoundaryWithGeom
 {
     public CellBoundary boundary;

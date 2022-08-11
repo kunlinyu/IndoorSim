@@ -10,7 +10,6 @@ enum PaAmrPoiMarkerStatus
     PaAmrPoiMarked,
 
     // PickingAgentPoiMarked
-
 }
 
 
@@ -33,8 +32,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void Start()
     {
-
-
     }
 
     private bool PaAmrTarget(SpaceController? sc)

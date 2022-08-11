@@ -8,8 +8,6 @@ using NetTopologySuite.Algorithm;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-using UnityEngine;
-
 #nullable enable
 
 
@@ -195,7 +193,7 @@ public class CellSpace : Container
 
             CellVertex currentVertex = currentBoundary.P0;
             vertices[ringIndex].Add(currentVertex);
-            Debug.Log(ringIndex);
+            Console.WriteLine(ringIndex);
             do
             {
                 currentVertex = currentBoundary!.Another(currentVertex);
@@ -209,8 +207,8 @@ public class CellSpace : Container
             ringIndex++;
         } while (waitingBoundaries.Count > 0);
 
-        List<CellVertex> maxAreaVertices = null;
-        List<CellBoundary> maxAreaBoundaries = null;
+        List<CellVertex>? maxAreaVertices = null;
+        List<CellBoundary>? maxAreaBoundaries = null;
         double maxArea = Double.MinValue;
         for (int i = 0; i < vertices.Count; i++)
         {
@@ -227,6 +225,7 @@ public class CellSpace : Container
                 maxAreaBoundaries = boundaries[i];
             }
         }
+        if (maxAreaVertices == null || maxAreaBoundaries == null) throw new Exception("Oops");
 
         // Add merged hole
         return new CellSpace(maxAreaVertices, maxAreaBoundaries, "generated temp cellspace");
@@ -248,8 +247,8 @@ public class CellSpace : Container
 
         if (!Polygon.Contains(cellSpace.Polygon.Shell))
         {
-            Debug.Log(Polygon);
-            Debug.Log(cellSpace.Polygon.Shell);
+            Console.WriteLine(Polygon);
+            Console.WriteLine(cellSpace.Polygon.Shell);
         }
 
         if (!Polygon.Contains(cellSpace.Polygon.Shell)) throw new ArgumentException("the polygon should contain the new hole.");

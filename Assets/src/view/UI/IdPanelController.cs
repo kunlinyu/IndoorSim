@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Newtonsoft.Json.Linq;
 
 [RequireComponent(typeof(UIDocument))]
 public class IdPanelController : MonoBehaviour

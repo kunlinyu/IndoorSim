@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 
 // https://opengeospatial.github.io/poi/spec/poi-core.html
 namespace poi

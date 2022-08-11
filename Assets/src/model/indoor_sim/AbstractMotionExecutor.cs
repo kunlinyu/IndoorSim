@@ -2,8 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-using UnityEngine;
-
 #nullable enable
 
 public enum MotionExecutorStatus
@@ -87,7 +85,7 @@ public abstract class AbstractMotionExecutor : IGroupExecutor<Motion, object?, M
         {
             goals.ForEach(goal => motionQueue.Enqueue(goal));
             status = MotionExecutorStatus.Executing;
-            Debug.Log("motion executor get motions");
+            Console.WriteLine("motion executor get motions");
         }
     }
 

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
-using UnityEngine;
 
 #nullable enable
 
@@ -59,7 +58,7 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
                     currentGoal = desires[0];
                     status = AgentStatus.Running;
                     desires.RemoveAt(0);
-                    Debug.Log("agent pick one goal");
+                    Console.WriteLine("agent pick one goal");
                 }
                 else
                 {
@@ -69,7 +68,7 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
 
             if (currentGoal != null)
             {
-                Debug.Log("agent plan");
+                Console.WriteLine("agent plan");
                 intensions.AddRange(planner.Plan(this, currentGoal));
             }
             else
@@ -82,12 +81,12 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
             {
                 var executor = actionExecutors.FirstOrDefault(exe => exe.Accept(action));
                 if (executor == null) throw new Exception("no action executor accept this action");
-                Debug.Log("agent execute action");
+                Console.WriteLine("agent execute action");
                 executor.Execute(action, ref join, out var result);
                 if (join) break;
             }
 
-            Debug.Log("agent finish all action of current goal");
+            Console.WriteLine("agent finish all action of current goal");
             intensions.Clear();
         }
     }
@@ -100,7 +99,7 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
         lock (desires)
         {
             desires.Add(goal);
-            Debug.Log($"agent get task, {desires.Count} remain");
+            Console.WriteLine($"agent get task, {desires.Count} remain");
         }
     }
 

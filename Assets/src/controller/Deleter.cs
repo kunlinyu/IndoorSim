@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using NetTopologySuite.Geometries;
 using UnityEngine;
 #nullable enable
 

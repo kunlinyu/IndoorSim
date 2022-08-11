@@ -1,6 +1,3 @@
-using System;
-using NetTopologySuite.Geometries;
-using UnityEngine;
 #nullable enable
 
 public interface ITool

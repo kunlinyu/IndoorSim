@@ -1,9 +1,3 @@
-using System;
-
-using UnityEngine;
-
-#nullable enable
-
 public class DummyAgent : AbstractAgent
 {
     public DummyAgent(AbstractActionPlanner planner, params AbstractActionExecutor[] actionExecutors) : base(planner, actionExecutors)

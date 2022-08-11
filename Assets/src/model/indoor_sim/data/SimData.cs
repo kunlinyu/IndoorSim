@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using UnityEngine;
 
 public class SimData
 {
@@ -19,17 +18,17 @@ public class SimData
         this.name = name;
         instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.Agent, (ins) =>
         {
-            Debug.Log("execute command add agent");
+            Console.WriteLine("execute command add agent");
             AddAgent(ins.newParam.agent().Clone());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.Agent, (ins) =>
         {
-            Debug.Log("execute command remove agent");
+            Console.WriteLine("execute command remove agent");
             RemoveAgentEqualsTo(ins.oldParam.agent());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.Agent, (ins) =>
         {
-            Debug.Log("execute command update agent");
+            Console.WriteLine("execute command update agent");
             UpdateAgent(ins.oldParam.agent(), ins.newParam.agent());
         });
     }
