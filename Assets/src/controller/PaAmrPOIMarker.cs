@@ -79,11 +79,11 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         var spaces = selectedSpace.Select(sc => sc.Space).ToList();
                         var containers = new List<Container>(spaces);
 
-                        HumanPOI humanPoi = new HumanPOI(Utils.Vec2Point(pickingPoiPosition), containers);
+                        HumanPOI humanPoi = new HumanPOI(U.Vec2Point(pickingPoiPosition), containers);
                         humanPoi.id = "picking poi";
                         IndoorSimData!.AddPOI(humanPoi);
 
-                        var paAmrPoi = new PaAmrPoi(Utils.Vec2Point(paAmrPoiPosition), containers);
+                        var paAmrPoi = new PaAmrPoi(U.Vec2Point(paAmrPoiPosition), containers);
                         paAmrPoi.id = "pa amr poi";
                         IndoorSimData.AddPOI(paAmrPoi);
                         Debug.Log("POI inserted");
@@ -109,7 +109,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
             obj.name = "Container2POI " + index;
             pickingAgent2ContainerObj.Add(obj);
             obj.GetComponent<LineRenderer>().positionCount = 2;
-            obj.GetComponent<LineRenderer>().SetPosition(0, Utils.Coor2Vec(selectedSpace[index].Space.Geom!.Centroid.Coordinate));
+            obj.GetComponent<LineRenderer>().SetPosition(0, U.Coor2Vec(selectedSpace[index].Space.Geom!.Centroid.Coordinate));
         }
         while (pickingAgent2ContainerObj.Count > selectedSpace.Count)
         {

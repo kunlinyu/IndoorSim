@@ -50,7 +50,7 @@ public class SpaceController : MonoBehaviour, Selectable
     [SerializeField] public Material triangulationMaterial;
 
     public float Distance(Vector3 vec)
-    => (float)space.Polygon.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+    => (float)space.Polygon.Distance(new GeometryFactory().CreatePoint(U.Vec2Coor(vec)));
 
     void Start()
     {

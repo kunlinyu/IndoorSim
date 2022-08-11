@@ -46,7 +46,7 @@ public class POIController : MonoBehaviour, Selectable
     public SelectableType type { get => SelectableType.POI; }
 
     public float Distance(Vector3 vec)
-        => (float)poi.point.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+        => (float)poi.point.Distance(new GeometryFactory().CreatePoint(U.Vec2Coor(vec)));
     public string Tip()
     {
         List<string> spaceChildrens = poi.spaces.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
@@ -60,20 +60,20 @@ public class POIController : MonoBehaviour, Selectable
 
     void UpdateRenderer()
     {
-        transform.position = Utils.Point2Vec(poi.point);
+        transform.position = U.Point2Vec(poi.point);
 
         if (poi.indoorPOIType == "PaAmr")
         {
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
-            lr.SetPosition(0, Utils.Point2Vec(poi.point));
+            lr.SetPosition(0, U.Point2Vec(poi.point));
 
             HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI(poi.spaces[0]);
             IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
             if (humanPoi != null)
             {
-                lr.SetPosition(1, Utils.Point2Vec(humanPoi.point));
-                Vector3 delta = Utils.Point2Vec(humanPoi.point) - Utils.Point2Vec(poi.point);
+                lr.SetPosition(1, U.Point2Vec(humanPoi.point));
+                Vector3 delta = U.Point2Vec(humanPoi.point) - U.Point2Vec(poi.point);
                 float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
                 transform.localRotation = Quaternion.Euler(90.0f, 0.0f, rotation);
             }
@@ -105,8 +105,8 @@ public class POIController : MonoBehaviour, Selectable
             if (poi.indoorPOIType == "PaAmr")
             {
                 lr.positionCount = 2;
-                lr.SetPosition(0, Utils.Point2Vec(poi.spaces[i].Geom.Centroid));
-                lr.SetPosition(1, Utils.Point2Vec(poi.point));
+                lr.SetPosition(0, U.Point2Vec(poi.spaces[i].Geom.Centroid));
+                lr.SetPosition(1, U.Point2Vec(poi.point));
             }
             else
             {

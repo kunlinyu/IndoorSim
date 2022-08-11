@@ -33,7 +33,7 @@ public class PolygonRenderer : MonoBehaviour
 
     public Mesh UpdatePolygon(Polygon polygon)
     {
-        GetComponent<MeshFilter>().mesh = Utils.TriangulatePolygon2Mesh(polygon);
+        GetComponent<MeshFilter>().mesh = U.TriangulatePolygon2Mesh(polygon);
 
         if (enableBorder)
         {
@@ -45,7 +45,7 @@ public class PolygonRenderer : MonoBehaviour
             lr.positionCount = polygon.Coordinates.Length;
             for (int i = 0; i < polygon.Coordinates.Length; i++)
             {
-                lr.SetPosition(i, Utils.Coor2Vec(polygon.Coordinates[i]));
+                lr.SetPosition(i, U.Coor2Vec(polygon.Coordinates[i]));
             }
 
             lr.alignment = LineAlignment.TransformZ;

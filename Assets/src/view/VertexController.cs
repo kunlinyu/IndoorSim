@@ -11,7 +11,7 @@ public class VertexController : MonoBehaviour, Selectable
         set
         {
             vertex = value;
-            vertex.OnUpdate += () => { updateRenderer(Utils.Coor2Vec(vertex.Coordinate)); };
+            vertex.OnUpdate += () => { updateRenderer(U.Coor2Vec(vertex.Coordinate)); };
             vertex.OnUpdate += updateCollider;
             vertex.OnUpdate += updateTransform;
         }
@@ -56,7 +56,7 @@ public class VertexController : MonoBehaviour, Selectable
     public SelectableType type { get => SelectableType.Vertex; }
 
     public float Distance(Vector3 vec)
-        => (float)vertex.Coordinate.Distance(Utils.Vec2Coor(vec));
+        => (float)vertex.Coordinate.Distance(U.Vec2Coor(vec));
 
     private int lastCameraHeightInt;
 
@@ -65,7 +65,7 @@ public class VertexController : MonoBehaviour, Selectable
     void Start()
     {
         GetComponent<LineRenderer>().positionCount = 0;
-        updateRenderer(Utils.Coor2Vec(vertex.Coordinate));
+        updateRenderer(U.Coor2Vec(vertex.Coordinate));
         updateCollider();
         updateTransform();
     }
@@ -82,7 +82,7 @@ public class VertexController : MonoBehaviour, Selectable
             width = radius * widthFactor;
         }
         if (needUpdateRenderer)
-            updateRenderer(Utils.Coor2Vec(vertex.Coordinate));
+            updateRenderer(U.Coor2Vec(vertex.Coordinate));
     }
 
     void updateCollider()
@@ -93,7 +93,7 @@ public class VertexController : MonoBehaviour, Selectable
 
     void updateTransform()
     {
-        transform.localPosition = Utils.Coor2Vec(vertex.Coordinate);
+        transform.localPosition = U.Coor2Vec(vertex.Coordinate);
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f); ;
     }
 

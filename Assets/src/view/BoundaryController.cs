@@ -14,7 +14,7 @@ public class BoundaryController : MonoBehaviour, Selectable
         set
         {
             boundary = value;
-            boundary.OnUpdate += () => { updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray()); };
+            boundary.OnUpdate += () => { updateRenderer(boundary.geom.Coordinates.Select(coor => U.Coor2Vec(coor)).ToArray()); };
             boundary.OnUpdate += updateCollider;
             boundary.OnUpdate += updateTransform;
         }
@@ -55,13 +55,13 @@ public class BoundaryController : MonoBehaviour, Selectable
     private int lastCameraHeightInt;
 
     public float Distance(Vector3 vec)
-    => (float)boundary.geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+    => (float)boundary.geom.Distance(new GeometryFactory().CreatePoint(U.Vec2Coor(vec)));
 
     // Start is called before the first frame update
     void Start()
     {
         transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-        updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+        updateRenderer(boundary.geom.Coordinates.Select(coor => U.Coor2Vec(coor)).ToArray());
         updateCollider();
         updateTransform();
     }
@@ -77,7 +77,7 @@ public class BoundaryController : MonoBehaviour, Selectable
             width = newHeightInt * 2.0f * widthFactor + 0.01f;
         }
         if (needUpdateRenderer)
-            updateRenderer(boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+            updateRenderer(boundary.geom.Coordinates.Select(coor => U.Coor2Vec(coor)).ToArray());
     }
 
     void updateCollider()
@@ -88,7 +88,7 @@ public class BoundaryController : MonoBehaviour, Selectable
 
     void updateTransform()
     {
-        transform.localPosition = Utils.Coor2Vec(boundary.geom.Centroid.Coordinate);
+        transform.localPosition = U.Coor2Vec(boundary.geom.Centroid.Coordinate);
 
         Coordinate start = boundary.geom.StartPoint.Coordinate;
         Coordinate end = boundary.geom.EndPoint.Coordinate;

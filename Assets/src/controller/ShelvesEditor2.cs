@@ -66,7 +66,7 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
         mousePositionNullable = CameraController.mousePositionOnGround();
         mouseSnapPosition = mousePositionNullable;
         if (MousePickController.PointedVertex != null)
-            mouseSnapPosition = Utils.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
+            mouseSnapPosition = U.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
         if (mouseSnapPosition == null) return;
 
         switch (status)
@@ -142,15 +142,15 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
                 case 2: status++; break;
                 case 3:
                     IndoorSimData?.SessionStart();
-                    IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(firstPoint), U.Vec2Coor(secondPoint));
                     CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
+                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][0]), U.Vec2Coor(spaceVectors[i][1]));
                         if (b1 == null) break;
-                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
+                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][1]), U.Vec2Coor(spaceVectors[i][2]));
                         if (b2 == null) break;
-                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
+                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][2]), U.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
                         Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;

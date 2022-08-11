@@ -69,7 +69,7 @@ public class ShelvesEditor : MonoBehaviour, ITool
         mousePositionNullable = CameraController.mousePositionOnGround();
         mouseSnapPosition = mousePositionNullable;
         if (MousePickController.PointedVertex != null)
-            mouseSnapPosition = Utils.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
+            mouseSnapPosition = U.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
         if (mouseSnapPosition == null) return;
 
         Vector3 segmentDir = (secondPoint - firstPoint).normalized;
@@ -143,7 +143,7 @@ public class ShelvesEditor : MonoBehaviour, ITool
             if (mousePositionNullable == null) return;
             mouseSnapPosition = mousePositionNullable.Value;
             if (MousePickController.PointedVertex != null)
-                mouseSnapPosition = Utils.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
+                mouseSnapPosition = U.Coor2Vec(MousePickController.PointedVertex.Vertex.Coordinate);
             Debug.Log(status);
 
             switch (status)
@@ -154,15 +154,15 @@ public class ShelvesEditor : MonoBehaviour, ITool
                 case 3: if (corridorWidth != 0.0f) status++; break;
                 case 4:
                     IndoorSimData?.SessionStart();
-                    IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(firstPoint), Utils.Vec2Coor(secondPoint));
+                    IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(firstPoint), U.Vec2Coor(secondPoint));
                     CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][0]), Utils.Vec2Coor(spaceVectors[i][1]));
+                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][0]), U.Vec2Coor(spaceVectors[i][1]));
                         if (b1 == null) break;
-                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][1]), Utils.Vec2Coor(spaceVectors[i][2]));
+                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][1]), U.Vec2Coor(spaceVectors[i][2]));
                         if (b2 == null) break;
-                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(Utils.Vec2Coor(spaceVectors[i][2]), Utils.Vec2Coor(spaceVectors[i][3]));
+                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][2]), U.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
                         Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
@@ -173,8 +173,8 @@ public class ShelvesEditor : MonoBehaviour, ITool
                     }
                     IndoorSimData?.SessionCommit();
 
-                    firstPoint = Utils.Coor2Vec(lastBoundary!.P0.Coordinate);
-                    secondPoint = Utils.Coor2Vec(lastBoundary!.P1.Coordinate);
+                    firstPoint = U.Coor2Vec(lastBoundary!.P0.Coordinate);
+                    secondPoint = U.Coor2Vec(lastBoundary!.P1.Coordinate);
 
                     if (spaceVectors.Count % 2 == 1)
                         firstIsShelf = !firstIsShelf;

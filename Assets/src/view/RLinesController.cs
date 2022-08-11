@@ -36,7 +36,7 @@ public class RLineController : MonoBehaviour, Selectable
     public SelectableType type { get => SelectableType.RLine; }
 
     public float Distance(Vector3 vec)
-        => (float)rLine.geom.Distance(new GeometryFactory().CreatePoint(Utils.Vec2Coor(vec)));
+        => (float)rLine.geom.Distance(new GeometryFactory().CreatePoint(U.Vec2Coor(vec)));
 
     public string Tip()
         => $"from: {rLine.fr.Id}\n" +
@@ -119,7 +119,7 @@ public class RLinesController : MonoBehaviour
             GameObject obj = new GameObject("rLine renderer");
             obj.transform.SetParent(transform);
             obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
-            obj.transform.position = Utils.Coor2Vec(rLine.geom.GetPointN(rLine.geom.NumPoints / 2).Coordinate);
+            obj.transform.position = U.Coor2Vec(rLine.geom.GetPointN(rLine.geom.NumPoints / 2).Coordinate);
             renderObj.Add(obj);
 
             var rlc = obj.AddComponent<RLineController>();
@@ -133,7 +133,7 @@ public class RLinesController : MonoBehaviour
 
             LineRenderer lr = obj.AddComponent<LineRenderer>();
             lr.positionCount = rLine.geom.NumPoints;
-            lr.SetPositions(rLine.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor)).ToArray());
+            lr.SetPositions(rLine.geom.Coordinates.Select(coor => U.Coor2Vec(coor)).ToArray());
             lr.alignment = LineAlignment.TransformZ;
             lr.textureMode = LineTextureMode.Tile;
             lr.useWorldSpace = true;

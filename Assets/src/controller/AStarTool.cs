@@ -68,7 +68,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorData.FindSpaceGeom(Utils.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -82,7 +82,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorData.FindSpaceGeom(Utils.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -116,13 +116,13 @@ public class AStarTool : MonoBehaviour, ITool
         {
             Debug.Log("run A*");
             shouldRunAStar = false;
-            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(Utils.Vec2Coor(sourcePoint!.Value), targetSpace!);
+            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
             PlanSimpleResult? simpleResult = result?.ToSimple();
             if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)
             {
                 path.Clear();
                 path.Add(sourcePoint.Value);
-                path.AddRange(simpleResult.boundaryCentroids.Select(p => Utils.Coor2Vec(p.Coordinate)));
+                path.AddRange(simpleResult.boundaryCentroids.Select(p => U.Coor2Vec(p.Coordinate)));
                 path.Add(targetPoint!.Value);
                 Debug.Log("get path : " + path.Count);
             }

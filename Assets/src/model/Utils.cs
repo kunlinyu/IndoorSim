@@ -6,12 +6,12 @@ using NetTopologySuite.Geometries;
 using UnityEngine;
 #nullable enable
 
-public class Utils
+public class U
 {
     static public Mesh? TriangulatePolygon2Mesh(in Polygon polygon)
     {
         if (polygon == null) return null;
-        Utils.TriangulatePolygon(polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices);
+        U.TriangulatePolygon(polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices);
 
         Mesh mesh = new Mesh();
         mesh.Clear();
@@ -119,6 +119,6 @@ public class Utils
     static public Coordinate? Vec2Coor(Vector3? vec) => vec == null ? null : new Coordinate(vec!.Value.x, vec!.Value.z);
     static public Point Vec2Point(Vector3 vec) => new Point(Vec2Coor(vec));
 
-    static public Vector3 Coor2Screen(Coordinate coor) => Camera.main.WorldToScreenPoint(Utils.Coor2Vec(coor));
+    static public Vector3 Coor2Screen(Coordinate coor) => Camera.main.WorldToScreenPoint(U.Coor2Vec(coor));
 
 }

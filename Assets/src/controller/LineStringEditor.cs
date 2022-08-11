@@ -29,7 +29,7 @@ public class LineStringEditor : MonoBehaviour, ITool
     {
         if (Input.GetMouseButtonUp(0) && !MouseOnUI)
         {
-            Coordinate? currentCoor_ = Utils.Vec2Coor(CameraController.mousePositionOnGround());
+            Coordinate? currentCoor_ = U.Vec2Coor(CameraController.mousePositionOnGround());
             if (currentCoor_ != null)
             {
                 Coordinate currentCoor = currentCoor_;
@@ -110,7 +110,7 @@ public class LineStringEditor : MonoBehaviour, ITool
             return;
         }
 
-        Coordinate? mousePosition = Utils.Vec2Coor(CameraController.mousePositionOnGround());
+        Coordinate? mousePosition = U.Vec2Coor(CameraController.mousePositionOnGround());
         Selectable? pointedVertex = MousePickController.PointedEntity;
         if (mousePosition != null)
         {
@@ -119,8 +119,8 @@ public class LineStringEditor : MonoBehaviour, ITool
 
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
-            lr.SetPosition(0, Utils.Coor2Vec(mousePosition));
-            lr.SetPosition(1, Utils.Coor2Vec(lastCoor));
+            lr.SetPosition(0, U.Coor2Vec(mousePosition));
+            lr.SetPosition(1, U.Coor2Vec(lastCoor));
         }
     }
 }

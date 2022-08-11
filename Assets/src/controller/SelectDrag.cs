@@ -140,7 +140,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             break;
 
                     // use bounding box to select vertices
-                    List<Coordinate> coors = SquareFromCursor().Select(v => Utils.Vec2Coor(v)).ToList();
+                    List<Coordinate> coors = SquareFromCursor().Select(v => U.Vec2Coor(v)).ToList();
                     coors.Add(coors[0]);
                     Polygon selectBox = new GeometryFactory().CreatePolygon(coors.ToArray());
                     foreach (var entry in mapView.vertex2Obj)
@@ -272,15 +272,15 @@ public class SelectDrag : MonoBehaviour, ITool
                     List<Coordinate> newAgentCoor = new List<Coordinate>();
                     foreach (VertexController vc in selectedVertices)
                     {
-                        Vector3? newPosition = Utils.Coor2Vec(vc.Vertex.Coordinate) + delta;
+                        Vector3? newPosition = U.Coor2Vec(vc.Vertex.Coordinate) + delta;
                         if (Input.GetMouseButtonUp(0))
-                            newVertexCoor.Add(Utils.Vec2Coor(newPosition!.Value));
+                            newVertexCoor.Add(U.Vec2Coor(newPosition!.Value));
                         else
                             vc.updateRenderer(newPosition!.Value);
                     }
                     foreach (BoundaryController bc in selectedBoundaries)
                     {
-                        Vector3[] positions = bc.Boundary.geom.Coordinates.Select(coor => Utils.Coor2Vec(coor) + delta).ToArray();
+                        Vector3[] positions = bc.Boundary.geom.Coordinates.Select(coor => U.Coor2Vec(coor) + delta).ToArray();
                         bc.updateRenderer(positions);
                     }
                     foreach (SpaceController sc in selectedSpaces)
@@ -294,7 +294,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     }
                     foreach (POIController pc in selectedPOIs)
                     {
-                        pc.transform.position = Utils.Point2Vec(pc.Poi.point) + delta;
+                        pc.transform.position = U.Point2Vec(pc.Poi.point) + delta;
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
@@ -317,7 +317,7 @@ public class SelectDrag : MonoBehaviour, ITool
                         if (selectedPOIs.Count > 0)
                         {
                             foreach (POIController pc in selectedPOIs)
-                                IndoorSimData.UpdatePOI(pc.Poi, Utils.Vec2Coor(pc.transform.position));
+                                IndoorSimData.UpdatePOI(pc.Poi, U.Vec2Coor(pc.transform.position));
                         }
 
                         if (adhoc)

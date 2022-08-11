@@ -53,8 +53,8 @@ public class AssetApplier : MonoBehaviour, ITool
         for (int i = 0; i < assetIndoorData.boundaryPool.Count; i++)
         {
             Quaternion rot = Quaternion.AngleAxis(rotation, Vector3.up);
-            Vector3 p0 = rot * (Utils.Coor2Vec(assetIndoorData.boundaryPool[i].P0.Coordinate) - center) + mousePosition.Value;
-            Vector3 p1 = rot * (Utils.Coor2Vec(assetIndoorData.boundaryPool[i].P1.Coordinate) - center) + mousePosition.Value;
+            Vector3 p0 = rot * (U.Coor2Vec(assetIndoorData.boundaryPool[i].P0.Coordinate) - center) + mousePosition.Value;
+            Vector3 p1 = rot * (U.Coor2Vec(assetIndoorData.boundaryPool[i].P1.Coordinate) - center) + mousePosition.Value;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().positionCount = 2;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(0, p0);
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(1, p1);
@@ -65,8 +65,8 @@ public class AssetApplier : MonoBehaviour, ITool
             IndoorSimData?.SessionStart();
             foreach (var obj in boundaryRenderObjs)
             {
-                Coordinate coor0 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(0));
-                Coordinate coor1 = Utils.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(1));
+                Coordinate coor0 = U.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(0));
+                Coordinate coor1 = U.Vec2Coor(obj.GetComponent<LineRenderer>().GetPosition(1));
                 IndoorSimData?.AddBoundaryAutoSnap(coor0, coor1);
             }
             IndoorSimData?.SessionCommit();
