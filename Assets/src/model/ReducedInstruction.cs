@@ -44,11 +44,11 @@ public enum SubjectType
 // 11. Update grid map  // TODO
 // 12. Remove grid map  // TODO
 // 13. Add Agent
-// 14. Update Agent  // TODO
+// 14. Update Agent  // Doing
 // 15. Remove Agent
-// 16. Add POI     // doing
-// 17. Update POI  // doing
-// 18. Remove POI  // doing
+// 16. Add POI
+// 17. Update POI
+// 18. Remove POI
 
 public struct NaviInfo
 {
