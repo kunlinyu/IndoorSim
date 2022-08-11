@@ -16,7 +16,6 @@ public class IDEditor : MonoBehaviour, ITool
 
     public Action<int, int, string, string>? PopContainerIdPanel;
     public Action? HideContainerIdPanel;
-    private string currentSpaceId = "";
 
     private CellSpace? currentSpace;
 

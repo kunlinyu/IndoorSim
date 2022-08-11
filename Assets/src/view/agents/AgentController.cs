@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-
-#nullable enable
 
 public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectable
 {
@@ -14,16 +11,17 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
         set
         {
             agentDescriptor = value;
-            agentDescriptor.OnUpdate += UpdateTransform;
+            if (agentDescriptor != null)
+                agentDescriptor.OnUpdate += UpdateTransform;
         }
     }
-    public AbstractMotionExecutor? motionExecutor { get; set; }
+    public AbstractMotionExecutor motionExecutor { get; set; }
     private bool reset = false;
-    private Action<ISensorData> listener;
+    private Action<ISensorData> listener = (sensorData) => { };
 
-    protected IActuatorCommand? command = null;
+    protected IActuatorCommand command = null;
 
-    public AgentTypeMetaUnity? meta = null;
+    public AgentTypeMetaUnity meta = null;
 
     private bool _highLight = false;
     public bool highLight
@@ -46,11 +44,12 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
     }
     public SelectableType type { get => SelectableType.Agent; }
 
-    public string Tip() => AgentDescriptor.type;
+    public string Tip() => agentDescriptor == null ? "" : agentDescriptor.type;
 
     public float Distance(Vector3 vec)
     {
-        float distanceToCenter = (vec - new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y)).magnitude;
+        if (agentDescriptor == null) return float.MaxValue;
+        float distanceToCenter = (vec - new Vector3(agentDescriptor.x, 0.0f, agentDescriptor.y)).magnitude;
         distanceToCenter -= meta!.collisionRadius;
         if (distanceToCenter < 0.0f) distanceToCenter = 0.0f;
         return distanceToCenter;
@@ -80,8 +79,9 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
 
     void UpdateTransform()
     {
-        transform.position = new Vector3(AgentDescriptor.x, 0.0f, AgentDescriptor.y);
-        transform.rotation = Quaternion.Euler(0.0f, (float)AgentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
+        if (agentDescriptor == null) return;
+        transform.position = new Vector3(agentDescriptor.x, 0.0f, agentDescriptor.y);
+        transform.rotation = Quaternion.Euler(0.0f, (float)agentDescriptor.theta / Mathf.PI * 180.0f * -1.0f, 0.0f);
     }
 
     protected abstract ISensorData GetSensorData();
@@ -93,6 +93,7 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
     {
         GetComponentInChildren<AgentShadowController>().meta = meta;
     }
+
     protected void Start()
     {
     }
@@ -104,6 +105,7 @@ public abstract class AgentController : MonoBehaviour, IActuatorSensor, Selectab
     void OnDestroy()
     {
         if (agentDescriptor != null)
-            agentDescriptor.OnUpdate -= UpdateTransform;
+            if (agentDescriptor.OnUpdate != null)
+                agentDescriptor.OnUpdate -= this.UpdateTransform;
     }
 }

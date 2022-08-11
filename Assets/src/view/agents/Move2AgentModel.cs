@@ -22,7 +22,7 @@ public class Move2AgentModel : AgentController
         transform.position = position;
     }
 
-    void Update()
+    new void Update()
     {
         var speedLR = transform.Find("AgentSpeedLineRenderer").gameObject.GetComponent<LineRenderer>();
         UpdateSpeedCommandLineRender(speedLR);
@@ -36,7 +36,7 @@ public class Move2AgentModel : AgentController
         lr.positionCount = 2;
         lr.SetPosition(0, transform.position);
         Vector3 speedTarget;
-        lock (command)
+        lock (command!)
         {
             SpeedVec speed = command as SpeedVec ?? throw new ArgumentException("accept only speed vector");
             speedTarget = transform.position + new Vector3((float)speed.x, 0.0f, (float)speed.y);

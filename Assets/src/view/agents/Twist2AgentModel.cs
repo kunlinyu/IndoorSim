@@ -65,7 +65,7 @@ public class Twist2AgentModel : AgentController
     void UpdateTwistCommandLineRender(LineRenderer velLR, LineRenderer dirLR)
     {
         Twist2 twist2;
-        lock (command)
+        lock (command!)
         {
             Twist2 twist = command as Twist2 ?? throw new ArgumentException("accept only twist");
             twist2 = new Twist2() { v_x = twist.v_x, omega_z = twist.omega_z };
