@@ -23,8 +23,13 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
-        // Build("../release", BuildTarget.WebGL, true);
         Build("../release", BuildTarget.WebGL, false);
+    }
+
+    [MenuItem("Build/Build WebGL dev")]
+    public static void BuildWebGLDev()
+    {
+        Build("../release", BuildTarget.WebGL, true);
     }
 
 
