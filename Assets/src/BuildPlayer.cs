@@ -9,7 +9,7 @@ using UnityEditor.Build.Reporting;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 
-// Output the build size or a failure depending on BuildPlayer.
+using Markdig;
 
 public class BuildPlayer : MonoBehaviour
 {
@@ -30,6 +30,29 @@ public class BuildPlayer : MonoBehaviour
     public static void BuildWebGLDev()
     {
         Build("../release", BuildTarget.WebGL, true);
+    }
+
+    [MenuItem("Build/Generate release from markdown")]
+    public static void GenerateReleaseFromMarkdown()
+    {
+        string header = @"<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
+  <title>IndoorSim Release</title>
+</head>
+<body>
+";
+        string footer = "</body>\n</html>\n";
+
+        string markdown = File.ReadAllText("RELEASE.md");
+
+        MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        string html = Markdown.ToHtml(markdown, pipeline);
+        string fullHtml = header + html + footer;
+
+        File.WriteAllText("index.html", fullHtml);
+        Debug.Log("build index.html from RELEASE.md");
     }
 
 
@@ -59,7 +82,8 @@ public class BuildPlayer : MonoBehaviour
             Debug.Log("Build " + summary.result.ToString());
 
 
-        if (target == BuildTarget.StandaloneLinux64) {
+        if (target == BuildTarget.StandaloneLinux64)
+        {
             CreateTarGZ(prefix + "/" + dirName + ".tar.gz", prefix + "/" + dirName);
             Directory.Delete(prefix + "/" + dirName, true);
         }
