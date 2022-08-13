@@ -13,23 +13,26 @@ using Markdig;
 
 public class BuildPlayer : MonoBehaviour
 {
+
+    private static string releaseDirectoryPath = "release";
+
     [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
     {
-        Build("../release", BuildTarget.StandaloneLinux64, true);
-        Build("../release", BuildTarget.StandaloneLinux64, false);
+        Build(BuildTarget.StandaloneLinux64, true);
+        Build(BuildTarget.StandaloneLinux64, false);
     }
 
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
-        Build("../release", BuildTarget.WebGL, false);
+        Build(BuildTarget.WebGL, false);
     }
 
     [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
-        Build("../release", BuildTarget.WebGL, true);
+        Build(BuildTarget.WebGL, true);
     }
 
     [MenuItem("Build/Generate release from markdown")]
@@ -45,19 +48,31 @@ public class BuildPlayer : MonoBehaviour
 ";
         string footer = "</body>\n</html>\n";
 
-        string markdown = File.ReadAllText("RELEASE.md");
+        string markdownPath = "RELEASE.md";
+        string indexPath = releaseDirectoryPath + "/index.html";
+
+        CheckReleaseDir();
+
+        string markdown = File.ReadAllText(markdownPath);
 
         MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
         string html = Markdown.ToHtml(markdown, pipeline);
         string fullHtml = header + html + footer;
 
-        File.WriteAllText("index.html", fullHtml);
-        Debug.Log("build index.html from RELEASE.md");
+        File.WriteAllText(indexPath, fullHtml);
+        Debug.Log($"build {indexPath} from {markdownPath}");
+    }
+
+    private static void CheckReleaseDir()
+    {
+        if (!Directory.Exists(releaseDirectoryPath))
+            Directory.CreateDirectory(releaseDirectoryPath);
     }
 
 
-    public static void Build(string prefix, BuildTarget target, bool development)
+    public static void Build(BuildTarget target, bool development)
     {
+        CheckReleaseDir();
         string[] lines = File.ReadAllLines(".git/refs/heads/master");
         if (lines.Length < 1)
             throw new System.Exception("can not read line from file");
@@ -69,7 +84,7 @@ public class BuildPlayer : MonoBehaviour
 
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = new[] { "Assets/Scenes/MappingScene.unity" };
-        buildPlayerOptions.locationPathName = prefix + "/" + dirName + (target == BuildTarget.StandaloneLinux64 ? "/" + dirName : "");
+        buildPlayerOptions.locationPathName = releaseDirectoryPath + "/" + dirName + (target == BuildTarget.StandaloneLinux64 ? "/" + dirName : "");
         buildPlayerOptions.target = target;
         buildPlayerOptions.options = development ? BuildOptions.Development : BuildOptions.None;
 
@@ -84,49 +99,25 @@ public class BuildPlayer : MonoBehaviour
 
         if (target == BuildTarget.StandaloneLinux64)
         {
-            CreateTarGZ(prefix + "/" + dirName + ".tar.gz", prefix + "/" + dirName);
-            Directory.Delete(prefix + "/" + dirName, true);
+            CreateTarGZ(releaseDirectoryPath + "/" + dirName + ".tar.gz", releaseDirectoryPath + "/" + dirName, releaseDirectoryPath);
+            Directory.Delete(releaseDirectoryPath + "/" + dirName, true);
         }
     }
-    private static void CreateTarGZ(string tgzFilename, string sourceDirectory)
+
+    private static void CreateTarGZ(string tgzFilename, string sourceDirectory, string rootPath)
     {
         Stream outStream = File.Create(tgzFilename);
-        Stream gzoStream = new GZipOutputStream(outStream);
+        GZipOutputStream gzoStream = new GZipOutputStream(outStream);
+        gzoStream.SetLevel(3);
         TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream);
+        tarArchive.RootPath = rootPath;
 
-        // Note that the RootPath is currently case sensitive and must be forward slashes e.g. "c:/temp"
-        // and must not end with a slash, otherwise cuts off first char of filename
-        // This is scheduled for fix in next release
-        tarArchive.RootPath = sourceDirectory.Replace('\\', '/');
-        if (tarArchive.RootPath.EndsWith("/"))
-            tarArchive.RootPath = tarArchive.RootPath.Remove(tarArchive.RootPath.Length - 1);
-
-        AddDirectoryFilesToTar(tarArchive, sourceDirectory, true);
+        TarEntry tarEntry = TarEntry.CreateEntryFromFile(sourceDirectory);
+        tarArchive.WriteEntry(tarEntry, recurse: true);
 
         tarArchive.Close();
     }
-    private static void AddDirectoryFilesToTar(TarArchive tarArchive, string sourceDirectory, bool recurse)
-    {
-        // Optionally, write an entry for the directory itself.
-        // Specify false for recursion here if we will add the directory's files individually.
-        TarEntry tarEntry = TarEntry.CreateEntryFromFile(sourceDirectory);
-        tarArchive.WriteEntry(tarEntry, false);
 
-        // Write each file to the tar.
-        string[] filenames = Directory.GetFiles(sourceDirectory);
-        foreach (string filename in filenames)
-        {
-            tarEntry = TarEntry.CreateEntryFromFile(filename);
-            tarArchive.WriteEntry(tarEntry, true);
-        }
-
-        if (recurse)
-        {
-            string[] directories = Directory.GetDirectories(sourceDirectory);
-            foreach (string directory in directories)
-                AddDirectoryFilesToTar(tarArchive, directory, recurse);
-        }
-    }
 }
 
 #endif
