@@ -88,8 +88,6 @@ var StandaloneFileBrowserWebGLPlugin = {
         document.onmouseup = null;
 
         SendMessage(gameObjectName, methodName);
-        // document.onmouseup = function() {
-        // }
     }
 };
 

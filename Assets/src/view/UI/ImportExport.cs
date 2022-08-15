@@ -64,8 +64,15 @@ public class ImportExport : MonoBehaviour
         DownloadFile(gameObject.name, "OnFileDownload", "unnamed_map.indoor.json", bytes, bytes.Length);
 #else
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");
-        Debug.Log("save file to: " + path);
-        File.WriteAllText(path, content);
+        if (path.Length != 0)
+        {
+            Debug.Log("save file to: " + path);
+            File.WriteAllText(path, content);
+        }
+        else
+        {
+            Debug.Log("save cancelled");
+        }
 #endif
     }
 
@@ -164,8 +171,9 @@ public class ImportExport : MonoBehaviour
 
     public void OnFileDownload()
     {
-        Debug.Log("File Successfully Downloaded");
+        Debug.Log("File downloaded... perhabs. If you didn't click \"cancel\"");
     }
+
     private IEnumerator OutputRoutine(string url, string filePath, Action<WWW> postAction)
     {
         // var request = new UnityWebRequest(url);
