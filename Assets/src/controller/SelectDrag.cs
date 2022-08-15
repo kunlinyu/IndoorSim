@@ -39,6 +39,10 @@ public class SelectDrag : MonoBehaviour, ITool
     private Texture2D? dragCursorTexture;
     private Vector2 dragHotSpot;
 
+    private int lastCameraHeightInt;
+    public float widthFactor = 0.01f;
+    private float width = 0.0f;
+
     void Start()
     {
         transform.rotation = Quaternion.Euler(new Vector3(90.0f, 0.0f, 0.0f));
@@ -73,6 +77,15 @@ public class SelectDrag : MonoBehaviour, ITool
         if (simView == null) throw new InvalidOperationException("simView null");
         if (IndoorSimData == null) throw new InvalidOperationException("IndoorSim null");
         Selectable? pointedEntity = MousePickController.PointedEntity;
+
+        int newHeightInt = (int)(CameraController.CameraPosition.y * 0.5f);
+        if (lastCameraHeightInt != newHeightInt)
+        {
+            lastCameraHeightInt = newHeightInt;
+            width = newHeightInt * 2.0f * widthFactor + 0.01f;
+        }
+        GetComponent<LineRenderer>().startWidth = width;
+        GetComponent<LineRenderer>().endWidth = width;
 
         switch (status)
         {
