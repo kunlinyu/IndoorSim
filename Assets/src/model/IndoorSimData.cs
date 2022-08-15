@@ -75,7 +75,7 @@ public class IndoorSimData
         if (indoorSimData == null) return false;
 
         indoorData = indoorSimData.indoorData;
-        gridMaps = indoorSimData.gridMaps;
+
         simDataList = indoorSimData.simDataList;
         simDataList.ForEach(sim => sim.active = false);
         assets = indoorSimData.assets;
@@ -85,8 +85,10 @@ public class IndoorSimData
         OnAssetListUpdated?.Invoke(assets);
         OnSimulationListUpdated?.Invoke(simDataList);
         OnIndoorDataUpdated?.Invoke(indoorData);
-        foreach (var gridmap in gridMaps)
-            OnGridMapCreated?.Invoke(gridmap);
+
+        gridMaps.ForEach(gridmap => OnGridMapRemoved?.Invoke(gridmap));
+        gridMaps = indoorSimData.gridMaps;
+        gridMaps.ForEach(gridmap => OnGridMapCreated?.Invoke(gridmap));
 
         indoorTiling.AssignIndoorData(indoorData);
 
