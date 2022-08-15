@@ -63,7 +63,7 @@ public class ImportExport : MonoBehaviour
         var bytes = Encoding.UTF8.GetBytes(content);
         DownloadFile(gameObject.name, "OnFileDownload", "unnamed_map.indoor.json", bytes, bytes.Length);
 #else
-        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map.indoor.json", "indoor.json");
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map", "indoor.json");
         if (path.Length != 0)
         {
             Debug.Log("save file to: " + path);
