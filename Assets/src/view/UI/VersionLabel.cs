@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[RequireComponent(typeof(UIDocument))]
 public class VersionLabel : MonoBehaviour
 {
-    public UIDocument rootUIDocument;
     void Start()
     {
-        Label versionLabel = rootUIDocument.rootVisualElement.Q<Label>("VersionLabel");
+        Label versionLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("VersionLabel");
         versionLabel.text = " IndoorSim version: V" + Application.version;
     }
 }

@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[RequireComponent(typeof(UIDocument))]
 public class CursorTip : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
-    public UIDocument rootUIDocument;
 
     Label tip;
     private string uiMessage;
@@ -13,7 +13,7 @@ public class CursorTip : MonoBehaviour
 
     void Start()
     {
-        this.tip = rootUIDocument.rootVisualElement.Q<Label>("Tip");
+        this.tip = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Tip");
         this.tip.text = "";
         eventDispatcher.eventListener += this.EventListener;
     }
