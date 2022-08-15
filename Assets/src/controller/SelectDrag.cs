@@ -57,6 +57,8 @@ public class SelectDrag : MonoBehaviour, ITool
         selectedBoundaries = mapView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
         selectedSpaces = mapView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
         // TODO: selected agents
+
+        MousePickController.pickType = CurrentPickType.All & ~CurrentPickType.RLine;
     }
 
     void SwitchStatus(SelectStatus status)
