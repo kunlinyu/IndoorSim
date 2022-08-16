@@ -1,5 +1,19 @@
 # version list
 
+## V0.2.2
+
+* [IndoorSim-WebGL-V0.2.2.9dbbecf](./IndoorSim-WebGL-V0.2.2.9dbbecf)
+* [IndoorSim-WebGL-dev-V0.2.2.9dbbecf](./IndoorSim-WebGL-dev-V0.2.2.9dbbecf)
+* [IndoorSim-StandaloneLinux64-V0.2.2.9dbbecf.tar.gz](./IndoorSim-StandaloneLinux64-V0.2.2.9dbbecf.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.2.2.9dbbecf.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.2.2.9dbbecf.tar.gz)
+
+### ChangeLog
+1. 增加了Camra最大高度上限
+2. POI随高度变化大小
+3. 导入地图时删除垃圾日至
+4. 开始仿真是检查当前状态是否可仿真
+
+
 ## V0.2.1
 * [IndoorSim-WebGL-V0.2.1.278cdfd](./IndoorSim-WebGL-V0.2.1.278cdfd)
 * [IndoorSim-WebGL-dev-V0.2.1.278cdfd](./IndoorSim-WebGL-dev-V0.2.1.278cdfd)
