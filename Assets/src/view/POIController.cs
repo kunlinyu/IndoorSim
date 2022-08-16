@@ -5,6 +5,7 @@ using UnityEngine;
 using NetTopologySuite.Geometries;
 
 [RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class POIController : MonoBehaviour, Selectable
 {
     private IndoorPOI poi;
@@ -61,6 +62,7 @@ public class POIController : MonoBehaviour, Selectable
     void UpdateRenderer()
     {
         transform.position = U.Point2Vec(poi.point);
+        GetComponent<SpriteRenderer>().size = spriteSize;
 
         if (poi.indoorPOIType == "PaAmr")
         {
@@ -126,8 +128,20 @@ public class POIController : MonoBehaviour, Selectable
         UpdateCollider();
     }
 
+
+    private int lastCameraHeightInt;
+    private Vector2 spriteSize = new Vector2(0.5f, 0.5f);
     void Update()
     {
+        int newHeightInt = (int)(CameraController.CameraPosition.y * 0.5f);
+        if (lastCameraHeightInt != newHeightInt)
+        {
+            lastCameraHeightInt = newHeightInt;
+            needUpdateRenderer = true;
+
+            spriteSize.x = Mathf.Sqrt(newHeightInt + 2) * 0.2f + 0.1f;
+            spriteSize.y = Mathf.Sqrt(newHeightInt + 2) * 0.2f + 0.1f;
+        }
         if (needUpdateRenderer)
             UpdateRenderer();
     }
