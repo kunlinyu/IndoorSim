@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] public const float rotationSpeed = 0.05f;
     [SerializeField] public const float mouseScrollSpeed = 10.0f;
     [SerializeField] public const float minHeight = 1.0f;
+    [SerializeField] public const float maxHeight = 100.0f;
 
     private static Plane ground = new Plane(Vector3.up, Vector3.zero);
 
@@ -79,6 +80,12 @@ public class CameraController : MonoBehaviour
         {
             var pos = transform.position;
             pos.y = minHeight;
+            transform.position = pos;
+        }
+        if (transform.position.y > maxHeight)
+        {
+            var pos = transform.position;
+            pos.y = maxHeight;
             transform.position = pos;
         }
 
