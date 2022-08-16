@@ -1,5 +1,22 @@
 # version list
 
+## V0.2.1
+* [IndoorSim-WebGL-V0.2.1.278cdfd](./IndoorSim-WebGL-V0.2.1.278cdfd)
+* [IndoorSim-WebGL-dev-V0.2.1.278cdfd](./IndoorSim-WebGL-dev-V0.2.1.278cdfd)
+* [IndoorSim-StandaloneLinux64-V0.2.1.278cdfd.tar.gz](./IndoorSim-StandaloneLinux64-V0.2.1.278cdfd.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.2.1.278cdfd.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.2.1.278cdfd.tar.gz)
+
+### ChangeLog
+1. 修复了一些bug
+2. 修复了StandaloneLinux64的包结构问题
+3. 优化了选取与拖动工具的展示效果
+4. 使用LFS管理nupkg
+5. 创建脚本，用batch mode构建项目
+6. 使用MarkDown管理release页面
+7. 更新了构建脚本和上传脚本
+8. 把版本标签和鼠标提示从全局页面中拆分出来
+
+
 ## V0.2.0
 * [IndoorSim-WebGL-V0.2.0.d2dc12a](./IndoorSim-WebGL-V0.2.0.d2dc12a)
 * [IndoorSim-WebGL-dev-V0.2.0.d2dc12a](./IndoorSim-WebGL-dev-V0.2.0.d2dc12a)
