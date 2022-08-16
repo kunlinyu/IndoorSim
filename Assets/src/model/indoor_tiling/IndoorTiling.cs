@@ -398,7 +398,6 @@ public class IndoorTiling
 
         foreach (var s in spaces)
         {
-            Debug.Log(s.Id);
             s.UpdateFromVertex();
             s.OnUpdate?.Invoke();
 

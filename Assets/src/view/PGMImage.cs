@@ -102,14 +102,12 @@ public class PGMImage
         {
             List<int> intData = new List<int>();
             string nextWord = wordReader.ReadWordString(Encoding.ASCII);
-            Debug.Log(nextWord);
             while (nextWord != null)
             {
                 intData.Add(int.Parse(nextWord));
                 nextWord = wordReader.ReadWordString(Encoding.ASCII);
             }
 
-            Debug.Log(intData.Count);
             if (intData.Count != expectDataLength)
                 throw new ArgumentException($"Data length wrong. expect {expectDataLength} but get {intData.Count}");
             imageData = new int[header.width, header.height];
