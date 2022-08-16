@@ -228,6 +228,10 @@ public class SimDataController : MonoBehaviour
 
                     Debug.Log("Switch to tool capsule");
                 }
+                else
+                {
+                    Debug.LogWarning("You should create or select one simulation too create robot in it.");
+                }
             }
             else if (e.name == "bronto")
             {
@@ -240,6 +244,10 @@ public class SimDataController : MonoBehaviour
                     currentTool = agentEditor;
 
                     Debug.Log("Switch to tool bronto");
+                }
+                else
+                {
+                    Debug.LogWarning("You should create or select one simulation too create robot in it.");
                 }
             }
             else if (e.name == "astar")
