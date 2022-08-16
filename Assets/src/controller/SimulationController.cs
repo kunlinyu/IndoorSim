@@ -33,16 +33,16 @@ public class SimulationController : MonoBehaviour
                     indoorSimData.simulating = true;
                     indoorSimData.currentSimData.tasks.Clear();
 
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("0")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("1")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("2")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("3")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("4")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("5")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("6")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("7")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("8")}));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("9")}));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("0") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("1") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("2") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("3") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("4") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("5") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("6") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("7") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("8") }));
+                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("9") }));
 
                     // indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
                     //     new ActionMoveToCoor(1.0f, 1.0f),
@@ -94,10 +94,19 @@ public class SimulationController : MonoBehaviour
 
             if (e.name == "stop")
             {
-                simulation?.ResetAll();
-                simulation = null;
-                indoorSimData.simulating = false;
-                Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" stopped");
+                if (simulation != null)
+                {
+                    simulation?.ResetAll();
+                    simulation = null;
+                    indoorSimData.simulating = false;
+                    timeScale = 1.0f;
+                    Time.timeScale = timeScale;
+                    Debug.Log($"simulation \"{indoorSimData.currentSimData.name}\" stopped");
+                }
+                else
+                {
+                    Debug.LogWarning("No simulation is running");
+                }
             }
 
             if (e.name == "fast")
@@ -107,12 +116,15 @@ public class SimulationController : MonoBehaviour
                     if (timeScale >= 1.0f)
                         timeScale += 1.0f;
                     else timeScale *= 2.0f;
+                    if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
+                        timeScale = 1.0f;
+                    Time.timeScale = timeScale;
+                    Debug.Log("simulation speed: " + timeScale);
                 }
-
-                if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
-                    timeScale = 1.0f;
-                Time.timeScale = timeScale;
-                Debug.Log("simulation speed: " + timeScale);
+                else
+                {
+                    Debug.LogWarning("No simulation is running");
+                }
             }
 
             if (e.name == "slow")
@@ -122,12 +134,15 @@ public class SimulationController : MonoBehaviour
                     if (timeScale > 1.0f)
                         timeScale -= 1.0f;
                     else timeScale /= 2.0f;
+                    if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
+                        timeScale = 1.0f;
+                    Time.timeScale = timeScale;
+                    Debug.Log("simulation speed: " + timeScale);
                 }
-
-                if (Mathf.Abs(timeScale - 1.0f) < 1e-3)
-                    timeScale = 1.0f;
-                Time.timeScale = timeScale;
-                Debug.Log("simulation speed: " + timeScale);
+                else
+                {
+                    Debug.LogWarning("No simulation is running");
+                }
             }
         }
     }
