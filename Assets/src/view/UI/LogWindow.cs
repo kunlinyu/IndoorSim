@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 
 public class LogWindow : MonoBehaviour
 {
+    public UIEventDispatcher eventDispatcher;
     public UIDocument rootUIDocument;
     private const int kMaxLogCount = 100;
     private const int kMaxLogLength = 200;
@@ -18,6 +19,12 @@ public class LogWindow : MonoBehaviour
     {
         Init();
         Application.logMessageReceived += HandleLog;
+
+        VisualElement logWindow = rootUIDocument.rootVisualElement.Q<VisualElement>("LogWindow");
+        logWindow.RegisterCallback<MouseEnterEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "sim panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
+        logWindow.RegisterCallback<MouseLeaveEvent>(e =>
+            { eventDispatcher.Raise(this, new UIEvent() { name = "sim panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
 
     public void Init()
