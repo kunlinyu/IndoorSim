@@ -146,15 +146,15 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
                     CellBoundary? lastBoundary = null;
                     for (int i = 0; i < spaceVectors.Count; i++)
                     {
-                        var b1 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][0]), U.Vec2Coor(spaceVectors[i][1]));
+                        CellBoundary? b1 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][0]), U.Vec2Coor(spaceVectors[i][1]));
                         if (b1 == null) break;
-                        var b2 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][1]), U.Vec2Coor(spaceVectors[i][2]));
+                        CellBoundary? b2 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][1]), U.Vec2Coor(spaceVectors[i][2]));
                         if (b2 == null) break;
-                        var b3 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][2]), U.Vec2Coor(spaceVectors[i][3]));
+                        CellBoundary? b3 = IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(spaceVectors[i][2]), U.Vec2Coor(spaceVectors[i][3]));
                         if (b3 == null) break;
 
                         Navigable navigable = isShelf(firstIsShelf, i) ? Navigable.PhysicallyNonNavigable : Navigable.Navigable;
-                        CellSpace newSpace = shelfWidth > 0.0f ? b3.leftSpace! : b3.rightSpace!;
+                        CellSpace? newSpace = b3.leftSpace != null ? b3.leftSpace : b3.rightSpace;
                         IndoorSimData?.UpdateSpaceNavigable(newSpace!, navigable);
 
                         lastBoundary = b2;
