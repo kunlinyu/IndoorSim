@@ -569,16 +569,36 @@ public class IndoorTiling
         }
     }
 
-    public void AddPOI(IndoorPOI poi)
+    public bool AddPOI(IndoorPOI poi)
     {
-        indoorData.AddPOI(poi);
-        OnPOICreated?.Invoke(poi);
+        CellSpace? space = indoorData.FindSpaceGeom(poi.point.Coordinate);
+        if (poi.CanLayOn(space))
+        {
+            indoorData.AddPOI(poi);
+            OnPOICreated?.Invoke(poi);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
-    public void UpdatePOI(IndoorPOI poi, Coordinate coor)
+    // TODO: check all POI after boundary updated or removed
+    public bool UpdatePOI(IndoorPOI poi, Coordinate coor)
     {
-        indoorData.UpdatePOI(poi, coor);
-        // TODO: check poi lay on correct space
+        CellSpace? space = indoorData.FindSpaceGeom(coor);
+        if (poi.CanLayOn(space))
+        {
+            indoorData.UpdatePOI(poi, coor);
+            Debug.Log("Can lay on");
+            return true;
+        }
+        else
+        {
+            Debug.Log("Can not lay on");
+            return false;
+        }
     }
 
     public void RemovePOI(IndoorPOI poi)

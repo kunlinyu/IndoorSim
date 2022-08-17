@@ -3,12 +3,20 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
+#nullable enable
+
 public class IndoorPOI : poi.POI
 {
     public string indoorPOIType { get; private set; }
 
     public List<Container> spaces;
-    [JsonIgnore] public Action OnLocationPointUpdate;
+    [JsonIgnore] public Action OnLocationPointUpdate = () => { };
+
+    public virtual bool CanLayOn(Container? container)
+    => container != null && container.navigable == Navigable.Navigable;
+
+    public virtual bool AcceptContainer(Container? container)
+        => container != null && container.navigable != Navigable.Navigable;
 
     public IndoorPOI(string type, ICollection<Container> spaces)
     {

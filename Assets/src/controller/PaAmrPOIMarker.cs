@@ -34,15 +34,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     {
     }
 
-    private bool PaAmrTarget(SpaceController? sc)
-        => sc != null && sc.Space.navigable != Navigable.Navigable;
-
-    private bool PaAmrPoiSpace(SpaceController? sc)
-        => sc != null && sc.Space.navigable == Navigable.Navigable;
-
-    private bool PickingAgentPoiSpace(SpaceController? sc)
-        => sc != null && sc.Space.navigable == Navigable.Navigable;
-
     void UpdateStatus()
     {
         switch (status)
@@ -51,11 +42,11 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
-                    if (PaAmrTarget(sc))
+                    if (PaAmrPoi.AcceptContainerStatic(sc?.Space) && HumanPOI.AcceptContainerStatic(sc?.Space))
                     {
                         selectedSpace.Add(sc!);
                     }
-                    else if (selectedSpace.Count > 0 && PaAmrPoiSpace(sc))
+                    else if (selectedSpace.Count > 0 && PaAmrPoi.CanLayOnStatic(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
@@ -71,7 +62,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
-                    if (PickingAgentPoiSpace(sc))
+                    if (HumanPOI.CanLayOnStatic(sc?.Space))
                     {
                         // insert
                         Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");

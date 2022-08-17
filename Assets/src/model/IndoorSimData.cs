@@ -666,19 +666,21 @@ public class IndoorSimData
 
     public void AddPOI(IndoorPOI poi)
     {
-        indoorTiling.AddPOI(poi);
-
-        history.DoCommit(
-            ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
-                                            poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
-                                            poi.indoorPOIType));
-        OnIndoorDataUpdated?.Invoke(indoorData);
+        if (indoorTiling.AddPOI(poi))
+        {
+            history.DoCommit(
+                ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
+                                                poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                                poi.indoorPOIType));
+            OnIndoorDataUpdated?.Invoke(indoorData);
+        }
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
     {
-        history.DoCommit(ReducedInstruction.UpdateIndoorPOI(poi.point.Coordinate, coor));
-        indoorTiling.UpdatePOI(poi, coor);
+        Coordinate oldCoordinate = poi.point.Coordinate;
+        if (indoorTiling.UpdatePOI(poi, coor))
+            history.DoCommit(ReducedInstruction.UpdateIndoorPOI(oldCoordinate, coor));
     }
 
     public void RemovePOI(IndoorPOI poi)
