@@ -28,20 +28,32 @@ public class CameraController : MonoBehaviour
     {
         Vector3 move = Vector3.zero;
 
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
             move += Vector3.forward;
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
             move += Vector3.left;
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
             move += Vector3.back;
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             move += Vector3.right;
-        if (Input.GetKey(KeyCode.X))
+        if (Input.GetKey(KeyCode.X) || Input.GetKey(KeyCode.PageUp))
             move += Vector3.up;
-        if (Input.GetKey(KeyCode.Z))
+        if (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.PageDown))
             move += Vector3.down;
 
         move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
+
+        float rot = 0.0f;
+        if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.Home))
+            rot += 20.0f;
+        if (Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.End))
+            rot -= 20.0f;
+
+        Vector3 e = transform.rotation.eulerAngles + new Vector3(0.0f, rot) * rotationSpeed;
+        if (e.x > 90.0f) e.x = 90.0f;
+        if (e.x < 0.0f) e.x = 0.0f;
+        transform.rotation = Quaternion.Euler(e);
+
 
         float move_space = transform.position.y * KeyboardMoveSpeed;
         if (move.magnitude > 0.0)
@@ -57,10 +69,8 @@ public class CameraController : MonoBehaviour
         {
             Vector3 mouseDiff = anchorMouse - Input.mousePosition;
             Vector3 newEuler = anchorRot.eulerAngles + new Vector3(-mouseDiff.y, mouseDiff.x) * rotationSpeed;
-            if (newEuler.x > 90.0f)
-                newEuler.x = 90.0f;
-            if (newEuler.x < 0.0f)
-                newEuler.x = 0.0f;
+            if (newEuler.x > 90.0f) newEuler.x = 90.0f;
+            if (newEuler.x < 0.0f) newEuler.x = 0.0f;
             transform.rotation = Quaternion.Euler(newEuler);
         }
 
