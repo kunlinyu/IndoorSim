@@ -42,9 +42,12 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
+
                     if (PaAmrPoi.AcceptContainerStatic(sc?.Space) && HumanPOI.AcceptContainerStatic(sc?.Space))
                     {
-                        selectedSpace.Add(sc!);
+                        if (selectedSpace.Contains(sc!))
+                            selectedSpace.Remove(sc!);
+                        else selectedSpace.Add(sc!);
                     }
                     else if (selectedSpace.Count > 0 && PaAmrPoi.CanLayOnStatic(sc?.Space))
                     {
@@ -93,6 +96,11 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void UpdateView()
     {
+        if (pickingAgent2ContainerObj.Count > selectedSpace.Count)
+        {
+            pickingAgent2ContainerObj.ForEach(obj => Destroy(obj));
+            pickingAgent2ContainerObj.Clear();
+        }
         while (pickingAgent2ContainerObj.Count < selectedSpace.Count)
         {
             var obj = Instantiate<GameObject>(Resources.Load<GameObject>("POIObj/Container2POI"), this.transform);
@@ -101,11 +109,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
             pickingAgent2ContainerObj.Add(obj);
             obj.GetComponent<LineRenderer>().positionCount = 2;
             obj.GetComponent<LineRenderer>().SetPosition(0, U.Coor2Vec(selectedSpace[index].Space.Geom!.Centroid.Coordinate));
-        }
-        while (pickingAgent2ContainerObj.Count > selectedSpace.Count)
-        {
-            Destroy(pickingAgent2ContainerObj[pickingAgent2ContainerObj.Count - 1]);
-            pickingAgent2ContainerObj.RemoveAt(pickingAgent2ContainerObj.Count - 1);
         }
 
         Vector3? mousePosition = CameraController.mousePositionOnGround();
