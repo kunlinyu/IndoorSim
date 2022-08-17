@@ -79,7 +79,7 @@ public class CellSpace : Container
     {
         shellVertices = new List<CellVertex>(sortedVertices);
         shellBoundaries = new List<CellBoundary>(boundaries);
-        Geom = UpdateFromVertex();
+        UpdateFromVertex();
     }
 
     public CellSpace ShellCellSpace()
@@ -88,7 +88,7 @@ public class CellSpace : Container
     }
 
     // TODO(to support future feature): we should use UpdateFromBoundary to support complex boundary geometry
-    public Polygon UpdateFromVertex()
+    public bool UpdateFromVertex()
     {
         List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);
         shellVertices2.Add(shellVertices.First());
@@ -96,9 +96,13 @@ public class CellSpace : Container
 
         Holes.ForEach(hole => hole.UpdateFromVertex());
 
+        Polygon tempPolygon = new GeometryFactory().CreatePolygon(shellRing);
+        if (Holes.Any(hole => !tempPolygon.Contains(hole.Geom)))
+            return false;
+
         Geom = new GeometryFactory().CreatePolygon(shellRing, Holes.Select(h => h.Polygon.Shell).ToArray());
 
-        return Polygon;
+        return true;
     }
 
     public void SplitBoundary(CellBoundary oldBoundary, CellBoundary newBoundary1, CellBoundary newBoundary2, CellVertex middleVertex)

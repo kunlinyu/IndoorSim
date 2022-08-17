@@ -398,8 +398,14 @@ public class IndoorTiling
 
         foreach (var s in spaces)
         {
-            s.UpdateFromVertex();
+            bool ret = s.UpdateFromVertex();
             s.OnUpdate?.Invoke();
+
+            if (!ret)
+            {
+                valid = false;
+                goto VALID_RESULT;
+            }
 
             s.rLines?.UpdateGeom();
             s.rLines?.OnUpdate?.Invoke();
@@ -412,6 +418,7 @@ public class IndoorTiling
                     if (s1.Polygon.Relate(s2.Geom, kInnerInterSectionDE9IMPatter))
                     {
                         valid = false;
+                        Console.WriteLine("spaces inner intersects");
                         goto VALID_RESULT;
                     }
 
@@ -422,6 +429,7 @@ public class IndoorTiling
                 if (!s.ShellCellSpace().Polygon.Contains(hole.Polygon.Shell))
                 {
                     valid = false;
+                    Console.WriteLine("space lose its hole");
                     goto VALID_RESULT;
                 }
         }
