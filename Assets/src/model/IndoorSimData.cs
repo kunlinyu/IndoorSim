@@ -581,7 +581,29 @@ public class IndoorSimData
     }
     public void RemoveBoundary(CellBoundary boundary)
     {
-        history.DoCommit(ReducedInstruction.RemoveBoundary(boundary));
+        var spaces = boundary.Spaces();
+
+        history.SessionStart();
+        if (spaces.Count == 1)
+        {
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[0].Geom!.Centroid.Coordinate, spaces[0].navigable, Navigable.Navigable));
+        }
+        else if (spaces.Count == 2)
+        {
+            if (spaces[0].navigable < spaces[1].navigable)
+            {
+                history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[1].Polygon.InteriorPoint.Coordinate, spaces[1].Navigable, spaces[0].navigable));
+                indoorTiling.UpdateSpaceNavigable(spaces[1], spaces[0].navigable);
+            }
+            else
+            {
+                history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[0].Polygon.InteriorPoint.Coordinate, spaces[0].Navigable, spaces[1].navigable));
+                indoorTiling.UpdateSpaceNavigable(spaces[0], spaces[1].navigable);
+            }
+        }
+        history.DoStep(ReducedInstruction.RemoveBoundary(boundary));
+        history.SessionCommit();
+
         indoorTiling.RemoveBoundary(boundary);
         OnIndoorDataUpdated?.Invoke(indoorData);
     }

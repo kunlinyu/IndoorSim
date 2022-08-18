@@ -1,9 +1,9 @@
 public enum Navigable
 {
-    PhysicallyNonNavigable,
-    LogicallyNonNavigable,
-    Navigable,
-    Mix,
+    PhysicallyNonNavigable = 0,
+    LogicallyNonNavigable = 1,
+    Navigable = 2,
+    Mix = 3,
 }
 
 public enum NaviDirection

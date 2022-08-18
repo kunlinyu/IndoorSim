@@ -472,7 +472,8 @@ public class IndoorTiling
     public void RemoveBoundary(CellBoundary boundary)
     {
         // Remove space
-        List<CellSpace> spaces = new List<CellSpace>(boundary.Spaces());
+        List<CellSpace> spaces = boundary.Spaces();
+
         if (spaces.Count == 0)  // no cellspace related
         {
             Debug.Log("remove boundary without any space");
@@ -525,12 +526,18 @@ public class IndoorTiling
         {
             Debug.Log("merge two spaces");
 
+            Navigable navigable = spaces[0].navigable;
+            if (spaces[1].navigable < navigable)
+                navigable = spaces[1].navigable;
+
             RemoveSpaceInternal(spaces[0]);
             RemoveSpaceInternal(spaces[1]);
             RemoveBoundaryWithVertex(boundary);
 
             List<JumpInfo> path = PSLGPolygonSearcher.Search(new JumpInfo() { target = boundary.P0, through = boundary }, boundary.P0, AdjacentFinder, true, true);
-            AddSpaceConsiderHole(CreateCellSpaceWithHole(path));
+            CellSpace newCellSpace = CreateCellSpaceWithHole(path);
+            newCellSpace.navigable = navigable;
+            AddSpaceConsiderHole(newCellSpace);
         }
         FullPolygonizerCheck();
         BoundaryLeftRightCheck();
