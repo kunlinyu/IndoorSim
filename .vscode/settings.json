@@ -5,6 +5,7 @@
     "files.associations": {
         "*.jslib": "javascript",
     },
+    "insertDateString.format": "YYYY-MM-DD hh:mm:ss ZZ",
     "files.exclude": {
         "**/.DS_Store": true,
         "**/.git": true,
