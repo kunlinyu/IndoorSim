@@ -14,7 +14,7 @@ public class CellBoundary
 {
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
-    [JsonPropertyAttribute] private NaviDirection naviDir { set; get; } = NaviDirection.BiDirection;
+    [JsonPropertyAttribute] private NaviDirection naviDir { set; get; } = NaviDirection.Left2Right;
     [JsonPropertyAttribute] private Navigable navigable { set; get; } = Navigable.Navigable;
     [JsonPropertyAttribute] private LineString? Geom;  // complex line string should save to json file
 

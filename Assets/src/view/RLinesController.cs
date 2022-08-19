@@ -43,7 +43,7 @@ public class RLineController : MonoBehaviour, Selectable
            $"to: {rLine.to.Id}\n" +
            $"passType: {rLine.pass}";
 
-    public float scrollSpeed = 1.0f;
+    public float scrollSpeed = 0.0f;  // default value is 1.0f
     Vector2 textureOffset = new Vector2();
     LineRenderer lr;
 
@@ -74,7 +74,8 @@ public class RLineController : MonoBehaviour, Selectable
 
         textureOffset.x = (Time.time * -1.0f * scrollSpeed) % 1.0f;
         textureOffset.y = 0.0f;
-        lr.material.SetTextureOffset("_MainTex", textureOffset);
+        if (scrollSpeed != 0.0f)
+            lr.material.SetTextureOffset("_MainTex", textureOffset);
     }
 }
 

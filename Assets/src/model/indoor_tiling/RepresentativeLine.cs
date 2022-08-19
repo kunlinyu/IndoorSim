@@ -16,7 +16,9 @@ public class RepresentativeLine
     [JsonIgnore] public LineString? geom { get; private set; }
 
     public bool IllForm(CellSpace through)
-        => !through.InBound().Contains(fr) || (!through.OutBound().Contains(to) && !through.StopBound().Contains(to));
+        => (!through.InBound().Contains(fr) && !through.StopBound().Contains(fr)) ||
+           (!through.OutBound().Contains(to) && !through.StopBound().Contains(to)) ||
+           (through.StopBound().Contains(fr) && through.StopBound().Contains(to));
 
 #pragma warning disable CS8618
     public RepresentativeLine() { }  // for deserialize only
@@ -37,7 +39,7 @@ public class RepresentativeLine
     {
         double lengthRoughEstimate = fr.geom.Centroid.Distance(to.geom.Centroid);
         double bazierHandlerLength = 0.2d * lengthRoughEstimate;
-        double shiftRatio = 0.1f;
+        double shiftRatio = 0.01f;
 
         Coordinate P0;
         Coordinate P1;
