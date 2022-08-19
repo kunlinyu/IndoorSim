@@ -6,13 +6,18 @@ using UnityEngine.UIElements;
 public class AssetsPanelController : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
     public UIDocument rootUIDocument;
     [SerializeField] public VisualTreeAsset assetButtonTemplate;
     private VisualElement assetsPanel;
 
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+    }
     void Start()
     {
-        eventDispatcher.eventListener += this.EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
         this.assetsPanel = rootUIDocument.rootVisualElement.Q<VisualElement>("AssetsPanel");
         this.assetsPanel.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(assetsPanel, new UIEvent() { name = "assets panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });

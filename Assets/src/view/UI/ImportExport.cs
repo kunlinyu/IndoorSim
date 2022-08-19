@@ -12,6 +12,7 @@ using SFB;
 public class ImportExport : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
     public UIDocument rootUIDocument;
 
     // pop up panels
@@ -20,9 +21,12 @@ public class ImportExport : MonoBehaviour
 
     void Start()
     {
-        eventDispatcher.eventListener += this.EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
     }
-
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+    }
     private void EventListener(object sender, UIEvent e)
     {
         if (e.type == UIEventType.ToolButton && e.name == "load")

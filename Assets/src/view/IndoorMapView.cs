@@ -6,6 +6,7 @@ public class IndoorMapView : MonoBehaviour
 {
     public IndoorTiling indoorTiling;
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
 
     private GameObject vertexParentObj;
     private GameObject boundaryParentObj;
@@ -19,9 +20,13 @@ public class IndoorMapView : MonoBehaviour
     public Dictionary<RLineGroup, GameObject> rLine2Obj = new Dictionary<RLineGroup, GameObject>();
     public Dictionary<IndoorPOI, GameObject> poi2Obj = new Dictionary<IndoorPOI, GameObject>();
 
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+    }
     void Start()
     {
-        eventDispatcher.eventListener += EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
 
         vertexParentObj = transform.Find("Vertices").gameObject;
         boundaryParentObj = transform.Find("Boundaries").gameObject;

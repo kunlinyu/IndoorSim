@@ -8,12 +8,19 @@ public class SimulationController : MonoBehaviour
     public Simulation simulation = null;
 
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
 
     private float timeScale = 1.0f;
 
     void Start()
     {
-        eventDispatcher.eventListener += EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
+    }
+
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+        simulation?.TikTok(Time.time);
     }
 
     void EventListener(object sender, UIEvent e)
@@ -145,10 +152,5 @@ public class SimulationController : MonoBehaviour
                 }
             }
         }
-    }
-
-    void Update()
-    {
-        simulation?.TikTok(Time.time);
     }
 }

@@ -5,13 +5,17 @@ using Newtonsoft.Json.Linq;
 public class IdPanelCreator : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
     public UIDocument rootUIDocument;
     GameObject IdPanelObj;
 
     void Start()
     {
-        eventDispatcher.eventListener += this.EventListener;
-
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
+    }
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
     }
 
     public void EventListener(object sender, UIEvent e)

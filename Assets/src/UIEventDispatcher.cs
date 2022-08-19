@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using UnityEngine;
 
@@ -29,22 +30,43 @@ public struct UIEvent
 [Serializable]
 public class UIEventDispatcher : MonoBehaviour
 {
-    public delegate void EventListener(object sender, UIEvent e);
-    public event EventListener eventListener;
-    private ConcurrentQueue<UIEvent> eventQueue = new ConcurrentQueue<UIEvent>();
+    private ConcurrentQueue<UIEvent> pubEventQueue = new ConcurrentQueue<UIEvent>();
+    private List<ConcurrentQueue<UIEvent>> subEventQueue = new List<ConcurrentQueue<UIEvent>>();
 
     public void Raise(object sender, UIEvent e)
     {
-        eventQueue.Enqueue(e);
+        pubEventQueue.Enqueue(e);
+    }
+
+    public ConcurrentQueue<UIEvent> NewSubscribeQueue()
+    {
+        var newQueue = new ConcurrentQueue<UIEvent>();
+        subEventQueue.Add(newQueue);
+        return newQueue;
     }
 
     void Update()
     {
-        while (eventQueue.TryDequeue(out var evt))
-            eventListener?.Invoke(this, evt);
-
-            // New thread created in Parallel.ForEach cause UI element "can only be called from the main thread." exceptions
-            // Parallel.ForEach(eventListener?.GetInvocationList(), inv => inv.DynamicInvoke(this, evt));
+        while (pubEventQueue.TryDequeue(out var evt))
+            subEventQueue.ForEach(queue => queue.Enqueue(evt));
     }
 
+}
+
+public class UIEventSubscriber
+{
+    private UIEventDispatcher dispatcher;
+    private ConcurrentQueue<UIEvent> subscribeQueue;
+
+    public UIEventSubscriber(UIEventDispatcher dispatcher)
+    {
+        this.dispatcher = dispatcher;
+        this.subscribeQueue = dispatcher.NewSubscribeQueue();
+    }
+
+    public void ConsumeAll(Action<object, UIEvent> listener)
+    {
+        while (subscribeQueue.TryDequeue(out var evt))
+            listener?.Invoke(this, evt);
+    }
 }

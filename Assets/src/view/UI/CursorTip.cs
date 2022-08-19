@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 public class CursorTip : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
 
     Label tip;
     private string uiMessage;
@@ -15,11 +16,12 @@ public class CursorTip : MonoBehaviour
     {
         this.tip = GetComponent<UIDocument>().rootVisualElement.Q<Label>("Tip");
         this.tip.text = "";
-        eventDispatcher.eventListener += this.EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
     }
 
     void Update()
     {
+        eventSubscriber.ConsumeAll(EventListener);
         if (MouseOnUI)
             tip.text = uiMessage;
         else

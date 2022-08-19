@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 public class HierarchyPanelController : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
     public UIDocument rootUIDocument;
     private ScrollView foldoutContainer;
     private Foldout gridMapFoldout;
@@ -77,14 +78,17 @@ public class HierarchyPanelController : MonoBehaviour
         OnSelectGridMap += gridName =>
             eventDispatcher.Raise(this, new UIEvent() { name = "select grid map", message = gridName, type = UIEventType.Hierarchy });
 
-        eventDispatcher.eventListener += this.EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
 
         foldoutContainer.RegisterCallback<MouseEnterEvent>(e =>
             { eventDispatcher.Raise(this, new UIEvent() { name = "hierarchy panel", message = "enter", type = UIEventType.EnterLeaveUIPanel }); });
         foldoutContainer.RegisterCallback<MouseLeaveEvent>(e =>
             { eventDispatcher.Raise(this, new UIEvent() { name = "hierarchy panel", message = "leave", type = UIEventType.EnterLeaveUIPanel }); });
     }
-
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+    }
 
     public void UpdateGridMap(string gridmapIdList)
     {

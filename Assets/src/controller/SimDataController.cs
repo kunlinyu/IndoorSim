@@ -18,10 +18,17 @@ public class SimDataController : MonoBehaviour
     ITool currentTool;
 
     public UIEventDispatcher eventDispatcher;
+    private UIEventSubscriber eventSubscriber;
 
+
+    void Update()
+    {
+        eventSubscriber.ConsumeAll(EventListener);
+    }
     void Start()
     {
-        eventDispatcher.eventListener += EventListener;
+        eventSubscriber = new UIEventSubscriber(eventDispatcher);
+
         indoorSimData.OnAssetListUpdated += (assets) =>
         {
             var e = new UIEvent();
@@ -349,13 +356,5 @@ public class SimDataController : MonoBehaviour
                 indoorSimData.AddGridMap(gridMap);
             }
         }
-    }
-
-
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }
