@@ -43,7 +43,7 @@ public class SimDataController : MonoBehaviour
             var e = new UIEvent();
             e.type = UIEventType.Hierarchy;
             e.name = "indoordata";
-            e.message = indoorData.Serialize(false);
+            e.message = indoorData.Serialize(false);  // TODO: too slow
 
             eventDispatcher?.Raise(this, e);
         };

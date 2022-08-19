@@ -70,7 +70,6 @@ public class IndoorSimData
     {
         assets.Clear();
         history.Clear();
-
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
         if (indoorSimData == null) return false;
 
@@ -83,15 +82,13 @@ public class IndoorSimData
         currentSimData = null;
         activeHistory = history;
         OnAssetListUpdated?.Invoke(assets);
-        OnSimulationListUpdated?.Invoke(simDataList);
         OnIndoorDataUpdated?.Invoke(indoorData);
+        OnSimulationListUpdated?.Invoke(simDataList);
 
         gridMaps.ForEach(gridmap => OnGridMapRemoved?.Invoke(gridmap));
         gridMaps = indoorSimData.gridMaps;
         gridMaps.ForEach(gridmap => OnGridMapCreated?.Invoke(gridmap));
-
         indoorTiling.AssignIndoorData(indoorData);
-
         return true;
     }
 
@@ -102,10 +99,9 @@ public class IndoorSimData
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter(), new StackConverter() },
+            Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
             ContractResolver = new ShouldSerializeContractResolver(),
         };
-
         IndoorSimData? indoorSimData = JsonConvert.DeserializeObject<IndoorSimData>(json, settings);
         if (indoorSimData == null) return null;
 

@@ -77,7 +77,7 @@ public class RepresentativeLine
         else throw new Exception($"space({through.Id}) contain the boundary({to.Id}) but it is neither the left nor the right side of boundary");
 
 
-        geom = gf.CreateLineString(M.bazierCurve4(P0, P1, P2, P3, 20));
+        geom = gf.CreateLineString(M.bazierCurve4(P0, P1, P2, P3, 5));
         return geom;
     }
 }

@@ -10,7 +10,7 @@ public class StackConverter : JsonConverter
 {
     // Prevent Json.NET from reversing the order of a Stack<T> when deserializing.
     // https://github.com/JamesNK/Newtonsoft.Json/issues/971
-    static Type StackParameterType(Type objectType)
+    public static Type StackParameterType(Type objectType)
     {
         while (objectType != null)
         {

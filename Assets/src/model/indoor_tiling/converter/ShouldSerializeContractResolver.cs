@@ -4,12 +4,12 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-using UnityEngine;
-
 // TODO: move this file to a better place
 
 public class ShouldSerializeContractResolver : DefaultContractResolver
 {
+    public new static readonly ShouldSerializeContractResolver Instance = new ShouldSerializeContractResolver();
+
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {
         JsonProperty property = base.CreateProperty(member, memberSerialization);
@@ -26,5 +26,17 @@ public class ShouldSerializeContractResolver : DefaultContractResolver
         }
 
         return property;
+    }
+
+    protected override JsonContract CreateContract(Type objectType)
+    {
+        JsonContract contract = base.CreateContract(objectType);
+
+        if (StackConverter.StackParameterType(objectType) != null)
+        {
+            contract.Converter = new StackConverter();
+        }
+
+        return contract;
     }
 }
