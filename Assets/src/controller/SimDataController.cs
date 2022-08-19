@@ -7,8 +7,6 @@ using UnityEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using SFB;
-
 public class SimDataController : MonoBehaviour
 {
     public IndoorSimData indoorSimData;

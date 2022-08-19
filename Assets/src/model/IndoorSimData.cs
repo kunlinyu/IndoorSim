@@ -3,9 +3,13 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+
 using NetTopologySuite.Geometries;
+
 using Newtonsoft.Json;
+
 using UnityEngine;
+using UnityEngine.Profiling;
 
 #nullable enable
 
@@ -68,9 +72,12 @@ public class IndoorSimData
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
+        Profiler.BeginSample("IndoorSimData");
         assets.Clear();
         history.Clear();
+        Profiler.BeginSample("Desirialize");
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
+        Profiler.EndSample();
         if (indoorSimData == null) return false;
 
         indoorData = indoorSimData.indoorData;
@@ -81,14 +88,17 @@ public class IndoorSimData
         history = indoorSimData.history;
         currentSimData = null;
         activeHistory = history;
+        Profiler.BeginSample("OnUpdate");
         OnAssetListUpdated?.Invoke(assets);
         OnIndoorDataUpdated?.Invoke(indoorData);
         OnSimulationListUpdated?.Invoke(simDataList);
+        Profiler.EndSample();
 
         gridMaps.ForEach(gridmap => OnGridMapRemoved?.Invoke(gridmap));
         gridMaps = indoorSimData.gridMaps;
         gridMaps.ForEach(gridmap => OnGridMapCreated?.Invoke(gridmap));
         indoorTiling.AssignIndoorData(indoorData);
+        Profiler.EndSample();
         return true;
     }
 
