@@ -156,7 +156,25 @@ public class BoundaryController : MonoBehaviour, Selectable
 
         sr.size = new Vector2(spriteSize, spriteSize);
 
+
+        UpdateEdge();
+
         needUpdateRenderer = false;
+    }
+
+    private void UpdateEdge()
+    {
+        LineRenderer lr = transform.Find("Edge").GetComponent<LineRenderer>();
+        if (boundary.NaviDir != NaviDirection.NoneDirection &&
+            boundary.leftSpace != null && boundary.leftSpace.navigable == Navigable.Navigable &&
+            boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)
+        {
+            lr.positionCount = 2;
+            lr.SetPosition(0, U.Coor2Vec(boundary.leftSpace.Geom.Centroid.Coordinate));
+            lr.SetPosition(1, U.Coor2Vec(boundary.rightSpace.Geom.Centroid.Coordinate));
+        }
+        else
+            lr.positionCount = 0;
     }
 
     public string Tip()

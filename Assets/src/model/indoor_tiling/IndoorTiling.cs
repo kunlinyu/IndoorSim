@@ -441,6 +441,10 @@ public class IndoorTiling
             vertices.ForEach(v => v.OnUpdate?.Invoke());
             FullPolygonizerCheck();
             BoundaryLeftRightCheck();
+
+            // update boundary again because the edge depends on the centroid of space
+            foreach (var s in spaces)
+                s.allBoundaries.ForEach(b => b.UpdateFromVertex());
         }
         else
         {

@@ -54,8 +54,7 @@ public class SpaceController : MonoBehaviour, Selectable
 
     void Start()
     {
-        ReTriangulate();
-        updateRenderer(Vector3.zero);
+        ReTriangulateUpdateRenderer();
     }
 
     void Update()
@@ -68,6 +67,12 @@ public class SpaceController : MonoBehaviour, Selectable
     {
         ReTriangulate();
         updateRenderer(Vector3.zero);
+
+        GameObject node = transform.Find("Node").gameObject;
+        if (space.navigable == Navigable.Navigable)
+            node.transform.position = U.Coor2Vec(space.Geom.Centroid.Coordinate);
+        else
+            node.SetActive(false);
     }
 
     void ReTriangulate()
