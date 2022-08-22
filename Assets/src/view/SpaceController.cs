@@ -70,9 +70,14 @@ public class SpaceController : MonoBehaviour, Selectable
 
         GameObject node = transform.Find("Node").gameObject;
         if (space.navigable == Navigable.Navigable)
+        {
+            node.GetComponent<SpriteRenderer>().enabled = true;
             node.transform.position = U.Coor2Vec(space.Geom.Centroid.Coordinate);
+        }
         else
+        {
             node.GetComponent<SpriteRenderer>().enabled = false;
+        }
     }
 
     void ReTriangulate()
