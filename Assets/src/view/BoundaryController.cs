@@ -169,12 +169,15 @@ public class BoundaryController : MonoBehaviour, Selectable
             boundary.leftSpace != null && boundary.leftSpace.navigable == Navigable.Navigable &&
             boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)
         {
+            lr.enabled = true;
             lr.positionCount = 2;
             lr.SetPosition(0, U.Coor2Vec(boundary.leftSpace.Geom.Centroid.Coordinate));
             lr.SetPosition(1, U.Coor2Vec(boundary.rightSpace.Geom.Centroid.Coordinate));
         }
         else
-            lr.positionCount = 0;
+        {
+            lr.enabled = false;
+        }
     }
 
     public string Tip()

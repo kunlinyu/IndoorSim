@@ -123,6 +123,19 @@ public class IndoorMapView : MonoBehaviour
         {
             rLineParentObj.SetActive(!rLineParentObj.activeSelf);
         }
+        if (e.type == UIEventType.ViewButton && e.name == "duality graph")
+        {
+            foreach (var obj in cellspace2Obj.Values)
+            {
+                GameObject node = obj.transform.Find("Node").gameObject;
+                node.SetActive(!node.activeSelf);
+            }
+            foreach (var obj in boundary2Obj.Values)
+            {
+                GameObject edge = obj.transform.Find("Edge").gameObject;
+                edge.SetActive(!edge.activeSelf);
+            }
+        }
     }
 
 }

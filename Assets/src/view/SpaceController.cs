@@ -72,7 +72,7 @@ public class SpaceController : MonoBehaviour, Selectable
         if (space.navigable == Navigable.Navigable)
             node.transform.position = U.Coor2Vec(space.Geom.Centroid.Coordinate);
         else
-            node.SetActive(false);
+            node.GetComponent<SpriteRenderer>().enabled = false;
     }
 
     void ReTriangulate()
