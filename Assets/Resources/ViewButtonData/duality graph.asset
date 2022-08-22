@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
-  m_Name: view rline
+  m_Name: duality graph
   m_EditorClassIdentifier: 
-  m_ToolName: view rline
+  m_ToolName: duality graph
   m_Class: 1
-  m_PortraitImage: {fileID: 21300000, guid: 88db9491ec659a168a77e0e2e4b519bb, type: 3}
+  m_PortraitImage: {fileID: 21300000, guid: 4e0e3bf608846855686b2071ad5732b8, type: 3}
   m_SortingOrder: 999

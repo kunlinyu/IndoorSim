@@ -13,6 +13,7 @@ public class IndoorMapView : MonoBehaviour
     private GameObject spaceParentObj;
     private GameObject rLineParentObj;
     private GameObject POIParentObj;
+    private GameObject DualityGraphObj;
 
     public Dictionary<CellVertex, GameObject> vertex2Obj = new Dictionary<CellVertex, GameObject>();
     public Dictionary<CellBoundary, GameObject> boundary2Obj = new Dictionary<CellBoundary, GameObject>();
