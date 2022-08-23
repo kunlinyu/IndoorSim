@@ -334,6 +334,19 @@ public class CellSpace : Container
         }
     }
 
+    public List<CellBoundary> InOutBound()
+    {
+        return allBoundaries.Where(b =>
+        {
+            if (b.SmartNavigable() != Navigable.Navigable) return false;
+
+            if (b.Another(this) != null && b.NaviDir != NaviDirection.NoneDirection)
+                return true;
+            else return false;
+
+        }).ToList();
+    }
+
     public List<CellBoundary> InBound()
     {
         return allBoundaries.Where(b =>

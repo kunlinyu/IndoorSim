@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -119,22 +120,35 @@ public class IndoorMapView : MonoBehaviour
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.type == UIEventType.ViewButton && e.name == "view rline")
+        if (e.type == UIEventType.ViewButton)
         {
-            rLineParentObj.SetActive(!rLineParentObj.activeSelf);
+            bool status;
+            if (e.message == "enable") status = true;
+            else if (e.message == "disable") status = false;
+            else throw new ArgumentException("unknow message of view button");
+
+            if (e.name == "view rline")
+            {
+                rLineParentObj.SetActive(status);
+            }
+            if (e.name == "duality graph")
+            {
+                SwitchDualityGraph(status);
+            }
         }
-        if (e.type == UIEventType.ViewButton && e.name == "duality graph")
+    }
+
+    public void SwitchDualityGraph(bool status)
+    {
+        foreach (var obj in cellspace2Obj.Values)
         {
-            foreach (var obj in cellspace2Obj.Values)
-            {
-                GameObject node = obj.transform.Find("Node").gameObject;
-                node.SetActive(!node.activeSelf);
-            }
-            foreach (var obj in boundary2Obj.Values)
-            {
-                GameObject edge = obj.transform.Find("Edge").gameObject;
-                edge.SetActive(!edge.activeSelf);
-            }
+            GameObject node = obj.transform.Find("Node").gameObject;
+            node.SetActive(status);
+        }
+        foreach (var obj in boundary2Obj.Values)
+        {
+            GameObject edge = obj.transform.Find("Edge").gameObject;
+            edge.SetActive(status);
         }
     }
 

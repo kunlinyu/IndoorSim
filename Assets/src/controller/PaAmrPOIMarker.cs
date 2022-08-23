@@ -2,6 +2,9 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Distance;
+
 #nullable enable
 
 enum PaAmrPoiMarkerStatus
@@ -32,6 +35,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void Start()
     {
+        mapView!.SwitchDualityGraph(true);
     }
 
     void UpdateStatus()
@@ -52,6 +56,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     else if (selectedSpace.Count > 0 && PaAmrPoi.CanLayOnStatic(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
+                        paAmrPoiPosition = ClosestEdgeRoot(sc, paAmrPoiPosition);
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
                 }
@@ -94,6 +99,18 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     }
 
+    private Vector3 ClosestEdgeRoot(SpaceController sc, Vector3 mousePosition)
+    {
+        List<CellBoundary> inOutBound = sc.Space.InOutBound();
+        List<LineRenderer> lrs = inOutBound.Select(b => mapView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
+        List<LineString> lineStrings = lrs.Select(lr
+          => new GeometryFactory().CreateLineString(new Coordinate[] {U.Vec2Coor(lr.GetPosition(0)),
+                                                                                      U.Vec2Coor(lr.GetPosition(1))})).ToList();
+        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(lineStrings.ToArray());
+        Coordinate[] nearestCoor = DistanceOp.NearestPoints(gc, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
+        return U.Coor2Vec(nearestCoor[0]);
+    }
+
     void UpdateView()
     {
         if (pickingAgent2ContainerObj.Count > selectedSpace.Count)
@@ -117,10 +134,36 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
             case PaAmrPoiMarkerStatus.ContainerSelecting:
                 if (mousePosition != null)
                 {
-                    foreach (var obj in pickingAgent2ContainerObj)
-                        obj.GetComponent<LineRenderer>().SetPosition(1, mousePosition.Value);
-                    transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
-                    transform.Find("PosePOI").position = mousePosition.Value;
+                    SpaceController? sc = MousePickController.PointedSpace;
+                    if (sc != null)
+                    {
+                        Vector3 position = mousePosition.Value;
+                        if (sc.Space.navigable == Navigable.Navigable)
+                        {
+                            transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                            transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                            position = ClosestEdgeRoot(sc, mousePosition.Value);
+                            transform.Find("PosePOI").position = position;
+                        }
+                        else
+                        {
+                            transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                            transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                            position = mousePosition.Value;
+                            transform.Find("PosePOIDark").position = position;
+                        }
+                        foreach (var obj in pickingAgent2ContainerObj)
+                        {
+                            obj.GetComponent<LineRenderer>().enabled = true;
+                            obj.GetComponent<LineRenderer>().SetPosition(1, position);
+                        }
+                    }
+                    else
+                    {
+                        transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                        foreach (var obj in pickingAgent2ContainerObj)
+                            obj.GetComponent<LineRenderer>().enabled = false;
+                    }
                 }
                 else
                 {
