@@ -1,5 +1,21 @@
 # version list
 
+## V0.3.0
+* [IndoorSim-WebGL-V0.3.0.e3638b6](./IndoorSim-WebGL-V0.3.0.e3638b6)
+* [IndoorSim-WebGL-dev-V0.3.0.e3638b6](./IndoorSim-WebGL-dev-V0.3.0.e3638b6)
+* [IndoorSim-StandaloneLinux64-V0.3.0.e3638b6.tar.gz](./IndoorSim-StandaloneLinux64-V0.3.0.e3638b6.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.3.0.e3638b6.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.3.0.e3638b6.tar.gz)
+
+## DateTime
+2022-08-23 15:51:15 +08
+
+### ChangeLog
+1. 优化事件队列和反序列化效率
+2. 调整rine的显示效果
+3. 生成和显示对偶网络
+4. 将POI吸附到对偶网络上
+
+---
 
 ## V0.2.3
 * [IndoorSim-WebGL-V0.2.3.3cedd9d](./IndoorSim-WebGL-V0.2.3.3cedd9d)
