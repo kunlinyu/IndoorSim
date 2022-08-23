@@ -171,8 +171,10 @@ public class BoundaryController : MonoBehaviour, Selectable
         {
             lr.enabled = true;
             lr.positionCount = 2;
-            lr.SetPosition(0, U.Coor2Vec(boundary.leftSpace.Geom.Centroid.Coordinate));
-            lr.SetPosition(1, U.Coor2Vec(boundary.rightSpace.Geom.Centroid.Coordinate));
+            Vector3 left = U.Coor2Vec(boundary.leftSpace.Geom.Centroid.Coordinate);
+            Vector3 right = U.Coor2Vec(boundary.rightSpace.Geom.Centroid.Coordinate);
+            lr.SetPosition(0, (left - right).normalized * 0.2f + right);
+            lr.SetPosition(1, (right - left).normalized * 0.2f + left);
         }
         else
         {
