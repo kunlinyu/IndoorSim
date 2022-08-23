@@ -75,12 +75,12 @@ public class IndoorMapView : MonoBehaviour
         {
             string poiObjPath;
             if (poi.indoorPOIType == "PaAmr")
-                poiObjPath = "POIObj/PaAmrPOI";
+                poiObjPath = "POI/PaAmrPOI";
             else if (poi.indoorPOIType == "human")
-                poiObjPath = "POIObj/HumanPOI";
+                poiObjPath = "POI/HumanPOI";
             else
             {
-                poiObjPath = "POIObj/DefaultPOI";
+                poiObjPath = "POI/DefaultPOI";
                 Debug.LogWarning("Unknow poi type");
             }
 

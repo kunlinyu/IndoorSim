@@ -120,7 +120,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         }
         while (pickingAgent2ContainerObj.Count < selectedSpace.Count)
         {
-            var obj = Instantiate<GameObject>(Resources.Load<GameObject>("POIObj/Container2POI"), this.transform);
+            var obj = Instantiate<GameObject>(Resources.Load<GameObject>("POI/Container2POI"), this.transform);
             int index = pickingAgent2ContainerObj.Count;
             obj.name = "Container2POI " + index;
             pickingAgent2ContainerObj.Add(obj);

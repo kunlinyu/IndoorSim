@@ -86,7 +86,7 @@ public class POIController : MonoBehaviour, Selectable
         }
 
         // to POI line
-        GameObject linePrefab = Resources.Load<GameObject>("POIObj/Container2POI");
+        GameObject linePrefab = Resources.Load<GameObject>("POI/Container2POI");
         while (toPOILineObj.Count < poi.spaces.Count)
         {
             GameObject obj = Instantiate(linePrefab, transform);
