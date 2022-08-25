@@ -56,7 +56,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     else if (selectedSpace.Count > 0 && PaAmrPoi.CanLayOnStatic(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
-                        paAmrPoiPosition = ClosestEdgeRoot(sc, paAmrPoiPosition);
+                        paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition);
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
                 }
@@ -99,14 +99,19 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     }
 
-    private Vector3 ClosestEdgeRoot(SpaceController sc, Vector3 mousePosition)
+    private Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition)
     {
         List<CellBoundary> inOutBound = sc.Space.InOutBound();
         List<LineRenderer> lrs = inOutBound.Select(b => mapView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
         List<LineString> lineStrings = lrs.Select(lr
           => new GeometryFactory().CreateLineString(new Coordinate[] {U.Vec2Coor(lr.GetPosition(0)),
-                                                                                      U.Vec2Coor(lr.GetPosition(1))})).ToList();
-        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(lineStrings.ToArray());
+                                                                      U.Vec2Coor(lr.GetPosition(1))})).ToList();
+
+        List<Geometry> edgeNodeGeom = new List<Geometry>(lineStrings);
+        edgeNodeGeom.Add(new GeometryFactory().CreatePoint(U.Vec2Coor(sc.transform.Find("Node").position)));
+
+        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(edgeNodeGeom.ToArray());
+
         Coordinate[] nearestCoor = DistanceOp.NearestPoints(gc, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
         return U.Coor2Vec(nearestCoor[0]);
     }
@@ -138,11 +143,11 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     if (sc != null)
                     {
                         Vector3 position = mousePosition.Value;
-                        if (sc.Space.navigable == Navigable.Navigable)
+                        if (PaAmrPoi.CanLayOnStatic(sc.Space))
                         {
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
                             transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = false;
-                            position = ClosestEdgeRoot(sc, mousePosition.Value);
+                            position = ClosestEdgeNode(sc, mousePosition.Value);
                             transform.Find("PosePOI").position = position;
                         }
                         else
