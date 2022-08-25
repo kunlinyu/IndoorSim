@@ -228,6 +228,7 @@ MonoBehaviour:
   phyNonNaviMat: {fileID: 2100000, guid: f8045398905c107f0a7b4554492ef5ff, type: 2}
   highLightMaterial: {fileID: 2100000, guid: c5936f1d4de06097eaa61ac465e0bb62, type: 2}
   selectedMaterial: {fileID: 2100000, guid: 5d4adca62e5b3b9fca0bd13f4f565444, type: 2}
+  edgeShrink: 0.12
   widthFactor: 0.01
 --- !u!1 &6667813349420396224
 GameObject:
