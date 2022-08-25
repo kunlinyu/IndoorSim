@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: stretch; width: auto; height: auto; flex-wrap: nowrap; flex-shrink: 1; flex-grow: 0; flex-basis: auto;">
+        <ui:Button tabindex="-1" text="QPOI" display-tooltip-when-elided="true" name="QPOI" style="flex-grow: 0;" />
+        <ui:Button tabindex="-1" text="POI" display-tooltip-when-elided="true" name="POI" style="align-items: stretch; flex-direction: column; flex-grow: 1;" />
+    </ui:VisualElement>
+</ui:UXML>

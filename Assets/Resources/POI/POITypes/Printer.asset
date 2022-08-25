@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78c430b1a7d85897cab7cc1b4e6295c2, type: 3}
-  m_Name: Standby
+  m_Name: Printer
   m_EditorClassIdentifier: 
-  name: STANDBY
+  name: PRINTER
   multiRelated: 0
-  relatedNavigable: 1
+  relatedNavigable: 0
   needDirection: 1
-  relatesToCurrent: 1
+  relatesToCurrent: 0
   needQueue: 1
   color: {r: 0, g: 0, b: 0, a: 0}

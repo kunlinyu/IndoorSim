@@ -93,12 +93,22 @@ public class SimDataController : MonoBehaviour
 
     void EventListener(object sender, UIEvent e)
     {
-        if (e.type == UIEventType.ToolButton)
+        if (e.type == UIEventType.ToolButton && e.message == "leave")
         {
-            string oldToolName = "";
             if (toolObj != null)
             {
-                oldToolName = toolObj.name;
+                Debug.Log("Disable tool " + toolObj.name);
+                Destroy(toolObj);
+                toolObj = null;
+                currentTool = null;
+                MousePickController.pickType = CurrentPickType.All;
+                UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            }
+        }
+        else if (e.type == UIEventType.ToolButton && e.message == "enter")
+        {
+            if (toolObj != null)
+            {
                 Debug.Log("Disable tool " + toolObj.name);
                 Destroy(toolObj);
                 toolObj = null;
@@ -120,20 +130,6 @@ public class SimDataController : MonoBehaviour
                 toolObj.name = "select drag";
                 currentTool = toolObj.GetComponent<SelectDrag>();
                 Debug.Log("Switch to tool select drag");
-            }
-            else if (e.name == "save asset")
-            {
-                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/AssetSaver"), this.transform);
-                toolObj.name = "asset saver";
-                toolObj.transform.SetParent(this.transform);
-                var assetSaver = toolObj.AddComponent<AssetSaver>();
-                assetSaver.mapView = mapView;
-                assetSaver.simView = simView;
-                assetSaver.IndoorSimData = indoorSimData;
-                assetSaver.ExtractSelected2Asset();
-                Debug.Log("Use tool AssetSaver");
-                toolObj = null;
-                currentTool = null;
             }
             else if (e.name == "delete")
             {
@@ -207,15 +203,12 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "apply asset")
             {
-                // if (oldToolName != "apply asset")
-                {
-                    toolObj = new GameObject("apply asset");
-                    toolObj.transform.SetParent(this.transform);
-                    AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
-                    assetApplier.assetId = Int32.Parse(e.message);
-                    currentTool = assetApplier;
-                    Debug.Log("Switch to asset applier");
-                }
+                toolObj = new GameObject("apply asset");
+                toolObj.transform.SetParent(this.transform);
+                AssetApplier assetApplier = toolObj.AddComponent<AssetApplier>();
+                assetApplier.assetId = Int32.Parse(e.message);
+                currentTool = assetApplier;
+                Debug.Log("Switch to asset applier");
             }
             else if (e.name == "remove asset")
             {
@@ -264,7 +257,18 @@ public class SimDataController : MonoBehaviour
 
                 Debug.Log("Switch to tool astar");
             }
-            else if (e.name == "save")
+
+
+            if (currentTool != null)
+            {
+                currentTool.mapView = mapView;
+                currentTool.simView = simView;
+                currentTool.IndoorSimData = indoorSimData;
+            }
+        }
+        else if (e.type == UIEventType.ToolButton && e.message == "trigger")
+        {
+            if (e.name == "save")
             {
                 string content = indoorSimData.Serialize(true);
                 eventDispatcher.Raise(this, new UIEvent() { name = "save", message = content, type = UIEventType.Resources });
@@ -277,12 +281,19 @@ public class SimDataController : MonoBehaviour
             {
                 indoorSimData.Undo();
             }
-
-            if (currentTool != null)
+            else if (e.name == "save asset")
             {
-                currentTool.mapView = mapView;
-                currentTool.simView = simView;
-                currentTool.IndoorSimData = indoorSimData;
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/AssetSaver"), this.transform);
+                toolObj.name = "asset saver";
+                toolObj.transform.SetParent(this.transform);
+                var assetSaver = toolObj.AddComponent<AssetSaver>();
+                assetSaver.mapView = mapView;
+                assetSaver.simView = simView;
+                assetSaver.IndoorSimData = indoorSimData;
+                assetSaver.ExtractSelected2Asset();
+                Debug.Log("Use tool AssetSaver");
+                toolObj = null;
+                currentTool = null;
             }
         }
         else if (e.type == UIEventType.Resources && e.name == "load")
