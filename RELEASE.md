@@ -6,7 +6,7 @@
 * [IndoorSim-StandaloneLinux64-V0.3.0.e3638b6.tar.gz](./IndoorSim-StandaloneLinux64-V0.3.0.e3638b6.tar.gz)
 * [IndoorSim-StandaloneLinux64-dev-V0.3.0.e3638b6.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.3.0.e3638b6.tar.gz)
 
-## DateTime
+### DateTime
 2022-08-23 15:51:15 +08
 
 ### ChangeLog
@@ -23,7 +23,7 @@
 * [IndoorSim-StandaloneLinux64-V0.2.3.3cedd9d.tar.gz](./IndoorSim-StandaloneLinux64-V0.2.3.3cedd9d.tar.gz)
 * [IndoorSim-StandaloneLinux64-dev-V0.2.3.3cedd9d.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.2.3.3cedd9d.tar.gz)
 
-## DateTime
+### DateTime
 2022-08-18 10:47:11 +08
 
 ### ChangeLog
@@ -38,6 +38,7 @@
 9. 修复了删除边导致space信息丢失而无法正确undo的bug
 
 ---
+
 ## V0.2.2
 
 * [IndoorSim-WebGL-V0.2.2.9dbbecf](./IndoorSim-WebGL-V0.2.2.9dbbecf)
@@ -52,6 +53,7 @@
 4. 开始仿真是检查当前状态是否可仿真
 
 ---
+
 ## V0.2.1
 * [IndoorSim-WebGL-V0.2.1.278cdfd](./IndoorSim-WebGL-V0.2.1.278cdfd)
 * [IndoorSim-WebGL-dev-V0.2.1.278cdfd](./IndoorSim-WebGL-dev-V0.2.1.278cdfd)
@@ -69,6 +71,7 @@
 8. 把版本标签和鼠标提示从全局页面中拆分出来
 
 ---
+
 ## V0.2.0
 * [IndoorSim-WebGL-V0.2.0.d2dc12a](./IndoorSim-WebGL-V0.2.0.d2dc12a)
 * [IndoorSim-WebGL-dev-V0.2.0.d2dc12a](./IndoorSim-WebGL-dev-V0.2.0.d2dc12a)
@@ -83,6 +86,7 @@
 5. 消除了一些警告
 
 ---
+
 ## V0.1.4
 
 * [IndoorSim-WebGL-V0.1.4.57482c3](./IndoorSim-WebGL-V0.1.4.57482c3)
@@ -95,13 +99,16 @@
 2. Add Build script to make CI better
 
 ---
+
 ## V0.1.3
 * [IndoorSim-release-V0.1.3](./IndoorSim-release-V0.1.3)
 
 ---
+
 ## V0.1.2
 * [IndoorSim-release-V0.1.2](./IndoorSim-release-V0.1.2)
 
 ---
+
 ## V0.1.1
 * [IndoorSim-release-V0.1.1](./IndoorSim-release-V0.1.1)

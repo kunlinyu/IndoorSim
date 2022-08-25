@@ -35,7 +35,8 @@ public class BuildPlayer : MonoBehaviour
         Build(BuildTarget.WebGL, true);
     }
 
-    [MenuItem("Build/Generate release from markdown")]
+    // [MenuItem("Build/Generate release from markdown")]
+    // use ci/generate_markdown.sh instead
     public static void GenerateReleaseFromMarkdown()
     {
         string header = @"<!DOCTYPE html>
