@@ -1,0 +1,6 @@
+release procedure:
+1. Change Version Number and Commit.
+2. Build & Upload
+3. Smoke Test
+4. Tag and Push
+5. Update ChangeLog and publish RELEASE page
