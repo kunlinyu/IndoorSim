@@ -10,6 +10,8 @@ public class IndoorPOI : poi.POI
     public string indoorPOIType { get; private set; }
 
     public List<Container> spaces;
+
+    // TODO: add layOnSpace, related space, and move POI when space moved
     [JsonIgnore] public Action OnLocationPointUpdate = () => { };
 
     public virtual bool CanLayOn(Container? container)

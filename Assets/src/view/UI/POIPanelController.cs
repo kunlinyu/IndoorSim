@@ -8,10 +8,12 @@ public class POIPanelController : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
     [SerializeField] private VisualTreeAsset m_QueuedPOITemplate;
+    private string toolName;
 
-    public void Init(UIEventDispatcher eventDispatcher)
+    public void Init(UIEventDispatcher eventDispatcher, string toolName)
     {
         this.eventDispatcher = eventDispatcher;
+        this.toolName = toolName;
     }
 
     void Start()
@@ -24,22 +26,17 @@ public class POIPanelController : MonoBehaviour
 
         allPOITypes.ForEach(poit =>
         {
-            if (poit.needQueue)
+            Button button = new Button();
+            button.text = (poit.needQueue ? "(Q)" : "") + poit.name;
+            button.style.backgroundColor = poit.color;
+            button.clicked += () =>
             {
-                TemplateContainer buttonContainer = m_QueuedPOITemplate.Instantiate();
-                Button button = buttonContainer.Q<Button>("POI");
-                button.text = poit.name;
+                string json = poit.ToJson();
+                eventDispatcher.Raise(this, new UIEvent() { name = toolName, message = json, type = UIEventType.ToolButton });
+                eventDispatcher.Raise(this, new UIEvent() { name = "poi panel", message = "hide", type = UIEventType.PopUp });
+            };
+            POIPanel.Add(button);
 
-                Button Qbutton = buttonContainer.Q<Button>("QPOI");
-                Qbutton.text = "Q";
-                POIPanel.Add(buttonContainer);
-            }
-            else
-            {
-                Button button = new Button();
-                button.text = poit.name;
-                POIPanel.Add(button);
-            }
         });
     }
 

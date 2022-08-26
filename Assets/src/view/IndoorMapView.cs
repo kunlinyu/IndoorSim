@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +22,8 @@ public class IndoorMapView : MonoBehaviour
     public Dictionary<RLineGroup, GameObject> rLine2Obj = new Dictionary<RLineGroup, GameObject>();
     public Dictionary<IndoorPOI, GameObject> poi2Obj = new Dictionary<IndoorPOI, GameObject>();
 
+    private List<POIType> allPOITypes;
+
     void Update()
     {
         eventSubscriber.ConsumeAll(EventListener);
@@ -34,6 +37,8 @@ public class IndoorMapView : MonoBehaviour
         spaceParentObj = transform.Find("Spaces").gameObject;
         rLineParentObj = transform.Find("RLines").gameObject;
         POIParentObj = transform.Find("POIs").gameObject;
+
+        allPOITypes = new List<POIType>(Resources.LoadAll<POIType>("POI/POITypes"));
 
         indoorTiling.OnVertexCreated += (vertex) =>
         {
@@ -84,10 +89,15 @@ public class IndoorMapView : MonoBehaviour
                 Debug.LogWarning("Unknow poi type");
             }
 
+            POIType matchedPoiType = allPOITypes.FirstOrDefault(poiType => poi.LabelContains(poiType.name));
+
+
             var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), POIParentObj.transform);
             obj.name = poi.id;
             obj.GetComponent<POIController>().Poi = poi;
             obj.GetComponent<POIController>().Space2IndoorPOI = (space) => indoorTiling.indoorData.Space2POIs(space);
+            if (matchedPoiType != null)
+                obj.GetComponent<SpriteRenderer>().color = matchedPoiType.color;
             poi2Obj[poi] = obj;
         };
 

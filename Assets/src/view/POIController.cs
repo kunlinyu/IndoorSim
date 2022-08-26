@@ -52,12 +52,15 @@ public class POIController : MonoBehaviour, Selectable
     {
         List<string> spaceChildrens = poi.spaces.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
         return $"type: {poi.indoorPOIType}\n" +
+               $"labels: {string.Join(',', poi.label.Select(label => label.value))}\n" +
                $"container: {string.Join(',', spaceChildrens)}";
     }
 
     public Func<Container, HashSet<IndoorPOI>> Space2IndoorPOI;
 
     private List<GameObject> toPOILineObj = new List<GameObject>();
+
+    private List<POIType> allPOITypes;
 
     void UpdateRenderer()
     {

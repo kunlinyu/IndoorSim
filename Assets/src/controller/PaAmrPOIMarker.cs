@@ -33,9 +33,16 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     public static float PaAmrFunctionDirection = Mathf.PI;
 
+    private POIType poiType;
+
     void Start()
     {
         mapView!.SwitchDualityGraph(true);
+    }
+
+    public void Init(POIType poiType)
+    {
+        this.poiType = poiType;
     }
 
     void UpdateStatus()
@@ -79,11 +86,12 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         var containers = new List<Container>(spaces);
 
                         HumanPOI humanPoi = new HumanPOI(U.Vec2Point(pickingPoiPosition), containers);
-                        humanPoi.id = "picking poi";
+                        humanPoi.id = "picking poi";  // TODO: this is not ID
                         IndoorSimData!.AddPOI(humanPoi);
 
                         var paAmrPoi = new PaAmrPoi(U.Vec2Point(paAmrPoiPosition), containers);
-                        paAmrPoi.id = "pa amr poi";
+                        paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
+                        paAmrPoi.AddLabel(poiType.name);
                         IndoorSimData.AddPOI(paAmrPoi);
                         Debug.Log("POI inserted");
                         selectedSpace.Clear();
@@ -146,6 +154,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         if (PaAmrPoi.CanLayOnStatic(sc.Space))
                         {
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                            transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().color = poiType.color;
                             transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = false;
                             position = ClosestEdgeNode(sc, mousePosition.Value);
                             transform.Find("PosePOI").position = position;
@@ -196,6 +205,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                 // PaAmr sprite
                 GameObject PaAmrSpriteObj = transform.Find("PosePOI").gameObject;
+                PaAmrSpriteObj.gameObject.GetComponent<SpriteRenderer>().color = poiType.color;
                 PaAmrSpriteObj.transform.position = paAmrPoiPosition;
                 Vector3 delta = PickingAgentSpriteObj.transform.position - paAmrPoiPosition;
                 float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;

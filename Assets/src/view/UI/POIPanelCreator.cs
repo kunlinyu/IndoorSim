@@ -25,7 +25,7 @@ public class POIPanelCreator : MonoBehaviour
         {
             DestroyPOIPanel();
             IdPanelObj = Instantiate(Resources.Load<GameObject>("UIObj/POIPanel"), this.transform);
-            IdPanelObj.GetComponent<POIPanelController>().Init(eventDispatcher);
+            IdPanelObj.GetComponent<POIPanelController>().Init(eventDispatcher, "paamrpoi");
         }
 
         if (e.type == UIEventType.PopUp && e.name == "poi panel" && e.message == "hide")

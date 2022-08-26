@@ -196,10 +196,7 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "paamrpoi")
             {
-                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/PaAmrPOIMarker"), this.transform);
-                toolObj.name = "PaAmrPOIMarker";
-                currentTool = toolObj.GetComponent<PaAmrPOIMarker>();
-                Debug.Log("Switch to tool PaAmrPOIMarker");
+                Debug.Log("Waiting for POIType");
             }
             else if (e.name == "apply asset")
             {
@@ -295,6 +292,21 @@ public class SimDataController : MonoBehaviour
                 toolObj = null;
                 currentTool = null;
             }
+        }
+        else if (e.type == UIEventType.ToolButton && e.name == "paamrpoi")
+        {
+
+            Debug.Log(e.message);
+            POIType poiType = POIType.FromJson(e.message);
+
+            toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/PaAmrPOIMarker"), this.transform);
+            toolObj.name = "PaAmrPOIMarker";
+            PaAmrPOIMarker poiMarker = toolObj.GetComponent<PaAmrPOIMarker>();
+            poiMarker.mapView = mapView;
+            poiMarker.IndoorSimData = indoorSimData;
+            poiMarker.Init(poiType);
+            currentTool = poiMarker;
+            Debug.Log("Switch to tool PaAmrPOIMarker");
         }
         else if (e.type == UIEventType.Resources && e.name == "load")
         {
