@@ -10,9 +10,10 @@ using Newtonsoft.Json.Linq;
 public class POIType : ScriptableObject
 {
     public new string name;
+
+    // filter of related space
     public int relatedCount;
-    public bool relatedNavigable;
-    public bool needDirection;
+
     public bool needQueue;
     public Color color;
 
@@ -23,8 +24,6 @@ public class POIType : ScriptableObject
         POIType result = ScriptableObject.CreateInstance<POIType>();
         result.name = jObj["name"].Value<string>();
         result.relatedCount = jObj["relatedCount"].Value<int>();
-        result.relatedNavigable = jObj["relatedNavigable"].Value<bool>();
-        result.needDirection = jObj["needDirection"].Value<bool>();
         result.needQueue = jObj["needQueue"].Value<bool>();
 
         JToken color = jObj["color"];
@@ -60,12 +59,6 @@ public class POIType : ScriptableObject
 
         writer.WritePropertyName("relatedCount");
         writer.WriteValue(relatedCount);
-
-        writer.WritePropertyName("relatedNavigable");
-        writer.WriteValue(relatedNavigable);
-
-        writer.WritePropertyName("needDirection");
-        writer.WriteValue(needDirection);
 
         writer.WritePropertyName("needQueue");
         writer.WriteValue(needQueue);
