@@ -2,17 +2,7 @@ using UnityEngine;
 
 public class PaAmrPoiController : MonoBehaviour
 {
-    private PaAmrPoi paAmrPoi;
 
-    public PaAmrPoi PaAmrPoi
-    {
-        get => paAmrPoi;
-        set
-        {
-            paAmrPoi = value;
-            // paAmrPoi.OnUpdate += ReRender;
-        }
-    }
 
     void ReRender()
     {

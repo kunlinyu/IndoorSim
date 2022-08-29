@@ -51,7 +51,7 @@ public class POIController : MonoBehaviour, Selectable
     public string Tip()
     {
         List<string> spaceChildrens = poi.spaces.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
-        return $"type: {poi.indoorPOIType}\n" +
+        return $"category: {string.Join(',', poi.category.Select(category => category.term))}\n" +
                $"labels: {string.Join(',', poi.label.Select(label => label.value))}\n" +
                $"container: {string.Join(',', spaceChildrens)}";
     }
@@ -67,14 +67,14 @@ public class POIController : MonoBehaviour, Selectable
         transform.position = U.Point2Vec(poi.point);
         GetComponent<SpriteRenderer>().size = spriteSize;
 
-        if (poi.indoorPOIType == "PaAmr")
+        if (poi.CategoryContains(POICategory.PaAmr.ToString()))
         {
             LineRenderer lr = GetComponent<LineRenderer>();
             lr.positionCount = 2;
             lr.SetPosition(0, U.Point2Vec(poi.point));
 
-            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI(poi.spaces[0]);
-            IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.LabelContains("human"));
+            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI?.Invoke(poi.spaces[0]);
+            IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
             if (humanPoi != null)
             {
                 lr.SetPosition(1, U.Point2Vec(humanPoi.point));
@@ -107,7 +107,7 @@ public class POIController : MonoBehaviour, Selectable
         {
             var obj = toPOILineObj[i];
             var lr = obj.GetComponent<LineRenderer>();
-            if (poi.indoorPOIType == "PaAmr")
+            if (poi.CategoryContains(POICategory.PaAmr.ToString()))
             {
                 lr.positionCount = 2;
                 lr.SetPosition(0, U.Point2Vec(poi.spaces[i].Geom.Centroid));

@@ -79,14 +79,14 @@ public class IndoorMapView : MonoBehaviour
         indoorTiling.OnPOICreated += (poi) =>
         {
             string poiObjPath;
-            if (poi.indoorPOIType == "PaAmr")
+            if (poi.CategoryContains(POICategory.PaAmr.ToString()))
                 poiObjPath = "POI/PaAmrPOI";
-            else if (poi.indoorPOIType == "human")
+            else if (poi.CategoryContains(POICategory.Human.ToString()))
                 poiObjPath = "POI/HumanPOI";
             else
             {
                 poiObjPath = "POI/DefaultPOI";
-                Debug.LogWarning("Unknow poi type");
+                Debug.LogWarning("Unknow poi type: " + string.Join(',', poi.category.Select(category => category.term)) );
             }
 
             POIType matchedPoiType = allPOITypes.FirstOrDefault(poiType => poi.LabelContains(poiType.name));

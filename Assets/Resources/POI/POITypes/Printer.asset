@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Printer
   m_EditorClassIdentifier: 
   name: PRINTER
-  multiRelated: 0
+  relatedCount: 1
   relatedNavigable: 0
   needDirection: 1
-  relatesToCurrent: 0
   needQueue: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 0.7735849, g: 0.37584552, b: 0.75985944, a: 1}

@@ -298,11 +298,9 @@ public class IndoorSimData
         instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.POI, (ins) =>
         {
             ICollection<Container?> spaces = new List<Container?>(ins.newParam.coors().Select(coor => indoorData.FindSpaceGeom(coor)).ToList());
-            if (ins.newParam.value() == "human")
-                indoorTiling.AddPOI(new HumanPOI(new Point(ins.newParam.coor()), spaces));
-            else if (ins.newParam.value() == "PaAmr")
-                indoorTiling.AddPOI(new PaAmrPoi(new Point(ins.newParam.coor()), spaces));
-            else throw new Exception("unknow poi type: " + ins.newParam.value());
+            if (ins.newParam.values().Contains(POICategory.Human.ToString()) || ins.newParam.values().Contains(POICategory.PaAmr.ToString()))
+                indoorTiling.AddPOI(new IndoorPOI(new Point(ins.newParam.coor()), spaces, ins.newParam.values().ToArray()));
+            else throw new Exception("unknow poi type: " + ins.newParam.values());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.POI, (ins) =>
         {
@@ -699,7 +697,7 @@ public class IndoorSimData
             history.DoCommit(
                 ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
                                                 poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
-                                                poi.indoorPOIType));
+                                                poi.category.Select(c => c.term).ToList()));
             OnIndoorDataUpdated?.Invoke(indoorData);
         }
     }
@@ -718,7 +716,7 @@ public class IndoorSimData
         history.DoCommit(
             ReducedInstruction.RemoveIndoorPOI(poi.point.Coordinate,
                                                poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
-                                               poi.indoorPOIType));
+                                               poi.category.Select(c => c.term).ToList()));
         OnIndoorDataUpdated?.Invoke(indoorData);
     }
 }

@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: ContainerBind
   m_EditorClassIdentifier: 
   name: CONTAINER_BIND
-  multiRelated: 1
+  relatedCount: 2
   relatedNavigable: 0
   needDirection: 1
-  relatesToCurrent: 0
   needQueue: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 0.38501248, g: 0.5714887, b: 0.7924528, a: 1}

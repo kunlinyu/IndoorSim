@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78c430b1a7d85897cab7cc1b4e6295c2, type: 3}
   m_Name: CarrierBindUnbind
   m_EditorClassIdentifier: 
-  name: CONTAINER_BIND_UNBIND
-  multiRelated: 1
+  name: CARRIER_BIND_UNBIND
+  relatedCount: 2
   relatedNavigable: 0
   needDirection: 1
-  relatesToCurrent: 0
   needQueue: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 0.16794232, g: 0.24732538, b: 0.3207547, a: 0.8784314}

@@ -8,14 +8,17 @@ namespace poi
     public class POI : POIProperties
     {
         public List<POIProperties> label = new List<POIProperties>();
-        public List<POIProperties> description = null;
-        public List<POIProperties> category = null;
+        public List<POIProperties> description = new List<POIProperties>();
+        public List<POIProperties> category = new List<POIProperties>();
         public List<POIProperties> time = null;
         public List<POIProperties> link = null;
         public Location location = new Location();
         public List<POIProperties> metadata = null;
 
-        public void AddLabel(string value) => AddLabel(value, "en-US", "primary");
+        public POI() {}
+
+        // public void AddLabel(string value) => AddLabel(value, "en-US", "primary");
+        public void AddLabel(string value) => AddLabel(value, null, null);
 
         /// <summary>
         /// Add one Label to this POI
@@ -25,14 +28,12 @@ namespace poi
         /// <param name="term">"primary" or "note"</param>
         public void AddLabel(string value, string lang, string term)
         {
-            var label = new poi.POIProperties()
+            this.label.Add(new poi.POIProperties()
             {
                 value = value,
                 lang = lang,
                 term = term,
-            };
-
-            this.label.Add(label);
+            });
         }
 
         public bool LabelContains(string value) => label.Any(label => label.value == value);
@@ -40,17 +41,15 @@ namespace poi
         public void AddDescription(string value) => AddDescription(value, "en-US");
         public void AddDescription(string value, string lang)
         {
-            var description = new poi.POIProperties()
+            this.description.Add(new poi.POIProperties()
             {
                 value = value,
                 lang = lang,
-            };
-            if (this.description == null) this.description = new List<POIProperties>();
-            this.description.Add(description);
+            });
         }
 
 
-        public void AddCategory(string term) => AddCategory(term, "free", "");
+        public void AddCategory(string term) => AddCategory(term, null, null);  // TODO: default scheme should be "free" or "http://free"?
 
         /// <summary>
         ///     Add Category
@@ -60,15 +59,15 @@ namespace poi
         /// <param name="value">describe human readable categorical</param>
         public void AddCategory(string term, string scheme, string value)
         {
-            var category = new poi.POIProperties()
+            this.category.Add(new poi.POIProperties()
             {
                 term = term,
-                scheme = new System.Uri(scheme),
+                scheme = scheme == null ? null : new System.Uri(scheme),
                 value = value,
-            };
-            if (this.category == null) this.category = new List<POIProperties>();
-            this.category.Add(category);
+            });
         }
+
+        public bool CategoryContains(string term) => category.Any(category => category.term == term);
 
         public void AddPointLocation(Geometry location) => this.location.point = location;
         public void AddLineLocation(Geometry location) => this.location.line = location;

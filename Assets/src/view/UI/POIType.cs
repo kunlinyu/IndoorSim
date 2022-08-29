@@ -10,10 +10,9 @@ using Newtonsoft.Json.Linq;
 public class POIType : ScriptableObject
 {
     public new string name;
-    public bool multiRelated;
+    public int relatedCount;
     public bool relatedNavigable;
     public bool needDirection;
-    public bool relatesToCurrent;
     public bool needQueue;
     public Color color;
 
@@ -23,10 +22,9 @@ public class POIType : ScriptableObject
 
         POIType result = ScriptableObject.CreateInstance<POIType>();
         result.name = jObj["name"].Value<string>();
-        result.multiRelated = jObj["multiRelated"].Value<bool>();
+        result.relatedCount = jObj["relatedCount"].Value<int>();
         result.relatedNavigable = jObj["relatedNavigable"].Value<bool>();
         result.needDirection = jObj["needDirection"].Value<bool>();
-        result.relatesToCurrent = jObj["relatesToCurrent"].Value<bool>();
         result.needQueue = jObj["needQueue"].Value<bool>();
 
         JToken color = jObj["color"];
@@ -60,17 +58,14 @@ public class POIType : ScriptableObject
         writer.WritePropertyName("name");
         writer.WriteValue(name);
 
-        writer.WritePropertyName("multiRelated");
-        writer.WriteValue(multiRelated);
+        writer.WritePropertyName("relatedCount");
+        writer.WriteValue(relatedCount);
 
         writer.WritePropertyName("relatedNavigable");
         writer.WriteValue(relatedNavigable);
 
         writer.WritePropertyName("needDirection");
         writer.WriteValue(needDirection);
-
-        writer.WritePropertyName("relatesToCurrent");
-        writer.WriteValue(relatesToCurrent);
 
         writer.WritePropertyName("needQueue");
         writer.WriteValue(needQueue);

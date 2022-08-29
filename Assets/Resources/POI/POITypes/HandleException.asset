@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: HandleException
   m_EditorClassIdentifier: 
   name: HANDLE_EXCEPTION
-  multiRelated: 1
+  relatedCount: 2
   relatedNavigable: 0
   needDirection: 1
-  relatesToCurrent: 0
   needQueue: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 0.8301887, g: 0.43467426, b: 0.43467426, a: 1}

@@ -9,10 +9,11 @@ using NetTopologySuite.Operation.Distance;
 
 enum PaAmrPoiMarkerStatus
 {
-    ContainerSelecting,
+    RelatedSpaceSelecting,
     PaAmrPoiMarked,
+    HumanPoiMarked,
 
-    // PickingAgentPoiMarked
+    // queueEntryMarked
 }
 
 
@@ -29,7 +30,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     private List<GameObject> pickingAgent2ContainerObj = new List<GameObject>();
     private Vector3 paAmrPoiPosition;
 
-    private PaAmrPoiMarkerStatus status = PaAmrPoiMarkerStatus.ContainerSelecting;
+    private PaAmrPoiMarkerStatus status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
 
     public static float PaAmrFunctionDirection = Mathf.PI;
 
@@ -45,22 +46,37 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         this.poiType = poiType;
     }
 
+    private bool AcceptContainer(Container? container)
+    {
+        if (container == null) return false;
+        if (poiType.relatedNavigable)
+            return container.navigable == Navigable.Navigable;
+        else
+            return container.navigable != Navigable.Navigable;
+    }
+
+    private bool CanLayOn(Container? container)
+    {
+        if (container == null) return false;
+        return container.navigable == Navigable.Navigable;
+    }
+
     void UpdateStatus()
     {
         switch (status)
         {
-            case PaAmrPoiMarkerStatus.ContainerSelecting:
+            case PaAmrPoiMarkerStatus.RelatedSpaceSelecting:
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
 
-                    if (PaAmrPoi.AcceptContainerStatic(sc?.Space) && HumanPOI.AcceptContainerStatic(sc?.Space))
+                    if (AcceptContainer(sc?.Space))
                     {
                         if (selectedSpace.Contains(sc!))
                             selectedSpace.Remove(sc!);
                         else selectedSpace.Add(sc!);
                     }
-                    else if (selectedSpace.Count > 0 && PaAmrPoi.CanLayOnStatic(sc?.Space))
+                    else if (selectedSpace.Count > 0 && CanLayOn(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                         paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition);
@@ -77,7 +93,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
-                    if (HumanPOI.CanLayOnStatic(sc?.Space))
+                    if (CanLayOn(sc?.Space))
                     {
                         // insert
                         Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
@@ -85,22 +101,22 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         var spaces = selectedSpace.Select(sc => sc.Space).ToList();
                         var containers = new List<Container>(spaces);
 
-                        HumanPOI humanPoi = new HumanPOI(U.Vec2Point(pickingPoiPosition), containers);
+                        IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(pickingPoiPosition), containers, POICategory.Human.ToString());
                         humanPoi.id = "picking poi";  // TODO: this is not ID
                         IndoorSimData!.AddPOI(humanPoi);
 
-                        var paAmrPoi = new PaAmrPoi(U.Vec2Point(paAmrPoiPosition), containers);
+                        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), containers, POICategory.PaAmr.ToString());
                         paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
                         paAmrPoi.AddLabel(poiType.name);
                         IndoorSimData.AddPOI(paAmrPoi);
                         Debug.Log("POI inserted");
                         selectedSpace.Clear();
-                        status = PaAmrPoiMarkerStatus.ContainerSelecting;
+                        status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
                     }
                 }
                 else if (Input.GetMouseButton(1))
                 {
-                    status = PaAmrPoiMarkerStatus.ContainerSelecting;
+                    status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
                 }
                 break;
         }
@@ -144,14 +160,14 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         Vector3? mousePosition = CameraController.mousePositionOnGround();
         switch (status)
         {
-            case PaAmrPoiMarkerStatus.ContainerSelecting:
+            case PaAmrPoiMarkerStatus.RelatedSpaceSelecting:
                 if (mousePosition != null)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
                     if (sc != null)
                     {
                         Vector3 position = mousePosition.Value;
-                        if (PaAmrPoi.CanLayOnStatic(sc.Space))
+                        if (CanLayOn(sc.Space))
                         {
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().color = poiType.color;

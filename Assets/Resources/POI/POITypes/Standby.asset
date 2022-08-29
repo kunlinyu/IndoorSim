@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Standby
   m_EditorClassIdentifier: 
   name: STANDBY
-  multiRelated: 0
+  relatedCount: 0
   relatedNavigable: 1
   needDirection: 1
-  relatesToCurrent: 1
   needQueue: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 0.2691349, g: 0.28099158, b: 0.9056604, a: 1}

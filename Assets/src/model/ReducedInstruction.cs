@@ -69,6 +69,7 @@ public struct Parameters
     [JsonPropertyAttribute] public string? containerId;
     [JsonPropertyAttribute] public string? childrenId;
     [JsonPropertyAttribute] public string? value;
+    [JsonPropertyAttribute] public List<string>? values;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -85,6 +86,7 @@ public static class ParameterExtension
     public static string containerId(this Parameters? param) => param!.Value.containerId!;
     public static string childrenId(this Parameters? param) => param!.Value.childrenId!;
     public static string value(this Parameters? param) => param!.Value.value!;
+    public static List<string> values(this Parameters? param) => param!.Value.values!;
 }
 
 [Serializable]
@@ -239,24 +241,24 @@ public class ReducedInstruction
         return ri;
     }
 
-    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, string indoorPOIType)
+    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, List<string> category)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Add;
 
-        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, value = indoorPOIType };
+        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, values = category };
 
         return ri;
     }
 
-    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, string indoorPOIType)
+    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, List<string> category)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Remove;
 
-        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, value = indoorPOIType };
+        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, values = category };
         return ri;
     }
 
@@ -345,11 +347,11 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.value());
+                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.values());
                     case Predicate.Update:
                         return UpdateIndoorPOI(newParam.coor(), oldParam.coor());
                     case Predicate.Remove:
-                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.value());
+                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.values());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }
