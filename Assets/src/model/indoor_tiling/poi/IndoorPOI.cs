@@ -10,7 +10,7 @@ public class IndoorPOI : poi.POI
     public List<Container> spaces = new List<Container>();
 
     // TODO: add layOnSpace, related space, and move POI when space moved
-    [JsonIgnore] public Action OnLocationPointUpdate = () => { };
+    [JsonIgnore] public Action OnLocationUpdate = () => { };
 
     public virtual bool CanLayOn(Container? container)
     => container != null && container.navigable == Navigable.Navigable;
@@ -18,7 +18,7 @@ public class IndoorPOI : poi.POI
     public virtual bool AcceptContainer(Container? container)
         => container != null && container.navigable != Navigable.Navigable;
 
-    public IndoorPOI() {}
+    public IndoorPOI() { }
 
     public IndoorPOI(Point point, ICollection<Container> spaces, params string[] category)
     {
@@ -28,14 +28,15 @@ public class IndoorPOI : poi.POI
             AddCategory(cate);
     }
 
-    [JsonIgnore] public Point point
+    [JsonIgnore]
+    public Point point
     {
         get => (Point)location.point.geometry;
         set
         {
             location.point.geometry = value;
-            location.point.term = "navigation point";
-            OnLocationPointUpdate?.Invoke();
+            location.point.term = "centroid";
+            OnLocationUpdate?.Invoke();
         }
     }
 

@@ -18,8 +18,8 @@ public class POIController : MonoBehaviour, Selectable
         set
         {
             poi = value;
-            poi.OnLocationPointUpdate += UpdateRenderer;
-            poi.OnLocationPointUpdate += UpdateCollider;
+            poi.OnLocationUpdate += UpdateRenderer;
+            poi.OnLocationUpdate += UpdateCollider;
         }
     }
 
@@ -151,7 +151,7 @@ public class POIController : MonoBehaviour, Selectable
 
     void OnDestroy()
     {
-        poi.OnLocationPointUpdate -= UpdateRenderer;
-        poi.OnLocationPointUpdate -= UpdateCollider;
+        poi.OnLocationUpdate -= UpdateRenderer;
+        poi.OnLocationUpdate -= UpdateCollider;
     }
 }

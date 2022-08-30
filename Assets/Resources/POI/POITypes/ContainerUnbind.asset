@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: ContainerUnbind
   m_EditorClassIdentifier: 
   name: CONTAINER_UNBIND
-  relatedCount: 2
-  relatedNavigable: 0
-  needDirection: 1
+  relatedCount: 4
   needQueue: 1
   color: {r: 0.27901387, g: 0.43761137, b: 0.6226415, a: 1}

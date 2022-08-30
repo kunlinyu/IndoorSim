@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Picking
   m_EditorClassIdentifier: 
   name: PICKING
-  relatedCount: 2
-  relatedNavigable: 0
-  needDirection: 1
+  relatedCount: 4
   needQueue: 0
   color: {r: 0.08924447, g: 0.6132076, b: 0.08388218, a: 1}
