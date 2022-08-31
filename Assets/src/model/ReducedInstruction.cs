@@ -241,24 +241,26 @@ public class ReducedInstruction
         return ri;
     }
 
-    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, List<string> category)
+    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Add;
+        LineString queue = new GeometryFactory().CreateLineString(queueInterior);
 
-        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, values = category };
+        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category };
 
         return ri;
     }
 
-    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, List<string> category)
+    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Remove;
+        LineString queue = new GeometryFactory().CreateLineString(queueInterior);
 
-        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, values = category };
+        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category };
         return ri;
     }
 
@@ -347,11 +349,11 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.values());
+                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.lineString().Coordinates, newParam.values());
                     case Predicate.Update:
                         return UpdateIndoorPOI(newParam.coor(), oldParam.coor());
                     case Predicate.Remove:
-                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.values());
+                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.lineString().Coordinates, oldParam.values());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }

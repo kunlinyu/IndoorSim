@@ -31,6 +31,9 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     private List<SpaceController> selectedSpace = new List<SpaceController>();
     private List<GameObject> pickingAgent2ContainerObj = new List<GameObject>();
     private Vector3 paAmrPoiPosition;
+    private Container paAmrPoiLayOnSpace;
+    private Vector3 humanPoiPosition;
+    private Container humanPoiLayOnSpace;
 
     private PaAmrPoiMarkerStatus status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
 
@@ -100,6 +103,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                         paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition);
+                        paAmrPoiLayOnSpace = sc!.Space;
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
                 }
@@ -114,6 +118,8 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     SpaceController? sc = MousePickController.PointedSpace;
                     if (CanLayOn(sc?.Space))
                     {
+                        humanPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
+                        humanPoiLayOnSpace = sc!.Space;
                         Insert();
 
                         // if (poiType.needQueue)
@@ -137,16 +143,15 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private void Insert()
     {
-        Vector3 pickingPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
 
         var spaces = selectedSpace.Select(sc => sc.Space).ToList();
         var containers = new List<Container>(spaces);
 
-        IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(pickingPoiPosition), containers, POICategory.Human.ToString());
+        IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(humanPoiPosition), humanPoiLayOnSpace, containers, new List<Container>(), POICategory.Human.ToString());
         humanPoi.id = "picking poi";  // TODO: this is not ID
         IndoorSimData!.AddPOI(humanPoi);
 
-        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), containers, POICategory.PaAmr.ToString());
+        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace, containers, new List<Container>(), POICategory.PaAmr.ToString());
         paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
         paAmrPoi.AddLabel(poiType.name);
         IndoorSimData.AddPOI(paAmrPoi);

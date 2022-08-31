@@ -50,7 +50,7 @@ public class POIController : MonoBehaviour, Selectable
         => (float)poi.point.Distance(new GeometryFactory().CreatePoint(U.Vec2Coor(vec)));
     public string Tip()
     {
-        List<string> spaceChildrens = poi.spaces.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
+        List<string> spaceChildrens = poi.foi.Select(space => string.Join(',', space.children.Select(child => child.containerId))).ToList();
         return $"category: {string.Join(',', poi.category.Select(category => category.term))}\n" +
                $"labels: {string.Join(',', poi.label.Select(label => label.value))}\n" +
                $"container: {string.Join(',', spaceChildrens)}";
@@ -73,7 +73,7 @@ public class POIController : MonoBehaviour, Selectable
             lr.positionCount = 2;
             lr.SetPosition(0, U.Point2Vec(poi.point));
 
-            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI?.Invoke(poi.spaces[0]);
+            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI?.Invoke(poi.foi[0]);
             IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
             if (humanPoi != null)
             {
@@ -90,27 +90,27 @@ public class POIController : MonoBehaviour, Selectable
 
         // to POI line
         GameObject linePrefab = Resources.Load<GameObject>("POI/Container2POI");
-        while (toPOILineObj.Count < poi.spaces.Count)
+        while (toPOILineObj.Count < poi.foi.Count)
         {
             GameObject obj = Instantiate(linePrefab, transform);
             int index = toPOILineObj.Count;
             obj.name = "container 2 POI " + index;
             toPOILineObj.Add(obj);
         }
-        while (toPOILineObj.Count > poi.spaces.Count)
+        while (toPOILineObj.Count > poi.foi.Count)
         {
             Destroy(toPOILineObj[toPOILineObj.Count - 1]);
             toPOILineObj.RemoveAt(toPOILineObj.Count - 1);
         }
 
-        for (int i = 0; i < poi.spaces.Count; i++)
+        for (int i = 0; i < poi.foi.Count; i++)
         {
             var obj = toPOILineObj[i];
             var lr = obj.GetComponent<LineRenderer>();
             if (poi.CategoryContains(POICategory.PaAmr.ToString()))
             {
                 lr.positionCount = 2;
-                lr.SetPosition(0, U.Point2Vec(poi.spaces[i].Geom.Centroid));
+                lr.SetPosition(0, U.Point2Vec(poi.foi[i].Geom.Centroid));
                 lr.SetPosition(1, U.Point2Vec(poi.point));
             }
             else

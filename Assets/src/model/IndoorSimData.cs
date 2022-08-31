@@ -297,9 +297,11 @@ public class IndoorSimData
         });
         instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.POI, (ins) =>
         {
+            Container? layOn = indoorData.FindSpaceGeom(ins.newParam.coor());
             ICollection<Container?> spaces = new List<Container?>(ins.newParam.coors().Select(coor => indoorData.FindSpaceGeom(coor)).ToList());
+            ICollection<Container?> queue = new List<Container?>(ins.newParam.lineString().Coordinates.Select(coor => indoorData.FindSpaceGeom(coor)).ToList());
             if (ins.newParam.values().Contains(POICategory.Human.ToString()) || ins.newParam.values().Contains(POICategory.PaAmr.ToString()))
-                indoorTiling.AddPOI(new IndoorPOI(new Point(ins.newParam.coor()), spaces, ins.newParam.values().ToArray()));
+                indoorTiling.AddPOI(new IndoorPOI(new Point(ins.newParam.coor()), layOn, spaces, queue, ins.newParam.values().ToArray()));
             else throw new Exception("unknow poi type: " + ins.newParam.values());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Remove, SubjectType.POI, (ins) =>
@@ -696,7 +698,8 @@ public class IndoorSimData
         {
             history.DoCommit(
                 ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
-                                                poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                                poi.foi.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                                poi.queue.Select(space => space.Geom!.Centroid.Coordinate).ToArray(),
                                                 poi.category.Select(c => c.term).ToList()));
             OnIndoorDataUpdated?.Invoke(indoorData);
         }
@@ -715,7 +718,8 @@ public class IndoorSimData
 
         history.DoCommit(
             ReducedInstruction.RemoveIndoorPOI(poi.point.Coordinate,
-                                               poi.spaces.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                               poi.foi.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
+                                               poi.queue.Select(space => space.Geom!.Centroid.Coordinate).ToArray(),
                                                poi.category.Select(c => c.term).ToList()));
         OnIndoorDataUpdated?.Invoke(indoorData);
     }

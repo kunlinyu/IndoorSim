@@ -132,7 +132,7 @@ public class IndoorData
         if (pois.Contains(poi)) throw new ArgumentException("add redundant poi");
 
         pois.Add(poi);
-        poi.spaces.ForEach(space => space2POIs[space].Add(poi));
+        poi.foi.ForEach(space => space2POIs[space].Add(poi));
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
@@ -144,7 +144,7 @@ public class IndoorData
     public void RemovePOI(IndoorPOI poi)
     {
         if (!pois.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);
-        poi.spaces.ForEach(space => space2POIs[space].Remove(poi));
+        poi.foi.ForEach(space => space2POIs[space].Remove(poi));
         pois.Remove(poi);
     }
 
@@ -259,7 +259,7 @@ public class IndoorData
 
         space2POIs.Clear();
         spacePool.ForEach(s => space2POIs[s] = new HashSet<IndoorPOI>());
-        pois.ForEach(poi => poi.spaces.ForEach(space => space2POIs[space].Add(poi)));
+        pois.ForEach(poi => poi.foi.ForEach(space => space2POIs[space].Add(poi)));
     }
 
     public string CalcDigest()
