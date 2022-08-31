@@ -9,7 +9,7 @@ public class IndoorPOI : poi.POI
 {
     public List<Container> foi = new List<Container>();  // feature of interest
     public List<Container> queue = new List<Container>();
-    public Container? layOnSpace;
+    public Container layOnSpace;
 
     // TODO: add layOnSpace, related space, and move POI when space moved
     [JsonIgnore] public Action OnLocationUpdate = () => { };
@@ -17,10 +17,10 @@ public class IndoorPOI : poi.POI
     public virtual bool CanLayOn(Container? container)
     => container != null && container.navigable == Navigable.Navigable;
 
-    public virtual bool AcceptContainer(Container? container)
-        => container != null && container.navigable != Navigable.Navigable;
 
-    public IndoorPOI() { }
+#pragma warning disable CS8618
+    public IndoorPOI() { }  // for deserialize only
+#pragma warning restore CS8618
 
     public IndoorPOI(Point point, Container layOn, ICollection<Container> foi, ICollection<Container> queue, params string[] category)
     {

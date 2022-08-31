@@ -588,19 +588,15 @@ public class IndoorTiling
         }
     }
 
-    public bool AddPOI(IndoorPOI poi)
+    public void AddPOI(IndoorPOI poi)
     {
-        CellSpace? space = indoorData.FindSpaceGeom(poi.point.Coordinate);
-        if (poi.CanLayOn(space))
-        {
-            indoorData.AddPOI(poi);
-            OnPOICreated?.Invoke(poi);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        if (poi.foi.Any(foi => !indoorData.Contains((CellSpace)foi))) throw new ArgumentException("unknow feature of interest");
+        if (poi.queue.Any(item => !indoorData.Contains((CellSpace)item))) throw new ArgumentException("unknow queue space");
+        if (!indoorData.Contains((CellSpace)poi.layOnSpace)) throw new ArgumentException("unknow space lay on");
+        if (!poi.CanLayOn(indoorData.FindSpaceGeom(poi.point.Coordinate))) throw new ArgumentException("poi can not lay on the space");
+
+        indoorData.AddPOI(poi);
+        OnPOICreated?.Invoke(poi);
     }
 
     // TODO: check all POI after boundary updated or removed

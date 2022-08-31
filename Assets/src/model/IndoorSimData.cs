@@ -694,15 +694,13 @@ public class IndoorSimData
 
     public void AddPOI(IndoorPOI poi)
     {
-        if (indoorTiling.AddPOI(poi))
-        {
-            history.DoCommit(
+        indoorTiling.AddPOI(poi);
+        history.DoCommit(
                 ReducedInstruction.AddIndoorPOI(poi.point.Coordinate,
                                                 poi.foi.Select(space => space.Geom!.Centroid.Coordinate).ToList(),
                                                 poi.queue.Select(space => space.Geom!.Centroid.Coordinate).ToArray(),
                                                 poi.category.Select(c => c.term).ToList()));
-            OnIndoorDataUpdated?.Invoke(indoorData);
-        }
+        OnIndoorDataUpdated?.Invoke(indoorData);
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
