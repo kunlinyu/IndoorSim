@@ -51,7 +51,7 @@ public class AStarTool : MonoBehaviour, ITool
             }
         }
 
-        bool shouldRunAStar = false;
+        bool clickAStar = false;
         if (Input.GetMouseButtonUp(0))
         {
             switch (status)
@@ -73,7 +73,7 @@ public class AStarTool : MonoBehaviour, ITool
                         {
                             targetSpace = space;
                             status = AStarToolStatus.TargetClicked;
-                            shouldRunAStar = true;
+                            clickAStar = true;
                         }
                         Debug.Log("get target");
                     }
@@ -87,7 +87,7 @@ public class AStarTool : MonoBehaviour, ITool
                         {
                             targetSpace = space;
                             status = AStarToolStatus.TargetClicked;
-                            shouldRunAStar = true;
+                            clickAStar = true;
                             Debug.Log("update target");
                         }
                         else
@@ -112,6 +112,7 @@ public class AStarTool : MonoBehaviour, ITool
             }
         }
 
+        bool dynamicAStar = false;
         if (status == AStarToolStatus.SourceClicked)
         {
             targetPoint = CameraController.mousePositionOnGround();
@@ -119,20 +120,17 @@ public class AStarTool : MonoBehaviour, ITool
             if (space2 != null)
             {
                 targetSpace = space2;
-                shouldRunAStar = true;
+                dynamicAStar = true;
             }
         }
         else if (status == AStarToolStatus.Nothing)
         {
-            shouldRunAStar = false;
             targetPoint = null;
             path.Clear();
         }
 
-        if (shouldRunAStar)
+        if (clickAStar || dynamicAStar)
         {
-            Debug.Log("run A*");
-            shouldRunAStar = false;
             PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
             PlanSimpleResult? simpleResult = result?.ToSimple();
             if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)
@@ -141,11 +139,11 @@ public class AStarTool : MonoBehaviour, ITool
                 path.Add(sourcePoint.Value);
                 path.AddRange(simpleResult.boundaryCentroids.Select(p => U.Coor2Vec(p.Coordinate)));
                 path.Add(targetPoint!.Value);
-                Debug.Log("get path : " + path.Count);
             }
             else
             {
-                Debug.Log("can not get path");
+                if (clickAStar)
+                    Debug.LogWarning("can not get path");
                 path.Clear();
             }
         }
