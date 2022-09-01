@@ -112,6 +112,23 @@ public class AStarTool : MonoBehaviour, ITool
             }
         }
 
+        if (status == AStarToolStatus.SourceClicked)
+        {
+            targetPoint = CameraController.mousePositionOnGround();
+            var space2 = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+            if (space2 != null)
+            {
+                targetSpace = space2;
+                shouldRunAStar = true;
+            }
+        }
+        else if (status == AStarToolStatus.Nothing)
+        {
+            shouldRunAStar = false;
+            targetPoint = null;
+            path.Clear();
+        }
+
         if (shouldRunAStar)
         {
             Debug.Log("run A*");
