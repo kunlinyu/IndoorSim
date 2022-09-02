@@ -416,6 +416,10 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                             lr.enabled = true;
                             lr.positionCount = path.Count;
                             lr.SetPositions(path.ToArray());
+
+                            Vector3 d = path[1] - queueSegObj.transform.position;
+                            float rot = Mathf.Atan2(d.z, d.x) * 180.0f / Mathf.PI;
+                            queueSegObj.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, rot);
                         }
                         else
                         {
