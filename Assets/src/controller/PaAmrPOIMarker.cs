@@ -158,8 +158,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     List<Vector3>? path = Astar(current, last, lastSpace!);
 
                     if (path == null) break;
-                    Debug.Log(path.Count);
-                    Debug.Log(path);
 
                     GameObject queueSegment = Instantiate(Resources.Load<GameObject>("POI/QueueSegment"), transform);
                     LineRenderer lr = queueSegment.GetComponent<LineRenderer>();
@@ -210,7 +208,12 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         humanPoi.id = "picking poi";  // TODO: this is not ID
         IndoorSimData!.AddPOI(humanPoi);
 
-        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace, containers, new List<Container>(), POICategory.PaAmr.ToString());
+        List<CellSpace?> queueSpace = queueObj.Select(obj => IndoorSimData.indoorData.FindSpaceGeom(U.Vec2Coor(obj.transform.position))).ToList();
+        List<Container> queueContainer = new List<Container>();
+        queueContainer.Add(paAmrPoiLayOnSpace);
+        queueContainer.AddRange(queueSpace);
+
+        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace, containers, queueContainer, POICategory.PaAmr.ToString());
         paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
         paAmrPoi.AddLabel(poiType.name);
         IndoorSimData.AddPOI(paAmrPoi);
@@ -395,7 +398,12 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     SpaceController? sc = MousePickController.PointedSpace;
                     Vector3 current = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                     var queueSegObj = transform.Find("QueueSegment").gameObject;
-                    if (sc != null && sc.Space.navigable == Navigable.Navigable && sc.Space != paAmrPoiLayOnSpace)
+                    Vector3 last = paAmrPoiPosition;
+                    if (this.queueObj.Count > 0)
+                        last = this.queueObj[this.queueObj.Count - 1].transform.position;
+                    CellSpace? lastCellSpace = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(last));
+
+                    if (sc != null && sc.Space.navigable == Navigable.Navigable && sc.Space != paAmrPoiLayOnSpace && sc.Space != lastCellSpace)
                     {
                         queueSegObj.transform.position = ClosestNode(sc, current);
 
@@ -405,10 +413,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         lr.enabled = true;
                         lr.positionCount = 2;
 
-                        Vector3 last = paAmrPoiPosition;
-                        if (this.queueObj.Count > 0)
-                            last = this.queueObj[this.queueObj.Count - 1].transform.position;
-                        CellSpace? lastCellSpace = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(last));
+
 
                         var path = Astar(queueSegObj.transform.position, last, lastCellSpace!);
                         if (path != null)
