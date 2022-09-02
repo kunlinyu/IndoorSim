@@ -59,6 +59,7 @@ public class POIController : MonoBehaviour, Selectable
     public Func<Container, HashSet<IndoorPOI>> Space2IndoorPOI;
 
     private List<GameObject> toPOILineObj = new List<GameObject>();
+    private List<GameObject> queueSpace = new List<GameObject>();
 
     private List<POIType> allPOITypes;
 
@@ -67,6 +68,7 @@ public class POIController : MonoBehaviour, Selectable
         transform.position = U.Point2Vec(poi.point);
         GetComponent<SpriteRenderer>().size = spriteSize;
 
+        // PaAmr 2 Human linerenderer
         if (poi.CategoryContains(POICategory.PaAmr.ToString()))
         {
             LineRenderer lr = GetComponent<LineRenderer>();
@@ -88,13 +90,12 @@ public class POIController : MonoBehaviour, Selectable
             }
         }
 
-        // to POI line
+        // container to POI linerenderer
         GameObject linePrefab = Resources.Load<GameObject>("POI/Container2POI");
         while (toPOILineObj.Count < poi.foi.Count)
         {
             GameObject obj = Instantiate(linePrefab, transform);
-            int index = toPOILineObj.Count;
-            obj.name = "container 2 POI " + index;
+            obj.name = "container_2_POI " + toPOILineObj.Count;
             toPOILineObj.Add(obj);
         }
         while (toPOILineObj.Count > poi.foi.Count)
@@ -117,6 +118,26 @@ public class POIController : MonoBehaviour, Selectable
             {
                 lr.positionCount = 0;
             }
+        }
+
+        // queue
+        GameObject queueSpacePrefab = Resources.Load<GameObject>("POI/QueueSpace");
+        while (queueSpace.Count < poi.queue.Count)
+        {
+            GameObject obj = Instantiate(queueSpacePrefab, transform);
+            obj.name = "queue space " + queueSpace.Count;
+            queueSpace.Add(obj);
+        }
+        while (queueSpace.Count > poi.queue.Count)
+        {
+            Destroy(queueSpace[queueSpace.Count - 1]);
+            queueSpace.RemoveAt(queueSpace.Count - 1);
+        }
+        for (int i = 0; i < poi.queue.Count; i++)
+        {
+            var obj = queueSpace[i];
+            PolygonRenderer pr = obj.GetComponent<PolygonRenderer>();
+            pr.UpdatePolygon(((CellSpace)poi.queue[i]).Polygon);
         }
     }
 

@@ -8,10 +8,10 @@ using Newtonsoft.Json;
 public class IndoorPOI : poi.POI
 {
     public List<Container> foi = new List<Container>();  // feature of interest
-    public List<Container> queue = new List<Container>();
     public Container layOnSpace;
+    public List<Container>? queue = null;
 
-    // TODO: add layOnSpace, related space, and move POI when space moved
+    // TODO: move POI when space moved
     [JsonIgnore] public Action OnLocationUpdate = () => { };
 
     public virtual bool CanLayOn(Container? container)
@@ -22,11 +22,15 @@ public class IndoorPOI : poi.POI
     public IndoorPOI() { }  // for deserialize only
 #pragma warning restore CS8618
 
-    public IndoorPOI(Point point, Container layOn, ICollection<Container> foi, ICollection<Container> queue, params string[] category)
+    public IndoorPOI(Point point, Container layOn, ICollection<Container> foi, ICollection<Container>? queue, params string[] category)
     {
         this.point = point;
         this.layOnSpace = layOn;
         this.foi = new List<Container>(foi);
+
+        if (queue != null)
+            this.queue = new List<Container>(queue);
+
         foreach (var cate in category)
             AddCategory(cate);
     }
