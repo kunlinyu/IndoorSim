@@ -145,6 +145,10 @@ public class IndoorMapView : MonoBehaviour
             {
                 SwitchDualityGraph(status);
             }
+            if (e.name == "poi")
+            {
+                POIParentObj.SetActive(status);
+            }
         }
     }
 
