@@ -1,5 +1,25 @@
 # version list
 
+## V0.4.0
+* [IndoorSim-WebGL-V0.4.0.bf439d9](./IndoorSim-WebGL-V0.4.0.bf439d9)
+* [IndoorSim-WebGL-dev-V0.4.0.bf439d9](./IndoorSim-WebGL-dev-V0.4.0.bf439d9)
+* [IndoorSim-StandaloneLinux64-V0.4.0.bf439d9.tar.gz](./IndoorSim-StandaloneLinux64-V0.4.0.bf439d9.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.4.0.bf439d9.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.4.0.bf439d9.tar.gz)
+
+### DateTime
+2022-09-05 18:47:14 +08
+
+### ChangeLog
+1. 优化RELEASE页面效果
+2. 添加POI创建面板
+3. 根据POI面板创建不同类型的POI
+4. 使用鼠标中键调整POI的交互逻辑
+5. 调整POI的结构与PlanResult保持一致
+6. 支持抵达POI前的队列，且支持不连续的队列
+7. 打开与关闭显示POI
+
+---
+
 ## V0.3.0
 * [IndoorSim-WebGL-V0.3.0.e3638b6](./IndoorSim-WebGL-V0.3.0.e3638b6)
 * [IndoorSim-WebGL-dev-V0.3.0.e3638b6](./IndoorSim-WebGL-dev-V0.3.0.e3638b6)
