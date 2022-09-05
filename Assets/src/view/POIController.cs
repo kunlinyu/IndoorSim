@@ -125,8 +125,6 @@ public class POIController : MonoBehaviour, Selectable
             throw new ArgumentException("Count queue of poi should not be 1");
         else if (poi.queue.Count > 1)
         {
-
-
             GameObject queueSpacePrefab = Resources.Load<GameObject>("POI/QueueSegment");
             while (queueSpace.Count < poi.queue.Count)
             {
@@ -145,16 +143,19 @@ public class POIController : MonoBehaviour, Selectable
                 if (i == 0)
                 {
                     obj.GetComponent<LineRenderer>().enabled = false;
+                    obj.GetComponent<SpriteRenderer>().enabled = false;
                     continue;
                 }
                 var lastObj = queueSpace[i - 1];
                 obj.transform.position = U.Point2Vec(poi.queue[i].Geom.Centroid);
 
                 LineRenderer lr = obj.GetComponent<LineRenderer>();
+                lr.enabled = true;
                 lr.SetPosition(0, obj.transform.position);
                 lr.SetPosition(1, lastObj.transform.position);
 
                 SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+                sr.enabled = true;
                 Vector3 d = lastObj.transform.position - obj.transform.position;
                 float rot = Mathf.Atan2(d.z, d.x) * 180.0f / Mathf.PI;
                 obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, rot);
@@ -185,8 +186,8 @@ public class POIController : MonoBehaviour, Selectable
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
 
-            spriteSize.x = Mathf.Sqrt(newHeightInt + 2) * 0.2f + 0.1f;
-            spriteSize.y = Mathf.Sqrt(newHeightInt + 2) * 0.2f + 0.1f;
+            spriteSize.x = Mathf.Sqrt(newHeightInt + 2) * 0.3f + 0.1f;
+            spriteSize.y = Mathf.Sqrt(newHeightInt + 2) * 0.3f + 0.1f;
         }
         if (needUpdateRenderer)
             UpdateRenderer();
