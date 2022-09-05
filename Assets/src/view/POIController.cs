@@ -121,23 +121,45 @@ public class POIController : MonoBehaviour, Selectable
         }
 
         // queue
-        GameObject queueSpacePrefab = Resources.Load<GameObject>("POI/QueueSpace");
-        while (queueSpace.Count < poi.queue.Count)
+        if (poi.queue.Count == 1)
+            throw new ArgumentException("Count queue of poi should not be 1");
+        else if (poi.queue.Count > 1)
         {
-            GameObject obj = Instantiate(queueSpacePrefab, transform);
-            obj.name = "queue space " + queueSpace.Count;
-            queueSpace.Add(obj);
-        }
-        while (queueSpace.Count > poi.queue.Count)
-        {
-            Destroy(queueSpace[queueSpace.Count - 1]);
-            queueSpace.RemoveAt(queueSpace.Count - 1);
-        }
-        for (int i = 0; i < poi.queue.Count; i++)
-        {
-            var obj = queueSpace[i];
-            PolygonRenderer pr = obj.GetComponent<PolygonRenderer>();
-            pr.UpdatePolygon(((CellSpace)poi.queue[i]).Polygon);
+
+
+            GameObject queueSpacePrefab = Resources.Load<GameObject>("POI/QueueSegment");
+            while (queueSpace.Count < poi.queue.Count)
+            {
+                GameObject obj = Instantiate(queueSpacePrefab, transform);
+                obj.name = "queue space " + queueSpace.Count;
+                queueSpace.Add(obj);
+            }
+            while (queueSpace.Count > poi.queue.Count)
+            {
+                Destroy(queueSpace[queueSpace.Count - 1]);
+                queueSpace.RemoveAt(queueSpace.Count - 1);
+            }
+            for (int i = 0; i < poi.queue.Count; i++)
+            {
+                var obj = queueSpace[i];
+                if (i == 0)
+                {
+                    obj.GetComponent<LineRenderer>().enabled = false;
+                    continue;
+                }
+                var lastObj = queueSpace[i - 1];
+                obj.transform.position = U.Point2Vec(poi.queue[i].Geom.Centroid);
+
+                LineRenderer lr = obj.GetComponent<LineRenderer>();
+                lr.SetPosition(0, obj.transform.position);
+                lr.SetPosition(1, lastObj.transform.position);
+
+                SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+                Vector3 d = lastObj.transform.position - obj.transform.position;
+                float rot = Mathf.Atan2(d.z, d.x) * 180.0f / Mathf.PI;
+                obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, rot);
+
+            }
         }
     }
 

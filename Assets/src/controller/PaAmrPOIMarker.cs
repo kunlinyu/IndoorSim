@@ -200,7 +200,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private void Insert()
     {
-
         var spaces = selectedSpace.Select(sc => sc.Space).ToList();
         var containers = new List<Container>(spaces);
 
@@ -247,7 +246,6 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     {
         PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(U.Vec2Coor(source), targetSpace);
         PlanSimpleResult? simpleResult = result?.ToSimple();
-
 
         List<Vector3> path = new List<Vector3>();
         if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)

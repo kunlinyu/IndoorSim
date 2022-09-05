@@ -54,7 +54,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 94a542ca420e00ae8aedcc7bd7265995, type: 2}
+  - {fileID: 2100000, guid: b764eee32c81f87efa55302f74c0d39e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -127,8 +127,8 @@ LineRenderer:
       m_NumAlphaKeys: 2
     numCornerVertices: 5
     numCapVertices: 5
-    alignment: 0
-    textureMode: 0
+    alignment: 1
+    textureMode: 1
     textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
@@ -177,7 +177,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 5
-  m_Sprite: {fileID: 21300000, guid: 76ce93ad29d221cd0bf510e39fc00fef, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e4462bb67a16adeec91356c195e96ec7, type: 3}
   m_Color: {r: 1, g: 0.9964248, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
