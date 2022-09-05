@@ -70,6 +70,7 @@ public struct Parameters
     [JsonPropertyAttribute] public string? childrenId;
     [JsonPropertyAttribute] public string? value;
     [JsonPropertyAttribute] public List<string>? values;
+    [JsonPropertyAttribute] public List<string>? values2;
 
     public override string ToString()
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
@@ -87,6 +88,7 @@ public static class ParameterExtension
     public static string childrenId(this Parameters? param) => param!.Value.childrenId!;
     public static string value(this Parameters? param) => param!.Value.value!;
     public static List<string> values(this Parameters? param) => param!.Value.values!;
+    public static List<string> values2(this Parameters? param) => param!.Value.values2!;
 }
 
 [Serializable]
@@ -241,26 +243,26 @@ public class ReducedInstruction
         return ri;
     }
 
-    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category)
+    public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Add;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
 
-        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category };
+        ri.newParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category, values2 = labels };
 
         return ri;
     }
 
-    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category)
+    public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
         ReducedInstruction ri = new ReducedInstruction();
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Remove;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
 
-        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category };
+        ri.oldParam = new Parameters() { coor = poiCoor, coors = spacesInterior, lineString = queue, values = category, values2 = labels };
         return ri;
     }
 
@@ -349,11 +351,11 @@ public class ReducedInstruction
                 switch (predicate)
                 {
                     case Predicate.Add:
-                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.lineString().Coordinates, newParam.values());
+                        return RemoveIndoorPOI(newParam.coor(), newParam.coors(), newParam.lineString().Coordinates, newParam.values(), newParam.values2());
                     case Predicate.Update:
                         return UpdateIndoorPOI(newParam.coor(), oldParam.coor());
                     case Predicate.Remove:
-                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.lineString().Coordinates, oldParam.values());
+                        return AddIndoorPOI(oldParam.coor(), oldParam.coors(), oldParam.lineString().Coordinates, oldParam.values(), oldParam.values2());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }
