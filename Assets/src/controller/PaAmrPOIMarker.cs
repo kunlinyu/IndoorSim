@@ -96,7 +96,8 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 }
                 else if (Input.GetMouseButtonDown(2))
                 {
-                    status = PaAmrPoiMarkerStatus.RelatedSpaceCommitted;
+                    if (selectedSpace.Count > 0)
+                        status = PaAmrPoiMarkerStatus.RelatedSpaceCommitted;
                 }
                 break;
             case PaAmrPoiMarkerStatus.RelatedSpaceCommitted:
@@ -209,8 +210,11 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
         List<CellSpace?> queueSpace = queueObj.Select(obj => IndoorSimData.indoorData.FindSpaceGeom(U.Vec2Coor(obj.transform.position))).ToList();
         List<Container> queueContainer = new List<Container>();
-        queueContainer.Add(paAmrPoiLayOnSpace);
-        queueContainer.AddRange(queueSpace);
+        if (queueSpace.Count != 0)
+        {
+            queueContainer.Add(paAmrPoiLayOnSpace);
+            queueContainer.AddRange(queueSpace);
+        }
 
         IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace, containers, queueContainer, POICategory.PaAmr.ToString());
         paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
