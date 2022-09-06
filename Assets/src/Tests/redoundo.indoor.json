@@ -1,6 +1,6 @@
 {
   "$id": "1",
-  "vertexPool": [
+  "cellVertexMember": [
     {
       "$id": "2",
       "Id": "VTX0",
@@ -42,7 +42,7 @@
       "Geom": "POINT (-1.9641649723052979 -2.9792032241821289)"
     }
   ],
-  "boundaryPool": [
+  "cellBoundaryMember": [
     {
       "$id": "10",
       "Id": "BDR4",
@@ -164,7 +164,7 @@
       "RightFunctional": false
     }
   ],
-  "spacePool": [
+  "cellSpaceMember": [
     {
       "$id": "18",
       "Id": "SPC0",
@@ -213,7 +213,7 @@
       "Holes": []
     }
   ],
-  "rLinePool": [],
+  "rLineGroupMember": [],
   "history": [],
   "instructionHistory": {
     "$id": "19",
@@ -431,5 +431,5 @@
     ],
     "IgnoreDo": false
   },
-  "digestCache": "{vertexPool.Count: 8, boundaryPool digest: {1.31347694958471, 1.46886666336419, 1.56175658270516, 1.74266016796819, 1.89311946195075, 2.31108108029369, 3.72142978443476, 4.23757496023449}, spacePool digest: {{Area:14.2223059659, Shell.Length:14.8879795252, Holes.Length:0}}}"
+  "digestCache": "{cellVertexMember.Count: 8, cellBoundaryMember digest: {1.31347694958471, 1.46886666336419, 1.56175658270516, 1.74266016796819, 1.89311946195075, 2.31108108029369, 3.72142978443476, 4.23757496023449}, spacePool digest: {{Area:14.2223059659, Shell.Length:14.8879795252, Holes.Length:0}}}"
 }

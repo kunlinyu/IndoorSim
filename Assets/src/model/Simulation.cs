@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Simulation
 {
-    private IndoorData indoorData;
+    private ThematicLayer indoorData;
     private SimData simData;
     private List<IActuatorSensor> HWs = null;
 
@@ -15,7 +15,7 @@ public class Simulation
     double startTime = 0.0f;
 
 
-    public Simulation(IndoorData indoorData, SimData simData, List<IActuatorSensor> agentHWs)
+    public Simulation(ThematicLayer indoorData, SimData simData, List<IActuatorSensor> agentHWs)
     {
         this.indoorData = indoorData;
         this.simData = simData;

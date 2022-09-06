@@ -17,7 +17,7 @@ public class IndoorSimData
 {
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
-    [JsonPropertyAttribute] public IndoorData indoorData = new IndoorData();
+    [JsonPropertyAttribute] public ThematicLayer indoorData = new ThematicLayer();
     [JsonIgnore] public IndoorTiling indoorTiling;
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
 
@@ -38,7 +38,7 @@ public class IndoorSimData
     [JsonIgnore] public Action<List<GridMap>> OnGridMapListUpdated = (gridMaps) => { };
     [JsonIgnore] public Action<GridMap> OnGridMapCreated = (gridmap) => { };
     [JsonIgnore] public Action<GridMap> OnGridMapRemoved = (gridmap) => { };
-    [JsonIgnore] public Action<IndoorData> OnIndoorDataUpdated = (indoor) => { };
+    [JsonIgnore] public Action<ThematicLayer> OnIndoorDataUpdated = (indoor) => { };
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
@@ -117,7 +117,7 @@ public class IndoorSimData
 
         if (historyOnly)
         {
-            indoorSimData.indoorData = new IndoorData();
+            indoorSimData.indoorData = new ThematicLayer();
             indoorSimData.simDataList = new List<SimData>();
             indoorSimData.history.Uuundo();
         }
@@ -140,11 +140,11 @@ public class IndoorSimData
         if (boundaries.Any(b => !indoorData.Contains(b))) throw new ArgumentException("can not find some boundary");
         if (spaces.Any(s => !indoorData.Contains(s))) throw new ArgumentException("can not find some space");
 
-        IndoorData newIndoorData = new IndoorData();
-        newIndoorData.vertexPool.AddRange(vertices);
-        newIndoorData.boundaryPool.AddRange(boundaries);
-        newIndoorData.spacePool.AddRange(spaces);
-        newIndoorData.rLinePool.AddRange(spaces.Select(s => s.rLines!));
+        ThematicLayer newIndoorData = new ThematicLayer();
+        newIndoorData.cellVertexMember.AddRange(vertices);
+        newIndoorData.cellBoundaryMember.AddRange(boundaries);
+        newIndoorData.cellSpaceMember.AddRange(spaces);
+        newIndoorData.rLineGroupMember.AddRange(spaces.Select(s => s.rLines!));
         string json = newIndoorData.Serialize(false);
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(boundaries.Select(b => b.geom).ToArray());
@@ -171,7 +171,7 @@ public class IndoorSimData
 
     public void AddAsset(Asset asset)
     {
-        IndoorData? indoorData = IndoorData.Deserialize(asset.json);
+        ThematicLayer? indoorData = ThematicLayer.Deserialize(asset.json);
         if (indoorData == null) throw new ArgumentException("can not deserialize the asset");
         assets.Add(asset);
         OnAssetListUpdated?.Invoke(assets);
@@ -187,7 +187,7 @@ public class IndoorSimData
     public void ApplyAsset(Asset asset, Coordinate center, float rotation)
     {
         if (!assets.Contains(asset)) throw new ArgumentException("can not find the asset");
-        IndoorData? tempIndoorData = IndoorData.Deserialize(asset.json);
+        ThematicLayer? tempIndoorData = ThematicLayer.Deserialize(asset.json);
         if (tempIndoorData == null) throw new Exception("Oops! can not deserialize the asset");
 
         history.SessionStart();

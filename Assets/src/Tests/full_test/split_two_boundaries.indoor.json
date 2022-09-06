@@ -2,7 +2,7 @@
 	"$id": "1",
 	"indoorData": {
 		"$id": "2",
-		"vertexPool": [
+		"cellVertexMember": [
 			{
 				"$id": "3",
 				"Id": "no id",
@@ -49,7 +49,7 @@
 				"Geom": "POINT (-0.07022550462844368 -2.4973593192345036)"
 			}
 		],
-		"boundaryPool": [
+		"cellBoundaryMember": [
 			{
 				"$id": "12",
 				"Id": "no id",
@@ -183,7 +183,7 @@
 				"naviDirection": 3
 			}
 		],
-		"spacePool": [
+		"cellSpaceMember": [
 			{
 				"$id": "23",
 				"navigable": 2,
@@ -305,7 +305,7 @@
 				"Geom": "POLYGON ((0.098504707217216492 0.086189039051532745, -2.2655868530273438 2.450279712677002, -4.2849149703979492 0.55408227443695068, -3.1028687953948975 -2.5734128952026367, -0.07022550462844368 -2.4973593192345036, 0.098504707217216492 0.086189039051532745))"
 			}
 		],
-		"rLinePool": [
+		"rLineGroupMember": [
 			{
 				"$id": "26",
 				"space": {
@@ -540,5 +540,5 @@
 		"IgnoreDo": false
 	},
 	"assets": [],
-	"digestCache": "{vertexPool.Count: 9, boundaryPool digest: {2.16642868155399, 2.41426280547644, 2.58905233705152, 2.77006331523156, 2.98990006202376, 3.03359678854134, 3.34332972025532, 3.34342028407412, 4.08790838718415, 4.68051539972216, 4.82455240057646}, spacePool digest: {{Area:11.8700657607, Shell.Length:14.5083829428, Holes.Length:0}, {Area:13.636535176, Shell.Length:17.2680822507, Holes.Length:0}, {Area:15.1174298239, Shell.Length:15.0794624452, Holes.Length:0}}}"
+	"digestCache": "{cellVertexMember.Count: 9, cellBoundaryMember digest: {2.16642868155399, 2.41426280547644, 2.58905233705152, 2.77006331523156, 2.98990006202376, 3.03359678854134, 3.34332972025532, 3.34342028407412, 4.08790838718415, 4.68051539972216, 4.82455240057646}, cellSpaceMember digest: {{Area:11.8700657607, Shell.Length:14.5083829428, Holes.Length:0}, {Area:13.636535176, Shell.Length:17.2680822507, Holes.Length:0}, {Area:15.1174298239, Shell.Length:15.0794624452, Holes.Length:0}}}"
 }

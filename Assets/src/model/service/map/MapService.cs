@@ -4,8 +4,8 @@ using NetTopologySuite.Geometries;
 
 public class MapService
 {
-    private IndoorData indoorData;
-    public MapService(IndoorData indoorData)
+    private ThematicLayer indoorData;
+    public MapService(ThematicLayer indoorData)
     {
         this.indoorData = indoorData;
     }

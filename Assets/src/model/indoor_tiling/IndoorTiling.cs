@@ -19,7 +19,7 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 public class IndoorTiling
 {
     public string kInnerInterSectionDE9IMPatter = "T********";
-    public IndoorData indoorData { get; private set; }
+    public ThematicLayer indoorData { get; private set; }
     public string digestCache = "";
     public IDGenInterface? IdGenVertex { get; private set; }
     public IDGenInterface? IdGenBoundary { get; private set; }
@@ -39,7 +39,7 @@ public class IndoorTiling
     public IndoorTiling() { }  // for deserialize only
 #pragma warning restore CS8618
 
-    public IndoorTiling(IndoorData indoorData, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
+    public IndoorTiling(ThematicLayer indoorData, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
         this.indoorData = indoorData;
         this.IdGenVertex = IdGenVertex;
@@ -74,42 +74,42 @@ public class IndoorTiling
         // return JsonConvert.SerializeObject(this);
     }
 
-    public void AssignIndoorData(IndoorData indoorData)
+    public void AssignIndoorData(ThematicLayer indoorData)
     {
-        this.indoorData.vertexPool.ForEach(v => OnVertexRemoved?.Invoke(v));
-        this.indoorData.boundaryPool.ForEach(b => OnBoundaryRemoved?.Invoke(b));
-        this.indoorData.spacePool.ForEach(s => OnSpaceRemoved?.Invoke(s));
-        this.indoorData.rLinePool.ForEach(r => OnRLinesRemoved?.Invoke(r));
-        this.indoorData.pois.ForEach(p => OnPOIRemoved?.Invoke(p));
+        this.indoorData.cellVertexMember.ForEach(v => OnVertexRemoved?.Invoke(v));
+        this.indoorData.cellBoundaryMember.ForEach(b => OnBoundaryRemoved?.Invoke(b));
+        this.indoorData.cellSpaceMember.ForEach(s => OnSpaceRemoved?.Invoke(s));
+        this.indoorData.rLineGroupMember.ForEach(r => OnRLinesRemoved?.Invoke(r));
+        this.indoorData.poiMember.ForEach(p => OnPOIRemoved?.Invoke(p));
 
         this.indoorData = indoorData;
 
-        this.indoorData.vertexPool.ForEach(v => OnVertexCreated?.Invoke(v));
-        this.indoorData.boundaryPool.ForEach(b => OnBoundaryCreated?.Invoke(b));
-        this.indoorData.spacePool.ForEach(s => OnSpaceCreated?.Invoke(s));
-        this.indoorData.rLinePool.ForEach(r => OnRLinesCreated?.Invoke(r));
-        this.indoorData.pois.ForEach(p => OnPOICreated?.Invoke(p));
+        this.indoorData.cellVertexMember.ForEach(v => OnVertexCreated?.Invoke(v));
+        this.indoorData.cellBoundaryMember.ForEach(b => OnBoundaryCreated?.Invoke(b));
+        this.indoorData.cellSpaceMember.ForEach(s => OnSpaceCreated?.Invoke(s));
+        this.indoorData.rLineGroupMember.ForEach(r => OnRLinesCreated?.Invoke(r));
+        this.indoorData.poiMember.ForEach(p => OnPOICreated?.Invoke(p));
 
 
         IdGenVertex!.Reset();
         IdGenBoundary!.Reset();
         IdGenSpace!.Reset();
-        this.indoorData.vertexPool.ForEach(v => v.Id = IdGenVertex!.Gen());
-        this.indoorData.boundaryPool.ForEach(b => b.Id = IdGenBoundary!.Gen());
-        this.indoorData.spacePool.ForEach(s => s.Id = IdGenSpace!.Gen());
+        this.indoorData.cellVertexMember.ForEach(v => v.Id = IdGenVertex!.Gen());
+        this.indoorData.cellBoundaryMember.ForEach(b => b.Id = IdGenBoundary!.Gen());
+        this.indoorData.cellSpaceMember.ForEach(s => s.Id = IdGenSpace!.Gen());
     }
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
-        foreach (var v in indoorData.vertexPool)
+        foreach (var v in indoorData.cellVertexMember)
             OnVertexRemoved?.Invoke(v);
-        foreach (var b in indoorData.boundaryPool)
+        foreach (var b in indoorData.cellBoundaryMember)
             OnBoundaryRemoved?.Invoke(b);
-        foreach (var s in indoorData.spacePool)
+        foreach (var s in indoorData.cellSpaceMember)
             OnSpaceRemoved?.Invoke(s);
-        foreach (var r in indoorData.rLinePool)
+        foreach (var r in indoorData.rLineGroupMember)
             OnRLinesRemoved?.Invoke(r);
-        indoorData = new IndoorData();
+        indoorData = new ThematicLayer();
 
 
         IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
@@ -119,24 +119,24 @@ public class IndoorTiling
         if (!historyOnly)
         {
             indoorData = indoorTiling.indoorData;
-            foreach (var v in indoorData.vertexPool)
+            foreach (var v in indoorData.cellVertexMember)
                 OnVertexCreated?.Invoke(v);
-            foreach (var b in indoorData.boundaryPool)
+            foreach (var b in indoorData.cellBoundaryMember)
                 OnBoundaryCreated?.Invoke(b);
-            foreach (var s in indoorData.spacePool)
+            foreach (var s in indoorData.cellSpaceMember)
                 OnSpaceCreated?.Invoke(s);
-            foreach (var r in indoorData.rLinePool)
+            foreach (var r in indoorData.rLineGroupMember)
                 OnRLinesCreated?.Invoke(r);
         }
 
         IdGenVertex!.Reset();
-        foreach (var v in indoorData.vertexPool)
+        foreach (var v in indoorData.cellVertexMember)
             v.Id = IdGenVertex!.Gen();
         IdGenBoundary!.Reset();
-        foreach (var b in indoorData.boundaryPool)
+        foreach (var b in indoorData.cellBoundaryMember)
             b.Id = IdGenBoundary!.Gen();
         IdGenSpace!.Reset();
-        foreach (var s in indoorData.spacePool)
+        foreach (var s in indoorData.cellSpaceMember)
             s.Id = IdGenSpace!.Gen();
 
         return true;
@@ -149,7 +149,7 @@ public class IndoorTiling
 
         if (historyOnly)
         {
-            indoorTiling.indoorData = new IndoorData();
+            indoorTiling.indoorData = new ThematicLayer();
             // indoorTiling.instructionHistory.Uuundo();
         }
         else
@@ -275,7 +275,7 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
         CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
-        CellSpace? oldCellSpace = indoorData.spacePool.FirstOrDefault(cs => cs.Polygon.Contains(IndoorData.MiddlePoint(ls)));
+        CellSpace? oldCellSpace = indoorData.cellSpaceMember.FirstOrDefault(cs => cs.Polygon.Contains(ThematicLayer.MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
@@ -387,7 +387,7 @@ public class IndoorTiling
         bool valid = true;
         foreach (var b1 in boundaries)
         {
-            foreach (var b2 in indoorData.boundaryPool)
+            foreach (var b2 in indoorData.cellBoundaryMember)
                 if (!System.Object.ReferenceEquals(b1, b2))
                     if (b1.geom.Crosses(b2.geom))
                     {
@@ -413,7 +413,7 @@ public class IndoorTiling
 
         foreach (var s1 in spaces)
         {
-            foreach (var s2 in indoorData.spacePool)
+            foreach (var s2 in indoorData.cellSpaceMember)
                 if (!System.Object.ReferenceEquals(s1, s2))
                     if (s1.Polygon.Relate(s2.Geom, kInnerInterSectionDE9IMPatter))
                     {
@@ -687,7 +687,7 @@ public class IndoorTiling
         CellSpace? spaceContainCurrent = null;
         List<CellSpace> holeOfCurrent = new List<CellSpace>();
 
-        foreach (CellSpace space in indoorData.spacePool)
+        foreach (CellSpace space in indoorData.cellSpaceMember)
         {
             if (space.Polygon.Contains(current.Polygon.Shell))
                 if (spaceContainCurrent == null)
@@ -799,9 +799,9 @@ public class IndoorTiling
     private void BoundaryLeftRightCheck()
     {
         Dictionary<CellBoundary, int> sideCount = new Dictionary<CellBoundary, int>();
-        indoorData.boundaryPool.ForEach(b => sideCount.Add(b, 0));
+        indoorData.cellBoundaryMember.ForEach(b => sideCount.Add(b, 0));
 
-        indoorData.spacePool.ForEach(space => space.allBoundaries.ForEach(b =>
+        indoorData.cellSpaceMember.ForEach(space => space.allBoundaries.ForEach(b =>
         {
             if (b.leftSpace != space && b.rightSpace != space)
                 throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");

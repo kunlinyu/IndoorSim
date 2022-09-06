@@ -15,7 +15,7 @@ public class AssetApplier : MonoBehaviour, ITool
 
     List<GameObject> boundaryRenderObjs = new List<GameObject>();
 
-    IndoorData? assetIndoorData = null;
+    ThematicLayer? assetIndoorData = null;
 
     float rotation = 0.0f;
     float rotationAnchor = 0.0f;
@@ -31,11 +31,11 @@ public class AssetApplier : MonoBehaviour, ITool
             Debug.Log("asset id: " + assetId);
             asset = IndoorSimData?.assets[assetId];
             if (asset == null) return;
-            assetIndoorData = IndoorData.Deserialize(asset.Value.json);
+            assetIndoorData = ThematicLayer.Deserialize(asset.Value.json);
             if (assetIndoorData == null) throw new System.Exception("can not deserialize asset");
 
             boundaryRenderObjs.Clear();
-            foreach (var boundary in assetIndoorData.boundaryPool)
+            foreach (var boundary in assetIndoorData.cellBoundaryMember)
             {
                 var obj = Instantiate(Resources.Load<GameObject>("BasicShape/BoundaryBare"), this.transform);
                 obj.name = "boundary draft";
@@ -50,11 +50,11 @@ public class AssetApplier : MonoBehaviour, ITool
 
 
         Vector3 center = new Vector3((float)asset.Value.centerX, 0.0f, (float)asset.Value.centerY);
-        for (int i = 0; i < assetIndoorData.boundaryPool.Count; i++)
+        for (int i = 0; i < assetIndoorData.cellBoundaryMember.Count; i++)
         {
             Quaternion rot = Quaternion.AngleAxis(rotation, Vector3.up);
-            Vector3 p0 = rot * (U.Coor2Vec(assetIndoorData.boundaryPool[i].P0.Coordinate) - center) + mousePosition.Value;
-            Vector3 p1 = rot * (U.Coor2Vec(assetIndoorData.boundaryPool[i].P1.Coordinate) - center) + mousePosition.Value;
+            Vector3 p0 = rot * (U.Coor2Vec(assetIndoorData.cellBoundaryMember[i].P0.Coordinate) - center) + mousePosition.Value;
+            Vector3 p1 = rot * (U.Coor2Vec(assetIndoorData.cellBoundaryMember[i].P1.Coordinate) - center) + mousePosition.Value;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().positionCount = 2;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(0, p0);
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(1, p1);

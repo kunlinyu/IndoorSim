@@ -8,9 +8,9 @@ using NetTopologySuite.Geometries;
 
 public class IndoorDataAdjacentFinder : AdjacentFinder<CellBoundary>
 {
-    private IndoorData indoorData;
+    private ThematicLayer indoorData;
 
-    public IndoorDataAdjacentFinder(IndoorData indoorData)
+    public IndoorDataAdjacentFinder(ThematicLayer indoorData)
     {
         this.indoorData = indoorData;
     }
@@ -35,10 +35,10 @@ public class IndoorTSNodeBreaker : NodeBreaker<CellBoundary>
 
 public class IndoorDataAStar
 {
-    IndoorData indoorTS;
+    ThematicLayer indoorTS;
     IndoorDataAdjacentFinder adjacentFinder;
 
-    public IndoorDataAStar(IndoorData indoorData)
+    public IndoorDataAStar(ThematicLayer indoorData)
     {
         this.indoorTS = indoorData;
         adjacentFinder = new IndoorDataAdjacentFinder(indoorData);
