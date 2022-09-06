@@ -15,7 +15,7 @@ public class AssetApplier : MonoBehaviour, ITool
 
     List<GameObject> boundaryRenderObjs = new List<GameObject>();
 
-    ThematicLayer? assetIndoorData = null;
+    ThematicLayer? assetLayer = null;
 
     float rotation = 0.0f;
     float rotationAnchor = 0.0f;
@@ -31,11 +31,11 @@ public class AssetApplier : MonoBehaviour, ITool
             Debug.Log("asset id: " + assetId);
             asset = IndoorSimData?.assets[assetId];
             if (asset == null) return;
-            assetIndoorData = ThematicLayer.Deserialize(asset.Value.json);
-            if (assetIndoorData == null) throw new System.Exception("can not deserialize asset");
+            assetLayer = ThematicLayer.Deserialize(asset.Value.json);
+            if (assetLayer == null) throw new System.Exception("can not deserialize asset");
 
             boundaryRenderObjs.Clear();
-            foreach (var boundary in assetIndoorData.cellBoundaryMember)
+            foreach (var boundary in assetLayer.cellBoundaryMember)
             {
                 var obj = Instantiate(Resources.Load<GameObject>("BasicShape/BoundaryBare"), this.transform);
                 obj.name = "boundary draft";
@@ -46,15 +46,15 @@ public class AssetApplier : MonoBehaviour, ITool
 
         Vector3? mousePosition = CameraController.mousePositionOnGround();
         if (mousePosition == null) return;
-        if (assetIndoorData == null) return;
+        if (assetLayer == null) return;
 
 
         Vector3 center = new Vector3((float)asset.Value.centerX, 0.0f, (float)asset.Value.centerY);
-        for (int i = 0; i < assetIndoorData.cellBoundaryMember.Count; i++)
+        for (int i = 0; i < assetLayer.cellBoundaryMember.Count; i++)
         {
             Quaternion rot = Quaternion.AngleAxis(rotation, Vector3.up);
-            Vector3 p0 = rot * (U.Coor2Vec(assetIndoorData.cellBoundaryMember[i].P0.Coordinate) - center) + mousePosition.Value;
-            Vector3 p1 = rot * (U.Coor2Vec(assetIndoorData.cellBoundaryMember[i].P1.Coordinate) - center) + mousePosition.Value;
+            Vector3 p0 = rot * (U.Coor2Vec(assetLayer.cellBoundaryMember[i].P0.Coordinate) - center) + mousePosition.Value;
+            Vector3 p1 = rot * (U.Coor2Vec(assetLayer.cellBoundaryMember[i].P1.Coordinate) - center) + mousePosition.Value;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().positionCount = 2;
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(0, p0);
             boundaryRenderObjs[i].GetComponent<LineRenderer>().SetPosition(1, p1);
@@ -71,7 +71,7 @@ public class AssetApplier : MonoBehaviour, ITool
             }
             IndoorSimData?.SessionCommit();
 
-            assetIndoorData = null;
+            assetLayer = null;
             boundaryRenderObjs.ForEach(obj => Destroy(obj));
             boundaryRenderObjs.Clear();
         }
