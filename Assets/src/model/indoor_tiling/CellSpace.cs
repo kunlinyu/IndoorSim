@@ -13,36 +13,13 @@ using System.Runtime.Serialization;
 
 public class CellSpace : Container
 {
+    [JsonPropertyAttribute] public string Id { get; set; } = "";
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();
-    [JsonPropertyAttribute] public string Id { get; set; } = "";
-
-    [JsonIgnore]
-    public Navigable Navigable
-    {
-        get => navigable;
-        set
-        {
-            navigable = value;
-            allBoundaries.ForEach(b => b.OnUpdate?.Invoke());
-            OnUpdate?.Invoke();
-        }
-    }
+    [JsonIgnore] public RLineGroup? rLines;
     [JsonIgnore] public Polygon Polygon { get => (Polygon)Geom!; }
 
-
-    [JsonIgnore]
-    public List<CellVertex> allVertices
-    {
-        get
-        {
-            HashSet<CellVertex> result = new HashSet<CellVertex>(shellVertices);
-            foreach (var hole in Holes)
-                result.UnionWith(hole.shellVertices);
-            return result.ToList();
-        }
-    }
     [JsonIgnore]
     public List<CellBoundary> allBoundaries
     {
@@ -55,7 +32,29 @@ public class CellSpace : Container
         }
     }
 
-    [JsonIgnore] public RLineGroup? rLines;
+    [JsonIgnore]
+    public Navigable Navigable
+    {
+        get => navigable;
+        set
+        {
+            navigable = value;
+            allBoundaries.ForEach(b => b.OnUpdate?.Invoke());
+            OnUpdate?.Invoke();
+        }
+    }
+
+    [JsonIgnore]
+    public List<CellVertex> allVertices
+    {
+        get
+        {
+            HashSet<CellVertex> result = new HashSet<CellVertex>(shellVertices);
+            foreach (var hole in Holes)
+                result.UnionWith(hole.shellVertices);
+            return result.ToList();
+        }
+    }
 
     [JsonIgnore] public Action OnUpdate = () => { };
 

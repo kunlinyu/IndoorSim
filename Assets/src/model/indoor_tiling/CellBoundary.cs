@@ -6,19 +6,19 @@ using Newtonsoft.Json;
 
 #nullable enable
 
-struct BoundaryType
-{
-
-}
 public class CellBoundary
 {
+    [JsonPropertyAttribute] public string Id { get; set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
+    [JsonPropertyAttribute] private LineString? Geom;
+    [JsonIgnore] public CellSpace? leftSpace;
+    [JsonIgnore] public CellSpace? rightSpace;
     [JsonPropertyAttribute] private NaviDirection naviDir { set; get; } = NaviDirection.Left2Right;
     [JsonPropertyAttribute] private Navigable navigable { set; get; } = Navigable.Navigable;
-    [JsonPropertyAttribute] private LineString? Geom;  // complex line string should save to json file
 
     [JsonIgnore] private LineString? autoGenGeom;
+
     [JsonIgnore]
     public LineString geom
     {
@@ -31,34 +31,18 @@ public class CellBoundary
         }
     }
 
-    [JsonPropertyAttribute] public string Id { get; set; }
-
-    [JsonIgnore]
-    public NaviDirection NaviDir
-    {
-        set
-        {
-            naviDir = value;
-            OnUpdate?.Invoke();
-        }
-        get => naviDir;
-    }
-    [JsonIgnore]
-    public Navigable Navigable
-    {
-        set
-        {
-            navigable = value;
-            OnUpdate?.Invoke();
-        }
-        get => navigable;
-    }
-
-    [JsonIgnore] public CellSpace? leftSpace;
-    [JsonIgnore] public CellSpace? rightSpace;
-
+    [JsonIgnore] public NaviDirection NaviDir { get => naviDir; set { naviDir = value; OnUpdate?.Invoke(); } }
+    [JsonIgnore] public Navigable Navigable { get => navigable; set { navigable = value; OnUpdate?.Invoke(); } }
     [JsonIgnore] public Action OnUpdate = () => { };
     [JsonIgnore] public LineString GeomReverse { get => (LineString)geom.Reverse(); }
+
+    private CellBoundary()  // for deserialization only
+    {
+        Id = "";
+        autoGenGeom = new LineString(new Coordinate[0]);
+        P0 = new CellVertex();
+        P1 = new CellVertex();
+    }
 
     public Navigable SmartNavigable()
     {
@@ -86,31 +70,23 @@ public class CellBoundary
         return result;
     }
 
-    private CellBoundary()  // for deserialization
-    {
-        Id = "";
-        autoGenGeom = new LineString(new Coordinate[0]);
-        P0 = new CellVertex();
-        P1 = new CellVertex();
-    }
-
     public LineString GeomOrder(CellVertex start, CellVertex end)
     {
-        if (Object.ReferenceEquals(start, P0) && Object.ReferenceEquals(end, P1)) return this.geom;
-        if (Object.ReferenceEquals(start, P1) && Object.ReferenceEquals(end, P0)) return this.GeomReverse;
+        if (start == P0 && end == P1) return this.geom;
+        if (start == P1 && end == P0) return this.GeomReverse;
         throw new ArgumentException("Don't contain vertices");
     }
 
     public LineString GeomEndWith(CellVertex end)
     {
-        if (Object.ReferenceEquals(end, P1)) return this.geom;
-        if (Object.ReferenceEquals(end, P0)) return this.GeomReverse;
+        if (end == P1) return this.geom;
+        if (end == P0) return this.GeomReverse;
         throw new ArgumentException("Don't contain end vertex");
     }
 
     public CellBoundary(CellVertex p0, CellVertex p1, string id = "null")
     {
-        if (Object.ReferenceEquals(p0, p1)) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
+        if (p0 == p1) throw new ArgumentException("CellBoundary can not connect one same CellVertex");
         autoGenGeom = new GeometryFactory().CreateLineString(new Coordinate[] { p0.Coordinate, p1.Coordinate });
         P0 = p0;
         P1 = p1;
@@ -139,8 +115,8 @@ public class CellBoundary
 
     public bool Contains(CellVertex cv)
     {
-        if (Object.ReferenceEquals(cv, P0)) return true;
-        if (Object.ReferenceEquals(cv, P1)) return true;
+        if (cv == P0) return true;
+        if (cv == P1) return true;
         return false;
     }
 
@@ -160,15 +136,15 @@ public class CellBoundary
 
     public bool ConnectSameVertices(CellBoundary cb)
     {
-        if (Object.ReferenceEquals(P0, cb.P0) && Object.ReferenceEquals(P1, cb.P1)) return true;
-        if (Object.ReferenceEquals(P0, cb.P1) && Object.ReferenceEquals(P1, cb.P0)) return true;
+        if (P0 == cb.P0 && P1 == cb.P1) return true;
+        if (P0 == cb.P1 && P1 == cb.P0) return true;
         return false;
     }
 
     public Point ClosestPointTo(CellVertex cv)
     {
-        if (Object.ReferenceEquals(cv, P0)) return geom.GetPointN(1);
-        if (Object.ReferenceEquals(cv, P1)) return geom.GetPointN(geom.NumPoints - 2);
+        if (cv == P0) return geom.GetPointN(1);
+        if (cv == P1) return geom.GetPointN(geom.NumPoints - 2);
         throw new ArgumentException("Not any one of my CellVertex");
     }
 
@@ -187,8 +163,8 @@ public class CellBoundary
             target = space;
         if (target == null) throw new Exception("neither shell nor hole contain this boundary");
 
-        int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P0));
-        int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => Object.ReferenceEquals(cv, P1));
+        int P0Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => cv == P0);
+        int P1Index = target.shellVertices.FindIndex(0, target.shellVertices.Count - 1, cv => cv == P1);
 
         bool leftSide = P0Index < P1Index;
         if (Math.Abs(P0Index - P1Index) != 1)
