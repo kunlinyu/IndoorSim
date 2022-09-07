@@ -1,6 +1,6 @@
 {
   "$id": "1",
-  "vertexPool": [
+  "cellVertexMember": [
     {
       "$id": "2",
       "Id": "VTX0",
@@ -17,7 +17,7 @@
       "Geom": "POINT (-1.6241453886032104 2.0802404880523682)"
     }
   ],
-  "boundaryPool": [
+  "cellBoundaryMember": [
     {
       "$id": "5",
       "Id": "BDR0",
@@ -64,7 +64,7 @@
       "RightFunctional": false
     }
   ],
-  "spacePool": [
+  "cellSpaceMember": [
     {
       "$id": "8",
       "Id": "SPC0",
@@ -95,8 +95,8 @@
       "Holes": []
     }
   ],
-  "rLinePool": [],
-  "digestCache": "{vertexPool.Count: 3,boundaryPool.Count: 3,spacePool digest: {Area:1.41470745935935,Shell.Length:5.5247084149479,Holes.Length:0},}",
+  "rLineGroupMember": [],
+  "digestCache": "{cellVertexMember.Count: 3,cellBoundaryMember.Count: 3,cellSpaceMember digest: {Area:1.41470745935935,Shell.Length:5.5247084149479,Holes.Length:0},}",
   "history": [
     {
       "$id": "9",

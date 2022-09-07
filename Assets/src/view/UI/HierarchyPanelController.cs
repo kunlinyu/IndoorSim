@@ -110,11 +110,11 @@ public class HierarchyPanelController : MonoBehaviour
         indoorMapFoldout.SetValueWithoutNotify(true);
 
         var jsonData = JObject.Parse(json);
-        foreach (var vertexJson in jsonData["vertexPool"].Children())
+        foreach (var vertexJson in jsonData["cellVertexMember"].Children())
             indoorMapFoldout.Add(new TextElement() { text = vertexJson["Id"].Value<string>() });
-        foreach (var boundaryJson in jsonData["boundaryPool"].Children())
+        foreach (var boundaryJson in jsonData["cellBoundaryMember"].Children())
             indoorMapFoldout.Add(new TextElement() { text = boundaryJson["Id"].Value<string>() });
-        foreach (var spaceJson in jsonData["spacePool"].Children())
+        foreach (var spaceJson in jsonData["cellSpaceMember"].Children())
             indoorMapFoldout.Add(new TextElement() { text = spaceJson["Id"].Value<string>() });
     }
 
