@@ -14,6 +14,9 @@ using System.Runtime.Serialization;
 public class CellSpace : Container
 {
     [JsonPropertyAttribute] public string Id { get; set; } = "";
+    [JsonPropertyAttribute] public string? level = null;
+    [JsonPropertyAttribute] public string? name = null;
+    [JsonPropertyAttribute] public bool PoI = false;
     [JsonPropertyAttribute] public List<CellVertex> shellVertices { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> shellBoundaries { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> Holes { get; private set; } = new List<CellSpace>();

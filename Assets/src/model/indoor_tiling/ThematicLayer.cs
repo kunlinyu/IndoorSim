@@ -11,9 +11,23 @@ using NetTopologySuite.Operation.Polygonize;
 
 #nullable enable
 
+public enum ThemeLayerValueType
+{
+    Topographic,
+    Sensor,
+    Logical,
+    Unknown,
+    Property,
+    Other,
+}
+
 [Serializable]
 public class ThematicLayer
 {
+    [JsonPropertyAttribute] public bool semanticExtension;
+    [JsonPropertyAttribute] public ThemeLayerValueType theme;
+    [JsonPropertyAttribute] public DateTime creationDate;
+    [JsonPropertyAttribute] public DateTime terminationDate;
     [JsonPropertyAttribute] public List<CellVertex> cellVertexMember { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> cellBoundaryMember { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> cellSpaceMember { get; private set; } = new List<CellSpace>();

@@ -24,7 +24,16 @@ public class ShouldSerializeContractResolver : DefaultContractResolver
                     return dt != DateTime.MinValue;
                 };
         }
-
+        if (property.DeclaringType == typeof(ThematicLayer) && property.PropertyType == typeof(DateTime))
+        {
+            property.ShouldSerialize =
+                instance =>
+                {
+                    ThematicLayer layer = (ThematicLayer)instance;
+                    DateTime dt = (DateTime)(layer.GetType().GetField(property.PropertyName).GetValue(layer));
+                    return dt != DateTime.MinValue;
+                };
+        }
         return property;
     }
 
