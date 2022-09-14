@@ -36,12 +36,12 @@ public class SimDataController : MonoBehaviour
 
             eventDispatcher?.Raise(this, e);
         };
-        indoorSimData.OnIndoorDataUpdated += (indoorData) =>
+        indoorSimData.OnIndoorFeatureUpdated += (indoorData) =>
         {
             var e = new UIEvent();
             e.type = UIEventType.Hierarchy;
             e.name = "indoordata";
-            e.message = indoorData.Serialize(false);  // TODO: too slow
+            e.message = indoorData.activeLayer.Serialize(false);  // TODO: too slow
 
             eventDispatcher?.Raise(this, e);
         };

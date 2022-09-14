@@ -11,16 +11,6 @@ using NetTopologySuite.Operation.Polygonize;
 
 #nullable enable
 
-public enum ThemeLayerValueType
-{
-    Topographic,
-    Sensor,
-    Logical,
-    Unknown,
-    Property,
-    Other,
-}
-
 [Serializable]
 public class ThematicLayer
 {
@@ -28,17 +18,35 @@ public class ThematicLayer
     [JsonPropertyAttribute] public ThemeLayerValueType theme;
     [JsonPropertyAttribute] public DateTime creationDate;
     [JsonPropertyAttribute] public DateTime terminationDate;
+    [JsonPropertyAttribute] public string level = "";
+
     [JsonPropertyAttribute] public List<CellVertex> cellVertexMember { get; private set; } = new List<CellVertex>();
     [JsonPropertyAttribute] public List<CellBoundary> cellBoundaryMember { get; private set; } = new List<CellBoundary>();
     [JsonPropertyAttribute] public List<CellSpace> cellSpaceMember { get; private set; } = new List<CellSpace>();
     [JsonPropertyAttribute] public List<RLineGroup> rLineGroupMember { get; private set; } = new List<RLineGroup>();
     [JsonPropertyAttribute] public List<IndoorPOI> poiMember { get; private set; } = new List<IndoorPOI>();
 
+    [JsonIgnore] public Action<CellVertex>? OnVertexCreated;
+    [JsonIgnore] public Action<CellVertex>? OnVertexRemoved;
+    [JsonIgnore] public Action<CellBoundary>? OnBoundaryCreated;
+    [JsonIgnore] public Action<CellBoundary>? OnBoundaryRemoved;
+    [JsonIgnore] public Action<CellSpace>? OnSpaceCreated;
+    [JsonIgnore] public Action<CellSpace>? OnSpaceRemoved;
+    [JsonIgnore] public Action<RLineGroup>? OnRLinesCreated;
+    [JsonIgnore] public Action<RLineGroup>? OnRLinesRemoved;
+    [JsonIgnore] public Action<IndoorPOI>? OnPOICreated;
+    [JsonIgnore] public Action<IndoorPOI>? OnPOIRemoved;
+
     [JsonIgnore] public const double kFindGeomEpsilon = 1e-4;
 
     [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
     [JsonIgnore] private Dictionary<Container, HashSet<IndoorPOI>> space2POIs = new Dictionary<Container, HashSet<IndoorPOI>>();
+
+    public ThematicLayer(string level)
+    {
+        this.level = level;
+    }
 
     public bool Contains(CellVertex vertex) => cellVertexMember.Contains(vertex);
     public bool Contains(CellBoundary boundary) => cellBoundaryMember.Contains(boundary);
@@ -62,6 +70,8 @@ public class ThematicLayer
         if (cellVertexMember.Contains(vertex)) throw new ArgumentException("add redundant cell vertex");
         cellVertexMember.Add(vertex);
         vertex2Boundaries[vertex] = new HashSet<CellBoundary>();
+
+        OnVertexCreated?.Invoke(vertex);
     }
 
     public void RemoveVertex(CellVertex vertex)
@@ -72,6 +82,8 @@ public class ThematicLayer
         else
             throw new InvalidOperationException("You should remove all boundary connect to this vertex first");
         cellVertexMember.Remove(vertex);
+
+        OnVertexRemoved?.Invoke(vertex);
     }
 
     public void AddBoundary(CellBoundary boundary)
@@ -81,6 +93,8 @@ public class ThematicLayer
         vertex2Boundaries[boundary.P0].Add(boundary);
         vertex2Boundaries[boundary.P1].Add(boundary);
         boundary2RLines[boundary] = new HashSet<RepresentativeLine>();
+
+        OnBoundaryCreated?.Invoke(boundary);
     }
 
     public void RemoveBoundary(CellBoundary boundary)
@@ -95,6 +109,8 @@ public class ThematicLayer
         cellBoundaryMember.Remove(boundary);
         vertex2Boundaries[boundary.P0].Remove(boundary);
         vertex2Boundaries[boundary.P1].Remove(boundary);
+
+        OnBoundaryRemoved?.Invoke(boundary);
     }
 
     public void AddSpace(CellSpace space, string id)
@@ -105,6 +121,8 @@ public class ThematicLayer
         cellSpaceMember.Add(space);
         space.allBoundaries.ForEach(b => b.PartialBound(space));
         space2POIs[space] = new HashSet<IndoorPOI>();
+
+        OnSpaceCreated?.Invoke(space);
     }
 
     public void RemoveSpace(CellSpace space)
@@ -121,6 +139,8 @@ public class ThematicLayer
 
         cellSpaceMember.Remove(space);
         space.allBoundaries.ForEach(b => b.PartialUnBound(space));
+
+        OnSpaceRemoved?.Invoke(space);
     }
 
     public void AddRLines(RLineGroup rLineGroup)
@@ -129,6 +149,8 @@ public class ThematicLayer
         rLineGroupMember.Add(rLineGroup);
         rLineGroup.space.rLines = rLineGroup;
         rLineGroup.rLines.ForEach(rl => { boundary2RLines[rl.fr].Add(rl); boundary2RLines[rl.to].Add(rl); });
+
+        OnRLinesCreated?.Invoke(rLineGroup);
     }
 
     public void RemoveRLines(RLineGroup rLineGroup)
@@ -139,6 +161,8 @@ public class ThematicLayer
         rLineGroup.space.rLines = null;
 
         rLineGroup.rLines.ForEach(rl => { boundary2RLines[rl.fr].Remove(rl); boundary2RLines[rl.to].Remove(rl); });
+
+        OnRLinesRemoved?.Invoke(rLineGroup);
     }
 
     public void AddPOI(IndoorPOI poi)
@@ -147,6 +171,8 @@ public class ThematicLayer
 
         poiMember.Add(poi);
         poi.foi.ForEach(space => space2POIs[space].Add(poi));
+
+        OnPOICreated?.Invoke(poi);
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
@@ -160,6 +186,8 @@ public class ThematicLayer
         if (!poiMember.Contains(poi)) throw new ArgumentException("unknow poi: " + poi.id);
         poi.foi.ForEach(space => space2POIs[space].Remove(poi));
         poiMember.Remove(poi);
+
+        OnPOIRemoved?.Invoke(poi);
     }
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
@@ -186,8 +214,8 @@ public class ThematicLayer
         rLines.SetPassType(fr, to, passType);
     }
 
-    public CellVertex? FindVertexCoor(Point coor)
-    => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Distance(coor) < kFindGeomEpsilon);
+    public CellVertex? FindVertexCoor(Point point)
+        => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Distance(point) < kFindGeomEpsilon);
 
     public CellVertex? FindVertexCoor(Coordinate coor)
         => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < kFindGeomEpsilon);

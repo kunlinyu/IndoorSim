@@ -68,7 +68,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -82,7 +82,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -116,7 +116,7 @@ public class AStarTool : MonoBehaviour, ITool
         if (status == AStarToolStatus.SourceClicked)
         {
             targetPoint = CameraController.mousePositionOnGround();
-            var space2 = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+            var space2 = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
             if (space2 != null)
             {
                 targetSpace = space2;
@@ -131,7 +131,7 @@ public class AStarTool : MonoBehaviour, ITool
 
         if (clickAStar || dynamicAStar)
         {
-            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
+            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.activeLayer).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
             PlanSimpleResult? simpleResult = result?.ToSimple();
             if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)
             {

@@ -14,9 +14,9 @@ public class AssetSaver : MonoBehaviour, ITool
     public void ExtractSelected2Asset()
     {
         if (mapView == null) throw new System.Exception("mapView null");
-        var selectedVertices = mapView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
-        var selectedBoundaries = mapView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
-        var selectedSpaces = mapView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
+        var selectedVertices = mapView.activeLayerView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
+        var selectedBoundaries = mapView.activeLayerView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
+        var selectedSpaces = mapView.activeLayerView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
         // TODO(debt): selected agents
 
         if (selectedVertices.Count > 0 && selectedBoundaries.Count > 0)
@@ -39,17 +39,17 @@ public class AssetSaver : MonoBehaviour, ITool
         if (mapView == null) return "";
         if (screenshotCamera == null) return "";
 
-        foreach (var entry in mapView.vertex2Obj)
+        foreach (var entry in mapView.activeLayerView.vertex2Obj)
             if (!entry.Value.GetComponent<VertexController>().selected)
                 entry.Value.SetActive(false);
-        foreach (var entry in mapView.boundary2Obj)
+        foreach (var entry in mapView.activeLayerView.boundary2Obj)
             if (!entry.Value.GetComponent<BoundaryController>().selected)
                 entry.Value.SetActive(false);
-        foreach (var entry in mapView.cellspace2Obj)
+        foreach (var entry in mapView.activeLayerView.cellspace2Obj)
             if (!entry.Value.GetComponent<SpaceController>().selected)
             {
                 entry.Value.SetActive(false);
-                mapView.rLine2Obj[entry.Key.rLines].SetActive(false);
+                mapView.activeLayerView.rLine2Obj[entry.Key.rLines].SetActive(false);
             }
 
         int resWidth = 128;
@@ -73,13 +73,13 @@ public class AssetSaver : MonoBehaviour, ITool
         byte[] bytes = screenShot.EncodeToPNG();
         string filename = ScreenShotName(resWidth, resHeight);
 
-        foreach (var entry in mapView.vertex2Obj)
+        foreach (var entry in mapView.activeLayerView.vertex2Obj)
             entry.Value.SetActive(true);
-        foreach (var entry in mapView.boundary2Obj)
+        foreach (var entry in mapView.activeLayerView.boundary2Obj)
             entry.Value.SetActive(true);
-        foreach (var entry in mapView.cellspace2Obj)
+        foreach (var entry in mapView.activeLayerView.cellspace2Obj)
             entry.Value.SetActive(true);
-        foreach (var entry in mapView.rLine2Obj)
+        foreach (var entry in mapView.activeLayerView.rLine2Obj)
             entry.Value.SetActive(true);
         return Convert.ToBase64String(bytes);
     }

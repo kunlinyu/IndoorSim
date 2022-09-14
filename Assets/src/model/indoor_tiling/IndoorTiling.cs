@@ -19,29 +19,21 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 public class IndoorTiling
 {
     public string kInnerInterSectionDE9IMPatter = "T********";
-    public ThematicLayer indoorData { get; private set; }
+    public ThematicLayer layer { get; private set; }
     public string digestCache = "";
     public IDGenInterface? IdGenVertex { get; private set; }
     public IDGenInterface? IdGenBoundary { get; private set; }
     public IDGenInterface? IdGenSpace { get; private set; }
-    public Action<CellVertex> OnVertexCreated = (v) => { };
-    public Action<CellBoundary> OnBoundaryCreated = (b) => { };
-    public Action<CellSpace> OnSpaceCreated = (s) => { };
-    public Action<RLineGroup> OnRLinesCreated = (rLs) => { };
-    public Action<CellVertex> OnVertexRemoved = (v) => { };
-    public Action<CellBoundary> OnBoundaryRemoved = (b) => { };
-    public Action<CellSpace> OnSpaceRemoved = (s) => { };
-    public Action<RLineGroup> OnRLinesRemoved = (rLs) => { };
-    public Action<IndoorPOI> OnPOICreated = (poi) => { };
-    public Action<IndoorPOI> OnPOIRemoved = (poi) => { };
+
 
 #pragma warning disable CS8618
     public IndoorTiling() { }  // for deserialize only
 #pragma warning restore CS8618
 
+    // use same IndoorTiling for all ThematicLayer
     public IndoorTiling(ThematicLayer indoorData, IDGenInterface IdGenVertex, IDGenInterface IdGenBoundary, IDGenInterface IdGenSpace)
     {
-        this.indoorData = indoorData;
+        this.layer = indoorData;
         this.IdGenVertex = IdGenVertex;
         this.IdGenBoundary = IdGenBoundary;
         this.IdGenSpace = IdGenSpace;
@@ -49,7 +41,7 @@ public class IndoorTiling
 
     public string Serialize(bool indent = false)
     {
-        digestCache = indoorData.CalcDigest();
+        digestCache = layer.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto,
@@ -76,95 +68,20 @@ public class IndoorTiling
 
     public void AssignIndoorData(ThematicLayer indoorData)
     {
-        this.indoorData.cellVertexMember.ForEach(v => OnVertexRemoved?.Invoke(v));
-        this.indoorData.cellBoundaryMember.ForEach(b => OnBoundaryRemoved?.Invoke(b));
-        this.indoorData.cellSpaceMember.ForEach(s => OnSpaceRemoved?.Invoke(s));
-        this.indoorData.rLineGroupMember.ForEach(r => OnRLinesRemoved?.Invoke(r));
-        this.indoorData.poiMember.ForEach(p => OnPOIRemoved?.Invoke(p));
-
-        this.indoorData = indoorData;
-
-        this.indoorData.cellVertexMember.ForEach(v => OnVertexCreated?.Invoke(v));
-        this.indoorData.cellBoundaryMember.ForEach(b => OnBoundaryCreated?.Invoke(b));
-        this.indoorData.cellSpaceMember.ForEach(s => OnSpaceCreated?.Invoke(s));
-        this.indoorData.rLineGroupMember.ForEach(r => OnRLinesCreated?.Invoke(r));
-        this.indoorData.poiMember.ForEach(p => OnPOICreated?.Invoke(p));
-
+        this.layer = indoorData;
 
         IdGenVertex!.Reset();
         IdGenBoundary!.Reset();
         IdGenSpace!.Reset();
-        this.indoorData.cellVertexMember.ForEach(v => v.Id = IdGenVertex!.Gen());
-        this.indoorData.cellBoundaryMember.ForEach(b => b.Id = IdGenBoundary!.Gen());
-        this.indoorData.cellSpaceMember.ForEach(s => s.Id = IdGenSpace!.Gen());
+        this.layer.cellVertexMember.ForEach(v => v.Id = IdGenVertex!.Gen());
+        this.layer.cellBoundaryMember.ForEach(b => b.Id = IdGenBoundary!.Gen());
+        this.layer.cellSpaceMember.ForEach(s => s.Id = IdGenSpace!.Gen());
     }
-
-    public bool DeserializeInPlace(string json, bool historyOnly = false)
-    {
-        foreach (var v in indoorData.cellVertexMember)
-            OnVertexRemoved?.Invoke(v);
-        foreach (var b in indoorData.cellBoundaryMember)
-            OnBoundaryRemoved?.Invoke(b);
-        foreach (var s in indoorData.cellSpaceMember)
-            OnSpaceRemoved?.Invoke(s);
-        foreach (var r in indoorData.rLineGroupMember)
-            OnRLinesRemoved?.Invoke(r);
-        indoorData = new ThematicLayer();
-
-
-        IndoorTiling? indoorTiling = Deserialize(json, historyOnly);
-        if (indoorTiling == null) return false;
-
-
-        if (!historyOnly)
-        {
-            indoorData = indoorTiling.indoorData;
-            foreach (var v in indoorData.cellVertexMember)
-                OnVertexCreated?.Invoke(v);
-            foreach (var b in indoorData.cellBoundaryMember)
-                OnBoundaryCreated?.Invoke(b);
-            foreach (var s in indoorData.cellSpaceMember)
-                OnSpaceCreated?.Invoke(s);
-            foreach (var r in indoorData.rLineGroupMember)
-                OnRLinesCreated?.Invoke(r);
-        }
-
-        IdGenVertex!.Reset();
-        foreach (var v in indoorData.cellVertexMember)
-            v.Id = IdGenVertex!.Gen();
-        IdGenBoundary!.Reset();
-        foreach (var b in indoorData.cellBoundaryMember)
-            b.Id = IdGenBoundary!.Gen();
-        IdGenSpace!.Reset();
-        foreach (var s in indoorData.cellSpaceMember)
-            s.Id = IdGenSpace!.Gen();
-
-        return true;
-    }
-
-    public static IndoorTiling? Deserialize(string json, bool historyOnly = false)
-    {
-        IndoorTiling? indoorTiling = JsonConvert.DeserializeObject<IndoorTiling>(json, new WKTConverter(), new CoorConverter(), new StackConverter());
-        if (indoorTiling == null) return null;
-
-        if (historyOnly)
-        {
-            indoorTiling.indoorData = new ThematicLayer();
-            // indoorTiling.instructionHistory.Uuundo();
-        }
-        else
-        {
-            if (indoorTiling.indoorData != null)
-                indoorTiling.indoorData.UpdateIndices();
-        }
-        return indoorTiling;
-    }
-
 
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
-        CellVertex? startVertex = indoorData.FindVertexCoor(startCoor);
-        CellVertex? endVertex = indoorData.FindVertexCoor(endCoor);
+        CellVertex? startVertex = layer.FindVertexCoor(startCoor);
+        CellVertex? endVertex = layer.FindVertexCoor(endCoor);
         if (startVertex != null && endVertex != null)
             return AddBoundary(startVertex, endVertex, id);
         else if (startVertex != null && endVertex == null)
@@ -179,7 +96,7 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
 
-        if (indoorData.CrossesBoundaries(ls)) return null;
+        if (layer.CrossesBoundaries(ls)) return null;
 
         var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
         AddVertexInternal(start);
@@ -197,9 +114,9 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, endCoor });
 
-        if (!indoorData.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (!layer.Contains(start)) throw new ArgumentException("can not find vertex start");
 
-        if (indoorData.CrossesBoundaries(ls)) return null;
+        if (layer.CrossesBoundaries(ls)) return null;
 
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
         AddVertexInternal(end);
@@ -215,9 +132,9 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, end.Coordinate });
 
-        if (!indoorData.Contains(end)) throw new ArgumentException("can not find vertex end");
+        if (!layer.Contains(end)) throw new ArgumentException("can not find vertex end");
 
-        if (indoorData.CrossesBoundaries(ls)) return null;
+        if (layer.CrossesBoundaries(ls)) return null;
 
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
         AddVertexInternal(start);
@@ -241,12 +158,12 @@ public class IndoorTiling
     {
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, end.Coordinate });
 
-        if (!indoorData.Contains(start)) throw new ArgumentException("can not find vertex start");
-        if (!indoorData.Contains(end)) throw new ArgumentException("can not find vertex end");
+        if (!layer.Contains(start)) throw new ArgumentException("can not find vertex start");
+        if (!layer.Contains(end)) throw new ArgumentException("can not find vertex end");
         if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
 
-        if (indoorData.CrossesBoundaries(ls)) return null;
-        if (indoorData.VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
+        if (layer.CrossesBoundaries(ls)) return null;
+        if (layer.VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
 
@@ -275,7 +192,7 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
         CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
-        CellSpace? oldCellSpace = indoorData.cellSpaceMember.FirstOrDefault(cs => cs.Polygon.Contains(ThematicLayer.MiddlePoint(ls)));
+        CellSpace? oldCellSpace = layer.cellSpaceMember.FirstOrDefault(cs => cs.Polygon.Contains(ThematicLayer.MiddlePoint(ls)));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
@@ -326,7 +243,7 @@ public class IndoorTiling
 
     public CellVertex SplitBoundary(CellBoundary oldBoundary, Coordinate middleCoor, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
     {
-        if (!indoorData.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
+        if (!layer.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
         if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
         // TODO(robust): check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries
         Debug.Log("split boundary");
@@ -372,10 +289,10 @@ public class IndoorTiling
         HashSet<CellBoundary> boundaries = new HashSet<CellBoundary>();
         HashSet<CellSpace> spaces = new HashSet<CellSpace>();
         foreach (var vertex in vertices)
-            if (indoorData.Contains(vertex))
+            if (layer.Contains(vertex))
             {
-                boundaries.UnionWith(indoorData.Vertex2Boundaries(vertex));
-                spaces.UnionWith(indoorData.Vertex2Spaces(vertex));
+                boundaries.UnionWith(layer.Vertex2Boundaries(vertex));
+                spaces.UnionWith(layer.Vertex2Spaces(vertex));
             }
             else throw new ArgumentException("can not find vertex");
         Debug.Log("related boundaries: " + boundaries.Count);
@@ -387,7 +304,7 @@ public class IndoorTiling
         bool valid = true;
         foreach (var b1 in boundaries)
         {
-            foreach (var b2 in indoorData.cellBoundaryMember)
+            foreach (var b2 in layer.cellBoundaryMember)
                 if (!System.Object.ReferenceEquals(b1, b2))
                     if (b1.geom.Crosses(b2.geom))
                     {
@@ -413,7 +330,7 @@ public class IndoorTiling
 
         foreach (var s1 in spaces)
         {
-            foreach (var s2 in indoorData.cellSpaceMember)
+            foreach (var s2 in layer.cellSpaceMember)
                 if (!System.Object.ReferenceEquals(s1, s2))
                     if (s1.Polygon.Relate(s2.Geom, kInnerInterSectionDE9IMPatter))
                     {
@@ -467,9 +384,9 @@ public class IndoorTiling
         RemoveBoundaryInternal(boundary);
 
         // Remove Vertex if no boundary connect to it
-        if (indoorData.Vertex2Boundaries(boundary.P0).Count == 0)
+        if (layer.Vertex2Boundaries(boundary.P0).Count == 0)
             RemoveVertexInternal(boundary.P0);
-        if (indoorData.Vertex2Boundaries(boundary.P1).Count == 0)
+        if (layer.Vertex2Boundaries(boundary.P1).Count == 0)
             RemoveVertexInternal(boundary.P1);
     }
 
@@ -549,7 +466,7 @@ public class IndoorTiling
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
-        indoorData.UpdateBoundaryNaviDirection(boundary, direction);
+        layer.UpdateBoundaryNaviDirection(boundary, direction);
 
         boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
         boundary.rightSpace?.rLines?.OnUpdate?.Invoke();
@@ -557,7 +474,7 @@ public class IndoorTiling
 
     public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
     {
-        indoorData.UpdateBoundaryNavigable(boundary, navigable);
+        layer.UpdateBoundaryNavigable(boundary, navigable);
 
         boundary.leftSpace?.rLines?.OnUpdate?.Invoke();
         boundary.rightSpace?.rLines?.OnUpdate?.Invoke();
@@ -565,22 +482,22 @@ public class IndoorTiling
 
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
     {
-        indoorData.UpdateSpaceNavigable(space, navigable);
+        layer.UpdateSpaceNavigable(space, navigable);
 
         space.rLines?.OnUpdate?.Invoke();
 
-        indoorData.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
+        layer.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
 
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {
-        indoorData.UpdateRLinePassType(rLines, fr, to, passType);
+        layer.UpdateRLinePassType(rLines, fr, to, passType);
     }
 
     private List<JumpInfo> AdjacentFinder(CellVertex cv)
     {
-        if (indoorData.Contains(cv))
-            return indoorData.Vertex2Boundaries(cv).Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
+        if (layer.Contains(cv))
+            return layer.Vertex2Boundaries(cv).Select(b => new JumpInfo() { target = b.Another(cv), through = b }).ToList();
         else
         {
             Debug.LogError(cv.Id);
@@ -590,22 +507,21 @@ public class IndoorTiling
 
     public void AddPOI(IndoorPOI poi)
     {
-        if (poi.foi.Any(foi => !indoorData.Contains((CellSpace)foi))) throw new ArgumentException("unknow feature of interest");
-        if (poi.queue.Any(item => !indoorData.Contains((CellSpace)item))) throw new ArgumentException("unknow queue space");
-        if (!indoorData.Contains((CellSpace)poi.layOnSpace)) throw new ArgumentException("unknow space lay on");
-        if (!poi.CanLayOn(indoorData.FindSpaceGeom(poi.point.Coordinate))) throw new ArgumentException("poi can not lay on the space");
+        if (poi.foi.Any(foi => !layer.Contains((CellSpace)foi))) throw new ArgumentException("unknow feature of interest");
+        if (poi.queue.Any(item => !layer.Contains((CellSpace)item))) throw new ArgumentException("unknow queue space");
+        if (!layer.Contains((CellSpace)poi.layOnSpace)) throw new ArgumentException("unknow space lay on");
+        if (!poi.CanLayOn(layer.FindSpaceGeom(poi.point.Coordinate))) throw new ArgumentException("poi can not lay on the space");
 
-        indoorData.AddPOI(poi);
-        OnPOICreated?.Invoke(poi);
+        layer.AddPOI(poi);
     }
 
     // TODO: check all POI after boundary updated or removed
     public bool UpdatePOI(IndoorPOI poi, Coordinate coor)
     {
-        CellSpace? space = indoorData.FindSpaceGeom(coor);
+        CellSpace? space = layer.FindSpaceGeom(coor);
         if (poi.CanLayOn(space))
         {
-            indoorData.UpdatePOI(poi, coor);
+            layer.UpdatePOI(poi, coor);
             Debug.Log("Can lay on");
             return true;
         }
@@ -618,58 +534,49 @@ public class IndoorTiling
 
     public void RemovePOI(IndoorPOI poi)
     {
-        indoorData.RemovePOI(poi);
-        OnPOIRemoved?.Invoke(poi);
+        layer.RemovePOI(poi);
     }
 
     private void AddVertexInternal(CellVertex vertex)
     {
-        indoorData.AddVertex(vertex);
-        OnVertexCreated?.Invoke(vertex);
+        layer.AddVertex(vertex);
     }
 
     private void RemoveVertexInternal(CellVertex vertex)
     {
-        indoorData.RemoveVertex(vertex);
-        OnVertexRemoved?.Invoke(vertex);
+        layer.RemoveVertex(vertex);
     }
 
     private void AddBoundaryInternal(CellBoundary boundary)
     {
-        indoorData.AddBoundary(boundary);
-        OnBoundaryCreated.Invoke(boundary);
+        layer.AddBoundary(boundary);
     }
 
     private void RemoveBoundaryInternal(CellBoundary boundary)
     {
-        indoorData.RemoveBoundary(boundary);
-        OnBoundaryRemoved?.Invoke(boundary);
+        layer.RemoveBoundary(boundary);
     }
 
 
     private void AddSpaceInternal(CellSpace space)
     {
-        indoorData.AddSpace(space, IdGenSpace?.Gen() ?? "no id");
-        OnSpaceCreated?.Invoke(space);
+        layer.AddSpace(space, IdGenSpace?.Gen() ?? "no id");
 
         RLineGroup rLineGroup = new RLineGroup(space);
 
-        indoorData.AddRLines(rLineGroup);
-        OnRLinesCreated?.Invoke(rLineGroup);
+        layer.AddRLines(rLineGroup);
 
-        indoorData.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
+        layer.Space2Spaces(space).ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
 
     private void RemoveSpaceInternal(CellSpace space)
     {
-        List<CellSpace> neighbors = indoorData.Space2Spaces(space);
+        List<CellSpace> neighbors = layer.Space2Spaces(space);
 
         var rLines = space.rLines!;
-        indoorData.RemoveRLines(rLines);
-        OnRLinesRemoved?.Invoke(rLines);
+        layer.RemoveRLines(rLines);
 
-        indoorData.RemoveSpace(space);
-        OnSpaceRemoved?.Invoke(space);
+        layer.RemoveSpace(space);
 
         neighbors.ForEach(neighbor => neighbor.rLines?.OnUpdate?.Invoke());
     }
@@ -687,7 +594,7 @@ public class IndoorTiling
         CellSpace? spaceContainCurrent = null;
         List<CellSpace> holeOfCurrent = new List<CellSpace>();
 
-        foreach (CellSpace space in indoorData.cellSpaceMember)
+        foreach (CellSpace space in layer.cellSpaceMember)
         {
             if (space.Polygon.Contains(current.Polygon.Shell))
                 if (spaceContainCurrent == null)
@@ -786,8 +693,8 @@ public class IndoorTiling
 
     private void FullPolygonizerCheck()
     {
-        string expectDigest = indoorData.CalcDigest(Digest.PolygonList(indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
-        string increaseDigest = indoorData.CalcDigest();
+        string expectDigest = layer.CalcDigest(Digest.PolygonList(layer.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        string increaseDigest = layer.CalcDigest();
         if (expectDigest != increaseDigest)
         {
             Debug.Log(expectDigest);
@@ -799,9 +706,9 @@ public class IndoorTiling
     private void BoundaryLeftRightCheck()
     {
         Dictionary<CellBoundary, int> sideCount = new Dictionary<CellBoundary, int>();
-        indoorData.cellBoundaryMember.ForEach(b => sideCount.Add(b, 0));
+        layer.cellBoundaryMember.ForEach(b => sideCount.Add(b, 0));
 
-        indoorData.cellSpaceMember.ForEach(space => space.allBoundaries.ForEach(b =>
+        layer.cellSpaceMember.ForEach(space => space.allBoundaries.ForEach(b =>
         {
             if (b.leftSpace != space && b.rightSpace != space)
                 throw new Exception($"space({space.Id}) should be one of side of boundary({b.Id})");

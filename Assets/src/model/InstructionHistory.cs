@@ -29,7 +29,7 @@ public class InstructionHistory<InstructionType>
     public InstructionHistory() { }  // for deserialize only
 #pragma warning restore CS8618
 
-    public bool IgnoreDo { get; set; } = false;
+    [JsonIgnore] public bool IgnoreDo { get; set; } = false;
 
     public void SessionStart()
     {

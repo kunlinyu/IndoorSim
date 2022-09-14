@@ -23,19 +23,19 @@ public class ConsistencyTest
         IndoorSimData newIndoorSimData = IndoorSimData.Deserialize(json, true);
         do { } while (newIndoorSimData.Redo());
 
-        string expectDigest = newIndoorSimData.indoorData.CalcDigest(Digest.PolygonList(offlineIndoorSimData.indoorData.Polygonizer().Select(geom => (Polygon)geom).ToList()));
-        Debug.Log(expectDigest);
+        string expectDigest = newIndoorSimData.indoorFeatures.activeLayer.CalcDigest(Digest.PolygonList(offlineIndoorSimData.indoorFeatures.activeLayer.Polygonizer().Select(geom => (Polygon)geom).ToList()));
+        Debug.Log("expect: " + expectDigest);
         Debug.Log("---");
-        Debug.Log(offlineIndoorSimData.digestCache);
+        Debug.Log("offline digest cache: " + offlineIndoorSimData.digestCache);
         if (fullTest)
         {
             Assert.AreEqual(expectDigest, offlineIndoorSimData.digestCache);      // old cache
-            Assert.AreEqual(expectDigest, offlineIndoorSimData.indoorData.CalcDigest());     // old calc
-            Assert.AreEqual(expectDigest, newIndoorSimData.indoorData.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, offlineIndoorSimData.indoorFeatures.activeLayer.CalcDigest());     // old calc
+            Assert.AreEqual(expectDigest, newIndoorSimData.indoorFeatures.activeLayer.CalcDigest());  // new calc
         }
         else
         {
-            Assert.AreEqual(expectDigest, newIndoorSimData.indoorData.CalcDigest());  // new calc
+            Assert.AreEqual(expectDigest, newIndoorSimData.indoorFeatures.activeLayer.CalcDigest());  // new calc
         }
     }
 

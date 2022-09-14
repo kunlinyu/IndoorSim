@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class env : MonoBehaviour
 {
-    private IndoorSimData indoorSimData = new IndoorSimData();  // model
+    private IndoorSimData indoorSimData = new IndoorSimData(true);  // model
 
     public GridMapView gridMapView;  // view
     public IndoorMapView indoorMapView;  // view
@@ -16,7 +16,7 @@ public class env : MonoBehaviour
         UnitySystemConsoleRedirector.Redirect();
 
         gridMapView.indoorSimData = indoorSimData;
-        indoorMapView.indoorTiling = indoorSimData.indoorTiling;
+        indoorMapView.indoorFeatures = indoorSimData.indoorFeatures;
         simulationView.indoorSimData = indoorSimData;
 
         simDataController.indoorSimData = indoorSimData;

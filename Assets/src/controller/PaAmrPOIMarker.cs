@@ -46,7 +46,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void Start()
     {
-        mapView!.SwitchDualityGraph(true);
+        mapView!.activeLayerView.SwitchDualityGraph(true);
         MousePickController.pickType = CurrentPickType.Space;
     }
 
@@ -155,7 +155,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                     Vector3 current = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                     current = ClosestNode(sc, current);
-                    CellSpace? lastSpace = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastSpace = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(last));
                     List<Vector3>? path = Astar(current, last, lastSpace!);
 
                     if (path == null) break;
@@ -208,7 +208,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         humanPoi.id = "picking poi";  // TODO: this is not ID
         IndoorSimData!.AddPOI(humanPoi);
 
-        List<CellSpace?> queueSpace = queueObj.Select(obj => IndoorSimData.indoorData.FindSpaceGeom(U.Vec2Coor(obj.transform.position))).ToList();
+        List<CellSpace?> queueSpace = queueObj.Select(obj => IndoorSimData.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(obj.transform.position))).ToList();
         List<Container> queueContainer = new List<Container>();
         if (queueSpace.Count != 0)
         {
@@ -227,7 +227,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     private Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition)
     {
         List<CellBoundary> inOutBound = sc.Space.InOutBound();
-        List<LineRenderer> lrs = inOutBound.Select(b => mapView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
+        List<LineRenderer> lrs = inOutBound.Select(b => mapView.activeLayerView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
         List<LineString> lineStrings = lrs.Select(lr
           => new GeometryFactory().CreateLineString(new Coordinate[] {U.Vec2Coor(lr.GetPosition(0)),
                                                                       U.Vec2Coor(lr.GetPosition(1))})).ToList();
@@ -248,7 +248,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private List<Vector3>? Astar(Vector3 source, Vector3 target, CellSpace targetSpace)
     {
-        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorData).Search(U.Vec2Coor(source), targetSpace);
+        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.activeLayer).Search(U.Vec2Coor(source), targetSpace);
         PlanSimpleResult? simpleResult = result?.ToSimple();
 
         List<Vector3> path = new List<Vector3>();
@@ -403,7 +403,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     Vector3 last = paAmrPoiPosition;
                     if (this.queueObj.Count > 0)
                         last = this.queueObj[this.queueObj.Count - 1].transform.position;
-                    CellSpace? lastCellSpace = IndoorSimData!.indoorData.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastCellSpace = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(last));
 
                     if (sc != null && sc.Space.navigable == Navigable.Navigable && sc.Space != paAmrPoiLayOnSpace && sc.Space != lastCellSpace)
                     {

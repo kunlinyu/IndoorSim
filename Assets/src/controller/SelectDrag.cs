@@ -57,9 +57,9 @@ public class SelectDrag : MonoBehaviour, ITool
         dragHotSpot = new Vector2(0, 0);
 
         if (mapView == null) throw new System.Exception("mapView null");
-        selectedVertices = mapView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
-        selectedBoundaries = mapView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
-        selectedSpaces = mapView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
+        selectedVertices = mapView.activeLayerView.vertex2Obj.Select((entry, index) => entry.Value.GetComponent<VertexController>()).Where(vc => vc.selected).ToList();
+        selectedBoundaries = mapView.activeLayerView.boundary2Obj.Select((entry, index) => entry.Value.GetComponent<BoundaryController>()).Where(bc => bc.selected).ToList();
+        selectedSpaces = mapView.activeLayerView.cellspace2Obj.Select((entry, index) => entry.Value.GetComponent<SpaceController>()).Where(sc => sc.selected).ToList();
         // TODO: selected agents
 
         MousePickController.pickType = CurrentPickType.All & ~CurrentPickType.RLine;
@@ -101,7 +101,7 @@ public class SelectDrag : MonoBehaviour, ITool
                         {
                             CellBoundary boundary = ((BoundaryController)pointedEntity).Boundary;
                             selectedBoundaries.Add((BoundaryController)pointedEntity);
-                            foreach (var entry in mapView.vertex2Obj)
+                            foreach (var entry in mapView.activeLayerView.vertex2Obj)
                                 if (boundary.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
                         }
@@ -109,10 +109,10 @@ public class SelectDrag : MonoBehaviour, ITool
                         {
                             CellSpace space = ((SpaceController)pointedEntity).Space;
                             selectedSpaces.Add((SpaceController)pointedEntity);
-                            foreach (var entry in mapView.vertex2Obj)
+                            foreach (var entry in mapView.activeLayerView.vertex2Obj)
                                 if (space.allVertices.Contains(entry.Key))
                                     selectedVertices.Add(entry.Value.GetComponent<VertexController>());
-                            foreach (var entry in mapView.boundary2Obj)
+                            foreach (var entry in mapView.activeLayerView.boundary2Obj)
                                 if (space.allBoundaries.Contains(entry.Key))
                                     selectedBoundaries.Add(entry.Value.GetComponent<BoundaryController>());
                         }
@@ -158,7 +158,7 @@ public class SelectDrag : MonoBehaviour, ITool
                     List<Coordinate> coors = SquareFromCursor().Select(v => U.Vec2Coor(v)).ToList();
                     coors.Add(coors[0]);
                     Polygon selectBox = new GeometryFactory().CreatePolygon(coors.ToArray());
-                    foreach (var entry in mapView.vertex2Obj)
+                    foreach (var entry in mapView.activeLayerView.vertex2Obj)
                         if (selectBox.Contains(entry.Key.Geom))
                         {
                             var vc = entry.Value.GetComponent<VertexController>();
@@ -166,7 +166,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             if (!selectedVertices.Contains(vc))
                                 selectedVertices.Add(vc);
                         }
-                    foreach (var entry in mapView.boundary2Obj)
+                    foreach (var entry in mapView.activeLayerView.boundary2Obj)
                         if (selectBox.Contains(entry.Key.geom))
                         {
                             var bc = entry.Value.GetComponent<BoundaryController>();
@@ -174,7 +174,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             if (!selectedBoundaries.Contains(bc))
                                 selectedBoundaries.Add(bc);
                         }
-                    foreach (var entry in mapView.cellspace2Obj)
+                    foreach (var entry in mapView.activeLayerView.cellspace2Obj)
                         if (selectBox.Contains(entry.Key.Geom))
                         {
                             var sc = entry.Value.GetComponent<SpaceController>();
@@ -190,7 +190,7 @@ public class SelectDrag : MonoBehaviour, ITool
                             if (!selectedAgents.Contains(ac))
                                 selectedAgents.Add(ac);
                         }
-                    foreach (var entry in mapView.poi2Obj)
+                    foreach (var entry in mapView.activeLayerView.poi2Obj)
                         if (selectBox.Contains(entry.Key.point))
                         {
                             var pc = entry.Value.GetComponent<POIController>();
