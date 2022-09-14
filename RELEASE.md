@@ -1,5 +1,22 @@
 # version list
 
+## V0.5.0
+* [IndoorSim-WebGL-V0.5.0.78b5fd5](./IndoorSim-WebGL-V0.5.0.78b5fd5)
+* [IndoorSim-WebGL-dev-V0.5.0.78b5fd5](./IndoorSim-WebGL-dev-V0.5.0.78b5fd5)
+* [IndoorSim-StandaloneLinux64-V0.5.0.78b5fd5.tar.gz](./IndoorSim-StandaloneLinux64-V0.5.0.78b5fd5.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.5.0.78b5fd5.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.5.0.78b5fd5.tar.gz)
+
+### DateTime
+2022-09-14 14:19:11 +08
+
+### ChangeLog
+1. 添加IndoorFeatures以兼容IndoorGML2.0
+2. 修改部分class的字段名以兼容IndoorGML2.0
+3. 增加部分字段以兼容IndoorGML2.0
+4. 添加多layer支持，并默认仅创建一个layer
+
+---
+
 ## V0.4.0
 * [IndoorSim-WebGL-V0.4.0.bf439d9](./IndoorSim-WebGL-V0.4.0.bf439d9)
 * [IndoorSim-WebGL-dev-V0.4.0.bf439d9](./IndoorSim-WebGL-dev-V0.4.0.bf439d9)
