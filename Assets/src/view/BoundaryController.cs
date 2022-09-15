@@ -166,6 +166,8 @@ public class BoundaryController : MonoBehaviour, Selectable
     private void UpdateEdge()
     {
         LineRenderer lr = transform.Find("Edge").GetComponent<LineRenderer>();
+
+        // TODO: we should reconsider the if statement and put it in another place
         if (boundary.NaviDir != NaviDirection.NoneDirection &&
             boundary.leftSpace != null && boundary.leftSpace.navigable == Navigable.Navigable &&
             boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)

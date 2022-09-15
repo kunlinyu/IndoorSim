@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using YamlDotNet.Serialization;
+using System.Collections.Generic;
 
 public class LocationsYamlExporter : IExporter
 {
@@ -19,12 +19,35 @@ public class LocationsYamlExporter : IExporter
 
     public void Translate()
     {
+        Dictionary<CellSpace, Node> space2Node = new Dictionary<CellSpace, Node>();
+
         graph = new Graph();
-        graph.locations.Add(new Node() { name = "MAIN_000", pose = new float[] { 0.0f, 0.0f, 0.0f} });
-        graph.locations.Add(new Node() { name = "MAIN_001", pose = new float[] { 0.0f, 0.0f, 0.0f} });
-        graph.locations.Add(new Node() { name = "MAIN_002", pose = new float[] { 0.0f, 0.0f, 0.0f} });
-        graph.routes.Add(new Edge() { from = graph.locations[0], to = graph.locations[1]});
-        graph.routes.Add(new Edge() { from = graph.locations[1], to = graph.locations[2]});
+        int i = 0;
+        indoorSimData.indoorFeatures.layers[0].cellSpaceMember.ForEach(space =>
+        {
+            var centroid = space.Geom.Centroid;
+            string key = $"MAIN_" + i.ToString("D4");
+            i++;
+            Node newNode = new Node() { name = key, pose = new double[] { centroid.X, centroid.Y, 0.0 } };
+            graph.locations.Add(newNode);
+            space2Node[space] = newNode;
+        });
+
+        indoorSimData.indoorFeatures.layers[0].cellBoundaryMember.ForEach(boundary =>
+        {
+
+            if (boundary.NaviDir != NaviDirection.NoneDirection &&
+                boundary.leftSpace != null && boundary.leftSpace.navigable == Navigable.Navigable &&
+                boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)
+            {
+                if (boundary.NaviDir == NaviDirection.Left2Right || boundary.NaviDir == NaviDirection.BiDirection)
+                    graph.routes.Add(new Edge() { from = space2Node[boundary.leftSpace], to = space2Node[boundary.rightSpace] });
+
+                if (boundary.NaviDir == NaviDirection.Right2Left || boundary.NaviDir == NaviDirection.BiDirection)
+                    graph.routes.Add(new Edge() { from = space2Node[boundary.rightSpace], to = space2Node[boundary.leftSpace] });
+            }
+
+        });
     }
 
     public string Export()
@@ -34,7 +57,7 @@ public class LocationsYamlExporter : IExporter
         StringBuilder sb = new StringBuilder();
 
         sb.Append("Locations:\n");
-        graph.locations.ForEach(node => sb.Append($"  {node.name}: [{node.pose[0]}, {node.pose[0]}, {node.pose[0]}]\n"));
+        graph.locations.ForEach(node => sb.Append($"  {node.name}: [{node.pose[0]}, {node.pose[1]}, {node.pose[2]}]\n"));
 
         sb.Append("Route:\n");
         graph.routes.ForEach(edge => sb.Append($"  - [{edge.from.name}, {edge.to.name}]\n"));

@@ -6,7 +6,7 @@ using YamlDotNet.Core.Events;
 public class Node
 {
     public string name;
-    public float[] pose;
+    public double[] pose;
 }
 
 public class Edge

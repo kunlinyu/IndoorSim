@@ -311,6 +311,12 @@ public class SimDataController : MonoBehaviour
         else if (e.type == UIEventType.Resources && e.name == "load")
         {
             indoorSimData.DeserializeInPlace(e.message, false);
+
+            var exporter = new LocationsYamlExporter();
+            exporter.Load(indoorSimData);
+            exporter.Translate();
+            Debug.Log(exporter.Export());
+
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)
         {
