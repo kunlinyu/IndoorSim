@@ -27,6 +27,14 @@ public class env : MonoBehaviour
         simController.simulationView = simulationView;
     }
 
+    void Start()
+    {
+        var exporter = new LocationsYamlExporter();
+        exporter.Load(indoorSimData);
+        exporter.Translate();
+        Debug.Log(exporter.Export());
+    }
+
     void Update()
     {
     }
