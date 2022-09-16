@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
-  m_Name: shelves2
+  m_Name: 16 capsule
   m_EditorClassIdentifier: 
-  m_ToolName: shelves2
+  m_ToolName: capsule
   m_Class: 1
-  m_PortraitImage: {fileID: 21300000, guid: ddd08ac503added1c828ea669c8f1a99, type: 3}
-  m_SortingOrder: 8
+  m_PortraitImage: {fileID: 21300000, guid: d8051c95f6b085094b722deedd8e9120, type: 3}
+  m_SortingOrder: 15
