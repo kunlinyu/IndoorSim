@@ -4,6 +4,20 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
+class IdPrefixGenerator
+{
+    private Dictionary<string, int> idMap = new Dictionary<string, int>();
+
+    public string getId(string prefix)
+    {
+        string result;
+        if (!idMap.ContainsKey(prefix)) idMap[prefix] = 0;
+        result = prefix + "_" + idMap[prefix].ToString("D4");
+        idMap[prefix]++;
+        return result;
+    }
+}
+
 public class LocationsYamlExporter : IExporter
 {
     public static double PaAmrFunctionDirection = Math.PI;
@@ -13,6 +27,7 @@ public class LocationsYamlExporter : IExporter
 
     IndoorSimData indoorSimData = null;
     Graph graph = null;
+    IdPrefixGenerator id = new IdPrefixGenerator();
 
     public void Load(IndoorSimData indoorSimData)
     {
@@ -24,14 +39,13 @@ public class LocationsYamlExporter : IExporter
         Dictionary<CellSpace, Node> space2Node = new Dictionary<CellSpace, Node>();
 
         graph = new Graph();
-        int i = 0;
         indoorSimData.indoorFeatures.layers[0].cellSpaceMember.ForEach(space =>
         {
+            if (space.navigable != Navigable.Navigable) return;
             var centroid = space.Geom.Centroid;
-            string key = $"MAIN_" + i.ToString("D4");
-            i++;
+            string key = id.getId("MAIN");
             Node newNode = new Node(key, new double[] { centroid.X, centroid.Y, 0.0 });
-            graph.locations.Add(newNode);
+            graph.AddNode(newNode);
             space2Node[space] = newNode;
         });
 
@@ -43,46 +57,69 @@ public class LocationsYamlExporter : IExporter
                 boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)
             {
                 if (boundary.NaviDir == NaviDirection.Left2Right || boundary.NaviDir == NaviDirection.BiDirection)
-                    graph.routes.Add(new Edge(space2Node[boundary.leftSpace], space2Node[boundary.rightSpace]));
+                    graph.AddEdge(new Edge(space2Node[boundary.leftSpace], space2Node[boundary.rightSpace]));
 
                 if (boundary.NaviDir == NaviDirection.Right2Left || boundary.NaviDir == NaviDirection.BiDirection)
-                    graph.routes.Add(new Edge(space2Node[boundary.rightSpace], space2Node[boundary.leftSpace]));
+                    graph.AddEdge(new Edge(space2Node[boundary.rightSpace], space2Node[boundary.leftSpace]));
             }
 
         });
 
         indoorSimData.indoorFeatures.layers[0].poiMember.ForEach(poi =>
         {
+            if (poi.CategoryContains(POICategory.Human.ToString())) return;
             var coor = poi.point.Coordinate;
             var node = graph.ClosestNode(coor.X, coor.Y, 0.05);  // TODO haha, magic number
 
-            if (node != null)  // close to node
+            // close to node
+            if (node != null)
             {
-                node.name = poi.GetLabels()[0];
+                // change name
+                node.name = id.getId(poi.GetLabels()[0]);
 
-                HashSet<IndoorPOI> potentialHumanPois = indoorSimData.indoorFeatures.layers[0].Space2POIs(poi.foi[0]);
-                IndoorPOI humanPoi = potentialHumanPois.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
-                if (humanPoi != null)
-                {
-                    double dy = humanPoi.point.Y - poi.point.Y;
-                    double dx = humanPoi.point.X - poi.point.X;
-                    double rotation = Math.Atan2(dy, dx) - PaAmrFunctionDirection;
-                    while (rotation > Math.PI) rotation -= 2 * Math.PI;
-                    while (rotation < -Math.PI) rotation += 2 * Math.PI;
-                    node.pose[2] = rotation;
-                }
-                else
-                {
-                    throw new ArgumentException("can not find related human poi");
-                }
+                // look for human poi and change direction
+                node.pose[2] = Rotation(poi);
             }
-            else  // close to edge
+            // close to edge
+            else
             {
+                List<Edge> closestEdges = graph.ClosetEdges(coor.X, coor.Y, 0.03);
+                if (closestEdges.Count == 0)
+                    throw new InvalidOperationException("poi can not find an edge which close enough");
 
+                // construct new node
+                Node newNode = new Node(id.getId(poi.GetLabels()[0]), new double[] { coor.X, coor.Y, Rotation(poi) });  // TODO: key with id
+
+                // reconnect graph
+                graph.AddNode(newNode);
+                closestEdges.ForEach(closestEdge =>
+                {
+                    graph.RemoveEdge(closestEdge);
+                    graph.AddEdge(new Edge(closestEdge.from, newNode));
+                    graph.AddEdge(new Edge(newNode, closestEdge.to));
+                });
             }
-
-
         });
+    }
+
+    private double Rotation(IndoorPOI poi)
+    {
+        // look for human poi and change direction
+        HashSet<IndoorPOI> potentialHumanPois = indoorSimData.indoorFeatures.layers[0].Space2POIs(poi.foi[0]);
+        IndoorPOI humanPoi = potentialHumanPois.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
+        if (humanPoi != null)
+        {
+            double dy = humanPoi.point.Y - poi.point.Y;
+            double dx = humanPoi.point.X - poi.point.X;
+            double rotation = Math.Atan2(dy, dx) - PaAmrFunctionDirection;
+            while (rotation > Math.PI) rotation -= 2 * Math.PI;
+            while (rotation < -Math.PI) rotation += 2 * Math.PI;
+            return rotation;
+        }
+        else
+        {
+            throw new ArgumentException("can not find related human poi");
+        }
     }
 
     public string Export()
@@ -92,10 +129,10 @@ public class LocationsYamlExporter : IExporter
         StringBuilder sb = new StringBuilder();
 
         sb.Append("Locations:\n");
-        graph.locations.ForEach(node => sb.Append($"  {node.name}: [{node.pose[0]}, {node.pose[1]}, {node.pose[2]}]\n"));
+        graph.ForEachNode(node => sb.Append($"  {node.name}: [{node.pose[0]:F3}, {node.pose[1]:F3}, {node.pose[2]:F3}]\n"));
 
         sb.Append("Route:\n");
-        graph.routes.ForEach(edge => sb.Append($"  - [{edge.from.name}, {edge.to.name}]\n"));
+        graph.ForEachEdge(edge => sb.Append($"  - [{edge.from.name}, {edge.to.name}]\n"));
 
         return sb.ToString();
     }
