@@ -31,13 +31,14 @@ public class LayerView : MonoBehaviour
         spaceParentObj = transform.Find("Spaces").gameObject;
         rLineParentObj = transform.Find("RLines").gameObject;
         POIParentObj = transform.Find("POIs").gameObject;
+
+
+        allPOITypes = new List<POIType>(Resources.LoadAll<POIType>("POI/POITypes"));
     }
 
     void Start()
     {
         eventSubscriber = new UIEventSubscriber(eventDispatcher);
-
-        allPOITypes = new List<POIType>(Resources.LoadAll<POIType>("POI/POITypes"));
     }
 
     public void RegisterOnMethod()
@@ -92,7 +93,6 @@ public class LayerView : MonoBehaviour
             }
 
             POIType matchedPoiType = allPOITypes.FirstOrDefault(poiType => poi.LabelContains(poiType.name));
-
 
             var obj = Instantiate(Resources.Load<GameObject>(poiObjPath), POIParentObj.transform);
             obj.name = poi.id;

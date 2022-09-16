@@ -75,8 +75,8 @@ public class POIController : MonoBehaviour, Selectable
             lr.positionCount = 2;
             lr.SetPosition(0, U.Point2Vec(poi.point));
 
-            HashSet<IndoorPOI> humanPOIs = Space2IndoorPOI?.Invoke(poi.foi[0]);
-            IndoorPOI humanPoi = humanPOIs.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
+            HashSet<IndoorPOI> potentialHumanPois = Space2IndoorPOI?.Invoke(poi.foi[0]);
+            IndoorPOI humanPoi = potentialHumanPois.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
             if (humanPoi != null)
             {
                 lr.SetPosition(1, U.Point2Vec(humanPoi.point));

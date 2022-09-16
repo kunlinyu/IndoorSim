@@ -112,9 +112,6 @@ public class IndoorSimData
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
-        IndoorSimData? newIndoorSimData = Deserialize(json, true);
-
-
         Profiler.BeginSample("IndoorSimData");
         assets.Clear();
         history.Clear();

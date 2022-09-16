@@ -149,7 +149,6 @@ public class HierarchyPanelController : MonoBehaviour
 
     private void CollapsesAll()
     {
-        Debug.Log("CollapsesAll");
         gridMapFoldout.SetValueWithoutNotify(false);
         indoorMapFoldout.SetValueWithoutNotify(false);
         simFoldouts.ForEach(foldout => foldout.SetValueWithoutNotify(false));

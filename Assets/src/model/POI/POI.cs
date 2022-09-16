@@ -36,6 +36,9 @@ namespace poi
             });
         }
 
+        public List<string> GetLabels()
+            => label.Select(label => label.value).ToList();
+
         public bool LabelContains(string value) => label.Any(label => label.value == value);
 
         public void AddDescription(string value) => AddDescription(value, "en-US");
