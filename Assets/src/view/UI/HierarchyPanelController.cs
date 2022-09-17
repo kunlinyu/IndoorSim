@@ -114,12 +114,26 @@ public class HierarchyPanelController : MonoBehaviour
             Foldout layerFoldout = new Foldout();
             layerFoldout.text = layer["level"].Value<string>();
             indoorMapFoldout.Add(layerFoldout);
+
+            Foldout vertexFoldout = new Foldout();
+            Foldout boundaryFoldout = new Foldout();
+            Foldout spaceFoldout = new Foldout();
+
+            vertexFoldout.text = "vertex";
+            boundaryFoldout.text = "boundary";
+            spaceFoldout.text = "space";
+
             foreach (var vertexJson in layer["cellVertexMember"].Children())
-                layerFoldout.Add(new TextElement() { text = vertexJson["Id"].Value<string>() });
+                vertexFoldout.Add(new TextElement() { text = vertexJson["Id"].Value<string>() });
             foreach (var boundaryJson in layer["cellBoundaryMember"].Children())
-                layerFoldout.Add(new TextElement() { text = boundaryJson["Id"].Value<string>() });
+                boundaryFoldout.Add(new TextElement() { text = boundaryJson["Id"].Value<string>() });
             foreach (var spaceJson in layer["cellSpaceMember"].Children())
-                layerFoldout.Add(new TextElement() { text = spaceJson["Id"].Value<string>() });
+                spaceFoldout.Add(new TextElement() { text = spaceJson["Id"].Value<string>() });
+
+            layerFoldout.Add(vertexFoldout);
+            layerFoldout.Add(boundaryFoldout);
+            layerFoldout.Add(spaceFoldout);
+
         }
     }
 
