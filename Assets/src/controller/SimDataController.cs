@@ -3,6 +3,9 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading;
+
 using UnityEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,12 +20,25 @@ public class SimDataController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
     private UIEventSubscriber eventSubscriber;
+    private Thread serializationThread;
 
 
     void Update()
     {
         eventSubscriber.ConsumeAll(EventListener);
     }
+
+    void SerializeAndPublish()
+    {
+        UIEvent e = new UIEvent();
+
+        e.type = UIEventType.Hierarchy;
+        e.name = "indoordata";
+        e.message = indoorSimData.indoorFeatures.Serialize(false);  // slow
+
+        eventDispatcher?.Raise(this, e);
+    }
+
     void Start()
     {
         eventSubscriber = new UIEventSubscriber(eventDispatcher);
@@ -36,14 +52,13 @@ public class SimDataController : MonoBehaviour
 
             eventDispatcher?.Raise(this, e);
         };
-        indoorSimData.OnIndoorFeatureUpdated += (indoorData) =>
+        indoorSimData.OnIndoorFeatureUpdated += (indoorFeatues) =>
         {
-            var e = new UIEvent();
-            e.type = UIEventType.Hierarchy;
-            e.name = "indoordata";
-            e.message = indoorData.activeLayer.Serialize(false);  // TODO: too slow
+            if (serializationThread != null)
+                serializationThread.Join();
 
-            eventDispatcher?.Raise(this, e);
+            serializationThread = new Thread(new ThreadStart(this.SerializeAndPublish));
+            serializationThread.Start();
         };
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {

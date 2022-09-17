@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Text;
+using System.IO;
+
 using NetTopologySuite.Geometries;
 
 using Newtonsoft.Json;
-using System.Runtime.Serialization;
 
 #nullable enable
 
@@ -43,6 +46,33 @@ public class IndoorFeatures
         layers.Add(new ThematicLayer(defaultLevelName));
         activeLayer = layers[0];
         OnLayerCreated?.Invoke(layers[0]);
+    }
+
+    static ShouldSerializeContractResolver shouldSerializeContractResolver = new ShouldSerializeContractResolver();
+    public string Serialize(bool indent = false)
+    {
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+            Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
+            ContractResolver = shouldSerializeContractResolver,
+        };
+
+        JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
+        StringBuilder sb = new StringBuilder(256);
+        StringWriter sw = new StringWriter(sb);
+        using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+        {
+            jsonWriter.Formatting = jsonSerializer.Formatting;
+            jsonWriter.IndentChar = '\t';
+            jsonWriter.Indentation = 1;
+            jsonSerializer.Serialize(jsonWriter, this, null);
+        }
+
+        return sw.ToString();  // return JsonConvert.SerializeObject(this);
     }
 
     public bool Contains(CellVertex vertex) => activeLayer.Contains(vertex);

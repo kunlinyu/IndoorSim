@@ -104,18 +104,23 @@ public class HierarchyPanelController : MonoBehaviour
 
     public void UpdateIndoorData(string json)
     {
-        Debug.Log("Update indoor data");
         indoorMapFoldout.Clear();
         CollapsesAll();
         indoorMapFoldout.SetValueWithoutNotify(true);
 
         var jsonData = JObject.Parse(json);
-        foreach (var vertexJson in jsonData["cellVertexMember"].Children())
-            indoorMapFoldout.Add(new TextElement() { text = vertexJson["Id"].Value<string>() });
-        foreach (var boundaryJson in jsonData["cellBoundaryMember"].Children())
-            indoorMapFoldout.Add(new TextElement() { text = boundaryJson["Id"].Value<string>() });
-        foreach (var spaceJson in jsonData["cellSpaceMember"].Children())
-            indoorMapFoldout.Add(new TextElement() { text = spaceJson["Id"].Value<string>() });
+        foreach (var layer in jsonData["layers"].Children())
+        {
+            Foldout layerFoldout = new Foldout();
+            layerFoldout.text = layer["level"].Value<string>();
+            indoorMapFoldout.Add(layerFoldout);
+            foreach (var vertexJson in layer["cellVertexMember"].Children())
+                layerFoldout.Add(new TextElement() { text = vertexJson["Id"].Value<string>() });
+            foreach (var boundaryJson in layer["cellBoundaryMember"].Children())
+                layerFoldout.Add(new TextElement() { text = boundaryJson["Id"].Value<string>() });
+            foreach (var spaceJson in layer["cellSpaceMember"].Children())
+                layerFoldout.Add(new TextElement() { text = spaceJson["Id"].Value<string>() });
+        }
     }
 
     public void UpdateSimulation(string json)
