@@ -39,6 +39,8 @@ public class LocationsYamlExporter : IExporter
         Dictionary<CellSpace, Node> space2Node = new Dictionary<CellSpace, Node>();
 
         graph = new Graph();
+
+        // node
         indoorSimData.indoorFeatures.layers[0].cellSpaceMember.ForEach(space =>
         {
             if (space.navigable != Navigable.Navigable) return;
@@ -49,6 +51,7 @@ public class LocationsYamlExporter : IExporter
             space2Node[space] = newNode;
         });
 
+        // edge
         indoorSimData.indoorFeatures.layers[0].cellBoundaryMember.ForEach(boundary =>
         {
 
@@ -65,17 +68,28 @@ public class LocationsYamlExporter : IExporter
 
         });
 
+        // poi
         indoorSimData.indoorFeatures.layers[0].poiMember.ForEach(poi =>
         {
             if (poi.CategoryContains(POICategory.Human.ToString())) return;
             var coor = poi.point.Coordinate;
             var node = graph.ClosestNode(coor.X, coor.Y, 0.05);  // TODO haha, magic number
 
+            string newNodeName;
+
             // close to node
             if (node != null)
             {
                 // change name
-                node.name = id.getId(poi.GetLabels()[0]);
+                if (node.name.StartsWith("MAIN"))
+                {
+                    node.name = id.getId(poi.GetLabels()[0]);
+                    newNodeName = node.name;
+                }
+                else
+                {
+                    throw new ArgumentException("Two differenct poi should not lay on same MAIN point");
+                }
 
                 // look for human poi and change direction
                 node.pose[2] = Rotation(poi);
@@ -89,6 +103,7 @@ public class LocationsYamlExporter : IExporter
 
                 // construct new node
                 Node newNode = new Node(id.getId(poi.GetLabels()[0]), new double[] { coor.X, coor.Y, Rotation(poi) });  // TODO: key with id
+                newNodeName = newNode.name;
 
                 // reconnect graph
                 graph.AddNode(newNode);
@@ -98,6 +113,26 @@ public class LocationsYamlExporter : IExporter
                     graph.AddEdge(new Edge(closestEdge.from, newNode));
                     graph.AddEdge(new Edge(newNode, closestEdge.to));
                 });
+            }
+
+            // queue entry
+
+            if (poi.queue != null && poi.queue.Count > 0)
+            {
+                Container lastContainer = poi.queue.Last();
+                var centroid = lastContainer.Geom.Centroid;
+                var qNode = graph.ClosestNode(centroid.X, centroid.Y, 0.05);  // TODO haha, magic number
+                if (qNode != null)
+                {
+                    if (qNode.name.StartsWith("MAIN"))
+                        qNode.name = 'Q' + newNodeName;
+                    else
+                        throw new ArgumentException("entry of a queue should not be a business point: " + qNode.name);
+                }
+                else
+                {
+                    throw new ArgumentException("can not find the entry of queue: " + newNodeName);
+                }
             }
         });
     }
@@ -122,7 +157,7 @@ public class LocationsYamlExporter : IExporter
         }
     }
 
-    public string Export()
+    public string Export(bool includeFull)
     {
         if (graph == null) throw new InvalidOperationException("Translate first");
 
@@ -133,6 +168,10 @@ public class LocationsYamlExporter : IExporter
 
         sb.Append("Route:\n");
         graph.ForEachEdge(edge => sb.Append($"  - [{edge.from.name}, {edge.to.name}]\n"));
+
+        sb.Append("IndoorSim: ");
+        sb.Append(indoorSimData.Serialize(true));
+        sb.Append("\n");
 
         return sb.ToString();
     }

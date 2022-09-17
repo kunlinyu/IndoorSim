@@ -8,6 +8,6 @@ public interface IExporter
     public string defaultStreamName { get; }
     public void Load(IndoorSimData indoorSimData);
     public void Translate();
-    public string Export();
+    public string Export(bool includeFull);
     public void Export(Stream stream);
 }

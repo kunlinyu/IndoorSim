@@ -315,7 +315,7 @@ public class SimDataController : MonoBehaviour
             var exporter = new LocationsYamlExporter();
             exporter.Load(indoorSimData);
             exporter.Translate();
-            Debug.Log(exporter.Export());
+            Debug.Log(exporter.Export(true));
 
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)

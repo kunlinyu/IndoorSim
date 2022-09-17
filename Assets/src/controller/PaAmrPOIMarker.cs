@@ -28,7 +28,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     public bool MouseOnUI { set; get; }
 
 
-    private List<SpaceController> selectedSpace = new List<SpaceController>();
+    private List<SpaceController> foiSpace = new List<SpaceController>();
     private List<GameObject> pickingAgent2ContainerObj = new List<GameObject>();
     private Vector3 paAmrPoiPosition;
     private Container paAmrPoiLayOnSpace;
@@ -78,25 +78,25 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                     if (AcceptContainer(sc?.Space))
                     {
-                        if (selectedSpace.Contains(sc!))
-                            selectedSpace.Remove(sc!);
+                        if (foiSpace.Contains(sc!))
+                            foiSpace.Remove(sc!);
                         else
                         {
-                            selectedSpace.Add(sc!);
-                            if (selectedSpace.Count > poiType.relatedCount)
-                                selectedSpace.RemoveAt(0);
+                            foiSpace.Add(sc!);
+                            if (foiSpace.Count > poiType.relatedCount)
+                                foiSpace.RemoveAt(0);
                         }
 
                     }
                 }
                 else if (Input.GetMouseButtonDown(1))
                 {
-                    if (selectedSpace.Count > 0)
-                        selectedSpace.RemoveAt(selectedSpace.Count - 1);
+                    if (foiSpace.Count > 0)
+                        foiSpace.RemoveAt(foiSpace.Count - 1);
                 }
                 else if (Input.GetMouseButtonDown(2))
                 {
-                    if (selectedSpace.Count > 0)
+                    if (foiSpace.Count > 0)
                         status = PaAmrPoiMarkerStatus.RelatedSpaceCommitted;
                 }
                 break;
@@ -104,7 +104,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                 if (Input.GetMouseButtonDown(0) && !MouseOnUI)
                 {
                     SpaceController? sc = MousePickController.PointedSpace;
-                    if (selectedSpace.Count > 0 && CanLayOn(sc?.Space))
+                    if (foiSpace.Count > 0 && CanLayOn(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                         paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition);
@@ -201,7 +201,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private void Insert()
     {
-        var spaces = selectedSpace.Select(sc => sc.Space).ToList();
+        var spaces = foiSpace.Select(sc => sc.Space).ToList();
         var containers = new List<Container>(spaces);
 
         IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(humanPoiPosition), humanPoiLayOnSpace, containers, new List<Container>(), POICategory.Human.ToString());
@@ -221,7 +221,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         paAmrPoi.AddLabel(poiType.name);
         IndoorSimData.AddPOI(paAmrPoi);
         Debug.Log("POI inserted");
-        selectedSpace.Clear();
+        foiSpace.Clear();
     }
 
     private Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition)
@@ -266,13 +266,13 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void UpdateView()
     {
-        while (pickingAgent2ContainerObj.Count > selectedSpace.Count)
+        while (pickingAgent2ContainerObj.Count > foiSpace.Count)
         {
             int count = pickingAgent2ContainerObj.Count;
             Destroy(pickingAgent2ContainerObj[count - 1]);
             pickingAgent2ContainerObj.RemoveAt(count - 1);
         }
-        while (pickingAgent2ContainerObj.Count < selectedSpace.Count)
+        while (pickingAgent2ContainerObj.Count < foiSpace.Count)
         {
             var obj = Instantiate<GameObject>(Resources.Load<GameObject>("POI/Container2POI"), this.transform);
             int index = pickingAgent2ContainerObj.Count;
@@ -283,7 +283,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         {
             var obj = pickingAgent2ContainerObj[i];
             obj.GetComponent<LineRenderer>().positionCount = 2;
-            obj.GetComponent<LineRenderer>().SetPosition(0, U.Coor2Vec(selectedSpace[i].Space.Geom!.Centroid.Coordinate));
+            obj.GetComponent<LineRenderer>().SetPosition(0, U.Coor2Vec(foiSpace[i].Space.Geom!.Centroid.Coordinate));
         }
 
         transform.Find("QueueSegment").gameObject.GetComponent<LineRenderer>().enabled = false;
