@@ -54,11 +54,12 @@ public class SimDataController : MonoBehaviour
         };
         indoorSimData.OnIndoorFeatureUpdated += (indoorFeatues) =>
         {
-            if (serializationThread != null)
-                serializationThread.Join();
+            // if (serializationThread != null)
+            //     serializationThread.Join();
 
-            serializationThread = new Thread(new ThreadStart(this.SerializeAndPublish));
-            serializationThread.Start();
+            // serializationThread = new Thread(new ThreadStart(this.SerializeAndPublish));
+            // serializationThread.Start();
+            SerializeAndPublish();
         };
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {
