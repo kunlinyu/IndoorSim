@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -82,7 +83,7 @@ public class ImportExport : MonoBehaviour
         Debug.Log($"export layer: \"{layer}\" to file \"{file}\" and \"{helperString} INCLUDE\" a copy of whole file");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-        var bytes = Encoding.UTF8.GetBytes(content);
+        var bytes = Encoding.UTF8.GetBytes(data);
         DownloadFile(gameObject.name, "OnFileDownload", file, bytes, bytes.Length);
 #else
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", file, suffix);
