@@ -45,6 +45,8 @@ public class IndoorSimData
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
 
+    [JsonIgnore] private bool inSession = false;
+
     public IndoorSimData()
     {
         RegisterInstructionExecutor();
@@ -562,6 +564,7 @@ public class IndoorSimData
     public bool Undo()
     {
         if (simulating) return false;
+        if (inSession) return false;
         var instructions = activeHistory.Undo(out var snapShot);
         if (instructions.Count > 0)
         {
@@ -584,6 +587,7 @@ public class IndoorSimData
     public bool Redo()
     {
         if (simulating) return false;
+        if (inSession) return false;
         var instructions = activeHistory.Redo(out var snapShot);
         if (instructions.Count > 0)
         {
@@ -602,15 +606,24 @@ public class IndoorSimData
         }
     }
 
-    public void SessionStart() => activeHistory.SessionStart();
-    public void SessionCommit() => activeHistory.SessionCommit();
+    public void SessionStart()
+    {
+        activeHistory.SessionStart();
+        inSession = true;
+    }
+    public void SessionCommit()
+    {
+        inSession = false;
+        activeHistory.SessionCommit();
+        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+    }
 
 
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = activeTiling.AddBoundary(startCoor, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
 
@@ -618,14 +631,14 @@ public class IndoorSimData
     {
         CellBoundary? boundary = activeTiling.AddBoundary(start, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = activeTiling.AddBoundary(start, end, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
 
@@ -633,7 +646,7 @@ public class IndoorSimData
     {
         CellBoundary? boundary = activeTiling.AddBoundary(startCoor, end, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
 
@@ -641,7 +654,7 @@ public class IndoorSimData
     {
         CellBoundary? boundary = activeTiling.AddBoundaryAutoSnap(startCoor, endCoor, id);
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
@@ -652,7 +665,7 @@ public class IndoorSimData
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
         history.SessionCommit();
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return vertex;
     }
 
@@ -663,7 +676,7 @@ public class IndoorSimData
         List<Coordinate> oldCoors = vertices.Select(v => v.Coordinate).ToList();
         bool ret = activeTiling.UpdateVertices(vertices, newCoors);
         if (ret) history.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return ret;
     }
     public void RemoveBoundary(CellBoundary boundary)
@@ -692,7 +705,7 @@ public class IndoorSimData
         history.SessionCommit();
 
         activeTiling.RemoveBoundary(boundary);
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
     }
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
@@ -782,7 +795,7 @@ public class IndoorSimData
                                                 poi.queue.Select(space => space.Geom!.Centroid.Coordinate).ToArray(),
                                                 poi.category.Select(c => c.term).ToList(),
                                                 poi.label.Select(l => l.value).ToList()));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
@@ -802,6 +815,6 @@ public class IndoorSimData
                                                poi.queue.Select(space => space.Geom!.Centroid.Coordinate).ToArray(),
                                                poi.category.Select(c => c.term).ToList(),
                                                poi.label.Select(l => l.value).ToList()));
-        OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
     }
 }
