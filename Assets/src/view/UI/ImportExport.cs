@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.IO;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json.Linq;
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,8 +18,10 @@ public class ImportExport : MonoBehaviour
     public UIDocument rootUIDocument;
 
     // pop up panels
-    GameObject idPanelObj;  // TODO: do not put it in All.uxml, but load it as prefab
     GameObject gridMapImportPanelObj;
+    GameObject exportPanelObj;
+    VisualElement root;
+    List<string> layers = null;
 
     void Start()
     {
@@ -37,7 +41,60 @@ public class ImportExport : MonoBehaviour
             LoadGridMap();
         else if (e.type == UIEventType.Resources && e.name == "gridmap")
             DestroyGridMapImportPanel();
+        else if (e.type == UIEventType.ToolButton && e.name == "export")
+            PopExportPanel();
+        else if (e.type == UIEventType.Resources && e.name == "export")
+        {
+            Export(e.message);
+            DestroyExportPanel();
+        }
+        else if (e.type == UIEventType.Hierarchy && e.name == "indoordata")
+        {
+            var jsonData = JObject.Parse(e.message);
+            layers = jsonData["layers"].Children().Select(layer => layer["level"].Value<string>()).ToList();
+        }
     }
+
+    void PopExportPanel()
+    {
+        if (layers != null && layers.Count > 0)
+        {
+            exportPanelObj = Instantiate(Resources.Load<GameObject>("UIObj/ExportPanel"), Vector3.zero, Quaternion.identity);
+            exportPanelObj.GetComponent<ExportPanelController>().Init(layers, this.PublishExportInfo, this.DestroyExportPanel);
+        }
+        else
+        {
+            Debug.LogWarning("no layer can be export");
+        }
+    }
+
+    void Export(string content)
+    {
+        Debug.Log("export");
+#if UNITY_WEBGL && !UNITY_EDITOR
+        var bytes = Encoding.UTF8.GetBytes(content);
+        DownloadFile(gameObject.name, "OnFileDownload", "locations.yaml", bytes, bytes.Length);  // TODO: ha!!!shabi
+#else
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "locations", "yaml");
+        if (path.Length != 0)
+        {
+            Debug.Log("save file to: " + path);
+            File.WriteAllText(path, content);
+        }
+        else
+        {
+            Debug.Log("save cancelled");
+        }
+#endif
+    }
+
+    void DestroyExportPanel()
+    {
+        rootUIDocument.rootVisualElement.Focus();  // prevent warning if we focus on visualElement on gridMapImportPanelObj
+        Destroy(exportPanelObj);
+        exportPanelObj = null;
+    }
+
 
     private void DestroyGridMapImportPanel()
     {
@@ -56,6 +113,10 @@ public class ImportExport : MonoBehaviour
         }
     }
 
+    private void PublishExportInfo(string exportInfo)
+    {
+        eventDispatcher.Raise(this, new UIEvent() { name = "exportInfo", message = exportInfo, type = UIEventType.Resources });
+    }
     private void PublishGridMapLoadInfo(string serializedGridMapInfo)
     {
         eventDispatcher.Raise(this, new UIEvent() { name = "gridmap", message = serializedGridMapInfo, type = UIEventType.Resources });

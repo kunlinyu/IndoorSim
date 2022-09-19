@@ -22,8 +22,8 @@ public class LocationsYamlExporter : IExporter
 {
     public static double PaAmrFunctionDirection = Math.PI;
     public string name => "locations.yaml";
-
     public string defaultStreamName => "locations.yaml";
+    public bool canIncludeFull => true;
 
     IndoorSimData indoorSimData = null;
     Graph graph = null;
@@ -34,7 +34,7 @@ public class LocationsYamlExporter : IExporter
         this.indoorSimData = indoorSimData;
     }
 
-    public void Translate()
+    public void Translate(string layerName)
     {
         Dictionary<CellSpace, Node> space2Node = new Dictionary<CellSpace, Node>();
 

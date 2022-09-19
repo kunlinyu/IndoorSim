@@ -326,12 +326,25 @@ public class SimDataController : MonoBehaviour
         else if (e.type == UIEventType.Resources && e.name == "load")
         {
             indoorSimData.DeserializeInPlace(e.message, false);
+        }
+        else if (e.type == UIEventType.Resources && e.name == "exportInfo")
+        {
+            Debug.Log(e.message);
+            var jsonData = JObject.Parse(e.message);
 
-            var exporter = new LocationsYamlExporter();
-            exporter.Load(indoorSimData);
-            exporter.Translate();
-            Debug.Log(exporter.Export(true));
-
+            // TODO: we need a registry to handle all exporter and match one exporter according to jsonData["file"]
+            if (jsonData["file"].Value<string>() == "locations.yaml")
+            {
+                var exporter = new LocationsYamlExporter();
+                exporter.Load(indoorSimData);
+                exporter.Translate(jsonData["layer"].Value<string>());
+                string result = exporter.Export(jsonData["include"].Value<bool>());
+                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = result, type = UIEventType.Resources });
+            }
+            else
+            {
+                Debug.LogWarning("unknow exporter: " + jsonData["file"].Value<string>());
+            }
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)
         {

@@ -133,7 +133,6 @@ public class HierarchyPanelController : MonoBehaviour
             layerFoldout.Add(vertexFoldout);
             layerFoldout.Add(boundaryFoldout);
             layerFoldout.Add(spaceFoldout);
-
         }
     }
 

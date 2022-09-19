@@ -10,6 +10,8 @@ public class ToolBarController : MonoBehaviour
     [SerializeField] private VisualTreeAsset m_ToolBarButtonTemplate;
     private Button activeButton = null;
 
+    private Dictionary<Button, ToolButtonData> button2ButonData = new Dictionary<Button, ToolButtonData>();
+
     void Start()
     {
         VisualElement toolBar = rootUIDocument.rootVisualElement.Q<VisualElement>("ToolBar");
@@ -31,6 +33,9 @@ public class ToolBarController : MonoBehaviour
         {
             TemplateContainer buttonContainer = m_ToolBarButtonTemplate.Instantiate();
             Button button = buttonContainer.Q<Button>("ToolBarButton");
+
+            button2ButonData[button] = tbd;
+
             button.text = "";
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
@@ -40,6 +45,8 @@ public class ToolBarController : MonoBehaviour
                 button.clicked += () =>
                 {
                     onTrigger?.Invoke(tbd);
+                    if (activeButton != null)
+                        onLeave?.Invoke(button2ButonData[activeButton]);
                     DisableButton(activeButton);
                     toolBar.Focus();  // focus on toolbar to release focus on button
                 };

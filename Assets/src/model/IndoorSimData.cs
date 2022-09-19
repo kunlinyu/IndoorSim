@@ -40,7 +40,7 @@ public class IndoorSimData
     [JsonIgnore] public Action<List<GridMap>> OnGridMapListUpdated = (gridMaps) => { };
     [JsonIgnore] public Action<GridMap> OnGridMapCreated = (gridmap) => { };
     [JsonIgnore] public Action<GridMap> OnGridMapRemoved = (gridmap) => { };
-    [JsonIgnore] public Action<IndoorFeatures> OnIndoorFeatureUpdated = (indoor) => { };
+    [JsonIgnore] public Action<IndoorFeatures> OnIndoorFeatureUpdated = (indoorFeatues) => { };
     [JsonIgnore] public Action<List<SimData>> OnSimulationListUpdated = (sims) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
