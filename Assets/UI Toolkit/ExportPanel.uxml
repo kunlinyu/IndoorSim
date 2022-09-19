@@ -3,7 +3,7 @@
         <ui:VisualElement style="width: 400px; height: auto; left: auto; background-color: rgba(200, 200, 200, 0.62); margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;">
             <ui:DropdownField index="0" name="layer" label="layer" />
             <ui:DropdownField label="file" index="0" name="file" focusable="true" />
-            <ui:Toggle label="include a copy of whole file" name="include" value="false" />
+            <ui:Toggle label="include a copy of whole file" name="include" value="true" />
             <ui:VisualElement style="flex-direction: row; justify-content: center;">
                 <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="Cancel" />
                 <ui:Button tabindex="-1" text="Export" display-tooltip-when-elided="true" name="Export" />

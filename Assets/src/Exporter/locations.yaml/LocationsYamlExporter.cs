@@ -169,9 +169,12 @@ public class LocationsYamlExporter : IExporter
         sb.Append("Route:\n");
         graph.ForEachEdge(edge => sb.Append($"  - [{edge.from.name}, {edge.to.name}]\n"));
 
-        sb.Append("IndoorSim: ");
-        sb.Append(indoorSimData.Serialize(true));
-        sb.Append("\n");
+        if (includeFull)
+        {
+            sb.Append("IndoorSim: ");
+            sb.Append(indoorSimData.Serialize(true));
+            sb.Append("\n");
+        }
 
         return sb.ToString();
     }

@@ -24,6 +24,7 @@ public struct UIEvent
 {
     public string name;
     public string message;
+    public string data;
     public UIEventType type;
 }
 

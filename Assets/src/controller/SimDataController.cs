@@ -340,7 +340,7 @@ public class SimDataController : MonoBehaviour
                 exporter.Load(indoorSimData);
                 exporter.Translate(jsonData["layer"].Value<string>());
                 string result = exporter.Export(jsonData["include"].Value<bool>());
-                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = result, type = UIEventType.Resources });
+                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
             }
             else
             {

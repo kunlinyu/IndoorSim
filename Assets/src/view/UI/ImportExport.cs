@@ -45,7 +45,7 @@ public class ImportExport : MonoBehaviour
             PopExportPanel();
         else if (e.type == UIEventType.Resources && e.name == "export")
         {
-            Export(e.message);
+            Export(e.message, e.data);
             DestroyExportPanel();
         }
         else if (e.type == UIEventType.Hierarchy && e.name == "indoordata")
@@ -68,18 +68,28 @@ public class ImportExport : MonoBehaviour
         }
     }
 
-    void Export(string content)
+    void Export(string message, string data)
     {
-        Debug.Log("export");
+        var jsonData = JObject.Parse(message);
+        string layer = jsonData["layer"].Value<string>();
+        string file = jsonData["file"].Value<string>();
+        int dotIndex = file.LastIndexOf(".");
+        string suffix = file.Substring(dotIndex + 1);
+        bool include = jsonData["include"].Value<bool>();
+
+        string helperString = include ? "" : "NOT";
+
+        Debug.Log($"export layer: \"{layer}\" to file \"{file}\" and \"{helperString} INCLUDE\" a copy of whole file");
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         var bytes = Encoding.UTF8.GetBytes(content);
-        DownloadFile(gameObject.name, "OnFileDownload", "locations.yaml", bytes, bytes.Length);  // TODO: ha!!!shabi
+        DownloadFile(gameObject.name, "OnFileDownload", file, bytes, bytes.Length);
 #else
-        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "locations", "yaml");
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", file, suffix);
         if (path.Length != 0)
         {
             Debug.Log("save file to: " + path);
-            File.WriteAllText(path, content);
+            File.WriteAllText(path, data);
         }
         else
         {
