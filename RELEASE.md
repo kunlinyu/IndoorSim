@@ -1,5 +1,24 @@
 # version list
 
+## V0.6.0
+* [IndoorSim-WebGL-V0.6.0.a0b37e2](./IndoorSim-WebGL-V0.6.0.a0b37e2)
+* [IndoorSim-WebGL-dev-V0.6.0.a0b37e2](./IndoorSim-WebGL-dev-V0.6.0.a0b37e2)
+* [IndoorSim-StandaloneLinux64-V0.6.0.a0b37e2.tar.gz](./IndoorSim-StandaloneLinux64-V0.6.0.a0b37e2.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.6.0.a0b37e2.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.6.0.a0b37e2.tar.gz)
+
+### DateTime
+2022-09-19 17:02:42 +08
+
+### ChangeLog
+1. 添加文件导出面板
+2. 添加 location.yaml 文件导出工具
+3. 添加 location.yaml 导出工具对排队点的支持
+4. 添加将完整文件嵌如导出文件的接口
+5. 修复快速绘制工具频繁向UI界面更新数据的性能缺陷
+6. 修复在另一线程序列化导致读写冲突的bug
+
+---
+
 ## V0.5.0
 * [IndoorSim-WebGL-V0.5.0.78b5fd5](./IndoorSim-WebGL-V0.5.0.78b5fd5)
 * [IndoorSim-WebGL-dev-V0.5.0.78b5fd5](./IndoorSim-WebGL-dev-V0.5.0.78b5fd5)
