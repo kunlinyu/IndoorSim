@@ -11,14 +11,14 @@
             <ui:Instance template="viewPanel" name="ViewPanelContainer" style="min-width: 100px;" />
         </ui:VisualElement>
         <ui:VisualElement style="align-items: stretch; flex-direction: row; justify-content: space-around; width: auto; height: 100%;">
-            <ui:VisualElement name="Left" style="width: 400px;">
+            <ui:VisualElement name="Left" style="width: 300px; visibility: hidden;">
                 <ui:Instance template="hierarchyPanel" />
             </ui:VisualElement>
             <ui:VisualElement name="middle" style="width: auto; flex-direction: column-reverse; justify-content: flex-start; align-items: center;">
                 <ui:Instance template="LogWindow" name="LogWindow" tooltip="double click to copy" style="position: relative; right: auto; bottom: auto; max-width: none; max-height: 100px; min-width: auto; min-height: 50px; justify-content: flex-end;" />
-                <ui:Instance template="SimulationPanel" />
+                <ui:Instance template="SimulationPanel" style="visibility: hidden;" />
             </ui:VisualElement>
-            <ui:VisualElement name="right" style="width: 200px;">
+            <ui:VisualElement name="right" style="width: 200px; visibility: hidden; display: flex;">
                 <ui:Instance template="AssetsPanel" name="AssetsPanelContainer" style="height: auto; width: auto; max-height: none; justify-content: flex-start; right: auto; top: auto; left: auto; align-items: stretch; flex-direction: column;" />
             </ui:VisualElement>
         </ui:VisualElement>
