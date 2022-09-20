@@ -35,11 +35,9 @@ public class BinLocationsJsonExporter : IExporter
         poi2Container = new Dictionary<IndoorPOI, List<Container>>();
         layer.poiMember.ForEach(poi =>
         {
+            if (!poi.LabelContains("PICKING")) return;
             poi2Container[poi] = new List<Container>();
-            poi.foi.ForEach(foi =>
-            {
-                foi.AllNodeInContainerTree().ForEach(container => poi2Container[poi].Add(container));
-            });
+            poi.foi.ForEach(foi => foi.AllNodeInContainerTree().ForEach(container => poi2Container[poi].Add(container)));
         });
     }
 
@@ -53,18 +51,21 @@ public class BinLocationsJsonExporter : IExporter
         foreach (var entry in poi2Container)
         {
             if (entry.Key.CategoryContains(POICategory.Human.ToString())) continue;
+            string poiIdFull = entry.Key.GetLabels().Find(label => label.StartsWith(idPrefix));
+            if (poiIdFull == null)
+            {
+                Debug.Log(string.Join(',', entry.Key.GetLabels()));
+                throw new InvalidOperationException("you should export locations.yaml first to generate if for POI");
+            }
+            string poiId = poiIdFull.Substring(idPrefix.Length);
             entry.Value.ForEach(container =>
             {
-                string poiIdFull = entry.Key.GetLabels().Find(label => label.StartsWith(idPrefix));
-                if (poiIdFull == null)
-                {
-                    Debug.Log(string.Join(',', entry.Key.GetLabels()));
-                    throw new InvalidOperationException("you should export locations.yaml first to generate if for POI");
-                }
-                string poiId = poiIdFull.Substring(idPrefix.Length);
-                sb.Append($"  \"{container.containerId}\": \"{poiId}\",\n");
+                if (container.containerId != "")
+                    sb.Append($"  \"{container.containerId}\": \"{poiId}\",\n");
             });
         }
+
+        // TODO: we should check if some id don't connect to picking point
 
         if (includeFull)
         {
