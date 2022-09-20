@@ -20,6 +20,7 @@ class IdPrefixGenerator
 
 public class LocationsYamlExporter : IExporter
 {
+    private static string idPrefix = "LacationYamlExporterId: ";
     public static double PaAmrFunctionDirection = Math.PI;
     public string name => "locations.yaml";
     public string defaultStreamName => "locations.yaml";
@@ -36,12 +37,16 @@ public class LocationsYamlExporter : IExporter
 
     public void Translate(string layerName)
     {
+        ThematicLayer layer = indoorSimData.indoorFeatures.layers.Find(layer => layer.level == layerName);
+        if (layer == null) throw new ArgumentException("can not find layer with level name: " + layerName);
+
         Dictionary<CellSpace, Node> space2Node = new Dictionary<CellSpace, Node>();
 
         graph = new Graph();
 
+
         // node
-        indoorSimData.indoorFeatures.layers[0].cellSpaceMember.ForEach(space =>
+        layer.cellSpaceMember.ForEach(space =>
         {
             if (space.navigable != Navigable.Navigable) return;
             var centroid = space.Geom.Centroid;
@@ -52,9 +57,8 @@ public class LocationsYamlExporter : IExporter
         });
 
         // edge
-        indoorSimData.indoorFeatures.layers[0].cellBoundaryMember.ForEach(boundary =>
+        layer.cellBoundaryMember.ForEach(boundary =>
         {
-
             if (boundary.NaviDir != NaviDirection.NoneDirection &&
                 boundary.leftSpace != null && boundary.leftSpace.navigable == Navigable.Navigable &&
                 boundary.rightSpace != null && boundary.rightSpace.navigable == Navigable.Navigable)
@@ -65,11 +69,10 @@ public class LocationsYamlExporter : IExporter
                 if (boundary.NaviDir == NaviDirection.Right2Left || boundary.NaviDir == NaviDirection.BiDirection)
                     graph.AddEdge(new Edge(space2Node[boundary.rightSpace], space2Node[boundary.leftSpace]));
             }
-
         });
 
         // poi
-        indoorSimData.indoorFeatures.layers[0].poiMember.ForEach(poi =>
+        layer.poiMember.ForEach(poi =>
         {
             if (poi.CategoryContains(POICategory.Human.ToString())) return;
             var coor = poi.point.Coordinate;
@@ -85,6 +88,7 @@ public class LocationsYamlExporter : IExporter
                 {
                     node.name = id.getId(poi.GetLabels()[0]);
                     newNodeName = node.name;
+                    poi.AddLabel(idPrefix + node.name);
                 }
                 else
                 {
@@ -92,7 +96,7 @@ public class LocationsYamlExporter : IExporter
                 }
 
                 // look for human poi and change direction
-                node.pose[2] = Rotation(poi);
+                node.pose[2] = Rotation(poi, layer);
             }
             // close to edge
             else
@@ -102,8 +106,9 @@ public class LocationsYamlExporter : IExporter
                     throw new InvalidOperationException("poi can not find an edge which close enough");
 
                 // construct new node
-                Node newNode = new Node(id.getId(poi.GetLabels()[0]), new double[] { coor.X, coor.Y, Rotation(poi) });  // TODO: key with id
+                Node newNode = new Node(id.getId(poi.GetLabels()[0]), new double[] { coor.X, coor.Y, Rotation(poi, layer) });
                 newNodeName = newNode.name;
+                poi.AddLabel(idPrefix + newNode.name);
 
                 // reconnect graph
                 graph.AddNode(newNode);
@@ -137,10 +142,10 @@ public class LocationsYamlExporter : IExporter
         });
     }
 
-    private double Rotation(IndoorPOI poi)
+    private double Rotation(IndoorPOI poi, ThematicLayer layer)
     {
         // look for human poi and change direction
-        HashSet<IndoorPOI> potentialHumanPois = indoorSimData.indoorFeatures.layers[0].Space2POIs(poi.foi[0]);
+        HashSet<IndoorPOI> potentialHumanPois = layer.Space2POIs(poi.foi[0]);
         IndoorPOI humanPoi = potentialHumanPois.FirstOrDefault((poi) => poi.CategoryContains(POICategory.Human.ToString()));
         if (humanPoi != null)
         {

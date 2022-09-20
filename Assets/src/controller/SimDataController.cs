@@ -342,6 +342,14 @@ public class SimDataController : MonoBehaviour
                 string result = exporter.Export(jsonData["include"].Value<bool>());
                 eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
             }
+            else if (jsonData["file"].Value<string>() == "binlocations.json")
+            {
+                var exporter = new BinLocationsJsonExporter();
+                exporter.Load(indoorSimData);
+                exporter.Translate(jsonData["layer"].Value<string>());
+                string result = exporter.Export(jsonData["include"].Value<bool>());
+                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
+            }
             else
             {
                 Debug.LogWarning("unknow exporter: " + jsonData["file"].Value<string>());

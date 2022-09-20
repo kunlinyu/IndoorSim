@@ -15,6 +15,13 @@ public class Container
 
     public bool Contains(string id) => Find(id) != null;
 
+    public List<Container> AllNodeInContainerTree()
+    {
+        List<Container> result = new List<Container>() { this };
+        children.ForEach(child => result.AddRange(child.AllNodeInContainerTree()));
+        return result;
+    }
+
     public Container? Find(string id)
     {
         if (containerId == id) return this;
