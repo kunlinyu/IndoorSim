@@ -50,6 +50,10 @@ public class BoundaryController : MonoBehaviour, Selectable
     [SerializeField] public Material selectedMaterial;
     [SerializeField] public float edgeShrink = 0.1f;
 
+    private Sprite left2Right;
+    private Sprite right2Left;
+    private Sprite bidirection;
+
     public float widthFactor = 0.01f;
     private float width = 0.0f;
 
@@ -65,6 +69,10 @@ public class BoundaryController : MonoBehaviour, Selectable
         updateRenderer(boundary.geom.Coordinates.Select(coor => U.Coor2Vec(coor)).ToArray());
         updateCollider();
         updateTransform();
+
+        left2Right = Resources.Load<Sprite>("BoundaryDirection/left2right");
+        right2Left = Resources.Load<Sprite>("BoundaryDirection/right2left");
+        bidirection = Resources.Load<Sprite>("BoundaryDirection/bi-direction");
     }
 
     // Update is called once per frame
@@ -136,13 +144,13 @@ public class BoundaryController : MonoBehaviour, Selectable
                     sr.sprite = null;
                     break;
                 case NaviDirection.Left2Right:
-                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/left2right");
+                    sr.sprite = left2Right;
                     break;
                 case NaviDirection.Right2Left:
-                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/right2left");
+                    sr.sprite = right2Left;
                     break;
                 case NaviDirection.BiDirection:
-                    sr.sprite = Resources.Load<Sprite>("BoundaryDirection/bi-direction");
+                    sr.sprite = bidirection;
                     break;
             }
         }
@@ -151,8 +159,8 @@ public class BoundaryController : MonoBehaviour, Selectable
             sr.sprite = null;
         }
 
-        float arrowSizeFactor = 0.2f;
-        float maxSpriteSize = 0.2f;
+        float arrowSizeFactor = 0.3f;
+        float maxSpriteSize = 0.5f;
         float spriteSize = Mathf.Min((float)boundary.geom.Length * arrowSizeFactor, maxSpriteSize);
 
         sr.size = new Vector2(spriteSize, spriteSize);
