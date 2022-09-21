@@ -283,7 +283,7 @@ public class SimDataController : MonoBehaviour
         {
             if (e.name == "save")
             {
-                string content = indoorSimData.Serialize(true);
+                string content = indoorSimData.Serialize(Application.version, true);
                 eventDispatcher.Raise(this, new UIEvent() { name = "save", message = content, type = UIEventType.Resources });
             }
             else if (e.name == "redo")
@@ -339,7 +339,7 @@ public class SimDataController : MonoBehaviour
                 var exporter = new LocationsYamlExporter();
                 exporter.Load(indoorSimData);
                 exporter.Translate(jsonData["layer"].Value<string>());
-                string result = exporter.Export(jsonData["include"].Value<bool>());
+                string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
                 eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
             }
             else if (jsonData["file"].Value<string>() == "binlocations.json")
@@ -347,7 +347,7 @@ public class SimDataController : MonoBehaviour
                 var exporter = new BinLocationsJsonExporter();
                 exporter.Load(indoorSimData);
                 exporter.Translate(jsonData["layer"].Value<string>());
-                string result = exporter.Export(jsonData["include"].Value<bool>());
+                string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
                 eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
             }
             else

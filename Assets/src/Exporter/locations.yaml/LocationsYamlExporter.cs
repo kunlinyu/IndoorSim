@@ -162,7 +162,7 @@ public class LocationsYamlExporter : IExporter
         }
     }
 
-    public string Export(bool includeFull)
+    public string Export(string softwareVersion, bool includeFull)
     {
         if (graph == null) throw new InvalidOperationException("Translate first");
 
@@ -177,7 +177,7 @@ public class LocationsYamlExporter : IExporter
         if (includeFull)
         {
             sb.Append("IndoorSim: ");
-            sb.Append(indoorSimData.Serialize(true));
+            sb.Append(indoorSimData.Serialize(softwareVersion, true));
             sb.Append("\n");
         }
 

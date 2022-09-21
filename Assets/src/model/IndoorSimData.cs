@@ -16,13 +16,13 @@ using UnityEngine.Profiling;
 
 public class IndoorSimData
 {
+    [JsonPropertyAttribute] public string softwareVersion = null;
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorFeatures indoorFeatures = null;
     [JsonIgnore] public List<IndoorTiling> indoorTilings = new List<IndoorTiling>();
     [JsonIgnore] public IndoorTiling activeTiling = null;
     [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
-
 
     [JsonPropertyAttribute] private List<SimData> simDataList = new List<SimData>();
     [JsonPropertyAttribute] public Dictionary<string, AgentTypeMeta> agentMetaList = new Dictionary<string, AgentTypeMeta>();
@@ -85,8 +85,9 @@ public class IndoorSimData
         RegisterInstructionExecutor();
     }
 
-    public string Serialize(bool indent = false)
+    public string Serialize(string softwareVersion, bool indent = false)
     {
+        this.softwareVersion = softwareVersion;
         digestCache = indoorFeatures.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
         {

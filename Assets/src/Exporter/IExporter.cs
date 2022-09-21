@@ -9,6 +9,6 @@ public interface IExporter
     public bool canIncludeFull { get; }
     public void Load(IndoorSimData indoorSimData);
     public void Translate(string layerName);
-    public string Export(bool includeFull);
+    public string Export(string softwareVersion, bool includeFull);
     public void Export(Stream stream);
 }

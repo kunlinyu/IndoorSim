@@ -41,7 +41,7 @@ public class BinLocationsJsonExporter : IExporter
         });
     }
 
-    public string Export(bool includeFull)
+    public string Export(string softwareVersion, bool includeFull)
     {
         if (poi2Container == null) throw new InvalidOperationException("Translate first");
 
@@ -69,7 +69,7 @@ public class BinLocationsJsonExporter : IExporter
 
         if (includeFull)
         {
-            var quotesHelper = new QuotesHelper() { IndoorSim = indoorSimData.Serialize(false) };
+            var quotesHelper = new QuotesHelper() { IndoorSim = indoorSimData.Serialize(softwareVersion, false) };
             sb.Append($"  \"IndoorSim\": {JsonConvert.SerializeObject(quotesHelper.IndoorSim)}\n");
         }
 
