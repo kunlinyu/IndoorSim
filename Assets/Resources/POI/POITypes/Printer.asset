@@ -14,7 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: PRINTER
   relatedCount: 1
-  relatedNavigable: 0
-  needDirection: 1
   needQueue: 1
-  color: {r: 0.7735849, g: 0.37584552, b: 0.75985944, a: 1}
+  color: {r: 0.754717, g: 0.26699895, b: 0.7284551, a: 1}

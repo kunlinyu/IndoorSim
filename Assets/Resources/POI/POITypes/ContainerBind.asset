@@ -15,4 +15,4 @@ MonoBehaviour:
   name: CONTAINER_BIND
   relatedCount: 4
   needQueue: 1
-  color: {r: 0.38501248, g: 0.5714887, b: 0.7924528, a: 1}
+  color: {r: 0.21960782, g: 0.39286304, b: 0.6509804, a: 1}

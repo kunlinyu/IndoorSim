@@ -15,4 +15,4 @@ MonoBehaviour:
   name: CARRIER_BIND_UNBIND
   relatedCount: 4
   needQueue: 1
-  color: {r: 0.16794232, g: 0.24732538, b: 0.3207547, a: 0.8784314}
+  color: {r: 0.13697045, g: 0.509434, b: 0.509434, a: 0.8784314}
