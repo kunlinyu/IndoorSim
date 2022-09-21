@@ -171,13 +171,16 @@ public class POIController : MonoBehaviour, Selectable
 
     void Start()
     {
+        spriteSize = GetComponent<SpriteRenderer>().size;
+        spriteInitSize = new Vector2(spriteSize.x, spriteSize.y);
         UpdateRenderer();
         UpdateCollider();
     }
 
 
     private int lastCameraHeightInt;
-    private Vector2 spriteSize = new Vector2(0.5f, 0.5f);
+    private Vector2 spriteSize;
+    private Vector2 spriteInitSize;
     void Update()
     {
         int newHeightInt = (int)(CameraController.CameraPosition.y * 0.5f);
@@ -186,8 +189,8 @@ public class POIController : MonoBehaviour, Selectable
             lastCameraHeightInt = newHeightInt;
             needUpdateRenderer = true;
 
-            spriteSize.x = Mathf.Sqrt(newHeightInt + 2) * 0.3f + 0.1f;
-            spriteSize.y = Mathf.Sqrt(newHeightInt + 2) * 0.3f + 0.1f;
+            spriteSize.x = 0.05f * (newHeightInt -5.0f) + spriteInitSize.x;
+            spriteSize.y = 0.05f * (newHeightInt -5.0f) + spriteInitSize.y;
         }
         if (needUpdateRenderer)
             UpdateRenderer();
