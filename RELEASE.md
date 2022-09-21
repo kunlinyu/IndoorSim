@@ -1,5 +1,22 @@
 # version list
 
+## V0.7.0
+* [IndoorSim-WebGL-V0.7.0.caf210d](./IndoorSim-WebGL-V0.7.0.caf210d)
+* [IndoorSim-WebGL-dev-V0.7.0.caf210d](./IndoorSim-WebGL-dev-V0.7.0.caf210d)
+* [IndoorSim-StandaloneLinux64-V0.7.0.caf210d.tar.gz](./IndoorSim-StandaloneLinux64-V0.7.0.caf210d.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.7.0.caf210d.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.7.0.caf210d.tar.gz)
+
+### DateTime
+2022-09-21 09:46:22 +08
+
+### ChangeLog
+1. 导出binlocations.json
+2. 修复binlocations中导出非PICKING点的bug
+3. 隐藏hierarchy与assets面板
+4. 调整边通过方向标识的大小和颜色
+
+---
+
 ## V0.6.0
 * [IndoorSim-WebGL-V0.6.0.a0b37e2](./IndoorSim-WebGL-V0.6.0.a0b37e2)
 * [IndoorSim-WebGL-dev-V0.6.0.a0b37e2](./IndoorSim-WebGL-dev-V0.6.0.a0b37e2)
