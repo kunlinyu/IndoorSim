@@ -37,6 +37,11 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
         thread.Start();
     }
 
+    public void PrepareForReset()
+    {
+        join = true;
+    }
+
     public AbstractAgent(AbstractActionPlanner planner, params AbstractActionExecutor[] actionExecutors)
     {
         this.planner = planner;
@@ -73,7 +78,7 @@ public abstract class AbstractAgent : IAsyncExecutor<Task, object?, object?, Age
             }
             else
             {
-                Thread.Sleep(200);
+                Thread.Sleep(100);
                 continue;
             }
 

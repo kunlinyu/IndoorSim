@@ -118,8 +118,12 @@ public class Simulation
     public void ResetAll()
     {
         player.Reset(0.0d);
+
         taskAllocator.Stop();
+
+        agents.ForEach(agent => agent.PrepareForReset());
         agents.ForEach(agent => agent.Reset());
+
         HWs.ForEach(agentHW => agentHW.ResetToInitStatus());
     }
 
