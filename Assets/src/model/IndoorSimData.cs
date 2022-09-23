@@ -7,16 +7,18 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Schema.Generation;
 using System.Runtime.Serialization;
 
 using UnityEngine;
-using UnityEngine.Profiling;
 
 #nullable enable
 
 public class IndoorSimData
 {
     [JsonPropertyAttribute] public string softwareVersion = null;
+    [JsonPropertyAttribute] public string schemaHash = null;
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorFeatures indoorFeatures = null;
@@ -88,6 +90,10 @@ public class IndoorSimData
     public string Serialize(string softwareVersion, bool indent = false)
     {
         this.softwareVersion = softwareVersion;
+        var schema = new JSchemaGenerator(){ ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
+
+        this.schemaHash = Hash.GetHashString(schema.ToString());
+
         digestCache = indoorFeatures.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -115,12 +121,9 @@ public class IndoorSimData
 
     public bool DeserializeInPlace(string json, bool historyOnly = false)
     {
-        Profiler.BeginSample("IndoorSimData");
         assets.Clear();
         history.Clear();
-        Profiler.BeginSample("Desirialize");
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
-        Profiler.EndSample();
         if (indoorSimData == null) return false;
 
         indoorFeatures.layers.ForEach(layer =>
@@ -167,17 +170,14 @@ public class IndoorSimData
         history = indoorSimData.history;
         currentSimData = null;
         activeHistory = history;
-        Profiler.BeginSample("OnUpdate");
         OnAssetListUpdated?.Invoke(assets);
         OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         OnSimulationListUpdated?.Invoke(simDataList);
-        Profiler.EndSample();
 
         gridMaps.ForEach(gridmap => OnGridMapRemoved?.Invoke(gridmap));
         gridMaps = indoorSimData.gridMaps;
         gridMaps.ForEach(gridmap => OnGridMapCreated?.Invoke(gridmap));
 
-        Profiler.EndSample();
         return true;
     }
 
