@@ -43,13 +43,14 @@ public class SimulationController : MonoBehaviour
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("0") }));
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("1") }));
                     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("2") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("3") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("4") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("5") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("6") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("7") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("8") }));
-                    indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToContainer("9") }));
+
+                    // var rand = new System.Random();
+                    // for (int i = 0; i < 1000; i++)
+                    // {
+                    //     double x = rand.NextDouble() * 20.0 - 10.0;
+                    //     double y = rand.NextDouble() * 20.0 - 10.0;
+                    //     indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() { new ActionMoveToCoor(x, y) }));
+                    // }
 
                     // indoorSimData.currentSimData.tasks.Add(new ActionListTask(1.0d, new List<AgentAction>() {
                     //     new ActionMoveToCoor(1.0f, 1.0f),
@@ -57,27 +58,6 @@ public class SimulationController : MonoBehaviour
                     //     new ActionMoveToCoor(1.0f, -1.0f),
                     //     new ActionMoveToCoor(-1.0f, -1.0f),
                     //     new ActionMoveToCoor(1.0f, 1.0f),
-                    // }));
-                    // indoorSimData.currentSimData.tasks.Add(new ActionListTask(2.0d, new List<AgentAction>() {
-                    //     new ActionMoveToCoor(2.0f, 2.0f),
-                    //     new ActionMoveToCoor(-2.0f, 2.0f),
-                    //     new ActionMoveToCoor(2.0f, -2.0f),
-                    //     new ActionMoveToCoor(-2.0f, -2.0f),
-                    //     new ActionMoveToCoor(2.0f, 2.0f),
-                    // }));
-                    // indoorSimData.currentSimData.tasks.Add(new ActionListTask(3.0d, new List<AgentAction>() {
-                    //     new ActionMoveToCoor(3.0f, 3.0f),
-                    //     new ActionMoveToCoor(-3.0f, 3.0f),
-                    //     new ActionMoveToCoor(-3.0f, -3.0f),
-                    //     new ActionMoveToCoor(3.0f, -3.0f),
-                    //     new ActionMoveToCoor(3.0f, 3.0f),
-                    // }));
-                    // indoorSimData.currentSimData.tasks.Add(new ActionListTask(4.0d, new List<AgentAction>() {
-                    //     new ActionMoveToCoor(4.0f, 4.0f),
-                    //     new ActionMoveToCoor(4.0f, -4.0f),
-                    //     new ActionMoveToCoor(-4.0f, -4.0f),
-                    //     new ActionMoveToCoor(-4.0f, 4.0f),
-                    //     new ActionMoveToCoor(4.0f, 4.0f),
                     // }));
 
                     simulation = new Simulation(indoorSimData.indoorFeatures.activeLayer, indoorSimData.currentSimData, simulationView.GetAgentHWs());
