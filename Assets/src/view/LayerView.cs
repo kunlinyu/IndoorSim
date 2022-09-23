@@ -23,6 +23,8 @@ public class LayerView : MonoBehaviour
 
     private List<POIType> allPOITypes;
 
+    private bool graphStatus = true;
+
 
     void Awake()
     {
@@ -56,6 +58,7 @@ public class LayerView : MonoBehaviour
             obj.name = boundary.Id;
             obj.GetComponent<BoundaryController>().Boundary = boundary;
             boundary2Obj[boundary] = obj;
+            obj.transform.Find("Edge").gameObject.SetActive(graphStatus);
         };
         layer.OnSpaceCreated += (space) =>
         {
@@ -63,6 +66,7 @@ public class LayerView : MonoBehaviour
             obj.name = space.Id;
             obj.GetComponent<SpaceController>().Space = space;
             cellspace2Obj[space] = obj;
+            obj.transform.Find("Node").gameObject.SetActive(graphStatus);
         };
         layer.OnRLinesCreated += (rLines) =>
         {
@@ -161,15 +165,16 @@ public class LayerView : MonoBehaviour
 
     public void SwitchDualityGraph(bool status)
     {
+        graphStatus = status;
         foreach (var obj in cellspace2Obj.Values)
         {
             GameObject node = obj.transform.Find("Node").gameObject;
-            node.SetActive(status);
+            node.SetActive(graphStatus);
         }
         foreach (var obj in boundary2Obj.Values)
         {
             GameObject edge = obj.transform.Find("Edge").gameObject;
-            edge.SetActive(status);
+            edge.SetActive(graphStatus);
         }
     }
 }
