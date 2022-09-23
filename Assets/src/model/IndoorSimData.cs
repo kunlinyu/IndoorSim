@@ -19,6 +19,7 @@ public class IndoorSimData
 {
     [JsonPropertyAttribute] public string softwareVersion = null;
     [JsonPropertyAttribute] public string schemaHash = null;
+    [JsonIgnore] public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>() { {"0.7.0", "B141089E49F26556B3872205B1EA5718"} };
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorFeatures indoorFeatures = null;
@@ -53,6 +54,12 @@ public class IndoorSimData
     {
         RegisterInstructionExecutor();
     }
+
+    static public JSchema JSchema()
+        => new JSchemaGenerator(){ ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
+
+    static public string JSchemaHash()
+        => Hash.GetHashString(JSchema().ToString());
 
     [OnDeserialized]
     private void OnSerializedMethod(StreamingContext context)
@@ -90,9 +97,7 @@ public class IndoorSimData
     public string Serialize(string softwareVersion, bool indent = false)
     {
         this.softwareVersion = softwareVersion;
-        var schema = new JSchemaGenerator(){ ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
-
-        this.schemaHash = Hash.GetHashString(schema.ToString());
+        this.schemaHash = JSchemaHash();
 
         digestCache = indoorFeatures.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
@@ -124,7 +129,24 @@ public class IndoorSimData
         assets.Clear();
         history.Clear();
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
+
         if (indoorSimData == null) return false;
+        if (indoorSimData.schemaHash == null)
+            Debug.LogWarning("schemaHash == null. This file is not official file format. Resave it to generate an official file format.");
+        else if (indoorSimData.schemaHash.Length == 0)
+            Debug.LogWarning("schemaHash is empty. This file is not official file format. Resave it to generate an official file format.");
+        else
+        {
+            var expectedSchemahash = JSchemaHash();
+            if (indoorSimData.schemaHash != expectedSchemahash)
+            {
+                Debug.Log("schema hash history:");
+                foreach (var entry in schemaHashHistory)
+                    Debug.Log(entry.Key + ": " + entry.Value);
+                throw new ArgumentException($"schemaHash is not correct: {indoorSimData.schemaHash}, expeting {expectedSchemahash}");
+            }
+        }
+
 
         indoorFeatures.layers.ForEach(layer =>
         {
