@@ -28,7 +28,7 @@ public class AStarTool : MonoBehaviour, ITool
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             switch (status)
             {

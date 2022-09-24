@@ -354,7 +354,7 @@ public class SelectDrag : MonoBehaviour, ITool
                 break;
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             status = SelectStatus.Idle;
             selectedVertices.ForEach(vc => vc.selected = false);

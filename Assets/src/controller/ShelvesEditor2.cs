@@ -89,7 +89,6 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
                 if (shelfRatio > 0.9f) shelfRatio = 0.9f;
 
                 if (Input.GetMouseButtonDown(2)) splitCount++;
-                // if (Input.GetMouseButtonDown(1)) splitCount--;
                 if (splitCount <= 1) splitCount = 1;
                 corridorCount = splitCount / 2;
                 shelfCount = splitCount - corridorCount;
@@ -166,7 +165,7 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             if (status == 3)
                 if (splitCount > 1)

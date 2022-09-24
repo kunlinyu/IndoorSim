@@ -188,7 +188,7 @@ public class ShelvesEditor : MonoBehaviour, ITool
             Debug.Log(status);
         }
 
-        if (Input.GetMouseButtonDown(1) && !MouseOnUI)
+        if ((Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape)) && !MouseOnUI)
         {
             if (status > 0) status--;
             if (status == 0) firstIsShelf = true;

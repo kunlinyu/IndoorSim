@@ -89,7 +89,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                     }
                 }
-                else if (Input.GetMouseButtonDown(1))
+                else if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
                 {
                     if (foiSpace.Count > 0)
                         foiSpace.RemoveAt(foiSpace.Count - 1);
@@ -112,7 +112,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
                 }
-                else if (Input.GetMouseButtonDown(1))
+                else if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
                 {
                     status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
                 }
@@ -137,7 +137,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         }
                     }
                 }
-                else if (Input.GetMouseButtonDown(1))
+                else if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
                 {
                     Debug.Log("jump to related space committed");
                     status = PaAmrPoiMarkerStatus.RelatedSpaceCommitted;
@@ -180,7 +180,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     queueObj.Clear();
                     status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
                 }
-                else if (Input.GetMouseButtonDown(1))
+                else if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
                 {
                     if (queueObj.Count > 0)
                     {

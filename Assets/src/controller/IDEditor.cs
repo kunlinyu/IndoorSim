@@ -34,7 +34,7 @@ public class IDEditor : MonoBehaviour, ITool
                 PopContainerIdPanel?.Invoke((int)Input.mousePosition.x, (int)Input.mousePosition.y, currentSpace.containerId, childrenIds);
             }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             HideContainerIdPanel?.Invoke();
             currentSpace = null;

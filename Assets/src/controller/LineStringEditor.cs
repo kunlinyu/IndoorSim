@@ -85,7 +85,7 @@ public class LineStringEditor : MonoBehaviour, ITool
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             lastCoor = null;
             lastVertex = null;

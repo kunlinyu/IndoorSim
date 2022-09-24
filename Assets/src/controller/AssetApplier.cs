@@ -76,7 +76,7 @@ public class AssetApplier : MonoBehaviour, ITool
             boundaryRenderObjs.Clear();
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             anchorMouse = Input.mousePosition;
             rotationAnchor = rotation;
