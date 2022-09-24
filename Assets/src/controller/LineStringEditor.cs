@@ -35,35 +35,29 @@ public class LineStringEditor : MonoBehaviour, ITool
                 Coordinate currentCoor = currentCoor_;
                 Selectable? pointed = MousePickController.PointedEntity;
 
-                if (lastCoor == null && pointed != null && pointed.type == SelectableType.Boundary) return;
-
-                // snap to vertex
                 CellVertex? currentVertex = null;
                 CellBoundary? currentBoundary = null;
+
+                // handle split boundary
+                if (pointed != null && pointed.type == SelectableType.Boundary)
+                {
+                    currentBoundary = ((BoundaryController)pointed).Boundary;
+                    Coordinate[] nearestCoor = DistanceOp.NearestPoints(currentBoundary.geom, new GeometryFactory().CreatePoint(currentCoor));
+                    currentCoor = nearestCoor[0];
+                    currentVertex = IndoorSimData!.SplitBoundary(currentBoundary!, currentCoor);
+                }
+
+                // snap to vertex
                 if (pointed != null && pointed.type == SelectableType.Vertex)
                 {
                     currentVertex = ((VertexController)pointed).Vertex;
                     currentCoor = currentVertex.Coordinate;
                 }
 
-                // handle split boundary
-                bool splitBoundary = false;
-                if (lastCoor != null && pointed != null && pointed.type == SelectableType.Boundary)
-                {
-                    splitBoundary = true;
-                    currentBoundary = ((BoundaryController)pointed).Boundary;
-
-                    Coordinate[] nearestCoor = DistanceOp.NearestPoints(currentBoundary.geom, new GeometryFactory().CreatePoint(currentCoor));
-                    currentCoor = nearestCoor[0];
-                }
-
                 if (lastCoor != null)
                 {
                     GeometryFactory gf = new GeometryFactory();
                     CellBoundary? boundary = null;
-
-                    if (splitBoundary)
-                        currentVertex = IndoorSimData!.SplitBoundary(currentBoundary!, currentCoor);
 
                     if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentCoor);
                     else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastVertex, currentCoor);
