@@ -142,6 +142,8 @@ public class ImportExport : MonoBehaviour
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map", "indoor.json");
         if (path.Length != 0)
         {
+            if (!path.Contains("."))
+                path += ".indoor.json";
             Debug.Log("save file to: " + path);
             File.WriteAllText(path, content);
         }
