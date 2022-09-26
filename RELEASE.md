@@ -1,5 +1,26 @@
 # version list
 
+## V0.7.1
+* [IndoorSim-WebGL-V0.7.1.f352b80](./IndoorSim-WebGL-V0.7.1.f352b80)
+* [IndoorSim-WebGL-dev-V0.7.1.f352b80](./IndoorSim-WebGL-dev-V0.7.1.f352b80)
+* [IndoorSim-StandaloneLinux64-V0.7.1.f352b80.tar.gz](./IndoorSim-StandaloneLinux64-V0.7.1.f352b80.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.7.1.f352b80.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.7.1.f352b80.tar.gz)
+
+### DateTime
+2022-09-26 14:16:50 +08
+
+### ChangeLog
+1. 调整视角上下限
+2. 调整POI的大小和缩放逻辑
+3. 调整POI的颜色，删掉MAIN POI
+4. 把软件版本写入文件中
+5. 使用Newtonsoft.Json.Schema计算文件的Schema的哈希值并写入文件
+6. 修复Agent数量非常多时Reset卡顿的bug
+7. 修复Graph显示异常的bug
+8. 调整保存文件时自动添加文件名后缀的策略
+9. LineString工具点击边直接拆分
+10. 添加ESC键作为鼠标右键的替代
+
 ## V0.7.0
 * [IndoorSim-WebGL-V0.7.0.caf210d](./IndoorSim-WebGL-V0.7.0.caf210d)
 * [IndoorSim-WebGL-dev-V0.7.0.caf210d](./IndoorSim-WebGL-dev-V0.7.0.caf210d)
