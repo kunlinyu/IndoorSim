@@ -13,8 +13,6 @@ else
   exit
 fi
 
-aws s3 cp index.html s3://indoorsim/index.html
-
 echo $RELEASEPATH
 
 aws s3 cp $RELEASEPATH/index.html s3://indoorsim/$RELEASEPATH/index.html
