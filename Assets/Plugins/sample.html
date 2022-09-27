@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript">
+      function SendMessage2CSharp(obj) {
+        document.all.unity.contentWindow.Bridge.SendMessage2CSharp(JSON.stringify(obj));
+      }
+      function OnLineStringClick() {
+        SendMessage2CSharp({ type:"tool", name:"LineString", status:"enable" });
+      }
+      function OnCancelClick() {
+        SendMessage2CSharp({ type:"tool", name:"LineString", status:"disable" });
+      }
+      function Request() {
+        document.all.unity.contentWindow.Bridge.Request(
+          "hello i am request",
+          (response) => { console.log("index.html get response: " + response); }
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <p> hello </p>
+    <button onclick="OnLineStringClick()">line string</button>
+    <button onclick="OnCancelClick()">cancel</button>
+    <button onclick="Request()">Request</button>
+    <br/>
+    <iframe src="./unity/index.html" id="unity" height="700" width="1200"></iframe> 
+  </body>
+</html>
+
