@@ -23,7 +23,7 @@ public class SimDataController : MonoBehaviour
     private Thread serializationThread;
 
     [DllImport("__Internal")]
-    private static extern void Response(string str);
+    private static extern void Response(int number, string str);
 
 
     void Update()
@@ -58,7 +58,6 @@ public class SimDataController : MonoBehaviour
         indoorSimData.OnIndoorFeatureUpdated += (indoorFeatues) =>
         {
             SerializeAndPublish();
-            Response("IndoorFeatureUpdated");
         };
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {
