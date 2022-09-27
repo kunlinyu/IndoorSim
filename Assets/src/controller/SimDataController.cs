@@ -3,7 +3,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 using UnityEngine;
@@ -21,6 +21,9 @@ public class SimDataController : MonoBehaviour
     public UIEventDispatcher eventDispatcher;
     private UIEventSubscriber eventSubscriber;
     private Thread serializationThread;
+
+    [DllImport("__Internal")]
+    private static extern void Response(string str);
 
 
     void Update()
@@ -54,12 +57,8 @@ public class SimDataController : MonoBehaviour
         };
         indoorSimData.OnIndoorFeatureUpdated += (indoorFeatues) =>
         {
-            // if (serializationThread != null)
-            //     serializationThread.Join();
-
-            // serializationThread = new Thread(new ThreadStart(this.SerializeAndPublish));
-            // serializationThread.Start();
             SerializeAndPublish();
+            Response("IndoorFeatureUpdated");
         };
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {

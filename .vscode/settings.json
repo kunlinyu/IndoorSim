@@ -4,6 +4,7 @@
     "editor.formatOnType": true,
     "files.associations": {
         "*.jslib": "javascript",
+        "*.jspre": "javascript",
     },
     "insertDateString.format": "YYYY-MM-DD hh:mm:ss ZZ",
     "files.exclude": {
