@@ -730,6 +730,13 @@ public class IndoorSimData
         activeTiling.RemoveBoundary(boundary);
         if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
     }
+    public void RemoveBoundaries(List<CellBoundary> boundaries)
+    {
+        history.SessionStart();
+        boundaries.ForEach(b => RemoveBoundary(b));
+        history.SessionCommit();
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+    }
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
         history.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));

@@ -18,6 +18,8 @@ public class SimDataController : MonoBehaviour
     GameObject toolObj;
     ITool currentTool;
 
+    ITool keyBoardDeleter;
+
     public UIEventDispatcher eventDispatcher;
     private UIEventSubscriber eventSubscriber;
     private Thread serializationThread;
@@ -103,6 +105,11 @@ public class SimDataController : MonoBehaviour
         {
 
         };
+
+        keyBoardDeleter = transform.Find("KeyboardDeleter").GetComponent<KeyBoardDeleter>();
+        keyBoardDeleter.mapView = mapView;
+        keyBoardDeleter.simView = simView;
+        keyBoardDeleter.IndoorSimData = indoorSimData;
     }
 
     void EventListener(object sender, UIEvent e)
