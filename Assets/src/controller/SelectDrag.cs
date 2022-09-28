@@ -425,8 +425,9 @@ public class SelectDrag : MonoBehaviour, ITool
         edgeNodeGeom.Add(new GeometryFactory().CreatePoint(space.Geom.Centroid.Coordinate));
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(edgeNodeGeom.ToArray());
+        Geometry inSpace = gc.Intersection(space.Geom);
 
-        Coordinate[] nearestCoor = DistanceOp.NearestPoints(gc, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
+        Coordinate[] nearestCoor = DistanceOp.NearestPoints(inSpace, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
         return U.Coor2Vec(nearestCoor[0]);
     }
 
