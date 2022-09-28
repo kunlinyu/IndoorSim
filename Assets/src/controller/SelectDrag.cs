@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Distance;
 #nullable enable
 
 enum SelectStatus
@@ -332,7 +333,12 @@ public class SelectDrag : MonoBehaviour, ITool
                         if (selectedPOIs.Count > 0)
                         {
                             foreach (POIController pc in selectedPOIs)
-                                IndoorSimData.UpdatePOI(pc.Poi, U.Vec2Coor(pc.transform.position));
+                            {
+                                Vector3 snappedPosition = pc.transform.position;
+                                if (!pc.Poi.CategoryContains(POICategory.Human.ToString()))
+                                    snappedPosition = ClosestEdgeNode((CellSpace)pc.Poi.layOnSpace, pc.transform.position, mapView);
+                                IndoorSimData.UpdatePOI(pc.Poi, U.Vec2Coor(snappedPosition));
+                            }
                         }
 
                         if (adhoc)
@@ -407,4 +413,21 @@ public class SelectDrag : MonoBehaviour, ITool
 
         return result;
     }
+    private static Vector3 ClosestEdgeNode(CellSpace space, Vector3 mousePosition, IndoorMapView mapView)
+    {
+        List<CellBoundary> inOutBound = space.InOutBound();
+        List<LineRenderer> lrs = inOutBound.Select(b => mapView.activeLayerView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
+        List<LineString> lineStrings = lrs.Select(lr
+          => new GeometryFactory().CreateLineString(new Coordinate[] {U.Vec2Coor(lr.GetPosition(0)),
+                                                                      U.Vec2Coor(lr.GetPosition(1))})).ToList();
+
+        List<Geometry> edgeNodeGeom = new List<Geometry>(lineStrings);
+        edgeNodeGeom.Add(new GeometryFactory().CreatePoint(space.Geom.Centroid.Coordinate));
+
+        GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(edgeNodeGeom.ToArray());
+
+        Coordinate[] nearestCoor = DistanceOp.NearestPoints(gc, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
+        return U.Coor2Vec(nearestCoor[0]);
+    }
+
 }

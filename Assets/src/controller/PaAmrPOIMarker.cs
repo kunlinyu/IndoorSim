@@ -107,7 +107,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     if (foiSpace.Count > 0 && CanLayOn(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
-                        paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition);
+                        paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition, mapView);
                         paAmrPoiLayOnSpace = sc!.Space;
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
@@ -224,7 +224,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         foiSpace.Clear();
     }
 
-    private Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition)
+    public static Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition, IndoorMapView mapView)
     {
         List<CellBoundary> inOutBound = sc.Space.InOutBound();
         List<LineRenderer> lrs = inOutBound.Select(b => mapView.activeLayerView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
@@ -332,7 +332,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().color = poiType.color;
                             transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = false;
-                            position = ClosestEdgeNode(sc, mousePosition.Value);
+                            position = ClosestEdgeNode(sc, mousePosition.Value, mapView);
                             transform.Find("PosePOI").position = position;
                         }
                         else
