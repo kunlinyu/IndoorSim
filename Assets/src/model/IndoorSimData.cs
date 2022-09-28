@@ -751,11 +751,16 @@ public class IndoorSimData
         var oldContainerId = space.containerId;
         var oldChildrenId = string.Join(',', space.children.Select(child => child.containerId));
         var newChildrenId = string.Join(',', childrenId);
-        history.DoCommit(ReducedInstruction.UpdateSpaceId(space.Polygon.InteriorPoint.Coordinate, oldContainerId, oldChildrenId, newContainerId, newChildrenId));
+        try
+        {
+            activeTiling.UpdateSpaceId(space, newContainerId, childrenId);
+            history.DoCommit(ReducedInstruction.UpdateSpaceId(space.Polygon.InteriorPoint.Coordinate, oldContainerId, oldChildrenId, newContainerId, newChildrenId));
+        } catch (ArgumentException e)
+        {
+            Debug.LogWarning(e.Message);
+            Debug.LogWarning("Ignore the operation. Try another id please");
+        }
 
-        space.containerId = newContainerId;
-        space.children.Clear();
-        childrenId.ForEach(childId => space.children.Add(new Container(childId)));
     }
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {

@@ -336,17 +336,29 @@ public class SimDataController : MonoBehaviour
             {
                 var exporter = new LocationsYamlExporter();
                 exporter.Load(indoorSimData);
-                exporter.Translate(jsonData["layer"].Value<string>());
-                string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
-                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
+                if (exporter.Translate(jsonData["layer"].Value<string>()))
+                {
+                    string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
+                    eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
+                }
+                else
+                {
+                    Debug.LogWarning("locations.yaml data model translate failed");
+                }
             }
             else if (jsonData["file"].Value<string>() == "binlocations.json")
             {
                 var exporter = new BinLocationsJsonExporter();
                 exporter.Load(indoorSimData);
-                exporter.Translate(jsonData["layer"].Value<string>());
-                string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
-                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
+                if (exporter.Translate(jsonData["layer"].Value<string>()))
+                {
+                    string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
+                    eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
+                }
+                else
+                {
+                    Debug.LogWarning("binlocations.json data model translate failed");
+                }
             }
             else
             {

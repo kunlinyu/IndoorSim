@@ -27,7 +27,7 @@ public class BinLocationsJsonExporter : IExporter
         this.indoorSimData = indoorSimData;
     }
 
-    public void Translate(string layerName)
+    public bool Translate(string layerName)
     {
         ThematicLayer layer = indoorSimData.indoorFeatures.layers.Find(layer => layer.level == layerName);
         if (layer == null) throw new ArgumentException("can not find layer with level name: " + layerName);
@@ -39,6 +39,7 @@ public class BinLocationsJsonExporter : IExporter
             poi2Container[poi] = new List<Container>();
             poi.foi.ForEach(foi => foi.AllNodeInContainerTree().ForEach(container => poi2Container[poi].Add(container)));
         });
+        return true;
     }
 
     public string Export(string softwareVersion, bool includeFull)
@@ -47,6 +48,8 @@ public class BinLocationsJsonExporter : IExporter
 
         StringBuilder sb = new StringBuilder();
         sb.Append("{\n");
+
+        HashSet<string> containerIds = new HashSet<string>();
 
         foreach (var entry in poi2Container)
         {
@@ -61,7 +64,11 @@ public class BinLocationsJsonExporter : IExporter
             entry.Value.ForEach(container =>
             {
                 if (container.containerId != "")
+                {
+                    if (containerIds.Contains(container.containerId)) throw new ArgumentException("redundent container id: " + container.containerId);
+                    containerIds.Add(container.containerId);
                     sb.Append($"  \"{container.containerId}\": \"{poiId}\",\n");
+                }
             });
         }
 

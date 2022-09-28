@@ -8,7 +8,7 @@ public interface IExporter
     public string defaultStreamName { get; }
     public bool canIncludeFull { get; }
     public void Load(IndoorSimData indoorSimData);
-    public void Translate(string layerName);
+    public bool Translate(string layerName);
     public string Export(string softwareVersion, bool includeFull);
     public void Export(Stream stream);
 }

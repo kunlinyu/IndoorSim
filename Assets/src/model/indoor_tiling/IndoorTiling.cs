@@ -532,6 +532,29 @@ public class IndoorTiling
         }
     }
 
+    public void UpdateSpaceId(CellSpace space, string newContainerId, List<string> childrenId)
+    {
+        string? repeatId = null;
+        var newIds = new List<string>(childrenId);
+        newIds.Add(newContainerId);
+        foreach (var newId in newIds)
+            foreach (var oldspace in layer.cellSpaceMember)
+                foreach (var container in oldspace.AllNodeInContainerTree())
+                    if (newId == container.containerId)
+                    {
+                        repeatId = newId;
+                        goto OUT;
+                    }
+        OUT:
+        if (repeatId != null)
+        {
+            throw new ArgumentException($"new id ({repeatId}) repeated");
+        }
+        space.containerId = newContainerId;
+        space.children.Clear();
+        childrenId.ForEach(childId => space.children.Add(new Container(childId)));
+    }
+
     public void RemovePOI(IndoorPOI poi)
     {
         layer.RemovePOI(poi);

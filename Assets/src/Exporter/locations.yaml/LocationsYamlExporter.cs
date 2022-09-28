@@ -35,7 +35,7 @@ public class LocationsYamlExporter : IExporter
         this.indoorSimData = indoorSimData;
     }
 
-    public void Translate(string layerName)
+    public bool Translate(string layerName)
     {
         ThematicLayer layer = indoorSimData.indoorFeatures.layers.Find(layer => layer.level == layerName);
         if (layer == null) throw new ArgumentException("can not find layer with level name: " + layerName);
@@ -140,6 +140,7 @@ public class LocationsYamlExporter : IExporter
                 }
             }
         });
+        return true;
     }
 
     private double Rotation(IndoorPOI poi, ThematicLayer layer)
