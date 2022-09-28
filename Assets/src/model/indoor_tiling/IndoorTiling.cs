@@ -262,6 +262,10 @@ public class IndoorTiling
         // Create and add new boundaries
         newBoundary1 = new CellBoundary(oldBoundary.P0, middleVertex, IdGenBoundary?.Gen() ?? "no id");
         newBoundary2 = new CellBoundary(middleVertex, oldBoundary.P1, IdGenBoundary?.Gen() ?? "no id");
+        newBoundary1.Navigable = oldBoundary.Navigable;
+        newBoundary2.Navigable = oldBoundary.Navigable;
+        newBoundary1.NaviDir = oldBoundary.NaviDir;
+        newBoundary2.NaviDir = oldBoundary.NaviDir;
         AddBoundaryInternal(newBoundary1);
         AddBoundaryInternal(newBoundary2);
 
