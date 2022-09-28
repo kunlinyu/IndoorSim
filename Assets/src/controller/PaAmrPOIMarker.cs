@@ -224,7 +224,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         foiSpace.Clear();
     }
 
-    public static Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition, IndoorMapView mapView)
+    private static Vector3 ClosestEdgeNode(SpaceController sc, Vector3 mousePosition, IndoorMapView mapView)
     {
         List<CellBoundary> inOutBound = sc.Space.InOutBound();
         List<LineRenderer> lrs = inOutBound.Select(b => mapView.activeLayerView.boundary2Obj[b].transform.Find("Edge").GetComponent<LineRenderer>()).ToList();
