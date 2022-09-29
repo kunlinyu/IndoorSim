@@ -76,6 +76,7 @@ public class ImportExport : MonoBehaviour
         string file = jsonData["file"].Value<string>();
         int dotIndex = file.LastIndexOf(".");
         string suffix = file.Substring(dotIndex + 1);
+        string baseName = file.Substring(0, dotIndex);
         bool include = jsonData["include"].Value<bool>();
 
         string helperString = include ? "" : "NOT";
@@ -86,7 +87,9 @@ public class ImportExport : MonoBehaviour
         var bytes = Encoding.UTF8.GetBytes(data);
         DownloadFile(gameObject.name, "OnFileDownload", file, bytes, bytes.Length);
 #else
-        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", file, suffix);
+        Debug.Log("baseName: " + baseName);
+        Debug.Log("suffix: " + suffix);
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", baseName, suffix);
         if (path.Length != 0)
         {
             Debug.Log("save file to: " + path);

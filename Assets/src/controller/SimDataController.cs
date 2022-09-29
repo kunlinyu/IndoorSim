@@ -27,6 +27,8 @@ public class SimDataController : MonoBehaviour
     [DllImport("__Internal")]
     private static extern void Response(int number, string str);
 
+    private List<IExporter> exporters = new List<IExporter>();
+
 
     void Update()
     {
@@ -110,6 +112,10 @@ public class SimDataController : MonoBehaviour
         keyBoardDeleter.mapView = mapView;
         keyBoardDeleter.simView = simView;
         keyBoardDeleter.IndoorSimData = indoorSimData;
+
+        exporters.Add(new LocationsYamlExporter());
+        exporters.Add(new BinLocationsJsonExporter());
+        exporters.Add(new BinLocationCsvExporter());
     }
 
     void EventListener(object sender, UIEvent e)
@@ -338,38 +344,21 @@ public class SimDataController : MonoBehaviour
             Debug.Log(e.message);
             var jsonData = JObject.Parse(e.message);
 
-            // TODO: we need a registry to handle all exporter and match one exporter according to jsonData["file"]
-            if (jsonData["file"].Value<string>() == "locations.yaml")
+            string exportFileName = jsonData["file"].Value<string>();
+
+            IExporter exporter = exporters.Find(exporter => exporter.name == exportFileName);
+
+            if (exporter == null) throw new ArgumentException("unknow exporter: " + exportFileName);
+
+            exporter.Load(indoorSimData);
+            if (exporter.Translate(jsonData["layer"].Value<string>()))
             {
-                var exporter = new LocationsYamlExporter();
-                exporter.Load(indoorSimData);
-                if (exporter.Translate(jsonData["layer"].Value<string>()))
-                {
-                    string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
-                    eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
-                }
-                else
-                {
-                    Debug.LogWarning("locations.yaml data model translate failed");
-                }
-            }
-            else if (jsonData["file"].Value<string>() == "binlocations.json")
-            {
-                var exporter = new BinLocationsJsonExporter();
-                exporter.Load(indoorSimData);
-                if (exporter.Translate(jsonData["layer"].Value<string>()))
-                {
-                    string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
-                    eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
-                }
-                else
-                {
-                    Debug.LogWarning("binlocations.json data model translate failed");
-                }
+                string result = exporter.Export(Application.version, jsonData["include"].Value<bool>());
+                eventDispatcher.Raise(this, new UIEvent() { name = "export", message = e.message, data = result, type = UIEventType.Resources });
             }
             else
             {
-                Debug.LogWarning("unknow exporter: " + jsonData["file"].Value<string>());
+                Debug.LogWarning(exporter.name + " data model translate failed");
             }
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)

@@ -185,6 +185,13 @@ public class LocationsYamlExporter : IExporter
         return sb.ToString();
     }
 
+    public void Reset()
+    {
+        indoorSimData = null;
+        graph = null;
+        id = null;
+    }
+
     public void Export(Stream stream)
     {
         throw new System.NotImplementedException();

@@ -13,11 +13,11 @@ class QuotesHelper
 
 public class BinLocationsJsonExporter : IExporter
 {
-    private static string idPrefix = "LacationYamlExporterId: ";
     public string name => "binlocations.json";
     public string defaultStreamName => "binlocations.json";
     public bool canIncludeFull => true;
 
+    private static string idPrefix = "LacationYamlExporterId: ";
     IndoorSimData indoorSimData = null;
 
     Dictionary<IndoorPOI, List<Container>> poi2Container = null;
@@ -84,6 +84,13 @@ public class BinLocationsJsonExporter : IExporter
         sb.Append("}\n");
 
         return sb.ToString();
+    }
+
+    public void Reset()
+    {
+        indoorSimData = null;
+        poi2Container.Clear();
+        poi2Container = null;
     }
 
     public void Export(Stream stream)

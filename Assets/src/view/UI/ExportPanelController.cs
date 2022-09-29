@@ -40,6 +40,7 @@ public class ExportPanelController : MonoBehaviour
     {
         Exporter exporter = allExporter.Find(exporter => exporter.name == exporterName);
         root.Q<Toggle>("include").SetEnabled(exporter.canIncludeFull);
-
+        if (exporter.canIncludeFull == false)
+            root.Q<Toggle>("include").value = false;
     }
 }

@@ -11,4 +11,5 @@ public interface IExporter
     public bool Translate(string layerName);
     public string Export(string softwareVersion, bool includeFull);
     public void Export(Stream stream);
+    public void Reset();
 }
