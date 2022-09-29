@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Distance;
 using UnityEngine;
@@ -59,22 +60,54 @@ public class LineStringEditor : MonoBehaviour, ITool
                     GeometryFactory gf = new GeometryFactory();
                     CellBoundary? boundary = null;
 
-                    if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentCoor);
-                    else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastVertex, currentCoor);
-                    else if (lastVertex == null && currentVertex != null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentVertex);
-                    else if (lastVertex != null && currentVertex != null)
-                        if (lastVertex != currentVertex)
-                            boundary = IndoorSimData!.AddBoundary(lastVertex, currentVertex);
+                    Coordinate tempLastCoor = lastVertex != null ? lastVertex.Coordinate : lastCoor;
+                    Coordinate tempCurrentCoor = currentVertex != null ? currentVertex.Coordinate : currentCoor;
+                    LineString tempLs = new GeometryFactory().CreateLineString(new Coordinate[] { tempLastCoor, tempCurrentCoor });
+                    bool lessthan3 = IndoorSimData!.IntersectionLessThan(tempLs, 3, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections);
+                    if (lessthan3 && crossesBoundaries.Count == 0)
+                    {
+                        if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentCoor);
+                        else if (lastVertex != null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastVertex, currentCoor);
+                        else if (lastVertex == null && currentVertex != null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentVertex);
+                        else if (lastVertex != null && currentVertex != null)
+                            if (lastVertex != currentVertex)
+                                boundary = IndoorSimData!.AddBoundary(lastVertex, currentVertex);
 
-                    if (boundary != null)
-                    {
-                        lastVertex = boundary.P1;
-                        lastCoor = boundary.P1.Coordinate;
+                        if (boundary != null)
+                        {
+                            lastVertex = boundary.P1;
+                            lastCoor = boundary.P1.Coordinate;
+                        }
+                        else
+                        {
+                            lastVertex = currentVertex;
+                            lastCoor = lastVertex.Coordinate;
+                        }
                     }
-                    else if (lastVertex != null && currentVertex != null)
+                    else if (lessthan3 && crossesBoundaries.Count > 0)
                     {
-                        lastVertex = currentVertex;
-                        lastCoor = lastVertex.Coordinate;
+                        IndoorSimData!.SessionStart();
+                        List<CellVertex> newVertices = new List<CellVertex>();
+                        for (int i = 0; i < crossesBoundaries.Count; i++)
+                            newVertices.Add(IndoorSimData!.SplitBoundary(crossesBoundaries[i], intersections[i]));
+                        for (int i = 0; i < newVertices.Count - 1; i++)
+                            IndoorSimData!.AddBoundary(newVertices[i], newVertices[i + 1]);
+
+                        CellBoundary? firstB = IndoorSimData!.AddBoundaryAutoSnap(tempLastCoor, newVertices[0].Coordinate);
+                        CellBoundary? lastB = IndoorSimData!.AddBoundaryAutoSnap(newVertices[newVertices.Count - 1].Coordinate, tempCurrentCoor);
+
+                        IndoorSimData!.SessionCommit();
+
+                        lastVertex = lastB!.P1;
+                        lastCoor = lastB!.P1.Coordinate;
+                    }
+                    else
+                    {
+                        if (lastVertex != null && currentVertex != null)
+                        {
+                            lastVertex = currentVertex;
+                            lastCoor = lastVertex.Coordinate;
+                        }
                     }
                 }
                 else

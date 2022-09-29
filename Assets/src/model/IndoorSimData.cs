@@ -641,6 +641,10 @@ public class IndoorSimData
         OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
     }
 
+    public bool IntersectionLessThan(LineString ls, int threshold, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections)
+    {
+        return indoorFeatures.activeLayer.IntersectionLessThan(ls, threshold, out crossesBoundaries, out intersections);
+    }
 
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {

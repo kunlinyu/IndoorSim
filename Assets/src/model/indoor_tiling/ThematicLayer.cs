@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Polygonize;
 
+using UnityEngine;
+
 #nullable enable
 
 [Serializable]
@@ -55,6 +57,45 @@ public class ThematicLayer
     public bool Contains(IndoorPOI poi) => poiMember.Contains(poi);
 
     public bool CrossesBoundaries(LineString ls) => cellBoundaryMember.Any(b => b.geom.Crosses(ls));
+
+    public bool IntersectionLessThan(LineString ls, int threshold, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections)
+    {
+        int crossesNumber = 0;
+        crossesBoundaries = new List<CellBoundary>();
+        intersections = new List<Coordinate>();
+        foreach (var b in cellBoundaryMember)
+        {
+            if (b.geom.Crosses(ls))
+            {
+                crossesNumber++;
+                if (crossesNumber >= threshold)
+                {
+                    crossesBoundaries.Clear();
+                    intersections.Clear();
+                    return false;
+                }
+                else
+                {
+                    Geometry intersection = ls.Intersection(b.geom);
+                    crossesBoundaries.Add(b);
+                    intersections.Add(intersection.Coordinate);
+                }
+            }
+        }
+
+        var cba = crossesBoundaries.ToArray();
+        var isa = intersections.ToArray();
+
+
+        Coordinate start = ls.GetCoordinateN(0);
+
+        Array.Sort(isa, cba, Comparer<Coordinate>.Create((coor1, coor2) => Math.Sign(start.Distance(coor1) - start.Distance(coor2))));
+
+        crossesBoundaries = new List<CellBoundary>(cba);
+        intersections = new List<Coordinate>(isa);
+
+        return true;
+    }
 
     public ICollection<CellBoundary> Vertex2Boundaries(CellVertex vertex) => vertex2Boundaries[vertex];
     public ICollection<CellSpace> Vertex2Spaces(CellVertex vertex)
