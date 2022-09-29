@@ -1,5 +1,30 @@
 # version list
 
+## V0.8.0
+* [IndoorSim-WebGL-V0.8.0.b4851a4](./IndoorSim-WebGL-V0.8.0.b4851a4)
+* [IndoorSim-WebGL-dev-V0.8.0.b4851a4](./IndoorSim-WebGL-dev-V0.8.0.b4851a4)
+* [IndoorSim-StandaloneLinux64-V0.8.0.b4851a4.tar.gz](./IndoorSim-StandaloneLinux64-V0.8.0.b4851a4.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.8.0.b4851a4.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.8.0.b4851a4.tar.gz)
+
+### DateTime
+2022-09-29 18:58:55 +08
+
+### ChangeLog
+1. 在文件中记录软件版本
+2. 在文件中记录本文件schame的哈希值
+3. 避免页面刷新或关闭丢失数据
+4. LineString工具拆分边时保持边的navigable和naviDir
+5. LineString工具点击边直接拆分边
+6. LineString工具允许最多两个交叉点，并自动拆分好交叉的边
+7. 拖动POI时吸附在本spcace的graph上
+8. 添加binLocation.csv导出工具
+9. binLocation.csv导出时检查重复的编号
+10. 使用Delete键删除选中的边
+11. 增加ESC键实现与绝大多数时候鼠标右键相同的效果
+12. 调整了一些显示效果
+
+---
+
 ## V0.7.1
 * [IndoorSim-WebGL-V0.7.1.f352b80](./IndoorSim-WebGL-V0.7.1.f352b80)
 * [IndoorSim-WebGL-dev-V0.7.1.f352b80](./IndoorSim-WebGL-dev-V0.7.1.f352b80)
@@ -20,6 +45,8 @@
 8. 调整保存文件时自动添加文件名后缀的策略
 9. LineString工具点击边直接拆分
 10. 添加ESC键作为鼠标右键的替代
+
+---
 
 ## V0.7.0
 * [IndoorSim-WebGL-V0.7.0.caf210d](./IndoorSim-WebGL-V0.7.0.caf210d)
