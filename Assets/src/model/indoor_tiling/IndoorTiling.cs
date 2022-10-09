@@ -539,6 +539,21 @@ public class IndoorTiling
     public void UpdateSpaceId(CellSpace space, string newContainerId, List<string> childrenId)
     {
         string? repeatId = null;
+
+        if (childrenId.Contains(newContainerId))
+        {
+            repeatId = newContainerId;
+            goto OUT;
+        }
+
+        for (int i = 0; i < childrenId.Count - 1; i++)
+            for (int j = i + 1; j < childrenId.Count; j++)
+                if (childrenId[i] == childrenId[j])
+                {
+                    repeatId = childrenId[i];
+                    goto OUT;
+                }
+
         var newIds = new List<string>(childrenId);
         newIds.Add(newContainerId);
         foreach (var newId in newIds)
@@ -549,6 +564,7 @@ public class IndoorTiling
                         repeatId = newId;
                         goto OUT;
                     }
+
         OUT:
         if (repeatId != null)
         {
