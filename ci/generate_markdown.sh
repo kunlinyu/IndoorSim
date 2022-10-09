@@ -2,4 +2,5 @@
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
 
-pandoc ../RELEASE.md -f markdown -o ../release/index.html --template=${CURRENT_DIR}/easy_template.html --toc --metadata pagetitle="IndoorSim release"
+pandoc ../RELEASE.md -f markdown -o ../release/release.html --template=${CURRENT_DIR}/easy_template.html --toc --metadata pagetitle="IndoorSim release"
+pandoc ../PUBLISH.md -f markdown -o ../release/index.html --template=${CURRENT_DIR}/easy_template.html --toc --metadata pagetitle="IndoorSim publish"
