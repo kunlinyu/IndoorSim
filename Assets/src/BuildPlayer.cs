@@ -15,6 +15,15 @@ public class BuildPlayer : MonoBehaviour
 {
 
     private static string releaseDirectoryPath = "release";
+    [MenuItem("Build/Gen schema hash")]
+    public static void GenerateSchemaHash()
+    {
+        string dir = releaseDirectoryPath + "/schema/" + Application.version;
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+        File.WriteAllText(dir + "/schema.json", IndoorSimData.JSchema().ToString());
+        File.WriteAllText(dir + "/hash.txt", IndoorSimData.JSchemaHash());
+    }
 
     [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
