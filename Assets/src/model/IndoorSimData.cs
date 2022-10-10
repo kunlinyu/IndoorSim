@@ -19,7 +19,13 @@ public class IndoorSimData
 {
     [JsonPropertyAttribute] public string softwareVersion = null;
     [JsonPropertyAttribute] public string schemaHash = null;
-    [JsonIgnore] public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>() { {"0.7.0", "B141089E49F26556B3872205B1EA5718"} };
+    [JsonIgnore]
+    public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>()
+    {
+        {"0.7.0", "B141089E49F26556B3872205B1EA5718"},
+        {"0.8.0", "B141089E49F26556B3872205B1EA5718"},
+        {"0.8.1", "B141089E49F26556B3872205B1EA5718"}
+    };
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorFeatures indoorFeatures = null;
@@ -56,10 +62,14 @@ public class IndoorSimData
     }
 
     static public JSchema JSchema()
-        => new JSchemaGenerator(){ ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
+        => new JSchemaGenerator() { ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
 
     static public string JSchemaHash()
-        => Hash.GetHashString(JSchema().ToString());
+    {
+        var schemaStr = JSchema().ToString();
+        // File.WriteAllText("debugSchemaLaptop.txt", schemaStr);
+        return Hash.GetHashString(schemaStr);
+    }
 
     [OnDeserialized]
     private void OnSerializedMethod(StreamingContext context)
@@ -98,6 +108,8 @@ public class IndoorSimData
     {
         this.softwareVersion = softwareVersion;
         this.schemaHash = JSchemaHash();
+
+        Debug.Log("schemaHash: " + this.schemaHash);
 
         digestCache = indoorFeatures.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
@@ -766,7 +778,8 @@ public class IndoorSimData
         {
             activeTiling.UpdateSpaceId(space, newContainerId, childrenId);
             history.DoCommit(ReducedInstruction.UpdateSpaceId(space.Polygon.InteriorPoint.Coordinate, oldContainerId, oldChildrenId, newContainerId, newChildrenId));
-        } catch (ArgumentException e)
+        }
+        catch (ArgumentException e)
         {
             Debug.LogWarning(e.Message);
             Debug.LogWarning("Ignore the operation. Try another id please");
