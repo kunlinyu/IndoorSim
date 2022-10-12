@@ -25,13 +25,7 @@ public class KeyBoardDeleter : MonoBehaviour, ITool
                                                         .Where(bc => bc.selected)
                                                         .Select(bc => bc.Boundary)
                                                         .ToList();
-
-            foreach (var obj in boundaryObjs)
-            {
-                if (obj.GetComponent<BoundaryController>().selected)
-                IndoorSimData.RemoveBoundaries(boundaries);
-            }
-
+            IndoorSimData.RemoveBoundaries(boundaries);
         }
 
     }
