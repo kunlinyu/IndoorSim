@@ -21,7 +21,7 @@ public class BuildPlayer : MonoBehaviour
         string dir = releaseDirectoryPath + "/schema/" + Application.version;
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
-        File.WriteAllText(dir + "/schema.json", IndoorSimData.JSchema().ToString());
+        File.WriteAllText(dir + "/schema.json", IndoorSimData.JSchemaStableString());
         File.WriteAllText(dir + "/hash.txt", IndoorSimData.JSchemaHash());
     }
 

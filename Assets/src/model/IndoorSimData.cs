@@ -7,8 +7,10 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Schema.Generation;
+
 using System.Runtime.Serialization;
 
 using UnityEngine;
@@ -64,12 +66,27 @@ public class IndoorSimData
     static public JSchema JSchema()
         => new JSchemaGenerator() { ContractResolver = new IgnoreGeometryCoorContractResolver() }.Generate(typeof(IndoorSimData));
 
-    static public string JSchemaHash()
+    static public string JSchemaStableString()
     {
-        var schemaStr = JSchema().ToString();
-        // File.WriteAllText("debugSchemaLaptop.txt", schemaStr);
-        return Hash.GetHashString(schemaStr);
+        return JSchema().ToString();
+        // JSchema schema = JSchema();
+        // string schemaString = schema.ToString();
+        // JObject schemaDOM = JObject.Parse(schemaString);
+
+        // var jsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings { ContractResolver = new OrderedContractResolver() };
+        // var sb = new System.Text.StringBuilder();
+        // var sw = new System.IO.StringWriter(sb);
+        // using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
+        // {
+        //     writer.Formatting = Formatting.Indented;
+        //     var serializer = Newtonsoft.Json.JsonSerializer.Create(jsonSerializerSettings);
+        //     serializer.Serialize(writer, schema);
+        // }
+        // return sw.ToString();
     }
+
+    static public string JSchemaHash()
+        => Hash.GetHashString(JSchemaStableString());
 
     [OnDeserialized]
     private void OnSerializedMethod(StreamingContext context)
