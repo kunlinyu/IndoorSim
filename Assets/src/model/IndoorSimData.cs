@@ -621,7 +621,7 @@ public class IndoorSimData
         if (instructions.Count > 0)
         {
             List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
-            reverseIns.ForEach(ins => { Debug.Log(ins.predicate + " " + ins.subject); });
+            reverseIns.ForEach(ins => Debug.Log(ins.ToString()));
             activeInstructionInterpreter.Execute(reverseIns);
             if (activeHistory == history)
                 OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
@@ -643,7 +643,7 @@ public class IndoorSimData
         var instructions = activeHistory.Redo(out var snapShot);
         if (instructions.Count > 0)
         {
-            Debug.Log("interpret instruction: " + instructions);
+            instructions.ForEach(ins => Debug.Log(ins.ToString()));
             activeInstructionInterpreter.Execute(instructions);
             if (activeHistory == history)
                 OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
