@@ -1,5 +1,25 @@
 # version list
 
+## V0.8.1
+
+* [IndoorSim-WebGL-V0.8.1.55815fb](./IndoorSim-WebGL-V0.8.1.55815fb)
+* [IndoorSim-WebGL-dev-V0.8.1.55815fb](./IndoorSim-WebGL-dev-V0.8.1.55815fb)
+* [IndoorSim-StandaloneLinux64-V0.8.1.55815fb.tar.gz](./IndoorSim-StandaloneLinux64-V0.8.1.55815fb.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.8.1.55815fb.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.8.1.55815fb.tar.gz)
+
+### DateTime
+2022-10-10 13:17:27 +08
+
+### ChangeLog
+
+1. 修复了id工具输入id时有重复无法检查出来的bug
+2. 更新了schema
+
+### Schema
+* [schema](./schema/0.8.1/schema.json)(B141089E49F26556B3872205B1EA5718)
+
+---
+
 ## V0.8.0
 * [IndoorSim-WebGL-V0.8.0.b4851a4](./IndoorSim-WebGL-V0.8.0.b4851a4)
 * [IndoorSim-WebGL-dev-V0.8.0.b4851a4](./IndoorSim-WebGL-dev-V0.8.0.b4851a4)
