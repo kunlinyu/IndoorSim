@@ -1,5 +1,25 @@
 # version list
 
+## V0.8.2
+* [IndoorSim-WebGL-V0.8.2.2094f58](./IndoorSim-WebGL-V0.8.2.2094f58)
+* [IndoorSim-WebGL-dev-V0.8.2.2094f58](./IndoorSim-WebGL-dev-V0.8.2.2094f58)
+* [IndoorSim-StandaloneLinux64-V0.8.2.2094f58.tar.gz](./IndoorSim-StandaloneLinux64-V0.8.2.2094f58.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.8.2.2094f58.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.8.2.2094f58.tar.gz)
+
+### DateTime
+2022-10-12 19:58:17 +08
+
+### ChangeLog
+1. 修复了使用键盘删除边时的bug
+2. 放宽schema检查的限制
+3. 增加撤销重做的日至
+4. 允许POI拖动到graph附近0.1米范围内
+
+### Schema
+* [schema](./schema/0.8.2/schema.json)(B141089E49F26556B3872205B1EA5718)
+
+---
+
 ## V0.8.1
 
 * [IndoorSim-WebGL-V0.8.1.55815fb](./IndoorSim-WebGL-V0.8.1.55815fb)
