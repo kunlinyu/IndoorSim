@@ -428,7 +428,11 @@ public class SelectDrag : MonoBehaviour, ITool
         Geometry inSpace = gc.Intersection(space.Geom);
 
         Coordinate[] nearestCoor = DistanceOp.NearestPoints(inSpace, new GeometryFactory().CreatePoint(U.Vec2Coor(mousePosition)));
-        return U.Coor2Vec(nearestCoor[0]);
+        Vector3 snappedPos = U.Coor2Vec(nearestCoor[0]);
+        if ((snappedPos - mousePosition).magnitude < 0.10)
+            return mousePosition;
+        else
+            return snappedPos;
     }
 
 }

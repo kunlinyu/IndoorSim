@@ -101,7 +101,7 @@ public class LocationsYamlExporter : IExporter
             // close to edge
             else
             {
-                List<Edge> closestEdges = graph.ClosetEdges(coor.X, coor.Y, 0.03);
+                List<Edge> closestEdges = graph.ClosetEdges(coor.X, coor.Y, 0.10);
                 if (closestEdges.Count == 0)
                     throw new InvalidOperationException("poi can not find an edge which close enough");
 
