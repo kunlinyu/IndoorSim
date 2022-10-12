@@ -172,7 +172,7 @@ public class IndoorSimData
                 Debug.Log("schema hash history:");
                 foreach (var entry in schemaHashHistory)
                     Debug.Log(entry.Key + ": " + entry.Value);
-                throw new ArgumentException($"schemaHash is not correct: {indoorSimData.schemaHash}, expeting {expectedSchemahash}");
+                // throw new ArgumentException($"schemaHash is not correct: {indoorSimData.schemaHash}, expeting {expectedSchemahash}");
             }
         }
 
