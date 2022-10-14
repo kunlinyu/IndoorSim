@@ -24,9 +24,6 @@ public class SimDataController : MonoBehaviour
     private UIEventSubscriber eventSubscriber;
     private Thread serializationThread;
 
-    [DllImport("__Internal")]
-    private static extern void Response(int number, string str);
-
     private List<IExporter> exporters = new List<IExporter>();
 
 

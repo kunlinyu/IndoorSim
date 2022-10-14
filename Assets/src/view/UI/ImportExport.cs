@@ -267,9 +267,11 @@ public class ImportExport : MonoBehaviour
         postAction?.Invoke(loader);
     }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void DownloadFile(string gameObjectName, string methodName, string filename, byte[] byteArray, int byteArraySize);
 
     [DllImport("__Internal")]
     private static extern void UploadFile(string gameObjectName, string methodName, string filter, bool multiple);
+#endif
 }

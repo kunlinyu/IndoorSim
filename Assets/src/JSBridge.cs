@@ -12,8 +12,10 @@ public class JSBridge : MonoBehaviour
 {
     public UIEventDispatcher eventDispatcher;
     // private UIEventSubscriber eventSubscriber;
+#if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void Response(int number, string str);
+#endif
 
     private ConcurrentQueue<JsRequest> jsRequests = new ConcurrentQueue<JsRequest>();
 
@@ -52,7 +54,9 @@ public class JSBridge : MonoBehaviour
             if (ret)
             {
                 string response = "response of request(" + jsRequest.json + ")";
+#if UNITY_WEBGL && !UNITY_EDITOR
                 Response(jsRequest.number, response);
+#endif
             }
         }
     }
