@@ -11,12 +11,20 @@ using ICSharpCode.SharpZipLib.Tar;
 
 using Markdig;
 
+using UnityEngine.Assertions;
+
 public class BuildPlayer : MonoBehaviour
 {
 
     private static string releaseDirectoryPath = "release";
-    [MenuItem("Build/Gen schema hash")]
-    public static void GenerateSchemaHash()
+
+    [MenuItem("Build/schema hash")]
+    public static void SchemaHash()
+    {
+        Debug.Log(IndoorSimData.JSchemaHash());
+    }
+
+    private static void GenerateSchemaHash()
     {
         string dir = releaseDirectoryPath + "/schema/" + Application.version;
         if (!Directory.Exists(dir))
@@ -28,6 +36,8 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
     {
+        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
+        GenerateSchemaHash();
         Build(BuildTarget.StandaloneLinux64, true);
         Build(BuildTarget.StandaloneLinux64, false);
     }
@@ -35,12 +45,16 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
+        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
+        GenerateSchemaHash();
         Build(BuildTarget.WebGL, false);
     }
 
     [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
+        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
+        GenerateSchemaHash();
         Build(BuildTarget.WebGL, true);
     }
 
