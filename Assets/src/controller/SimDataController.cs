@@ -197,6 +197,13 @@ public class SimDataController : MonoBehaviour
                 currentTool = toolObj.GetComponent<ShelvesEditor2>();
                 Debug.Log("Switch to tool shelves2");
             }
+            else if (e.name == "split")
+            {
+                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SplitEditor"), this.transform);
+                toolObj.name = "split";
+                currentTool = toolObj.GetComponent<SplitEditor>();
+                Debug.Log("Switch to tool split");
+            }
             else if (e.name == "id")
             {
                 toolObj = new GameObject("id");

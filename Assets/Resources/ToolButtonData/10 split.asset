@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 480b9d6c129900661b404472b50f6161, type: 3}
   m_Name: 10 split
   m_EditorClassIdentifier: 
-  m_ToolName: paamrpoi
+  m_ToolName: split
   m_Class: 1
-  m_PortraitImage: {fileID: 21300000, guid: a2a302f1b3e200a82b30d6a9a463c42e, type: 3}
-  m_SortingOrder: 20
+  m_PortraitImage: {fileID: 21300000, guid: 6fdb4569c78091632990a52a13aba962, type: 3}
+  m_SortingOrder: 10
