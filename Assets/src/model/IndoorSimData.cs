@@ -68,7 +68,9 @@ public class IndoorSimData
 
     static public string JSchemaStableString()
     {
-        return JSchema().ToString();
+        var str = JSchema().ToString();
+        str = str.Replace("\r\n", "\n");  // for windows
+        return str;
         // JSchema schema = JSchema();
         // string schemaString = schema.ToString();
         // JObject schemaDOM = JObject.Parse(schemaString);
