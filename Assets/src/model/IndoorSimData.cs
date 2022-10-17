@@ -705,6 +705,19 @@ public class IndoorSimData
         if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return boundary;
     }
+
+    public CellVertex SplitBoundary(Coordinate middleCoor)
+    {
+        CellVertex vertex = activeTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
+        history.SessionStart();
+        history.DoStep(ReducedInstruction.RemoveBoundary(oldBoundary));
+        history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
+        history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
+        history.SessionCommit();
+        if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
+        return vertex;
+    }
+
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
         CellVertex vertex = activeTiling.SplitBoundary(boundary, middleCoor, out var newBoundary1, out var newBoundary2);
@@ -716,8 +729,6 @@ public class IndoorSimData
         if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return vertex;
     }
-
-    // TODO: We should add API to IndoorSimData to support history session start and commit
 
     public bool UpdateVertices(List<CellVertex> vertices, List<Coordinate> newCoors)
     {

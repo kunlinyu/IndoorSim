@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Polygonize;
+using NetTopologySuite.Operation.Distance;
 
 using UnityEngine;
 
@@ -272,6 +273,15 @@ public class ThematicLayer
             throw new ArgumentException("can not find vertex as end point of line string: " + ls.EndPoint.Coordinate);
         var boundaries = VertexPair2Boundaries(start, end);
         return boundaries.FirstOrDefault(b => b.geom.Distance(MiddlePoint(ls)) < kFindGeomEpsilon);
+    }
+
+    public CellBoundary? FindBoundaryGeom(Coordinate coor, double distance)
+    {
+        Point p = new GeometryFactory().CreatePoint(coor);
+        foreach (var b in cellBoundaryMember)
+            if (DistanceOp.Distance(b.geom, p) < distance)
+                return b;
+        return null;
     }
 
     public CellSpace? FindSpaceGeom(Coordinate coor)

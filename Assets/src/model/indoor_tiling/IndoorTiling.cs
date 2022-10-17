@@ -241,6 +241,15 @@ public class IndoorTiling
         return boundary;
     }
 
+    public CellVertex SplitBoundary(Coordinate middleCoor, out CellBoundary oldBoundary, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
+    {
+        CellBoundary? boundary = layer.FindBoundaryGeom(middleCoor, 1e-3);
+        if (boundary == null) throw new ArgumentException("can not find a boundary according to coordinate: " + middleCoor.ToString());
+
+        oldBoundary = boundary;
+        return SplitBoundary(boundary, middleCoor, out newBoundary1, out newBoundary2);
+    }
+
     public CellVertex SplitBoundary(CellBoundary oldBoundary, Coordinate middleCoor, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
     {
         if (!layer.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
