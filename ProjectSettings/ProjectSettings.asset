@@ -636,7 +636,8 @@ PlayerSettings:
   webGLMemoryLinearGrowthStep: 16
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Standalone: HAVE_DATE_TIME_OFFSET
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
