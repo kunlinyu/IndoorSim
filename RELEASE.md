@@ -16,7 +16,7 @@
 4. 允许POI拖动到graph附近0.1米范围内
 
 ### Schema
-* [schema](./schema/0.8.2/schema.json)(B141089E49F26556B3872205B1EA5718)
+* [schema](./schema/0.8.2/schema.json)(3AC0BED35318C7E853CAFCBCA198537F)
 
 ---
 
@@ -36,7 +36,7 @@
 2. 更新了schema
 
 ### Schema
-* [schema](./schema/0.8.1/schema.json)(B141089E49F26556B3872205B1EA5718)
+* [schema](./schema/0.8.1/schema.json)(3AC0BED35318C7E853CAFCBCA198537F)
 
 ---
 

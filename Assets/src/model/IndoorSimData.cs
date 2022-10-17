@@ -24,9 +24,10 @@ public class IndoorSimData
     [JsonIgnore]
     public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>()
     {
-        {"0.7.0", "B141089E49F26556B3872205B1EA5718"},
-        {"0.8.0", "B141089E49F26556B3872205B1EA5718"},
-        {"0.8.1", "B141089E49F26556B3872205B1EA5718"}
+        {"0.7.0", "3AC0BED35318C7E853CAFCBCA198537F"},
+        {"0.8.0", "3AC0BED35318C7E853CAFCBCA198537F"},
+        {"0.8.1", "3AC0BED35318C7E853CAFCBCA198537F"},
+        {"0.8.2", "3AC0BED35318C7E853CAFCBCA198537F"}
     };
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
@@ -71,20 +72,6 @@ public class IndoorSimData
         var str = JSchema().ToString();
         str = str.Replace("\r\n", "\n");  // for windows
         return str;
-        // JSchema schema = JSchema();
-        // string schemaString = schema.ToString();
-        // JObject schemaDOM = JObject.Parse(schemaString);
-
-        // var jsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings { ContractResolver = new OrderedContractResolver() };
-        // var sb = new System.Text.StringBuilder();
-        // var sw = new System.IO.StringWriter(sb);
-        // using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
-        // {
-        //     writer.Formatting = Formatting.Indented;
-        //     var serializer = Newtonsoft.Json.JsonSerializer.Create(jsonSerializerSettings);
-        //     serializer.Serialize(writer, schema);
-        // }
-        // return sw.ToString();
     }
 
     static public string JSchemaHash()
@@ -162,6 +149,7 @@ public class IndoorSimData
         IndoorSimData? indoorSimData = Deserialize(json, historyOnly);
 
         if (indoorSimData == null) return false;
+
         if (indoorSimData.schemaHash == null)
             Debug.LogWarning("schemaHash == null. This file is not official file format. Resave it to generate an official file format.");
         else if (indoorSimData.schemaHash.Length == 0)
@@ -174,7 +162,9 @@ public class IndoorSimData
                 Debug.Log("schema hash history:");
                 foreach (var entry in schemaHashHistory)
                     Debug.Log(entry.Key + ": " + entry.Value);
-                // throw new ArgumentException($"schemaHash is not correct: {indoorSimData.schemaHash}, expeting {expectedSchemahash}");
+                Debug.Log("current version is " + Application.version);
+                Debug.Log("current schemaHash is " + expectedSchemahash);
+                throw new ArgumentException($"schemaHash is incorrect: {indoorSimData.schemaHash}");
             }
         }
 
