@@ -140,6 +140,7 @@ public class SplitEditor : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(0))
         {
+            IndoorSimData!.SessionStart();
             List<CellBoundary> newBoundaries = new List<CellBoundary>();
 
             ACLines.ForEach(obj =>
@@ -179,6 +180,8 @@ public class SplitEditor : MonoBehaviour, ITool
                     IndoorSimData!.AddBoundary(splitVertices[i], splitVertices[i + 1]);
                 IndoorSimData!.AddBoundary(splitVertices[splitVertices.Count - 1], VEnd);
             }
+
+            IndoorSimData!.SessionCommit();
         }
     }
 
