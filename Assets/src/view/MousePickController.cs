@@ -19,7 +19,7 @@ public enum CurrentPickType : short
 public class MousePickController : MonoBehaviour
 {
 
-    public const float radiusFactor = 0.02f;
+    public const float radiusFactor = 0.01f;
 
     static private Selectable? pointedEntity = null;
     static public Selectable? PointedEntity { get => pointedEntity; }

@@ -92,7 +92,7 @@ public class BoundaryController : MonoBehaviour, Selectable
     void updateCollider()
     {
         GetComponent<BoxCollider>().center = Vector3.zero;
-        GetComponent<BoxCollider>().size = new Vector3((float)boundary.geom.Length, 0.1f, 0.1f);
+        GetComponent<BoxCollider>().size = new Vector3((float)boundary.geom.Length, 0.05f, 0.05f);
     }
 
     void updateTransform()
