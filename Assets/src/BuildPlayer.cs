@@ -111,6 +111,7 @@ public class BuildPlayer : MonoBehaviour
         buildPlayerOptions.locationPathName = releaseDirectoryPath + "/" + dirName + (target == BuildTarget.StandaloneLinux64 ? "/" + dirName : "");
         buildPlayerOptions.target = target;
         buildPlayerOptions.options = development ? BuildOptions.Development : BuildOptions.None;
+        buildPlayerOptions.extraScriptingDefines = new string[] { "HAVE_DATE_TIME_OFFSET" };  // for Newtonsoft.Json.Schema
 
         BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
         BuildSummary summary = report.summary;
