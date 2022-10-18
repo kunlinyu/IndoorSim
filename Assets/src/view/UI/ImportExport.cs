@@ -236,9 +236,15 @@ public class ImportExport : MonoBehaviour
 
         Texture2D tex = new Texture2D(1, 1);
         if (format == GridMapImageFormat.PNG)
+        {
             tex.LoadImage(imageBytes);
+        }
         else if (format == GridMapImageFormat.PGM)
+        {
             tex.LoadPGMImage(imageBytes);
+            zippedBase64Image = Convert.ToBase64String(Compress(tex.EncodeToPNG()));
+            format = GridMapImageFormat.PNG;
+        }
         else
         {
             Debug.LogError("Unrecognize file format: " + format);
