@@ -710,9 +710,17 @@ public class IndoorSimData
     {
         CellVertex vertex = activeTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
         history.SessionStart();
+        if (newBoundary1.leftSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
+        if (newBoundary1.rightSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
         history.DoStep(ReducedInstruction.RemoveBoundary(oldBoundary));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
+        if (newBoundary1.leftSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
+        if (newBoundary1.rightSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
         history.SessionCommit();
         if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return vertex;
@@ -720,11 +728,19 @@ public class IndoorSimData
 
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
-        CellVertex vertex = activeTiling.SplitBoundary(boundary, middleCoor, out var newBoundary1, out var newBoundary2);
+        CellVertex vertex = activeTiling.SplitBoundary(middleCoor, boundary, out var newBoundary1, out var newBoundary2);
         history.SessionStart();
+        if (newBoundary1.leftSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
+        if (newBoundary1.rightSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
         history.DoStep(ReducedInstruction.RemoveBoundary(boundary));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
         history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
+        if (newBoundary1.leftSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
+        if (newBoundary1.rightSpace != null)
+            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
         history.SessionCommit();
         if (!inSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         return vertex;

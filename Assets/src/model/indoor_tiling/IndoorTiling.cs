@@ -247,10 +247,10 @@ public class IndoorTiling
         if (boundary == null) throw new ArgumentException("can not find a boundary according to coordinate: " + middleCoor.ToString());
 
         oldBoundary = boundary;
-        return SplitBoundary(boundary, middleCoor, out newBoundary1, out newBoundary2);
+        return SplitBoundary(middleCoor, boundary, out newBoundary1, out newBoundary2);
     }
 
-    public CellVertex SplitBoundary(CellBoundary oldBoundary, Coordinate middleCoor, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
+    public CellVertex SplitBoundary(Coordinate middleCoor, CellBoundary oldBoundary, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
     {
         if (!layer.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
         if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
