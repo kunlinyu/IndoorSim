@@ -1,5 +1,28 @@
 # version list
 
+## V0.8.3
+* [IndoorSim-WebGL-V0.8.3.cd4ba36](./IndoorSim-WebGL-V0.8.3.cd4ba36)
+* [IndoorSim-WebGL-dev-V0.8.3.cd4ba36](./IndoorSim-WebGL-dev-V0.8.3.cd4ba36)
+* [IndoorSim-StandaloneLinux64-V0.8.3.cd4ba36.tar.gz](./IndoorSim-StandaloneLinux64-V0.8.3.cd4ba36.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.8.3.cd4ba36.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.8.3.cd4ba36.tar.gz)
+
+### DateTime
+2022-10-18 14:18:06 +08
+
+### ChangeLog
+1. 解决了一些windows兼容问题
+2. 将最新的Newtonsoft.Json.Schema源代码移至项目内
+3. 修复错误了schema hash历史
+4. 添加Split工具用于拆分货架
+5. 修复拆分边时navigable错误的bug
+6. 切换滚轮的缩放视角方向
+7. 减小点和边的吸附范围
+
+### Schema
+* [schema](./schema/0.8.3/schema.json)(3AC0BED35318C7E853CAFCBCA198537F)
+
+---
+
 ## V0.8.2
 * [IndoorSim-WebGL-V0.8.2.2094f58](./IndoorSim-WebGL-V0.8.2.2094f58)
 * [IndoorSim-WebGL-dev-V0.8.2.2094f58](./IndoorSim-WebGL-dev-V0.8.2.2094f58)
