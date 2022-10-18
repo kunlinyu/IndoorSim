@@ -170,7 +170,7 @@ namespace Newtonsoft.Json.Schema.Utilities
             return start;
         }
 
-#if HAVE_DATE_TIME_OFFSET
+// #if HAVE_DATE_TIME_OFFSET
         internal static void WriteDateTimeOffsetString(TextWriter writer, DateTimeOffset value, DateFormatHandling format, string? formatString, CultureInfo culture)
         {
             if (string.IsNullOrEmpty(formatString))
@@ -185,7 +185,7 @@ namespace Newtonsoft.Json.Schema.Utilities
                 writer.Write(value.ToString(formatString, culture));
             }
         }
-#endif
+// #endif
         #endregion
 
         internal static DateTime EnsureDateTime(DateTime value, DateTimeZoneHandling timeZone)
