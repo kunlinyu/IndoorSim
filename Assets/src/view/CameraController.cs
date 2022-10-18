@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
         if (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.PageDown))
             move += Vector3.down;
 
-        move += Vector3.up * Input.mouseScrollDelta.y * mouseScrollSpeed;
+        move += Vector3.down * Input.mouseScrollDelta.y * mouseScrollSpeed;
 
         float rot = 0.0f;
         if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.Home))
