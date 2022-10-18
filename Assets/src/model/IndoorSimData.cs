@@ -27,7 +27,8 @@ public class IndoorSimData
         {"0.7.0", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.8.0", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.8.1", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.2", "3AC0BED35318C7E853CAFCBCA198537F"}
+        {"0.8.2", "3AC0BED35318C7E853CAFCBCA198537F"},
+        {"0.8.3", "3AC0BED35318C7E853CAFCBCA198537F"}
     };
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 

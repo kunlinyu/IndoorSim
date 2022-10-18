@@ -1,5 +1,5 @@
 release procedure:
-1. Change Version Number and Commit.
+1. Change Version Number, add schemaHashHistory and Commit.
 2. Build & Upload
 3. Smoke Test
 4. Tag and Push
