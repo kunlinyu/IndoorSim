@@ -25,6 +25,8 @@ public class IndoorTiling
     public IDGenInterface? IdGenBoundary { get; private set; }
     public IDGenInterface? IdGenSpace { get; private set; }
 
+    public bool resultValidate { get; set; } = true;
+
 
 #pragma warning disable CS8618
     public IndoorTiling() { }  // for deserialize only
@@ -105,8 +107,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
         return boundary;
     }
 
@@ -123,8 +124,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
         return boundary;
     }
 
@@ -141,8 +141,7 @@ public class IndoorTiling
 
         CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
         return boundary;
     }
 
@@ -236,8 +235,7 @@ public class IndoorTiling
                 Debug.Log("add hole to cellspace");
                 break;
         }
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
         return boundary;
     }
 
@@ -285,8 +283,7 @@ public class IndoorTiling
             AddSpaceInternal(space);
         }
 
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
         return middleVertex;
     }
 
@@ -369,8 +366,7 @@ public class IndoorTiling
         if (valid)
         {
             vertices.ForEach(v => v.OnUpdate?.Invoke());
-            FullPolygonizerCheck();
-            BoundaryLeftRightCheck();
+            ResultValidate();
 
             // update boundary again because the edge depends on the centroid of space
             foreach (var s in spaces)
@@ -473,8 +469,7 @@ public class IndoorTiling
             newCellSpace.navigable = navigable;
             AddSpaceConsiderHole(newCellSpace);
         }
-        FullPolygonizerCheck();
-        BoundaryLeftRightCheck();
+        ResultValidate();
     }
 
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
@@ -574,7 +569,7 @@ public class IndoorTiling
                         goto OUT;
                     }
 
-        OUT:
+                OUT:
         if (repeatId != null)
         {
             throw new ArgumentException($"new id ({repeatId}) repeated");
@@ -742,6 +737,14 @@ public class IndoorTiling
         return new CellSpace(vertices, boundaries);
     }
 
+    private void ResultValidate()
+    {
+        if (resultValidate)
+        {
+            FullPolygonizerCheck();
+            BoundaryLeftRightCheck();
+        }
+    }
 
     private void FullPolygonizerCheck()
     {
