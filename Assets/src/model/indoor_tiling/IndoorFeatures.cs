@@ -62,6 +62,7 @@ public class IndoorFeatures
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
+
         StringBuilder sb = new StringBuilder(256);
         StringWriter sw = new StringWriter(sb);
         using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
@@ -75,6 +76,74 @@ public class IndoorFeatures
         return sw.ToString();  // return JsonConvert.SerializeObject(this);
     }
 
+    public string SerializeIndexFast(bool indent = false)
+    {
+        StringBuilder sb = new StringBuilder(256);
+        StringWriter sw = new StringWriter(sb);
+        using (JsonTextWriter writer = new JsonTextWriter(sw))
+        {
+            writer.Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None;
+            writer.IndentChar = '\t';
+            writer.Indentation = 1;
+
+            writer.WriteStartObject();
+
+
+            writer.WritePropertyName("layers");
+            writer.WriteStartArray();
+            foreach (var layer in layers)
+            {
+                writer.WriteStartObject();
+
+                writer.WritePropertyName("semanticExtension");
+                writer.WriteValue(layer.semanticExtension);
+                writer.WritePropertyName("theme");
+                writer.WriteValue(layer.theme);
+                writer.WritePropertyName("level");
+                writer.WriteValue(layer.level);
+
+                writer.WritePropertyName("cellVertexMember");
+                writer.WriteStartArray();
+                foreach (var vertex in layer.cellVertexMember)
+                {
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Id");
+                    writer.WriteValue(vertex.Id);
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+
+                writer.WritePropertyName("cellBoundaryMember");
+                writer.WriteStartArray();
+                foreach (var boundary in layer.cellBoundaryMember)
+                {
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Id");
+                    writer.WriteValue(boundary.Id);
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+
+                writer.WritePropertyName("cellSpaceMember");
+                writer.WriteStartArray();
+                foreach (var space in layer.cellSpaceMember)
+                {
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Id");
+                    writer.WriteValue(space.Id);
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
+        }
+
+        return sw.ToString();
+    }
     public bool Contains(CellVertex vertex) => activeLayer.Contains(vertex);
     public bool Contains(CellBoundary boundary) => activeLayer.Contains(boundary);
     public bool Contains(CellSpace space) => activeLayer.Contains(space);

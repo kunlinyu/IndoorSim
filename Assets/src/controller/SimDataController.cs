@@ -4,10 +4,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 using UnityEngine;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -23,7 +22,6 @@ public class SimDataController : MonoBehaviour
 
     public UIEventDispatcher eventDispatcher;
     private UIEventSubscriber eventSubscriber;
-    private Thread serializationThread;
 
     private List<IExporter> exporters = new List<IExporter>();
 
@@ -39,7 +37,7 @@ public class SimDataController : MonoBehaviour
 
         e.type = UIEventType.Hierarchy;
         e.name = "indoordata";
-        e.message = indoorSimData.indoorFeatures.Serialize(false);  // slow
+        e.message = indoorSimData.indoorFeatures.SerializeIndexFast(false);
 
         eventDispatcher?.Raise(this, e);
     }
