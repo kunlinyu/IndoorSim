@@ -25,8 +25,7 @@ public class IndoorTiling
     public IDGenInterface? IdGenBoundary { get; private set; }
     public IDGenInterface? IdGenSpace { get; private set; }
 
-    public bool resultValidate { get; set; } = true;
-
+    private bool resultValidate { get; set; } = true;
 
 #pragma warning disable CS8618
     public IndoorTiling() { }  // for deserialize only
@@ -744,6 +743,13 @@ public class IndoorTiling
             FullPolygonizerCheck();
             BoundaryLeftRightCheck();
         }
+    }
+
+    public void DisableResultValidate() => resultValidate = false;
+    public void EnableResultValidateAndDoOnce()
+    {
+        resultValidate = true;
+        ResultValidate();
     }
 
     private void FullPolygonizerCheck()

@@ -620,9 +620,9 @@ public class IndoorSimData
         {
             List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
             reverseIns.ForEach(ins => Debug.Log(ins.ToString()));
-            activeTiling.resultValidate = false;
+            activeTiling.DisableResultValidate();
             activeInstructionInterpreter.Execute(reverseIns);
-            activeTiling.resultValidate = true;
+            activeTiling.EnableResultValidateAndDoOnce();
             if (activeHistory == history)
                 OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
             else
@@ -644,9 +644,9 @@ public class IndoorSimData
         if (instructions.Count > 0)
         {
             instructions.ForEach(ins => Debug.Log(ins.ToString()));
-            activeTiling.resultValidate = false;
+            activeTiling.DisableResultValidate();
             activeInstructionInterpreter.Execute(instructions);
-            activeTiling.resultValidate = true;
+            activeTiling.EnableResultValidateAndDoOnce();
             if (activeHistory == history)
                 OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
             else
