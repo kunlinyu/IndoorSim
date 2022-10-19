@@ -30,6 +30,8 @@ public class IndoorSimData
         {"0.8.2", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.8.3", "3AC0BED35318C7E853CAFCBCA198537F"}
     };
+    [JsonIgnore]
+    static string? schemaStableString = null;
     [JsonPropertyAttribute] public List<GridMap> gridMaps = new List<GridMap>();
 
     [JsonPropertyAttribute] public IndoorFeatures indoorFeatures = null;
@@ -70,9 +72,12 @@ public class IndoorSimData
 
     static public string JSchemaStableString()
     {
-        var str = JSchema().ToString();
-        str = str.Replace("\r\n", "\n");  // for windows
-        return str;
+        if (schemaStableString == null)
+        {
+            schemaStableString = JSchema().ToString();
+            schemaStableString = schemaStableString.Replace("\r\n", "\n");  // for windows
+        }
+        return schemaStableString;
     }
 
     static public string JSchemaHash()
