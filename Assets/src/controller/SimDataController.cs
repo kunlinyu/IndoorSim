@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -342,6 +343,28 @@ public class SimDataController : MonoBehaviour
         else if (e.type == UIEventType.Resources && e.name == "load")
         {
             indoorSimData.DeserializeInPlace(e.message, false);
+
+            indoorSimData.gridMaps.ForEach(gridmap =>
+            {
+                byte[] imageBytes = Decompress(Convert.FromBase64String(gridmap.zippedBase64Image));
+                if (gridmap.format == GridMapImageFormat.PNG)
+                {
+                    Debug.Log("Format of grid map is png. PASS.");
+                }
+                else if (gridmap.format == GridMapImageFormat.PGM)
+                {
+                    Texture2D tex = new Texture2D(1, 1);
+                    tex.LoadPGMImage(imageBytes);
+                    gridmap.zippedBase64Image = Convert.ToBase64String(Compress(tex.EncodeToPNG()));
+                    gridmap.format = GridMapImageFormat.PNG;
+                    Debug.Log("Convert PGM grid map to PNG grid map");
+                }
+                else
+                {
+                    Debug.LogError("Unrecognize file format: " + gridmap.format);
+                    return;
+                }
+            });
         }
         else if (e.type == UIEventType.Resources && e.name == "exportInfo")
         {
@@ -429,6 +452,29 @@ public class SimDataController : MonoBehaviour
                     indoorSimData.RemoveGridMap(0);
                 indoorSimData.AddGridMap(gridMap);
             }
+        }
+    }
+
+    // TODO repeat code
+    public static byte[] Decompress(byte[] bytes)
+    {
+        using (var memoryStream = new MemoryStream(bytes))
+        using (var outputStream = new MemoryStream())
+        {
+            using (var decompressStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                decompressStream.CopyTo(outputStream);
+            return outputStream.ToArray();
+        }
+    }
+
+    // TODO repeat code
+    public static byte[] Compress(byte[] bytes)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            using (var gzipStream = new GZipStream(memoryStream, System.IO.Compression.CompressionLevel.Optimal))
+                gzipStream.Write(bytes, 0, bytes.Length);
+            return memoryStream.ToArray();
         }
     }
 }
