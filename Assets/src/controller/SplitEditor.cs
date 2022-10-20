@@ -140,6 +140,7 @@ public class SplitEditor : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(0))
         {
+            IndoorSimData!.activeTiling.DisableResultValidate();
             IndoorSimData!.SessionStart();
             List<CellBoundary> newBoundaries = new List<CellBoundary>();
 
@@ -182,6 +183,7 @@ public class SplitEditor : MonoBehaviour, ITool
             }
 
             IndoorSimData!.SessionCommit();
+            IndoorSimData!.activeTiling.EnableResultValidateAndDoOnce();
         }
     }
 
