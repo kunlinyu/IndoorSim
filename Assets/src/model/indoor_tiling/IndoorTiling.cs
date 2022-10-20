@@ -209,21 +209,18 @@ public class IndoorTiling
                     AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1));
                 else
                     AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2));
-                Debug.Log("create new cellspace");
                 break;
 
             case NewCellSpaceCase.Split:
                 RemoveSpaceInternal(oldCellSpace!);
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps1, oldCellSpace!.Navigable));
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(jumps2, oldCellSpace!.Navigable));
-                Debug.Log("split cellspace");
                 break;
 
             case NewCellSpaceCase.SplitNeedReSearch:
                 RemoveSpaceInternal(oldCellSpace!);
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps1, oldCellSpace!.Navigable));
                 AddSpaceConsiderHole(CreateCellSpaceWithHole(reJumps2, oldCellSpace!.Navigable));
-                Debug.Log("split cellspace");
                 break;
 
             case NewCellSpaceCase.HoleOfAnother:
@@ -231,7 +228,6 @@ public class IndoorTiling
                     AddSpaceConsiderHole(cellSpace1);
                 else
                     AddSpaceConsiderHole(cellSpace2);
-                Debug.Log("add hole to cellspace");
                 break;
         }
         ResultValidate();
@@ -252,7 +248,6 @@ public class IndoorTiling
         if (!layer.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
         if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
         // TODO(robust): check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries
-        Debug.Log("split boundary");
 
         // Remove spaces
         List<CellSpace> spaces = oldBoundary.Spaces().ToList();

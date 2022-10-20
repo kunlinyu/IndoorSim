@@ -29,11 +29,12 @@ public class RLineGroup
 
     private void FillDefaultRLines()
     {
-        int rLineCount = space.allBoundaries.Count * (space.allBoundaries.Count - 1);
+        List<CellBoundary> allBoundaries = space.allBoundaries;
+        int rLineCount = allBoundaries.Count * (allBoundaries.Count - 1);
         if (rLines.Count < rLineCount)
         {
-            foreach (var fr in space.allBoundaries)
-                foreach (var to in space.allBoundaries)
+            foreach (var fr in allBoundaries)
+                foreach (var to in allBoundaries)
                     if (fr != to)
                     {
                         var unDefault = udRL.FirstOrDefault(rl => rl.fr == fr && rl.to == to);
@@ -54,7 +55,8 @@ public class RLineGroup
         var inbound = space.InBound();
         var outbound = space.OutBound();
         FillDefaultRLines();
-        rLines.ForEach(rl => rl.UpdateGeom(space));
+        foreach (var rl in rLines)
+            rl.UpdateGeom(space);
     }
 
     public PassType passType(CellBoundary fr, CellBoundary to)

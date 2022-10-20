@@ -144,7 +144,8 @@ public class SplitEditor : MonoBehaviour, ITool
             IndoorSimData!.SessionStart();
             List<CellBoundary> newBoundaries = new List<CellBoundary>();
 
-            ACLines.ForEach(obj =>
+
+            foreach (var obj in ACLines)
             {
                 LineRenderer lr = obj.GetComponent<LineRenderer>();
                 CellVertex V1 = IndoorSimData!.SplitBoundary(U.Vec2Coor(lr.GetPosition(0)));
@@ -152,7 +153,7 @@ public class SplitEditor : MonoBehaviour, ITool
                 CellBoundary? newboundary = IndoorSimData!.AddBoundary(V1, V2);
                 if (newboundary == null) throw new System.Exception("Oops");
                 newBoundaries.Add(newboundary);
-            });
+            }
 
             GeometryFactory factory = new GeometryFactory();
             List<CellBoundary> switchBoundaries = new List<CellBoundary>();
@@ -161,12 +162,15 @@ public class SplitEditor : MonoBehaviour, ITool
                 LineRenderer lr = obj.GetComponent<LineRenderer>();
                 CellVertex VStart = IndoorSimData!.SplitBoundary(U.Vec2Coor(lr.GetPosition(0)));
                 CellVertex VEnd = IndoorSimData!.SplitBoundary(U.Vec2Coor(lr.GetPosition(1)));
-                LineString ls = factory.CreateLineString(new Coordinate[] { VStart.Coordinate, VEnd.Coordinate });
+                LineSegment lineSeg = new LineSegment(VStart.Coordinate, VEnd.Coordinate);
 
                 List<CellVertex> splitVertices = new List<CellVertex>();
                 foreach (var b in newBoundaries)
                 {
-                    Point intersectionPoint = (Point)b.geom.Intersection(ls);
+                    LineSegment bSeg = new LineSegment(b.P0.Coordinate, b.P1.Coordinate);
+                    Point intersectionPoint = new Point(bSeg.Intersection(lineSeg));
+                    var lingeSeg1 = new LineSegment(new Coordinate(0, 0), new Coordinate(1, 1));
+                    var lingeSeg2 = new LineSegment(new Coordinate(0, 0), new Coordinate(1, 1));
                     CellVertex vertex = IndoorSimData!.SplitBoundary(b, intersectionPoint.Coordinate);
                     var bs = new List<CellBoundary>(IndoorSimData!.activeTiling.layer.Vertex2Boundaries(vertex));
                     CellBoundary longerOne = bs[0].geom.Length > bs[1].geom.Length ? bs[0] : bs[1];
