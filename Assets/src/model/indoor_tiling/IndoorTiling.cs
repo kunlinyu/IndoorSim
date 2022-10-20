@@ -735,7 +735,8 @@ public class IndoorTiling
     {
         if (resultValidate)
         {
-            FullPolygonizerCheck();
+            if (layer.cellSpaceMember.Count < 400)
+                FullPolygonizerCheck();
             BoundaryLeftRightCheck();
         }
     }
