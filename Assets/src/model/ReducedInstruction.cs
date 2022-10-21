@@ -72,7 +72,7 @@ public struct Parameters
     [JsonPropertyAttribute] public List<string>? values;
     [JsonPropertyAttribute] public List<string>? values2;
 
-    public override string ToString()
+    public override string ToString()  // TODO: SLOW
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
 }
 
@@ -110,6 +110,7 @@ public class ReducedInstruction
         return new LineString(coors);
     }
 
+    // TODO: SLOW
     public override string ToString()
         => predicate + " " + subject + " " + oldParam.ToString() + " " + newParam.ToString();
 

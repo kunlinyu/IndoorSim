@@ -11,7 +11,14 @@ public class U
     static public Mesh? TriangulatePolygon2Mesh(in Polygon polygon)
     {
         if (polygon == null) return null;
-        U.TriangulatePolygon(polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices);
+
+        Vector3[] triVertices;
+        int[] triIndices;
+        int[] lineIndices;
+        if (PolygonIsSimple(polygon))
+            U.TriangulateSimplePolygon(polygon, out triVertices, out triIndices, out lineIndices);
+        else
+            U.TriangulatePolygon(polygon, out triVertices, out triIndices, out lineIndices);
 
         Mesh mesh = new Mesh();
         mesh.Clear();
@@ -21,7 +28,7 @@ public class U
         mesh.SetIndices(lineIndices, MeshTopology.Lines, 1);
 
         Vector2[] uv = new Vector2[triVertices.Length];
-        for(int i = 0; i < uv.Length; i++)
+        for (int i = 0; i < uv.Length; i++)
             uv[i] = new Vector2(triVertices[i].x, triVertices[i].z);
         mesh.SetUVs(0, uv);
 
@@ -47,6 +54,43 @@ public class U
         }
 
         return result;
+    }
+
+    static public bool PolygonIsSimple(Polygon polygon)
+    {
+        if (polygon.NumPoints != 5)
+            return false;
+
+        var coors = polygon.Coordinates;
+        var ls1 = new LineSegment(coors[0], coors[2]);
+        var ls2 = new LineSegment(coors[1], coors[3]);
+        if (ls1.Intersection(ls2) == null)
+            return false;
+
+        return true;
+    }
+
+    static public void TriangulateSimplePolygon(in Polygon polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices)
+    {
+        var coors = polygon.Coordinates;
+
+        triVertices = new Vector3[4];
+        triVertices[0] = Coor2Vec(coors[0]);
+        triVertices[1] = Coor2Vec(coors[1]);
+        triVertices[2] = Coor2Vec(coors[2]);
+        triVertices[3] = Coor2Vec(coors[3]);
+
+        triIndices = new int[6];
+        triIndices[0] = 0;
+        triIndices[1] = 2;
+        triIndices[2] = 1;
+        triIndices[3] = 0;
+        triIndices[4] = 3;
+        triIndices[5] = 2;
+
+        lineIndices = new int[2];
+        lineIndices[0] = 0;
+        lineIndices[1] = 2;
     }
 
     static public void TriangulatePolygon(in Polygon polygon, out Vector3[] triVertices, out int[] triIndices, out int[] lineIndices)

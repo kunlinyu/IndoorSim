@@ -400,7 +400,6 @@ public class IndoorTiling
 
         if (spaces.Count == 0)  // no cellspace related
         {
-            Debug.Log("remove boundary without any space");
             RemoveBoundaryWithVertex(boundary);
         }
         else if (spaces.Count == 1)  // only 1 cellspace related. Remove the cellspace.
@@ -448,8 +447,6 @@ public class IndoorTiling
         }
         else  // Two parallel cellspace. merge them
         {
-            Debug.Log("merge two spaces");
-
             Navigable navigable = spaces[0].navigable;
             if (spaces[1].navigable < navigable)
                 navigable = spaces[1].navigable;
