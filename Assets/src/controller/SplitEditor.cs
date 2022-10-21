@@ -14,6 +14,9 @@ public class SplitEditor : MonoBehaviour, ITool
     public SimulationView? simView { set; get; }
     public bool MouseOnUI { set; get; }
 
+    public int rows = 0;
+    public int coloums = 0;
+
     private List<GameObject> ACLines = new List<GameObject>();
     private List<GameObject> BDLines = new List<GameObject>();
 
@@ -86,6 +89,21 @@ public class SplitEditor : MonoBehaviour, ITool
         if (ACNum < 0 || ACNum > 10) ACNum = 10;
         if (BDNum < 0 || BDNum > 10) BDNum = 10;
 
+
+        if (rows != 0 && coloums != 0)
+        {
+            if (lsAC.Length < lsBD.Length)
+            {
+                ACNum = rows;
+                BDNum = coloums;
+            }
+            else
+            {
+                BDNum = rows;
+                ACNum = coloums;
+            }
+        }
+
         ACNum--;
         BDNum--;
 
@@ -124,6 +142,7 @@ public class SplitEditor : MonoBehaviour, ITool
             LineRenderer lr = obj.GetComponent<LineRenderer>();
             lr.positionCount = 2;
             float ratio = (float)(i + 1) / (ACNum + 1);
+            lr.positionCount = 2;
             lr.SetPosition(0, polygonVec[1] + V12 * ratio);
             lr.SetPosition(1, polygonVec[0] + V03 * ratio);
         }
@@ -134,6 +153,7 @@ public class SplitEditor : MonoBehaviour, ITool
             LineRenderer lr = obj.GetComponent<LineRenderer>();
             lr.positionCount = 2;
             float ratio = (float)(i + 1) / (BDNum + 1);
+            lr.positionCount = 2;
             lr.SetPosition(0, polygonVec[0] + V01 * ratio);
             lr.SetPosition(1, polygonVec[3] + V32 * ratio);
         }
@@ -143,7 +163,6 @@ public class SplitEditor : MonoBehaviour, ITool
             IndoorSimData!.activeTiling.DisableResultValidate();
             IndoorSimData!.SessionStart();
             List<CellBoundary> newBoundaries = new List<CellBoundary>();
-
 
             foreach (var obj in ACLines)
             {
@@ -180,10 +199,17 @@ public class SplitEditor : MonoBehaviour, ITool
                 newBoundaries = new List<CellBoundary>(switchBoundaries);
                 switchBoundaries.Clear();
 
-                IndoorSimData!.AddBoundary(VStart, splitVertices[0]);
-                for (int i = 0; i < splitVertices.Count - 1; i++)
-                    IndoorSimData!.AddBoundary(splitVertices[i], splitVertices[i + 1]);
-                IndoorSimData!.AddBoundary(splitVertices[splitVertices.Count - 1], VEnd);
+                if (splitVertices.Count > 0)
+                {
+                    IndoorSimData!.AddBoundary(VStart, splitVertices[0]);
+                    for (int i = 0; i < splitVertices.Count - 1; i++)
+                        IndoorSimData!.AddBoundary(splitVertices[i], splitVertices[i + 1]);
+                    IndoorSimData!.AddBoundary(splitVertices[splitVertices.Count - 1], VEnd);
+                }
+                else
+                {
+                    IndoorSimData!.AddBoundary(VStart, VEnd);
+                }
             }
 
             IndoorSimData!.SessionCommit();

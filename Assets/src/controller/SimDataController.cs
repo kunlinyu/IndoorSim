@@ -198,10 +198,7 @@ public class SimDataController : MonoBehaviour
             }
             else if (e.name == "split")
             {
-                toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SplitEditor"), this.transform);
-                toolObj.name = "split";
-                currentTool = toolObj.GetComponent<SplitEditor>();
-                Debug.Log("Switch to tool split");
+                Debug.Log("Waiting for grid count");
             }
             else if (e.name == "id")
             {
@@ -325,7 +322,6 @@ public class SimDataController : MonoBehaviour
         }
         else if (e.type == UIEventType.ToolButton && e.name == "paamrpoi")
         {
-
             Debug.Log(e.message);
             POIType poiType = POIType.FromJson(e.message);
 
@@ -337,6 +333,18 @@ public class SimDataController : MonoBehaviour
             poiMarker.Init(poiType);
             currentTool = poiMarker;
             Debug.Log("Switch to tool PaAmrPOIMarker");
+        }
+        else if (e.type == UIEventType.ToolButton && e.name == "split")
+        {
+            toolObj = Instantiate(Resources.Load<GameObject>("ToolObj/SplitEditor"), this.transform);
+            toolObj.name = "split";
+            var splitEditor = toolObj.GetComponent<SplitEditor>();
+            var jsonData = JObject.Parse(e.message);
+            splitEditor.rows = jsonData["rows"].Value<int>();;
+            splitEditor.coloums = jsonData["coloums"].Value<int>();
+            splitEditor.IndoorSimData = indoorSimData;
+            currentTool = splitEditor;
+            Debug.Log("Switch to tool split");
         }
         else if (e.type == UIEventType.Resources && e.name == "load")
         {

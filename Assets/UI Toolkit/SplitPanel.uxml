@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="SplitPanel" style="height: auto; width: 193px; min-height: auto; background-color: rgba(200, 200, 200, 0.62); border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; position: absolute; left: 100px; top: 100px; max-width: 500px; min-width: 100px; flex-direction: column; flex-wrap: nowrap;">
+        <ui:VisualElement name="FixedButtons" style="flex-direction: row; justify-content: space-between;">
+            <ui:VisualElement name="1" style="flex-grow: 1;">
+                <ui:Button tabindex="-1" text="1 x 2" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="1 x 3" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="1 x 4" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="1 x 5" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="1 x 6" display-tooltip-when-elided="true" />
+            </ui:VisualElement>
+            <ui:VisualElement name="2" style="flex-grow: 1;">
+                <ui:Button tabindex="-1" text="2 x 2" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="2 x 3" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="2 x 4" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="2 x 5" display-tooltip-when-elided="true" />
+                <ui:Button tabindex="-1" text="2 x 6" display-tooltip-when-elided="true" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Button tabindex="-1" text="n x n" display-tooltip-when-elided="true" />
+    </ui:VisualElement>
+</ui:UXML>
