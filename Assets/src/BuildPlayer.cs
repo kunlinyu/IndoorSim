@@ -24,6 +24,7 @@ public class BuildPlayer : MonoBehaviour
         Debug.Log(IndoorSimData.JSchemaHash());
     }
 
+    [MenuItem("Build/generate schema file")]
     private static void GenerateSchemaHash()
     {
         string dir = releaseDirectoryPath + "/schema/" + Application.version;

@@ -3,7 +3,6 @@ release procedure:
 2. Build & Upload
 3. Smoke Test
 4. Tag and Push
-5. Update ChangeLog
-6. Commit ChangeLog
-7. publish RELEASE, PUBLISH page
-8. upload schema file
+5. Update and Commit ChangeLog
+6. publish RELEASE, PUBLISH page
+7. upload schema file

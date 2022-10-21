@@ -1,4 +1,28 @@
 # version list
+## V0.8.4
+* [IndoorSim-WebGL-V0.8.4.80f3c98](./IndoorSim-WebGL-V0.8.4.80f3c98)
+* [IndoorSim-WebGL-dev-V0.8.4.80f3c98](./IndoorSim-WebGL-dev-V0.8.4.80f3c98)
+* [IndoorSim-StandaloneLinux64-V0.8.4.80f3c98.tar.gz](./IndoorSim-StandaloneLinux64-V0.8.4.80f3c98.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.8.4.80f3c98.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.8.4.80f3c98.tar.gz)
+
+### DateTime
+2022-10-21 15:37:34 +08
+
+### ChangeLog
+1. 导入PGM图片后转为PNG保存，以提升读取速度
+2. 历史文件打开后转存的时候把PGM转为PNG保存，以提升读取速度
+3. 序列化IndoorFeatures以供UI显示时，采用手动序列化来优化速度
+4. 缓存schemaHash避免重复计算
+5. 高级快速工具绘制时，不对每一次边操作做polygnizer检查，仅在完全完成后做一次检查
+6. Redo以及Undo时，不对边操作做polygnizer检查，仅在完成一个指令组后做一次检查
+7. 超过400个cellSpace时不做polygnizer检查
+8. 优化RLines的渲染效率
+9. 使用Envelop优化边和space查找效率
+
+### Schema
+* [schema](./schema/0.8.4/schema.json)(3AC0BED35318C7E853CAFCBCA198537F)
+
+---
 
 ## V0.8.3
 * [IndoorSim-WebGL-V0.8.3.cd4ba36](./IndoorSim-WebGL-V0.8.3.cd4ba36)
@@ -12,7 +36,7 @@
 ### ChangeLog
 1. 解决了一些windows兼容问题
 2. 将最新的Newtonsoft.Json.Schema源代码移至项目内
-3. 修复错误了schema hash历史
+3. 修复错误的schema hash历史
 4. 添加Split工具用于拆分货架
 5. 修复拆分边时navigable错误的bug
 6. 切换滚轮的缩放视角方向
@@ -20,6 +44,9 @@
 
 ### Schema
 * [schema](./schema/0.8.3/schema.json)(3AC0BED35318C7E853CAFCBCA198537F)
+
+### Know Issue
+1. Split货架拆分工具效率较慢，容易造成卡帧（已在V0.8.4中修复）
 
 ---
 
