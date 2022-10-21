@@ -25,6 +25,13 @@ public class RepresentativeLine
     public RepresentativeLine() { }  // for deserialize only
 #pragma warning restore CS8618
 
+    public RepresentativeLine(CellBoundary fr, CellBoundary to, PassType passType)
+    {
+        this.fr = fr;
+        this.to = to;
+        this.pass = passType;
+    }
+
     public RepresentativeLine(CellBoundary fr, CellBoundary to, CellSpace through, PassType passType)
     {
         this.fr = fr;
@@ -33,11 +40,11 @@ public class RepresentativeLine
 
         if (!through.allBoundaries.Contains(fr)) throw new ArgumentException("the \"fr\" boundary should bound the \"through\" space");
         if (!through.allBoundaries.Contains(to)) throw new ArgumentException("the \"to\" boundary should bound the \"through\" space");
-
     }
 
-    public LineString UpdateGeom(CellSpace through)
+    public LineString? UpdateGeom(CellSpace through)
     {
+        if (IllForm(through)) return null;
         Coordinate frCentroid = fr.geom.Centroid.Coordinate;
         Coordinate toCentroid = to.geom.Centroid.Coordinate;
         double lengthRoughEstimate = frCentroid.Distance(toCentroid);

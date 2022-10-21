@@ -117,6 +117,7 @@ public class RLinesController : MonoBehaviour
         foreach (var rLine in rLines.rLines)
         {
             if (rLine.IllForm(rLines.space)) continue;
+            if (rLine.geom == null) rLine.UpdateGeom(rLines.space);
             GameObject obj = new GameObject("rLine renderer");
             obj.transform.SetParent(transform);
             obj.transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);

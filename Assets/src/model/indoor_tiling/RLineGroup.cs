@@ -39,7 +39,7 @@ public class RLineGroup
                     {
                         var unDefault = udRL.FirstOrDefault(rl => rl.fr == fr && rl.to == to);
                         if (unDefault == null)
-                            rLines.Add(new RepresentativeLine(fr, to, space, defaultPassType));
+                            rLines.Add(new RepresentativeLine(fr, to, defaultPassType));
                         else
                             rLines.Add(unDefault);
                     }

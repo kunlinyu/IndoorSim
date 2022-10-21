@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Polygonize;
 using NetTopologySuite.Operation.Distance;
@@ -57,13 +58,30 @@ public class ThematicLayer
     public bool Contains(RLineGroup rLines) => rLineGroupMember.Contains(rLines);
     public bool Contains(IndoorPOI poi) => poiMember.Contains(poi);
 
+    static public bool Crosses(LineSegment line1, LineSegment line2)
+    {
+        var li = new RobustLineIntersector();
+        li.ComputeIntersection(line1.P0, line1.P1, line2.P0, line2.P1);
+        return li.IsProper;
+    }
+
     public bool CrossesBoundaries(LineString ls)
     {
         Envelope lsEnv = ls.EnvelopeInternal;
         foreach (var b in cellBoundaryMember)
             if (b.geom.EnvelopeInternal.Intersects(lsEnv))
+                if (b.geom.NumPoints == 2 && ls.NumPoints == 2)
+                {
+                    var line1 = new LineSegment(b.geom.Coordinates[0], b.geom.Coordinates[1]);
+                    var line2 = new LineSegment(ls.Coordinates[0], ls.Coordinates[1]);
+                    if (Crosses(line1, line2))
+                        return true;
+                }
+                else
+                {
                     if (b.geom.Crosses(ls))
                         return true;
+                }
         return false;
     }
 
@@ -265,7 +283,7 @@ public class ThematicLayer
     }
 
     public CellVertex? FindVertexCoor(Point point)
-        => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Distance(point) < kFindGeomEpsilon);
+        => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(point.Coordinate) < kFindGeomEpsilon);
 
     public CellVertex? FindVertexCoor(Coordinate coor)
         => cellVertexMember.FirstOrDefault(vertex => vertex.Geom.Coordinate.Distance(coor) < kFindGeomEpsilon);

@@ -122,8 +122,10 @@ public class U
         List<Geometry> insideResult = new List<Geometry>();
         foreach (Geometry geom in result.Geometries)
         {
-            if (polygon.Contains(geom.Centroid))
-                insideResult.Add(geom);
+            var centroid = geom.Centroid;
+            if (polygon.EnvelopeInternal.Contains(centroid.Coordinate))
+                if (polygon.Contains(centroid))
+                    insideResult.Add(geom);
         }
 
         triVertices = new Vector3[insideResult.Count * 3];
