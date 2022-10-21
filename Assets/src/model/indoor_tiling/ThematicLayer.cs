@@ -57,7 +57,15 @@ public class ThematicLayer
     public bool Contains(RLineGroup rLines) => rLineGroupMember.Contains(rLines);
     public bool Contains(IndoorPOI poi) => poiMember.Contains(poi);
 
-    public bool CrossesBoundaries(LineString ls) => cellBoundaryMember.Any(b => b.geom.Crosses(ls));
+    public bool CrossesBoundaries(LineString ls)
+    {
+        Envelope lsEnv = ls.EnvelopeInternal;
+        foreach (var b in cellBoundaryMember)
+            if (b.geom.EnvelopeInternal.Intersects(lsEnv))
+                    if (b.geom.Crosses(ls))
+                        return true;
+        return false;
+    }
 
     public bool IntersectionLessThan(LineString ls, int threshold, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections)
     {
@@ -279,13 +287,23 @@ public class ThematicLayer
     {
         Point p = new GeometryFactory().CreatePoint(coor);
         foreach (var b in cellBoundaryMember)
-            if (DistanceOp.Distance(b.geom, p) < distance)
-                return b;
+            if (b.geom.EnvelopeInternal.Contains(coor))
+                if (DistanceOp.Distance(b.geom, p) < distance)
+                    return b;
+        return null;
+    }
+
+    public CellSpace? FindSpaceGeom(Point p)
+    {
+        foreach (var cs in cellSpaceMember)
+            if (cs.Geom!.EnvelopeInternal.Contains(p.Coordinate))
+                if (cs.Geom!.Contains(p))
+                    return cs;
         return null;
     }
 
     public CellSpace? FindSpaceGeom(Coordinate coor)
-        => cellSpaceMember.FirstOrDefault(space => space.Polygon.Contains(new Point(coor)));
+        => FindSpaceGeom(new Point(coor));
 
     public CellSpace? FindContainerId(string id)
         => cellSpaceMember.FirstOrDefault(space => space.Contains(id));
@@ -328,7 +346,7 @@ public class ThematicLayer
         if (ls.NumPoints < 2)
             throw new ArgumentException("Empty LingString don't have middlePoint");
         else if (ls.NumPoints == 2)
-            return new GeometryFactory().CreatePoint(new Coordinate((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f));
+            return new Point((ls.StartPoint.X + ls.EndPoint.X) / 2.0f, (ls.StartPoint.Y + ls.EndPoint.Y) / 2.0f);
         else
             return ls.GetPointN(1);
     }

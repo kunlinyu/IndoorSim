@@ -190,7 +190,7 @@ public class IndoorTiling
 
         CellSpace cellSpace1 = CreateCellSpaceInternal(jumps1);
         CellSpace cellSpace2 = CreateCellSpaceInternal(jumps2);
-        CellSpace? oldCellSpace = layer.cellSpaceMember.FirstOrDefault(cs => cs.Polygon.Contains(ThematicLayer.MiddlePoint(ls)));
+        CellSpace? oldCellSpace = layer.FindSpaceGeom(ThematicLayer.MiddlePoint(ls));
 
         NewCellSpaceCase ncsCase;
         if (oldCellSpace == null)
