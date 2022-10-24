@@ -47,9 +47,13 @@ public class ThematicLayer
     [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
     [JsonIgnore] private Dictionary<Container, HashSet<IndoorPOI>> space2POIs = new Dictionary<Container, HashSet<IndoorPOI>>();
 
+
+    public ThematicLayer() { }
+
     public ThematicLayer(string level)
     {
         this.level = level;
+        creationDate = DateTime.Now;
     }
 
     public bool Contains(CellVertex vertex) => cellVertexMember.Contains(vertex);

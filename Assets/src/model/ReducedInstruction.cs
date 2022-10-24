@@ -98,9 +98,15 @@ public class ReducedInstruction
     [JsonPropertyAttribute] public Predicate predicate { get; set; }
     [JsonPropertyAttribute] public Parameters? oldParam { get; set; } = null;
     [JsonPropertyAttribute] public Parameters? newParam { get; set; } = null;
+    [JsonPropertyAttribute] public DateTime? dateTime { get; set; } = null;
 
-    ReducedInstruction()
-    { }
+    ReducedInstruction() { }
+
+    ReducedInstruction(bool nonDeserialization)
+    {
+        dateTime = DateTime.Now;
+    }
+
 
     public static LineString Clone(LineString ls)
     {
@@ -116,7 +122,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateVertices(List<Coordinate> oldCoors, List<Coordinate> newCoors)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Vertices;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { coors = oldCoors };
@@ -129,7 +135,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction AddBoundary(LineString ls)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
         ri.newParam = new Parameters() { lineString = Clone(ls) };
@@ -141,7 +147,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveBoundary(LineString ls)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
         ri.oldParam = new Parameters() { lineString = Clone(ls) };
@@ -150,7 +156,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateBoundary(LineString oldLineString, LineString newLineString)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { lineString = Clone(oldLineString) };
@@ -160,7 +166,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateBoundaryDirection(LineString oldLineString, NaviDirection oldDirection, NaviDirection newDirection)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.BoundaryDirection;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { direction = oldDirection } };
@@ -170,7 +176,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateBoundaryNavigable(LineString oldLineString, Navigable oldNavigable, Navigable newNavigable)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.BoundaryNavigable;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { navigable = oldNavigable } };
@@ -180,7 +186,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateSpaceNavigable(Coordinate spaceInterior, Navigable oldNavigable, Navigable newNavigable)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.SpaceNavigable;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { coor = spaceInterior, naviInfo = new NaviInfo() { navigable = oldNavigable } };
@@ -190,7 +196,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateRLinePassType(LineString oldLineString, PassType oldPassType, PassType newPassType)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.RLine;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { lineString = oldLineString, naviInfo = new NaviInfo() { passType = oldPassType } };
@@ -200,7 +206,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction AddAgent(AgentDescriptor agent)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Add;
 
@@ -211,7 +217,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveAgent(AgentDescriptor agent)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Remove;
 
@@ -222,7 +228,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Update;
 
@@ -234,7 +240,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateSpaceId(Coordinate spaceInterior, string oldContainerId, string oldChildrenId, string newContainerId, string newChildrenId)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.SpaceId;
         ri.predicate = Predicate.Update;
 
@@ -246,7 +252,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Add;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
@@ -258,7 +264,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Remove;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
@@ -269,7 +275,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateIndoorPOI(Coordinate oldCoor, Coordinate newCoor)
     {
-        ReducedInstruction ri = new ReducedInstruction();
+        ReducedInstruction ri = new ReducedInstruction(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Update;
 

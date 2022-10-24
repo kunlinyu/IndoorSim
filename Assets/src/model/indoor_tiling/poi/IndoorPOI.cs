@@ -33,6 +33,8 @@ public class IndoorPOI : poi.POI
 
         foreach (var cate in category)
             AddCategory(cate);
+
+        created = DateTime.Now;
     }
 
     [JsonIgnore]
