@@ -1,4 +1,25 @@
 # version list
+
+## V0.9.0
+* [IndoorSim-WebGL-V0.9.0.3a62a05](./IndoorSim-WebGL-V0.9.0.3a62a05)
+* [IndoorSim-WebGL-dev-V0.9.0.3a62a05](./IndoorSim-WebGL-dev-V0.9.0.3a62a05)
+* [IndoorSim-StandaloneLinux64-V0.9.0.3a62a05.tar.gz](./IndoorSim-StandaloneLinux64-V0.9.0.3a62a05.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.9.0.3a62a05.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.9.0.3a62a05.tar.gz)
+
+### DateTime
+2022-10-24 15:35:10 +08
+
+### ChangeLog
+1. 给拆分工具添加行列数量选择面板
+2. 对四边形使用更简单的三角花算法以提升性能
+3. 优化大量性能细节
+4. 添加关于时间和UUID的字段使得文件schema变更
+
+### Schema
+* [schema](./schema/0.9.0/schema.json)(4EBFB912BC82294B445CD7EDE4DD3E2D)
+
+---
+
 ## V0.8.4
 * [IndoorSim-WebGL-V0.8.4.80f3c98](./IndoorSim-WebGL-V0.8.4.80f3c98)
 * [IndoorSim-WebGL-dev-V0.8.4.80f3c98](./IndoorSim-WebGL-dev-V0.8.4.80f3c98)
