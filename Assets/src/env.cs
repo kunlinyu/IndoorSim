@@ -25,6 +25,8 @@ public class env : MonoBehaviour
 
         simController.indoorSimData = indoorSimData;
         simController.simulationView = simulationView;
+
+        indoorSimData.PostAction = () => { Debug.Log("post action of indoor sim data"); };
     }
 
     void Update()

@@ -64,6 +64,8 @@ public class IndoorSimData
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
 
+    [JsonIgnore] public Action PostAction = () => { };
+
 
     public IndoorSimData()
     {
@@ -359,6 +361,7 @@ public class IndoorSimData
 
         history.SessionCommit();
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     private void RegisterInstructionExecutor()
@@ -484,6 +487,7 @@ public class IndoorSimData
         OnGridMapCreated?.Invoke(gridMaps[0]);
         Debug.Log("Grid map added");
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -495,6 +499,7 @@ public class IndoorSimData
         OnGridMapListUpdated?.Invoke(gridMaps);
         OnGridMapRemoved?.Invoke(tobeRemoved);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -508,6 +513,7 @@ public class IndoorSimData
         OnGridMapListUpdated?.Invoke(gridMaps);
         OnGridMapRemoved?.Invoke(tobeRemoved);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -516,6 +522,7 @@ public class IndoorSimData
         if (index < 0 || index >= gridMaps.Count) return false;
         gridMaps[index].globalOrigin = newOrigin.Clone();
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -525,6 +532,7 @@ public class IndoorSimData
         if (index < 0) return false;
         gridMaps[index].globalOrigin = newOrigin.Clone();
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -536,6 +544,7 @@ public class IndoorSimData
         gridMaps[index].id = newName;
         OnGridMapListUpdated?.Invoke(gridMaps);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -545,6 +554,7 @@ public class IndoorSimData
         gridMaps[index].id = newName;
         OnGridMapListUpdated?.Invoke(gridMaps);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -556,6 +566,7 @@ public class IndoorSimData
         gridMaps.Insert(0, temp);
         OnGridMapListUpdated?.Invoke(gridMaps);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
     }
 
@@ -615,6 +626,7 @@ public class IndoorSimData
 
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
 
         return newSimData;
     }
@@ -626,6 +638,7 @@ public class IndoorSimData
         simDataList.RemoveAt(index);
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void RemoveSimulation(string name)
@@ -636,6 +649,7 @@ public class IndoorSimData
         simDataList.RemoveAt(index);
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void RenameSimulation(string oldName, string newName)
@@ -646,6 +660,7 @@ public class IndoorSimData
         simDataList[index].name = newName;
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public bool Undo()
@@ -708,6 +723,7 @@ public class IndoorSimData
         activeHistory.SessionCommit();
         OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public bool IntersectionLessThan(LineString ls, int threshold, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections)
@@ -721,6 +737,7 @@ public class IndoorSimData
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
 
@@ -730,6 +747,7 @@ public class IndoorSimData
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end, string? id = null)
@@ -738,6 +756,7 @@ public class IndoorSimData
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
 
@@ -747,6 +766,7 @@ public class IndoorSimData
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
 
@@ -756,6 +776,7 @@ public class IndoorSimData
         if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
 
@@ -777,6 +798,7 @@ public class IndoorSimData
         history.SessionCommit();
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return vertex;
     }
 
@@ -798,6 +820,7 @@ public class IndoorSimData
         history.SessionCommit();
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return vertex;
     }
 
@@ -808,6 +831,7 @@ public class IndoorSimData
         if (ret) history.DoCommit(ReducedInstruction.UpdateVertices(oldCoors, newCoors));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
         return ret;
     }
     public void RemoveBoundary(CellBoundary boundary)
@@ -838,6 +862,7 @@ public class IndoorSimData
         activeTiling.RemoveBoundary(boundary);
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
     public void RemoveBoundaries(List<CellBoundary> boundaries)
     {
@@ -846,24 +871,28 @@ public class IndoorSimData
         history.SessionCommit();
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
     public void UpdateBoundaryNaviDirection(CellBoundary boundary, NaviDirection direction)
     {
         history.DoCommit(ReducedInstruction.UpdateBoundaryDirection(boundary.geom, boundary.NaviDir, direction));
         activeTiling.UpdateBoundaryNaviDirection(boundary, direction);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
     public void UpdateBoundaryNavigable(CellBoundary boundary, Navigable navigable)
     {
         history.DoCommit(ReducedInstruction.UpdateBoundaryNavigable(boundary.geom, boundary.Navigable, navigable));
         activeTiling.UpdateBoundaryNavigable(boundary, navigable);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
     public void UpdateSpaceNavigable(CellSpace space, Navigable navigable)
     {
         history.DoCommit(ReducedInstruction.UpdateSpaceNavigable(space.Polygon.InteriorPoint.Coordinate, space.Navigable, navigable));
         activeTiling.UpdateSpaceNavigable(space, navigable);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void UpdateSpaceId(CellSpace space, string newContainerId, List<string> childrenId)
@@ -882,12 +911,14 @@ public class IndoorSimData
             Debug.LogWarning("Ignore the operation. Try another id please");
         }
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
     public void UpdateRLinePassType(RLineGroup rLines, CellBoundary fr, CellBoundary to, PassType passType)
     {
         history.DoCommit(ReducedInstruction.UpdateRLinePassType(rLines.Geom(fr, to), rLines.passType(fr, to), passType));
         activeTiling.UpdateRLinePassType(rLines, fr, to, passType);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void AddAgent(AgentDescriptor agent, AgentTypeMeta meta)
@@ -901,6 +932,7 @@ public class IndoorSimData
         if (!agentMetaList.ContainsKey(meta.typeName))
             agentMetaList.Add(meta.typeName, meta);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void RemoveAgent(AgentDescriptor agent)
@@ -914,6 +946,7 @@ public class IndoorSimData
         if (!currentSimData.agents.Any(a => a.type == agent.type))
             agentMetaList.Remove(agent.type);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
@@ -923,6 +956,7 @@ public class IndoorSimData
         currentSimData.UpdateAgent(oldAgent, newAgent);
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void UpdateAgents(List<AgentDescriptor> oldAgents, List<AgentDescriptor> newAgents)
@@ -938,6 +972,7 @@ public class IndoorSimData
         currentSimData.history.SessionCommit();
         OnSimulationListUpdated?.Invoke(simDataList);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void AddPOI(IndoorPOI poi)
@@ -951,6 +986,7 @@ public class IndoorSimData
                                                 poi.label.Select(l => l.value).ToList()));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void UpdatePOI(IndoorPOI poi, Coordinate coor)
@@ -959,6 +995,7 @@ public class IndoorSimData
         if (activeTiling.UpdatePOI(poi, coor))
             history.DoCommit(ReducedInstruction.UpdateIndoorPOI(oldCoordinate, coor));
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 
     public void RemovePOI(IndoorPOI poi)
@@ -973,5 +1010,6 @@ public class IndoorSimData
                                                poi.label.Select(l => l.value).ToList()));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
+        if (!activeHistory.InSession) PostAction?.Invoke();
     }
 }
