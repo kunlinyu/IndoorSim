@@ -23,68 +23,56 @@ public class InstructionHistory<InstructionType>
     }
 
     [JsonIgnore] private List<InstructionType>? uncommittedInstruction = null;
-    [JsonIgnore] private int reEntryLevel = 0;
+    [JsonIgnore] public int reEntryLevel { get; private set; } = 0;
+
+    [JsonIgnore] public bool InSession => reEntryLevel > 0;
 
 #pragma warning disable CS8618
     public InstructionHistory() { }  // for deserialize only
 #pragma warning restore CS8618
 
-    [JsonIgnore] public bool IgnoreDo { get; set; } = false;
-
     public void SessionStart()
     {
-        if (!IgnoreDo)
-        {
-            if (reEntryLevel == 0)
-                uncommittedInstruction = new List<InstructionType>();
-            reEntryLevel += 1;
-        }
+        if (reEntryLevel == 0)
+            uncommittedInstruction = new List<InstructionType>();
+        reEntryLevel += 1;
     }
 
     public void SessionCommit()
     {
-        if (!IgnoreDo)
+        reEntryLevel -= 1;
+        if (reEntryLevel == 0)
         {
-            reEntryLevel -= 1;
-            if (reEntryLevel == 0)
+            if (uncommittedInstruction!.Count == 0)
             {
-                if (uncommittedInstruction!.Count == 0)
-                {
-                    Console.WriteLine("Do nothing before commit.");
-                }
-                else
-                {
-                    history.Push(uncommittedInstruction);
-                    future.Clear();
-                    uncommittedInstruction = null;
-                    while (snapShots.Count > history.Count) snapShots.RemoveAt(snapShots.Count - 1);
-                    string? snapShot = getSnapshot?.Invoke();
-                    if (snapShot != null)
-                        snapShots.Add(snapShot);
-                }
+                Console.WriteLine("Do nothing before commit.");
             }
-
+            else
+            {
+                history.Push(uncommittedInstruction);
+                future.Clear();
+                uncommittedInstruction = null;
+                while (snapShots.Count > history.Count) snapShots.RemoveAt(snapShots.Count - 1);
+                string? snapShot = getSnapshot?.Invoke();
+                if (snapShot != null)
+                    snapShots.Add(snapShot);
+            }
         }
+
     }
 
     public void DoStep(InstructionType instruction)
     {
-        if (!IgnoreDo)
-        {
-            if (uncommittedInstruction == null)
-                throw new InvalidCastException("Can not do anything before session start.");
-            uncommittedInstruction.Add(instruction);
-        }
+        if (uncommittedInstruction == null)
+            throw new InvalidCastException("Can not do anything before session start.");
+        uncommittedInstruction.Add(instruction);
     }
 
     public void DoCommit(InstructionType instruction)
     {
-        if (!IgnoreDo)
-        {
-            SessionStart();
-            DoStep(instruction);
-            SessionCommit();
-        }
+        SessionStart();
+        DoStep(instruction);
+        SessionCommit();
     }
 
     public List<InstructionType> Undo(out string snapShot)
