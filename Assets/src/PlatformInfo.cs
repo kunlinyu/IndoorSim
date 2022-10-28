@@ -3,7 +3,6 @@ using UnityEngine;
 
 class PlatformInfo
 {
-    public string applicationPlatform;
     public string deviceModel;
     public string deviceName;
     public string deviceUniqueIdentifier;
@@ -23,7 +22,6 @@ class PlatformInfo
     {
         var platformInfo = new PlatformInfo()
         {
-            applicationPlatform = Application.platform.ToString(),
             deviceModel = SystemInfo.deviceModel,
             deviceName = SystemInfo.deviceName,
             deviceUniqueIdentifier = SystemInfo.deviceUniqueIdentifier,
