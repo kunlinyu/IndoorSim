@@ -129,8 +129,6 @@ public class IndoorSimData
         this.softwareVersion = softwareVersion;
         this.schemaHash = JSchemaHash();
 
-        Debug.Log("schemaHash: " + this.schemaHash);
-
         digestCache = indoorFeatures.CalcDigest();
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -139,7 +137,7 @@ public class IndoorSimData
             Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
-            ContractResolver = new ShouldSerializeContractResolver(),
+            ContractResolver = ShouldSerializeContractResolver.Instance,
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
@@ -262,7 +260,7 @@ public class IndoorSimData
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
-            ContractResolver = new ShouldSerializeContractResolver(),
+            ContractResolver = ShouldSerializeContractResolver.Instance,
         };
         IndoorSimData? indoorSimData = JsonConvert.DeserializeObject<IndoorSimData>(json, settings);
         if (indoorSimData == null) return null;

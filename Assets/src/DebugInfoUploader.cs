@@ -15,8 +15,14 @@ struct DebugInfo
 
 public class DebugInfoUploader : MonoBehaviour
 {
-    static public void DebugInfo(byte[] content, byte[] key, bool force)
+    int count = 0;
+    static int kTriggerThresHold = 5;
+    public void DebugInfo(byte[] content, byte[] key, bool force)
     {
+        count++;
+        if (count >= kTriggerThresHold) count = 0;
+        if (count != 0) return;
+
         DebugInfo debugInfo = new()
         {
             platformInfo = PlatformInfo.Get(),
@@ -29,11 +35,25 @@ public class DebugInfoUploader : MonoBehaviour
         debugInfo.encriptionInfo = EncriptionInfo.Get(aes);
 
         byte[] encryptedData = AesEncryption.AesEncryptBase64(content, aes);
-        Debug.Log("Length of encrypted zipped json: " + encryptedData.Length);
         aes.Dispose();
 
         debugInfo.content = Convert.ToBase64String(encryptedData);
 
-        Debug.Log(JsonConvert.SerializeObject(debugInfo, Formatting.None));
+        var json = JsonConvert.SerializeObject(debugInfo, Formatting.None);
+        Debug.Log("debuginfo.length: " + json.Length);
+
+        // UnityWebRequest www = UnityWebRequest.Get("http://indoorsim-log-cn-dev.syriusdroids.com/spec");
+        // www.SendWebRequest();
+        // while (www.result == UnityWebRequest.Result.InProgress)
+        //     Thread.Sleep(10);
+        // if (www.result != UnityWebRequest.Result.Success)
+        // {
+        //     Debug.LogWarning(www.result);
+        //     Debug.LogWarning(www.error);
+        // }
+        // else
+        // {
+        //     Debug.Log(www.downloadHandler.text);
+        // }
     }
 }

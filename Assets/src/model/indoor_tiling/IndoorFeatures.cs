@@ -48,7 +48,6 @@ public class IndoorFeatures
         OnLayerCreated?.Invoke(layers[0]);
     }
 
-    static ShouldSerializeContractResolver shouldSerializeContractResolver = new ShouldSerializeContractResolver();
     public string Serialize(bool indent = false)
     {
         JsonSerializerSettings settings = new JsonSerializerSettings
@@ -58,7 +57,7 @@ public class IndoorFeatures
             Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
-            ContractResolver = shouldSerializeContractResolver,
+            ContractResolver = ShouldSerializeContractResolver.Instance,
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);

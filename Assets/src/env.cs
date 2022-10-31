@@ -16,6 +16,8 @@ public class env : MonoBehaviour
     public SimDataController simDataController;  // controller
     public SimulationController simController;  // controller
 
+    public DebugInfoUploader uploader;
+
     void OnEnable()
     {
         UnitySystemConsoleRedirector.Redirect();
@@ -33,12 +35,10 @@ public class env : MonoBehaviour
 
         indoorSimData.PostAction = () =>
         {
-            byte[] key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
             var json = indoorSimData.Serialize(Application.version, false);
-            Debug.Log("Length of json: " + json.Length);
             var zippedJson = Compress(Encoding.ASCII.GetBytes(json));
-            Debug.Log("Length of zipped json: " + zippedJson.Length);
-            // DebugInfoUploader.DebugInfo(zippedJson, key, false);
+            byte[] key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
+            uploader.DebugInfo(zippedJson, key, false);
         };
     }
 
