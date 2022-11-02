@@ -104,6 +104,7 @@ public class HierarchyPanelController : MonoBehaviour
 
     public void UpdateIndoorData(string json)
     {
+        return;
         indoorMapFoldout.Clear();
         CollapsesAll();
         indoorMapFoldout.SetValueWithoutNotify(true);

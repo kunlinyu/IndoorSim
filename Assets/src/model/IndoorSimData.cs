@@ -32,7 +32,7 @@ public class IndoorSimData
         {"0.8.4", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.9.0", "4EBFB912BC82294B445CD7EDE4DD3E2D"},
     };
-    [JsonPropertyAttribute] Guid? uuid = null;
+    [JsonPropertyAttribute] public Guid? uuid { get; private set; } = null;
     [JsonIgnore]
     static string? schemaStableString = null;
     [JsonPropertyAttribute] public DateTime? latestUpdateTime = null;
@@ -65,6 +65,7 @@ public class IndoorSimData
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
 
     [JsonIgnore] public Action PostAction = () => { };
+    [JsonIgnore] public Action PostActionAfterException = () => { };
 
 
     public IndoorSimData()
@@ -247,7 +248,14 @@ public class IndoorSimData
         gridMaps.ForEach(gridmap => OnGridMapCreated?.Invoke(gridmap));
 
         latestUpdateTime = indoorSimData.latestUpdateTime;
+
         uuid = indoorSimData.uuid;
+        if (uuid == null)
+        {
+            Debug.LogWarning("loaded map don't have uuid");
+            uuid = Guid.NewGuid();
+            Debug.Log("Generate uuid for loaded map: " + uuid);
+        }
 
         return true;
     }

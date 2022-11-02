@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public struct SoftwareInfo
+public class SoftwareInfo
 {
     public string absoluteURL;
     public string buildGUID;

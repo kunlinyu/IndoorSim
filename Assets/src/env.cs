@@ -1,7 +1,5 @@
-using System.IO;
-using System.IO.Compression;
-using System.Text;
-
+using System;
+using System.Globalization;
 using UnityEngine;
 
 
@@ -17,6 +15,8 @@ public class env : MonoBehaviour
     public SimulationController simController;  // controller
 
     public DebugInfoUploader uploader;
+    int count = 0;
+    static readonly int kTriggerThresHold = 5;
 
     void OnEnable()
     {
@@ -33,38 +33,26 @@ public class env : MonoBehaviour
         simController.indoorSimData = indoorSimData;
         simController.simulationView = simulationView;
 
+        uploader.Key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
+        Debug.Log(BitConverter.ToString(uploader.Key));
+
+
         indoorSimData.PostAction = () =>
         {
-            var json = indoorSimData.Serialize(Application.version, false);
-            var zippedJson = Compress(Encoding.ASCII.GetBytes(json));
-            byte[] key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
-            uploader.DebugInfo(zippedJson, key, false);
+            count++;
+            if (count >= kTriggerThresHold) count = 0;
+            if (count != 0) return;
+            string mapId = indoorSimData.uuid.ToString();
+            string latestUpdateTime = indoorSimData.latestUpdateTime?.ToString("o", CultureInfo.CurrentCulture);
+            uploader.Append(() => indoorSimData.Serialize(Application.version, false), mapId, latestUpdateTime);
+        };
+        indoorSimData.PostActionAfterException = () =>
+        {
+            string mapId = indoorSimData.uuid.ToString();
+            string latestUpdateTime = indoorSimData.latestUpdateTime?.ToString("o", CultureInfo.CurrentCulture);
+            uploader.Append(() => indoorSimData.Serialize(Application.version, false), mapId, latestUpdateTime);
         };
     }
-
-    // TODO repeat code
-    public static byte[] Decompress(byte[] bytes)
-    {
-        using (var memoryStream = new MemoryStream(bytes))
-        using (var outputStream = new MemoryStream())
-        {
-            using (var decompressStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-                decompressStream.CopyTo(outputStream);
-            return outputStream.ToArray();
-        }
-    }
-
-    // TODO repeat code
-    public static byte[] Compress(byte[] bytes)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            using (var gzipStream = new GZipStream(memoryStream, System.IO.Compression.CompressionLevel.Optimal))
-                gzipStream.Write(bytes, 0, bytes.Length);
-            return memoryStream.ToArray();
-        }
-    }
-
     void Update()
     {
 

@@ -118,9 +118,14 @@ public class BuildPlayer : MonoBehaviour
         BuildSummary summary = report.summary;
 
         if (summary.result == BuildResult.Succeeded)
+        {
             Debug.Log("Build succeeded: " + summary.totalSize + " bytes into path " + summary.outputPath);
+        }
         else
-            Debug.Log("Build " + summary.result.ToString());
+        {
+            Debug.Log("Build result: " + summary.result.ToString());
+            return;
+        }
 
 
         if (target == BuildTarget.StandaloneLinux64)
