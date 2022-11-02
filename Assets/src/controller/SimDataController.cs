@@ -64,7 +64,7 @@ public class SimDataController : MonoBehaviour
             List<SimData> noHistorySims = new List<SimData>();
             sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { active = sim.active, agents = sim.agents, tasks = sim.tasks, history = null }));
 
-            JsonSerializerSettings settings = new JsonSerializerSettings
+            JsonSerializerSettings settings = new()
             {
                 PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
                 Formatting = Newtonsoft.Json.Formatting.None,

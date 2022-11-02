@@ -119,7 +119,7 @@ public class IndoorSimData
         activeHistory = history;
         activeInstructionInterpreter = instructionInterpreter;
 
-        latestUpdateTime = DateTime.Now; ;
+        latestUpdateTime = DateTime.Now;
         uuid = Guid.NewGuid();
 
         RegisterInstructionExecutor();
@@ -131,7 +131,7 @@ public class IndoorSimData
         this.schemaHash = JSchemaHash();
 
         digestCache = indoorFeatures.CalcDigest();
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        JsonSerializerSettings settings = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
@@ -139,6 +139,7 @@ public class IndoorSimData
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
             ContractResolver = ShouldSerializeContractResolver.Instance,
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'ffffffK",
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
@@ -262,7 +263,7 @@ public class IndoorSimData
 
     public static IndoorSimData? Deserialize(string json, bool historyOnly = false)
     {
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        JsonSerializerSettings settings = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,

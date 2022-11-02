@@ -407,12 +407,13 @@ public class ThematicLayer
 
     public string Serialize(bool indent = true)
     {
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        JsonSerializerSettings settings = new()
         {
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
             Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'ffffffK",
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);

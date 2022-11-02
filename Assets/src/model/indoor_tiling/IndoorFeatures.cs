@@ -50,7 +50,7 @@ public class IndoorFeatures
 
     public string Serialize(bool indent = false)
     {
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        JsonSerializerSettings settings = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
@@ -58,6 +58,7 @@ public class IndoorFeatures
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
             ContractResolver = ShouldSerializeContractResolver.Instance,
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'ffffffK",
         };
 
         JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
