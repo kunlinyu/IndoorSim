@@ -50,20 +50,23 @@ public enum SubjectType
 // 17. Update POI
 // 18. Remove POI
 
-public struct NaviInfo
+public class NaviInfo
 {
-    [JsonPropertyAttribute] public NaviDirection direction;
-    [JsonPropertyAttribute] public Navigable navigable;
-    [JsonPropertyAttribute] public PassType passType;
+    [JsonPropertyAttribute] public NaviDirection? direction;
+    [JsonPropertyAttribute] public Navigable? navigable;
+    [JsonPropertyAttribute] public PassType? passType;
 }
 
 [Serializable]
-public struct Parameters
+public class Parameters
 {
     [JsonPropertyAttribute] public Coordinate? coor;
     [JsonPropertyAttribute] public List<Coordinate>? coors;
     [JsonPropertyAttribute] public LineString? lineString;
     [JsonPropertyAttribute] public NaviInfo? naviInfo;
+    [JsonPropertyAttribute] public NaviDirection? direction;
+    [JsonPropertyAttribute] public Navigable? navigable;
+    [JsonPropertyAttribute] public PassType? passType;
     [JsonPropertyAttribute] public Task? task;
     [JsonPropertyAttribute] public AgentDescriptor? agent;
     [JsonPropertyAttribute] public string? containerId;
@@ -76,19 +79,51 @@ public struct Parameters
         => JsonConvert.SerializeObject(this, new CoorConverter(), new WKTConverter());
 }
 
+public static class NavigableExtension
+{
+    public static NaviDirection direction(this NaviInfo? navi) => navi!.direction!.Value;
+    public static Navigable navigable(this NaviInfo? navi) => navi!.navigable!.Value;
+    public static PassType passType(this NaviInfo? navi) => navi!.passType!.Value;
+}
 public static class ParameterExtension
 {
-    public static Coordinate coor(this Parameters? param) => param!.Value.coor!;
-    public static List<Coordinate> coors(this Parameters? param) => param!.Value.coors!;
-    public static LineString lineString(this Parameters? param) => param!.Value.lineString!;
-    public static NaviInfo naviInfo(this Parameters? param) => param!.Value.naviInfo!.Value;
-    public static AgentDescriptor agent(this Parameters? param) => param!.Value.agent!;
-    public static Task task(this Parameters? param) => param!.Value.task!;
-    public static string containerId(this Parameters? param) => param!.Value.containerId!;
-    public static string childrenId(this Parameters? param) => param!.Value.childrenId!;
-    public static string value(this Parameters? param) => param!.Value.value!;
-    public static List<string> values(this Parameters? param) => param!.Value.values!;
-    public static List<string> values2(this Parameters? param) => param!.Value.values2!;
+    public static Coordinate coor(this Parameters? param) => param!.coor!;
+    public static List<Coordinate> coors(this Parameters? param) => param!.coors!;
+    public static LineString lineString(this Parameters? param) => param!.lineString!;
+
+    // TODO: make this method simpler after V0.9.0 EOL
+    public static NaviDirection direction(this Parameters? param)
+    {
+        if (param!.direction != null)
+            return param!.direction.Value;
+        else
+            return param!.naviInfo!.direction!.Value;
+    }
+
+    // TODO: make this method simpler after V0.9.0 EOL
+    public static Navigable navigable(this Parameters? param)
+    {
+        if (param!.navigable != null)
+            return param!.navigable.Value;
+        else
+            return param!.naviInfo!.navigable!.Value;
+    }
+
+    // TODO: make this method simpler after V0.9.0 EOL
+    public static PassType passType(this Parameters? param)
+    {
+        if (param!.passType != null)
+            return param!.passType.Value;
+        else
+            return param!.naviInfo!.passType!.Value;
+    }
+    public static AgentDescriptor agent(this Parameters? param) => param!.agent!;
+    public static Task task(this Parameters? param) => param!.task!;
+    public static string containerId(this Parameters? param) => param!.containerId!;
+    public static string childrenId(this Parameters? param) => param!.childrenId!;
+    public static string value(this Parameters? param) => param!.value!;
+    public static List<string> values(this Parameters? param) => param!.values!;
+    public static List<string> values2(this Parameters? param) => param!.values2!;
 }
 
 [Serializable]
@@ -118,11 +153,11 @@ public class ReducedInstruction
 
     // TODO: SLOW
     public override string ToString()
-        => predicate + " " + subject + " " + oldParam.ToString() + " " + newParam.ToString();
+        => predicate + " " + subject + " " + oldParam?.ToString() + " " + newParam?.ToString();
 
     public static ReducedInstruction UpdateVertices(List<Coordinate> oldCoors, List<Coordinate> newCoors)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Vertices;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { coors = oldCoors };
@@ -135,7 +170,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction AddBoundary(LineString ls)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Add;
         ri.newParam = new Parameters() { lineString = Clone(ls) };
@@ -147,7 +182,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveBoundary(LineString ls)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Remove;
         ri.oldParam = new Parameters() { lineString = Clone(ls) };
@@ -156,7 +191,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateBoundary(LineString oldLineString, LineString newLineString)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Boundary;
         ri.predicate = Predicate.Update;
         ri.oldParam = new Parameters() { lineString = Clone(oldLineString) };
@@ -166,47 +201,47 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateBoundaryDirection(LineString oldLineString, NaviDirection oldDirection, NaviDirection newDirection)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.BoundaryDirection;
         ri.predicate = Predicate.Update;
-        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { direction = oldDirection } };
-        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { direction = newDirection } };
+        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), direction = oldDirection };
+        ri.newParam = new Parameters() { direction = newDirection };
         return ri;
     }
 
     public static ReducedInstruction UpdateBoundaryNavigable(LineString oldLineString, Navigable oldNavigable, Navigable newNavigable)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.BoundaryNavigable;
         ri.predicate = Predicate.Update;
-        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), naviInfo = new NaviInfo() { navigable = oldNavigable } };
-        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { navigable = newNavigable } };
+        ri.oldParam = new Parameters() { lineString = Clone(oldLineString), navigable = oldNavigable };
+        ri.newParam = new Parameters() { navigable = newNavigable };
         return ri;
     }
 
     public static ReducedInstruction UpdateSpaceNavigable(Coordinate spaceInterior, Navigable oldNavigable, Navigable newNavigable)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.SpaceNavigable;
         ri.predicate = Predicate.Update;
-        ri.oldParam = new Parameters() { coor = spaceInterior, naviInfo = new NaviInfo() { navigable = oldNavigable } };
-        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { navigable = newNavigable } };
+        ri.oldParam = new Parameters() { coor = spaceInterior, navigable = oldNavigable };
+        ri.newParam = new Parameters() { navigable = newNavigable };
         return ri;
     }
 
     public static ReducedInstruction UpdateRLinePassType(LineString oldLineString, PassType oldPassType, PassType newPassType)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.RLine;
         ri.predicate = Predicate.Update;
-        ri.oldParam = new Parameters() { lineString = oldLineString, naviInfo = new NaviInfo() { passType = oldPassType } };
-        ri.newParam = new Parameters() { naviInfo = new NaviInfo() { passType = newPassType } };
+        ri.oldParam = new Parameters() { lineString = oldLineString, passType = oldPassType };
+        ri.newParam = new Parameters() { passType = newPassType };
         return ri;
     }
 
     public static ReducedInstruction AddAgent(AgentDescriptor agent)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Add;
 
@@ -217,7 +252,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveAgent(AgentDescriptor agent)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Remove;
 
@@ -228,7 +263,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateAgent(AgentDescriptor oldAgent, AgentDescriptor newAgent)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.Agent;
         ri.predicate = Predicate.Update;
 
@@ -240,7 +275,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateSpaceId(Coordinate spaceInterior, string oldContainerId, string oldChildrenId, string newContainerId, string newChildrenId)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.SpaceId;
         ri.predicate = Predicate.Update;
 
@@ -252,7 +287,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction AddIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Add;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
@@ -264,7 +299,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction RemoveIndoorPOI(Coordinate poiCoor, List<Coordinate> spacesInterior, Coordinate[] queueInterior, List<string> category, List<string> labels)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Remove;
         LineString queue = new GeometryFactory().CreateLineString(queueInterior);
@@ -275,7 +310,7 @@ public class ReducedInstruction
 
     public static ReducedInstruction UpdateIndoorPOI(Coordinate oldCoor, Coordinate newCoor)
     {
-        ReducedInstruction ri = new ReducedInstruction(true);
+        ReducedInstruction ri = new(true);
         ri.subject = SubjectType.POI;
         ri.predicate = Predicate.Update;
 
@@ -318,18 +353,18 @@ public class ReducedInstruction
                 }
             case SubjectType.BoundaryDirection:
                 if (predicate == Predicate.Update)
-                    return UpdateBoundaryDirection(oldParam.lineString(), newParam.naviInfo().direction, oldParam.naviInfo().direction);
+                    return UpdateBoundaryDirection(oldParam.lineString(), newParam.direction(), oldParam.direction());
                 else
                     throw new ArgumentException("boundary direction can only update.");
 
             case SubjectType.BoundaryNavigable:
                 if (predicate == Predicate.Update)
-                    return UpdateBoundaryNavigable(oldParam.lineString(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
+                    return UpdateBoundaryNavigable(oldParam.lineString(), newParam.navigable(), oldParam.navigable());
                 else throw new ArgumentException("boundary navigable can only update.");
 
             case SubjectType.SpaceNavigable:
                 if (predicate == Predicate.Update)
-                    return UpdateSpaceNavigable(oldParam.coor(), newParam.naviInfo().navigable, oldParam.naviInfo().navigable);
+                    return UpdateSpaceNavigable(oldParam.coor(), newParam.navigable(), oldParam.navigable());
                 else throw new ArgumentException("space navigable can only update.");
 
             case SubjectType.SpaceId:
@@ -339,7 +374,7 @@ public class ReducedInstruction
 
             case SubjectType.RLine:
                 if (predicate == Predicate.Update)
-                    return UpdateRLinePassType(oldParam.lineString(), newParam.naviInfo().passType, oldParam.naviInfo().passType);
+                    return UpdateRLinePassType(oldParam.lineString(), newParam.passType(), oldParam.passType());
                 else throw new ArgumentException("rLine pass type can only update.");
 
             case SubjectType.Agent:

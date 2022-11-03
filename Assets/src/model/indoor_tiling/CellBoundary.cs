@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 public class CellBoundary
 {
-    [JsonPropertyAttribute] public string Id { get; set; }
+    [JsonIgnore] public string Id { get; set; }
     [JsonPropertyAttribute] public CellVertex P0 { get; private set; }
     [JsonPropertyAttribute] public CellVertex P1 { get; private set; }
     [JsonPropertyAttribute] private LineString? Geom;

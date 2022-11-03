@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 
 public class CellSpace : Container
 {
-    [JsonPropertyAttribute] public string Id { get; set; } = "";
+    [JsonIgnore] public string Id { get; set; } = "";
     [JsonPropertyAttribute] public string? level = null;
     [JsonPropertyAttribute] public string? name = null;
     [JsonPropertyAttribute] public bool PoI = false;

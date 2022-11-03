@@ -190,12 +190,16 @@ public class IndoorSimData
                         Debug.Log("schema hash history:");
                         foreach (var entry in schemaHashHistory)
                             Debug.Log(entry.Key + ": " + entry.Value);
+#if !UNITY_EDITOR
                         throw new ArgumentException($"schemaHash({indoorSimData.schemaHash}) not correct for that software version({indoorSimData.softwareVersion})");
+#endif
                     }
                 }
                 else
                 {
+#if !UNITY_EDITOR
                     throw new ArgumentException("Unknow software version of the map file: " + indoorSimData.softwareVersion);
+#endif
                 }
             }
         }
@@ -437,21 +441,21 @@ public class IndoorSimData
             CellBoundary? boundary = indoorFeatures!.FindBoundaryGeom(ins.oldParam.lineString());
             if (boundary == null)
                 throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
-            ActiveTiling.UpdateBoundaryNaviDirection(boundary, ins.newParam.naviInfo().direction);
+            ActiveTiling.UpdateBoundaryNaviDirection(boundary, ins.newParam.direction());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.BoundaryNavigable, (ins) =>
         {
             CellBoundary? boundary = indoorFeatures!.FindBoundaryGeom(ins.oldParam.lineString());
             if (boundary == null)
                 throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
-            ActiveTiling.UpdateBoundaryNavigable(boundary, ins.newParam.naviInfo().navigable);
+            ActiveTiling.UpdateBoundaryNavigable(boundary, ins.newParam.navigable());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.SpaceNavigable, (ins) =>
         {
             CellSpace? space = indoorFeatures!.FindSpaceGeom(ins.oldParam.coor());
             if (space == null)
                 throw new ArgumentException("can not find space contain point: " + ins.oldParam.coor().ToString());
-            ActiveTiling.UpdateSpaceNavigable(space, ins.newParam.naviInfo().navigable);
+            ActiveTiling.UpdateSpaceNavigable(space, ins.newParam.navigable());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.SpaceId, (ins) =>
         {
@@ -468,7 +472,7 @@ public class IndoorSimData
             RepresentativeLine? rLine = indoorFeatures!.FindRLine(ins.oldParam.lineString(), out var rLineGroup);
             if (rLine == null || rLineGroup == null)
                 throw new ArgumentException("can not find representative line: " + ins.oldParam.lineString());
-            ActiveTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, ins.newParam.naviInfo().passType);
+            ActiveTiling.UpdateRLinePassType(rLineGroup, rLine.fr, rLine.to, ins.newParam.passType());
         });
         instructionInterpreter.RegisterExecutor(Predicate.Add, SubjectType.POI, (ins) =>
         {
@@ -799,6 +803,7 @@ public class IndoorSimData
         return boundary;
     }
 
+    // TODO BUG .Geom!.Centroid.Coordinate
     public CellVertex SplitBoundary(Coordinate middleCoor)
     {
         CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
@@ -821,6 +826,7 @@ public class IndoorSimData
         return vertex;
     }
 
+    // TODO BUG .Geom!.Centroid.Coordinate
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
         CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, boundary, out var newBoundary1, out var newBoundary2);
@@ -866,12 +872,14 @@ public class IndoorSimData
         {
             if (spaces[0].navigable < spaces[1].navigable)
             {
-                history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[1].Polygon.InteriorPoint.Coordinate, spaces[1].Navigable, spaces[0].navigable));
+                if (spaces[0].Navigable != spaces[1].Navigable)
+                    history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[1].Polygon.InteriorPoint.Coordinate, spaces[1].Navigable, spaces[0].navigable));
                 ActiveTiling.UpdateSpaceNavigable(spaces[1], spaces[0].navigable);
             }
             else
             {
-                history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[0].Polygon.InteriorPoint.Coordinate, spaces[0].Navigable, spaces[1].navigable));
+                if (spaces[0].Navigable != spaces[1].Navigable)
+                    history.DoStep(ReducedInstruction.UpdateSpaceNavigable(spaces[0].Polygon.InteriorPoint.Coordinate, spaces[0].Navigable, spaces[1].navigable));
                 ActiveTiling.UpdateSpaceNavigable(spaces[0], spaces[1].navigable);
             }
         }

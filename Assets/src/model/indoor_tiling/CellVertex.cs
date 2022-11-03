@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 public class CellVertex
 {
-    [JsonPropertyAttribute] public string Id { get; set; }
+    [JsonIgnore] public string Id { get; set; }
     [JsonPropertyAttribute] public Point Geom { get; private set; }
     [JsonIgnore] public Coordinate Coordinate { get => Geom.Coordinate; }
     [JsonIgnore] public Action OnUpdate = () => { };
