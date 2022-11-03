@@ -42,13 +42,13 @@ public class env : MonoBehaviour
             count++;
             if (count >= kTriggerThresHold) count = 0;
             if (count != 0) return;
-            string mapId = indoorSimData.uuid.ToString();
+            string mapId = indoorSimData.Uuid.ToString();
             string latestUpdateTime = indoorSimData.latestUpdateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'ffffffK");
             uploader.Append(() => indoorSimData.Serialize(Application.version, false), mapId, latestUpdateTime);
         };
         indoorSimData.PostActionAfterException = () =>
         {
-            string mapId = indoorSimData.uuid.ToString();
+            string mapId = indoorSimData.Uuid.ToString();
             string latestUpdateTime = indoorSimData.latestUpdateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'ffffffK");
             uploader.Append(() => indoorSimData.Serialize(Application.version, false), mapId, latestUpdateTime);
         };

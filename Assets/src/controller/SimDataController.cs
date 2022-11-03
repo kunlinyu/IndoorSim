@@ -23,7 +23,7 @@ public class SimDataController : MonoBehaviour
     public UIEventDispatcher eventDispatcher;
     private UIEventSubscriber eventSubscriber;
 
-    private List<IExporter> exporters = new List<IExporter>();
+    private readonly List<IExporter> exporters = new();
 
 
     void Update()
@@ -33,13 +33,14 @@ public class SimDataController : MonoBehaviour
 
     void SerializeAndPublish()
     {
-        UIEvent e = new UIEvent();
+        UIEvent e = new()
+        {
+            type = UIEventType.Hierarchy,
+            name = "indoordata",
+            message = indoorSimData.indoorFeatures.SerializeIndexFast(false)
+        };
 
-        e.type = UIEventType.Hierarchy;
-        e.name = "indoordata";
-        e.message = indoorSimData.indoorFeatures.SerializeIndexFast(false);
-
-        eventDispatcher?.Raise(this, e);
+        eventDispatcher.Raise(this, e);
     }
 
     void Start()
@@ -48,12 +49,14 @@ public class SimDataController : MonoBehaviour
 
         indoorSimData.OnAssetListUpdated += (assets) =>
         {
-            var e = new UIEvent();
-            e.type = UIEventType.Asset;
-            e.name = "list";
-            e.message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Newtonsoft.Json.Formatting.Indented });
+            UIEvent e = new()
+            {
+                type = UIEventType.Asset,
+                name = "list",
+                message = JsonConvert.SerializeObject(assets, new JsonSerializerSettings { Formatting = Formatting.Indented })
+            };
 
-            eventDispatcher?.Raise(this, e);
+            eventDispatcher.Raise(this, e);
         };
         indoorSimData.OnIndoorFeatureUpdated += (indoorFeatues) =>
         {
@@ -62,19 +65,19 @@ public class SimDataController : MonoBehaviour
         indoorSimData.OnSimulationListUpdated += (sims) =>
         {
             List<SimData> noHistorySims = new List<SimData>();
-            sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { active = sim.active, agents = sim.agents, tasks = sim.tasks, history = null }));
+            sims.ForEach(sim => noHistorySims.Add(new SimData(sim.name) { agents = sim.agents, tasks = sim.tasks, history = null }));
 
             JsonSerializerSettings settings = new()
             {
-                PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-                Formatting = Newtonsoft.Json.Formatting.None,
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                Formatting = Formatting.None,
                 NullValueHandling = NullValueHandling.Ignore,
             };
 
             JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(settings);
-            StringBuilder sb = new StringBuilder(256);
-            StringWriter sw = new StringWriter(sb);
-            using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+            StringBuilder sb = new(256);
+            StringWriter sw = new(sb);
+            using (JsonTextWriter jsonWriter = new(sw))
             {
                 jsonWriter.Formatting = jsonSerializer.Formatting;
                 jsonWriter.IndentChar = '\t';
@@ -83,20 +86,24 @@ public class SimDataController : MonoBehaviour
             }
             string simsJson = sw.ToString();
 
-            var e = new UIEvent();
-            e.type = UIEventType.Hierarchy;
-            e.name = "simulation";
-            e.message = simsJson;
+            UIEvent e = new()
+            {
+                type = UIEventType.Hierarchy,
+                name = "simulation",
+                message = simsJson
+            };
 
-            eventDispatcher?.Raise(this, e);
+            eventDispatcher.Raise(this, e);
         };
         indoorSimData.OnGridMapListUpdated += (gridMaps) =>
         {
-            var e = new UIEvent();
-            e.type = UIEventType.Hierarchy;
-            e.name = "gridmap";
-            e.message = String.Join('\n', gridMaps.Select(gridMaps => gridMaps.id));
-            eventDispatcher?.Raise(this, e);
+            UIEvent e = new()
+            {
+                type = UIEventType.Hierarchy,
+                name = "gridmap",
+                message = String.Join('\n', gridMaps.Select(gridMaps => gridMaps.id))
+            };
+            eventDispatcher.Raise(this, e);
         };
 
         indoorSimData.OnAgentCreate += (agent) =>

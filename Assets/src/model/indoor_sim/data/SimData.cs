@@ -5,11 +5,10 @@ using Newtonsoft.Json;
 public class SimData
 {
     [JsonProperty] public string name;
-    [JsonProperty] public bool active;  // TODO: this is fucking wrong. We should not keep this field here. We should move it up.
-    [JsonProperty] public List<AgentDescriptor> agents = new List<AgentDescriptor>();
-    [JsonProperty] public List<Task> tasks = new List<Task>();
-    [JsonProperty] public InstructionHistory<ReducedInstruction> history = new InstructionHistory<ReducedInstruction>();
-    [JsonIgnore] public InstructionInterpreter instructionInterpreter = new InstructionInterpreter();
+    [JsonProperty] public List<AgentDescriptor> agents = new();
+    [JsonProperty] public List<Task> tasks = new();
+    [JsonProperty] public InstructionHistory<ReducedInstruction> history = new();
+    [JsonIgnore] public InstructionInterpreter instructionInterpreter = new();
     [JsonIgnore] public Action<AgentDescriptor> OnAgentCreate = (a) => { };
     [JsonIgnore] public Action<AgentDescriptor> OnAgentRemoved = (a) => { };
 

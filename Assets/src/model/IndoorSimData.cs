@@ -1,26 +1,21 @@
-using System;
-using System.IO;
-using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-
 using NetTopologySuite.Geometries;
-
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Schema.Generation;
-
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
-
+using System.Text;
 using UnityEngine;
 
 #nullable enable
 
 public class IndoorSimData
 {
-    [JsonPropertyAttribute] public string softwareVersion = "unknow";
-    [JsonPropertyAttribute] public string schemaHash = "unknow";
+    [JsonProperty] public string softwareVersion = "unknow";
+    [JsonProperty] public string schemaHash = "unknow";
     [JsonIgnore]
     public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>()
     {
@@ -32,30 +27,41 @@ public class IndoorSimData
         {"0.8.4", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.9.0", "4EBFB912BC82294B445CD7EDE4DD3E2D"},
     };
-    [JsonPropertyAttribute] public Guid? uuid { get; private set; } = null;
+    [JsonProperty] private Guid? uuid = null;
+    [JsonIgnore] public Guid? Uuid { get => uuid; }
+
     [JsonIgnore]
     static string? schemaStableString = null;
-    [JsonPropertyAttribute] public DateTime? latestUpdateTime = null;
-    [JsonPropertyAttribute] public List<GridMap> gridMaps = new();
 
-    [JsonPropertyAttribute] public IndoorFeatures? indoorFeatures;
+    [JsonProperty] public DateTime? latestUpdateTime = null;
+
+    [JsonProperty] public string? description = null;
+
+    [JsonProperty] public string? author = null;
+
+    [JsonProperty] public List<GridMap> gridMaps = new();
+
+    [JsonProperty] public IndoorFeatures? indoorFeatures;
+
     [JsonIgnore] public List<IndoorTiling> indoorTilings = new();
+
     [JsonIgnore] public IndoorTiling? activeTiling = null;
-    [JsonIgnore] public IndoorTiling ActiveTiling { get => activeTiling ?? throw new Exception("activeTilling null"); private set => activeTiling = value; }
+    [JsonIgnore] public IndoorTiling ActiveTiling {
+        get => activeTiling ?? throw new Exception("activeTilling null"); private set => activeTiling = value; }
 
-    [JsonPropertyAttribute] public InstructionHistory<ReducedInstruction> history = new();
+    [JsonProperty] public InstructionHistory<ReducedInstruction> history = new();
 
-    [JsonPropertyAttribute] private List<SimData> simDataList = new();
-    [JsonPropertyAttribute] public Dictionary<string, AgentTypeMeta> agentMetaList = new();
-    [JsonIgnore] public SimData? currentSimData { get; private set; }
+    [JsonProperty] private List<SimData> simDataList = new();
+    [JsonProperty] public Dictionary<string, AgentTypeMeta> agentMetaList = new();
+    [JsonIgnore] public SimData? currentSimData { get; private set; } = null;
     [JsonIgnore] public bool simulating = false;
 
     [JsonIgnore] public InstructionHistory<ReducedInstruction> activeHistory;
     [JsonIgnore] private readonly InstructionInterpreter instructionInterpreter = new();
     [JsonIgnore] private InstructionInterpreter activeInstructionInterpreter;
 
-    [JsonPropertyAttribute] public List<Asset> assets = new();
-    [JsonPropertyAttribute] public string digestCache = "";
+    [JsonProperty] public List<Asset> assets = new();
+    [JsonProperty] public string digestCache = "";
 
     [JsonIgnore] public Action<List<Asset>> OnAssetListUpdated = (a) => { };
     [JsonIgnore] public Action<List<GridMap>> OnGridMapListUpdated = (gridMaps) => { };
@@ -224,7 +230,7 @@ public class IndoorSimData
 
         if (indoorSimData.indoorFeatures != null)
         {
-            if (indoorFeatures == null) indoorFeatures = new();
+            indoorFeatures ??= new();
             indoorFeatures.layers = indoorSimData.indoorFeatures.layers;
             indoorFeatures.layerConnections = indoorSimData.indoorFeatures.layerConnections;
             indoorFeatures.layers.ForEach(layer => indoorFeatures.OnLayerCreated?.Invoke(layer));
@@ -251,10 +257,13 @@ public class IndoorSimData
         }
 
         simDataList = indoorSimData.simDataList;
-        simDataList.ForEach(sim => sim.active = false);
+        
         assets = indoorSimData.assets;
         history = indoorSimData.history;
-        currentSimData = null;
+
+        if (simDataList.Count > 0) currentSimData = simDataList[0];
+        else currentSimData = null;
+
         activeHistory = history;
         OnAssetListUpdated?.Invoke(assets);
         if (indoorFeatures != null) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
@@ -602,7 +611,6 @@ public class IndoorSimData
         {
             Debug.Log("going to remove agent");
             currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
-            currentSimData.active = false;
             currentSimData = null;
         }
     }
@@ -614,12 +622,8 @@ public class IndoorSimData
         if (index < 0) throw new ArgumentException("can not find simulation with name: " + simName);
 
         if (currentSimData != null)
-        {
             currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
-            currentSimData.active = false;
-        }
         currentSimData = simDataList[index];
-        currentSimData.active = true;
 
         activeHistory = currentSimData.history;
         activeInstructionInterpreter = currentSimData.instructionInterpreter;
@@ -633,15 +637,13 @@ public class IndoorSimData
         if (simulating) return null;
         if (simDataList.Any(sim => sim.name == name)) return null;
         if (currentSimData != null)
-        {
             currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
-            currentSimData.active = false;
-        }
 
-        SimData newSimData = new SimData(name);
-        newSimData.OnAgentCreate = OnAgentCreate;
-        newSimData.OnAgentRemoved = OnAgentRemoved;
-        newSimData.active = true;
+        SimData newSimData = new(name)
+        {
+            OnAgentCreate = OnAgentCreate,
+            OnAgentRemoved = OnAgentRemoved
+        };
         simDataList.Add(newSimData);
         currentSimData = newSimData;
         activeHistory = currentSimData.history;
