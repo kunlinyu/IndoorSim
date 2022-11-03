@@ -39,9 +39,10 @@ public class U
     {
         if (mesh1 == null) return mesh2;
         if (mesh2 == null) return mesh1;
-        Mesh result = new Mesh();
-
-        result.subMeshCount = mesh1.subMeshCount + mesh2.subMeshCount;
+        Mesh result = new()
+        {
+            subMeshCount = mesh1.subMeshCount + mesh2.subMeshCount
+        };
 
         result.SetVertices(mesh1.vertices.Concat(mesh2.vertices).ToArray());
 

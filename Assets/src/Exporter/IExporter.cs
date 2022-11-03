@@ -4,9 +4,9 @@ using System.IO;
 
 public interface IExporter
 {
-    public string name { get;  }
-    public string defaultStreamName { get; }
-    public bool canIncludeFull { get; }
+    public string Name { get;  }
+    public string DefaultStreamName { get; }
+    public bool CanIncludeFull { get; }
     public void Load(IndoorSimData indoorSimData);
     public bool Translate(string layerName);
     public string Export(string softwareVersion, bool includeFull);

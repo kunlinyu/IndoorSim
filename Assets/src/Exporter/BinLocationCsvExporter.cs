@@ -7,9 +7,9 @@ using System.Text;
 
 public class BinLocationCsvExporter : IExporter
 {
-    public string name => "binLocation.csv";
-    public string defaultStreamName => "binLocation.csv";
-    public bool canIncludeFull => false;
+    public string Name => "binLocation.csv";
+    public string DefaultStreamName => "binLocation.csv";
+    public bool CanIncludeFull => false;
 
     IndoorSimData? indoorSimData = null;
 
@@ -23,7 +23,7 @@ public class BinLocationCsvExporter : IExporter
     public bool Translate(string layerName)
     {
         if (indoorSimData == null) throw new InvalidOperationException("call Load() first");
-        ThematicLayer? layer = indoorSimData.indoorFeatures.layers.Find(layer => layer.level == layerName);
+        ThematicLayer? layer = indoorSimData!.indoorFeatures!.layers.Find(layer => layer.level == layerName);
         if (layer == null) throw new ArgumentException("can not find layer with name: " + layerName);
 
         layer.cellSpaceMember.ForEach(space => space.AllNodeInContainerTree()

@@ -43,9 +43,10 @@ public class TwistToCoorMotionExecutor : AbstractMotionExecutor
         if (dTheta > Math.PI) dTheta -= 2* Math.PI;
         if (dTheta <-Math.PI) dTheta += 2* Math.PI;
 
-        Twist2 twist = new Twist2();
-
-        twist.v_x = speedNormal - dTheta * dTheta * 5.0f;
+        Twist2 twist = new()
+        {
+            v_x = speedNormal - dTheta * dTheta * 5.0f
+        };
         if (twist.v_x < 0.0f) twist.v_x = 0.0f;
 
         twist.omega_z = dTheta * 2.0d;

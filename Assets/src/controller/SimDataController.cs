@@ -379,7 +379,7 @@ public class SimDataController : MonoBehaviour
 
             string exportFileName = jsonData["file"].Value<string>();
 
-            IExporter exporter = exporters.Find(exporter => exporter.name == exportFileName);
+            IExporter exporter = exporters.Find(exporter => exporter.Name == exportFileName);
 
             if (exporter == null) throw new ArgumentException("unknow exporter: " + exportFileName);
 
@@ -391,7 +391,7 @@ public class SimDataController : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning(exporter.name + " data model translate failed");
+                Debug.LogWarning(exporter.Name + " data model translate failed");
             }
         }
         else if (e.type == UIEventType.EnterLeaveUIPanel)

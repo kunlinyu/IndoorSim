@@ -11,7 +11,6 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Polygonize;
 using NetTopologySuite.Operation.Distance;
 
-using UnityEngine;
 
 #nullable enable
 
@@ -43,9 +42,9 @@ public class ThematicLayer
 
     [JsonIgnore] public const double kFindGeomEpsilon = 1e-4;
 
-    [JsonIgnore] private Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
-    [JsonIgnore] private Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
-    [JsonIgnore] private Dictionary<Container, HashSet<IndoorPOI>> space2POIs = new Dictionary<Container, HashSet<IndoorPOI>>();
+    [JsonIgnore] private readonly Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
+    [JsonIgnore] private readonly Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
+    [JsonIgnore] private readonly Dictionary<Container, HashSet<IndoorPOI>> space2POIs = new Dictionary<Container, HashSet<IndoorPOI>>();
 
 
     public ThematicLayer() { }

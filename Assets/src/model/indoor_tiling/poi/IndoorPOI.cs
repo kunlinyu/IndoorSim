@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 public class IndoorPOI : poi.POI
 {
-    public List<Container> foi = new List<Container>();  // feature of interest
+    public List<Container> foi = new();  // feature of interest
     public Container layOnSpace;
     public List<Container>? queue = null;
 

@@ -41,7 +41,14 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private List<Vector3> path = new List<Vector3>();
     private List<GameObject> queueObj = new List<GameObject>();
-
+    bool layerChecked = false;
+    bool layerOK = false;
+    void CheckLayerValid()
+    {
+        layerOK = IndoorSimData != null && IndoorSimData.indoorFeatures != null && IndoorSimData.indoorFeatures.ActiveLayer != null;
+        layerChecked = true;
+        if (!layerOK) Debug.LogWarning("AStartTool have to run on an valid layer");
+    }
     void Start()
     {
         mapView!.activeLayerView.SwitchDualityGraph(true);
@@ -153,7 +160,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                     Vector3 current = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                     current = ClosestNode(sc, current);
-                    CellSpace? lastSpace = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastSpace = IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
                     List<Vector3>? path = Astar(current, last, lastSpace!);
 
                     if (path == null) break;
@@ -206,7 +213,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         humanPoi.id = "picking poi";  // TODO: this is not ID
         IndoorSimData!.AddPOI(humanPoi);
 
-        List<CellSpace> queueSpace = queueObj.Select(obj => IndoorSimData.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(obj.transform.position))!).ToList();
+        List<CellSpace> queueSpace = queueObj.Select(obj => IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(obj.transform.position))!).ToList();
         List<Container> queueContainer = new();
         if (queueSpace.Count != 0)
         {
@@ -246,7 +253,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private List<Vector3>? Astar(Vector3 source, Vector3 target, CellSpace targetSpace)
     {
-        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.ActiveLayer).Search(U.Vec2Coor(source), targetSpace);
+        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures!.ActiveLayer).Search(U.Vec2Coor(source), targetSpace);
         PlanSimpleResult? simpleResult = result?.ToSimple();
 
         List<Vector3> path = new List<Vector3>();
@@ -401,7 +408,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     Vector3 last = paAmrPoiPosition;
                     if (this.queueObj.Count > 0)
                         last = this.queueObj[this.queueObj.Count - 1].transform.position;
-                    CellSpace? lastCellSpace = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastCellSpace = IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
 
                     if (sc != null && sc.Space.navigable == Navigable.Navigable && sc.Space != paAmrPoiLayOnSpace && sc.Space != lastCellSpace)
                     {
@@ -443,6 +450,8 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     void Update()
     {
+        if (!layerChecked) CheckLayerValid();
+        if (!layerOK) return;
         UpdateStatus();
         UpdateView();
     }

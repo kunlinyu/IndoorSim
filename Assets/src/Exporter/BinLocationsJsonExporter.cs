@@ -13,9 +13,9 @@ class QuotesHelper
 
 public class BinLocationsJsonExporter : IExporter
 {
-    public string name => "binlocations.json";
-    public string defaultStreamName => "binlocations.json";
-    public bool canIncludeFull => true;
+    public string Name => "binlocations.json";
+    public string DefaultStreamName => "binlocations.json";
+    public bool CanIncludeFull => true;
 
     private static string idPrefix = "LacationYamlExporterId: ";
     IndoorSimData indoorSimData = null;

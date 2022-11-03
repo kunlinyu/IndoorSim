@@ -22,9 +22,9 @@ public class LocationsYamlExporter : IExporter
 {
     private static string idPrefix = "LacationYamlExporterId: ";
     public static double PaAmrFunctionDirection = Math.PI;
-    public string name => "locations.yaml";
-    public string defaultStreamName => "locations.yaml";
-    public bool canIncludeFull => true;
+    public string Name => "locations.yaml";
+    public string DefaultStreamName => "locations.yaml";
+    public bool CanIncludeFull => true;
 
     IndoorSimData indoorSimData = null;
     Graph graph = null;

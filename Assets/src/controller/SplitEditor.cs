@@ -17,8 +17,8 @@ public class SplitEditor : MonoBehaviour, ITool
     public int rows = 0;
     public int coloums = 0;
 
-    private List<GameObject> ACLines = new List<GameObject>();
-    private List<GameObject> BDLines = new List<GameObject>();
+    private readonly List<GameObject> ACLines = new List<GameObject>();
+    private readonly List<GameObject> BDLines = new List<GameObject>();
 
     private void Clear()
     {
@@ -26,11 +26,6 @@ public class SplitEditor : MonoBehaviour, ITool
         BDLines.ForEach(obj => Destroy(obj));
         ACLines.Clear();
         BDLines.Clear();
-    }
-
-    void Start()
-    {
-
     }
 
 
@@ -110,7 +105,7 @@ public class SplitEditor : MonoBehaviour, ITool
         GameObject template = transform.Find("draft").gameObject;
         while (ACLines.Count > ACNum)
         {
-            Destroy(ACLines[ACLines.Count - 1]);
+            Destroy(ACLines[^1]);
             ACLines.RemoveAt(ACLines.Count - 1);
         }
         while (ACLines.Count < ACNum)
@@ -121,7 +116,7 @@ public class SplitEditor : MonoBehaviour, ITool
         }
         while (BDLines.Count > BDNum)
         {
-            Destroy(BDLines[BDLines.Count - 1]);
+            Destroy(BDLines[^1]);
             BDLines.RemoveAt(BDLines.Count - 1);
         }
         while (BDLines.Count < BDNum)
@@ -174,7 +169,6 @@ public class SplitEditor : MonoBehaviour, ITool
                 newBoundaries.Add(newboundary);
             }
 
-            GeometryFactory factory = new GeometryFactory();
             List<CellBoundary> switchBoundaries = new List<CellBoundary>();
             foreach (var obj in BDLines)
             {
@@ -204,7 +198,7 @@ public class SplitEditor : MonoBehaviour, ITool
                     IndoorSimData!.AddBoundary(VStart, splitVertices[0]);
                     for (int i = 0; i < splitVertices.Count - 1; i++)
                         IndoorSimData!.AddBoundary(splitVertices[i], splitVertices[i + 1]);
-                    IndoorSimData!.AddBoundary(splitVertices[splitVertices.Count - 1], VEnd);
+                    IndoorSimData!.AddBoundary(splitVertices[^1], VEnd);
                 }
                 else
                 {

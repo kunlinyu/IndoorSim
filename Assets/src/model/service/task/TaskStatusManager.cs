@@ -13,7 +13,7 @@ public enum TaskStatus
 
 public class TaskStatusManager
 {
-    private Dictionary<Task, TaskStatus> tasksStatus = new Dictionary<Task, TaskStatus>();
+    private readonly Dictionary<Task, TaskStatus> tasksStatus = new Dictionary<Task, TaskStatus>();
 
     public void Add(Task task)
     {

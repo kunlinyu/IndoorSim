@@ -25,7 +25,7 @@ public class M
         return new Coordinate((dirTo.X - dirFrom.X) / length * distance + origin.X, (dirTo.Y - dirFrom.Y) / length * distance + origin.Y);
     }
 
-    static public Coordinate[] bazierCurve3(Coordinate P0, Coordinate P1, Coordinate P2, int steps)
+    static public Coordinate[] BazierCurve3(Coordinate P0, Coordinate P1, Coordinate P2, int steps)
     {
         Coordinate[] result = new Coordinate[steps + 1];
         for (int i = 0; i < steps + 1; i++)
@@ -39,7 +39,7 @@ public class M
         }
         return result;
     }
-    static public Coordinate[] bazierCurve4(Coordinate P0, Coordinate P1, Coordinate P2, Coordinate P3, int steps)
+    static public Coordinate[] BazierCurve4(Coordinate P0, Coordinate P1, Coordinate P2, Coordinate P3, int steps)
     {
         Coordinate[] result = new Coordinate[steps + 1];
         for (int i = 0; i < steps + 1; i++)
@@ -55,17 +55,17 @@ public class M
         return result;
     }
 
-    static public Coordinate[] bazierCurve3(Coordinate P0, Coordinate P1, Coordinate P2, double stepLength)
+    static public Coordinate[] BazierCurve3(Coordinate P0, Coordinate P1, Coordinate P2, double stepLength)
     {
-        double length = LineStringLength(bazierCurve3(P0, P1, P2, 200));
+        double length = LineStringLength(BazierCurve3(P0, P1, P2, 200));
         int step = (int) (length / stepLength);
-        return bazierCurve3(P0, P1, P2, step);
+        return BazierCurve3(P0, P1, P2, step);
     }
-    static public Coordinate[] bazierCurve4(Coordinate P0, Coordinate P1, Coordinate P2, Coordinate P3, double stepLength)
+    static public Coordinate[] BazierCurve4(Coordinate P0, Coordinate P1, Coordinate P2, Coordinate P3, double stepLength)
     {
-        double length = LineStringLength(bazierCurve4(P0, P1, P2, P3, 200));
+        double length = LineStringLength(BazierCurve4(P0, P1, P2, P3, 200));
         int step = (int) (length / stepLength);
-        return bazierCurve4(P0, P1, P2, P3, step);
+        return BazierCurve4(P0, P1, P2, P3, step);
     }
 
     static public double LineStringLength(Coordinate[] coordinates)

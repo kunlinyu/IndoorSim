@@ -6,8 +6,8 @@ using System.Threading;
 
 public class MoveToContainerActionExecutor : AbstractActionExecutor
 {
-    MapService map;
-    AbstractMotionExecutor moveToCoorMotionExe;
+    readonly MapService map;
+    readonly AbstractMotionExecutor moveToCoorMotionExe;
 
 
     public MoveToContainerActionExecutor(AbstractMotionExecutor me, MapService map) : base(me)
@@ -28,11 +28,9 @@ public class MoveToContainerActionExecutor : AbstractActionExecutor
         var action2Container = goal as ActionMoveToContainer ?? throw new ArgumentException("can not cast AgentAction to ActionMoveToContainer");
 
         Position position;
-        var tl2cME = moveToCoorMotionExe as TranslateToCoorMotionExecutor;
-        var tw2cME = moveToCoorMotionExe as TwistToCoorMotionExecutor;
-        if (tl2cME != null)
+        if (moveToCoorMotionExe is TranslateToCoorMotionExecutor tl2cME)
             position = tl2cME.Position();
-        else if (tw2cME != null)
+        else if (moveToCoorMotionExe is TwistToCoorMotionExecutor tw2cME)
             position = tw2cME.Position();
         else
             throw new Exception("unknown motion executor type");

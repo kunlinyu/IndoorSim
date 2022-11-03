@@ -26,8 +26,20 @@ public class AStarTool : MonoBehaviour, ITool
 
     private AStarToolStatus status = AStarToolStatus.Nothing;
 
+    bool layerChecked = false;
+    bool layerOK = false;
+    void CheckLayerValid()
+    {
+        layerOK = IndoorSimData != null && IndoorSimData.indoorFeatures != null && IndoorSimData.indoorFeatures.ActiveLayer != null;
+        layerChecked = true;
+        if (!layerOK) Debug.LogWarning("AStartTool have to run on an valid layer");
+    }
+
     void Update()
     {
+        if (!layerChecked) CheckLayerValid();
+        if (!layerOK) return;
+
         if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
         {
             switch (status)
@@ -68,7 +80,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -82,7 +94,7 @@ public class AStarTool : MonoBehaviour, ITool
                     targetPoint = CameraController.mousePositionOnGround();
                     if (targetPoint != null)
                     {
-                        var space = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+                        var space = IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                         if (space != null)
                         {
                             targetSpace = space;
@@ -118,7 +130,7 @@ public class AStarTool : MonoBehaviour, ITool
             targetPoint = CameraController.mousePositionOnGround();
             if (targetPoint != null)
             {
-                var space2 = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
+                var space2 = IndoorSimData!.indoorFeatures!.ActiveLayer.FindSpaceGeom(U.Vec2Coor(targetPoint.Value));
                 if (space2 != null)
                 {
                     targetSpace = space2;
@@ -134,7 +146,7 @@ public class AStarTool : MonoBehaviour, ITool
 
         if (clickAStar || dynamicAStar)
         {
-            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.ActiveLayer).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
+            PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures!.ActiveLayer).Search(U.Vec2Coor(sourcePoint!.Value), targetSpace!);
             PlanSimpleResult? simpleResult = result?.ToSimple();
             if (simpleResult != null && simpleResult.boundaryCentroids.Count > 0)
             {
