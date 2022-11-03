@@ -8,7 +8,7 @@ using Newtonsoft.Json.Serialization;
 
 public class ShouldSerializeContractResolver : DefaultContractResolver
 {
-    public new static readonly ShouldSerializeContractResolver Instance = new ShouldSerializeContractResolver();
+    public static readonly ShouldSerializeContractResolver Instance = new();
 
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {

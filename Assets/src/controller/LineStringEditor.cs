@@ -81,7 +81,7 @@ public class LineStringEditor : MonoBehaviour, ITool
                         else
                         {
                             lastVertex = currentVertex;
-                            lastCoor = lastVertex.Coordinate;
+                            lastCoor = lastVertex!.Coordinate;
                         }
                     }
                     else if (lessthan3 && crossesBoundaries.Count > 0)

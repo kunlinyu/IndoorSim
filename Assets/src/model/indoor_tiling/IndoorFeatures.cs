@@ -16,9 +16,11 @@ public class IndoorFeatures
     public List<ThematicLayer> layers = new List<ThematicLayer>();
     // TODO: check there should be only one layer with same ThemeLayerValueType
     // TODO: use ThemeLayerValueType to get one layer and its accessor (IndoorTiling is one accessor of Topographic layer)
-    public List<InterLayerConnection> layerConnections = null;
+    public List<InterLayerConnection>? layerConnections = null;
 
-    [JsonIgnore] public ThematicLayer activeLayer = null;
+    [JsonIgnore] private ThematicLayer? activeLayer;
+    [JsonIgnore] public ThematicLayer ActiveLayer { get => activeLayer ?? throw new Exception("activeLayer is null"); set => activeLayer = value; }
+    public void ClearActiveLayer() => activeLayer = null;
 
     [JsonIgnore] public Action<ThematicLayer> OnLayerCreated = (layer) => { };
     [JsonIgnore] public Action<ThematicLayer> OnLayerRemoved = (layer) => { };
@@ -36,7 +38,7 @@ public class IndoorFeatures
     private void OnSerializedMethod(StreamingContext context)
     {
         if (layers.Count > 0)
-            activeLayer = layers[0];
+            ActiveLayer = layers[0];
         else
             activeLayer = null;
     }
@@ -44,7 +46,7 @@ public class IndoorFeatures
     public IndoorFeatures(string defaultLevelName)
     {
         layers.Add(new ThematicLayer(defaultLevelName));
-        activeLayer = layers[0];
+        ActiveLayer = layers[0];
         OnLayerCreated?.Invoke(layers[0]);
     }
 
@@ -144,27 +146,27 @@ public class IndoorFeatures
 
         return sw.ToString();
     }
-    public bool Contains(CellVertex vertex) => activeLayer.Contains(vertex);
-    public bool Contains(CellBoundary boundary) => activeLayer.Contains(boundary);
-    public bool Contains(CellSpace space) => activeLayer.Contains(space);
-    public bool Contains(RLineGroup rLines) => activeLayer.Contains(rLines);
-    public bool Contains(IndoorPOI poi) => activeLayer.Contains(poi);
+    public bool Contains(CellVertex vertex) => ActiveLayer.Contains(vertex);
+    public bool Contains(CellBoundary boundary) => ActiveLayer.Contains(boundary);
+    public bool Contains(CellSpace space) => ActiveLayer.Contains(space);
+    public bool Contains(RLineGroup rLines) => ActiveLayer.Contains(rLines);
+    public bool Contains(IndoorPOI poi) => ActiveLayer.Contains(poi);
 
-    public CellVertex? FindVertexCoor(Point point) => activeLayer.FindVertexCoor(point);
+    public CellVertex? FindVertexCoor(Point point) => ActiveLayer.FindVertexCoor(point);
 
-    public CellVertex? FindVertexCoor(Coordinate coor) => activeLayer.FindVertexCoor(coor);
-    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2) => activeLayer.VertexPair2Boundaries(cv1, cv2);
-    public CellBoundary? FindBoundaryGeom(LineString ls) => activeLayer.FindBoundaryGeom(ls);
+    public CellVertex? FindVertexCoor(Coordinate coor) => ActiveLayer.FindVertexCoor(coor);
+    public ICollection<CellBoundary> VertexPair2Boundaries(CellVertex cv1, CellVertex cv2) => ActiveLayer.VertexPair2Boundaries(cv1, cv2);
+    public CellBoundary? FindBoundaryGeom(LineString ls) => ActiveLayer.FindBoundaryGeom(ls);
 
-    public CellSpace? FindSpaceGeom(Coordinate coor) => activeLayer.FindSpaceGeom(coor);
+    public CellSpace? FindSpaceGeom(Coordinate coor) => ActiveLayer.FindSpaceGeom(coor);
 
-    public CellSpace? FindContainerId(string id) => activeLayer.FindContainerId(id);
+    public CellSpace? FindContainerId(string id) => ActiveLayer.FindContainerId(id);
 
-    public CellSpace? FindSpaceId(string id) => activeLayer.FindSpaceId(id);
+    public CellSpace? FindSpaceId(string id) => ActiveLayer.FindSpaceId(id);
 
-    public IndoorPOI? FindIndoorPOI(Coordinate coor) => activeLayer.FindIndoorPOI(coor);
+    public IndoorPOI? FindIndoorPOI(Coordinate coor) => ActiveLayer.FindIndoorPOI(coor);
 
-    public RepresentativeLine? FindRLine(LineString ls, out RLineGroup? rLineGroup) => activeLayer.FindRLine(ls, out rLineGroup);
+    public RepresentativeLine? FindRLine(LineString ls, out RLineGroup? rLineGroup) => ActiveLayer.FindRLine(ls, out rLineGroup);
 
 
     public string CalcDigest()

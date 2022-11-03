@@ -160,7 +160,7 @@ public class SplitEditor : MonoBehaviour, ITool
 
         if (Input.GetMouseButtonDown(0))
         {
-            IndoorSimData!.activeTiling.DisableResultValidate();
+            IndoorSimData!.ActiveTiling.DisableResultValidate();
             IndoorSimData!.SessionStart();
             List<CellBoundary> newBoundaries = new List<CellBoundary>();
 
@@ -191,7 +191,7 @@ public class SplitEditor : MonoBehaviour, ITool
                     var lingeSeg1 = new LineSegment(new Coordinate(0, 0), new Coordinate(1, 1));
                     var lingeSeg2 = new LineSegment(new Coordinate(0, 0), new Coordinate(1, 1));
                     CellVertex vertex = IndoorSimData!.SplitBoundary(b, intersectionPoint.Coordinate);
-                    var bs = new List<CellBoundary>(IndoorSimData!.activeTiling.layer.Vertex2Boundaries(vertex));
+                    var bs = new List<CellBoundary>(IndoorSimData!.ActiveTiling.layer.Vertex2Boundaries(vertex));
                     CellBoundary longerOne = bs[0].geom.Length > bs[1].geom.Length ? bs[0] : bs[1];
                     switchBoundaries.Add(longerOne);
                     splitVertices.Add(vertex);
@@ -213,7 +213,7 @@ public class SplitEditor : MonoBehaviour, ITool
             }
 
             IndoorSimData!.SessionCommit();
-            IndoorSimData!.activeTiling.EnableResultValidateAndDoOnce();
+            IndoorSimData!.ActiveTiling.EnableResultValidateAndDoOnce();
         }
     }
 

@@ -153,7 +153,7 @@ public class ShelvesEditor : MonoBehaviour, ITool
                 case 2: status++; break;
                 case 3: if (corridorWidth != 0.0f) status++; break;
                 case 4:
-                    IndoorSimData!.activeTiling.DisableResultValidate();
+                    IndoorSimData!.ActiveTiling.DisableResultValidate();
 
                     IndoorSimData?.SessionStart();
                     IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(firstPoint), U.Vec2Coor(secondPoint));
@@ -174,7 +174,7 @@ public class ShelvesEditor : MonoBehaviour, ITool
                         lastBoundary = b2;
                     }
                     IndoorSimData?.SessionCommit();
-                    IndoorSimData!.activeTiling.EnableResultValidateAndDoOnce();
+                    IndoorSimData!.ActiveTiling.EnableResultValidateAndDoOnce();
 
                     firstPoint = U.Coor2Vec(lastBoundary!.P0.Coordinate);
                     secondPoint = U.Coor2Vec(lastBoundary!.P1.Coordinate);

@@ -422,7 +422,7 @@ public class SelectDrag : MonoBehaviour, ITool
                                                                       U.Vec2Coor(lr.GetPosition(1))})).ToList();
 
         List<Geometry> edgeNodeGeom = new List<Geometry>(lineStrings);
-        edgeNodeGeom.Add(new GeometryFactory().CreatePoint(space.Geom.Centroid.Coordinate));
+        edgeNodeGeom.Add(new GeometryFactory().CreatePoint(space.Geom!.Centroid.Coordinate));
 
         GeometryCollection gc = new GeometryFactory().CreateGeometryCollection(edgeNodeGeom.ToArray());
         Geometry inSpace = gc.Intersection(space.Geom);

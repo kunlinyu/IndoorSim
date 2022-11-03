@@ -32,7 +32,6 @@ public class GridMap
     }
 }
 
-
 public struct MapOrigin
 {
     public double x;

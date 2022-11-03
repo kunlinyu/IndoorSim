@@ -9,7 +9,6 @@ using Newtonsoft.Json.Linq;
 public class ExportPanelController : MonoBehaviour
 {
     VisualElement root;
-    List<string> layers = null;
     List<Exporter> allExporter = null;
 
     public void Init(List<string> layers, Action<string> exportAction, Action cancelAction)

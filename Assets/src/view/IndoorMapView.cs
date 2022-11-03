@@ -20,13 +20,13 @@ public class IndoorMapView : MonoBehaviour
 
         GameObject obj = Instantiate(Resources.Load<GameObject>("Layer"), transform);
         activeLayerView = obj.GetComponent<LayerView>();
-        activeLayerView.layer = indoorFeatures.activeLayer;
+        activeLayerView.layer = indoorFeatures.ActiveLayer;
         activeLayerView.eventDispatcher = eventDispatcher;
         activeLayerView.RegisterOnMethod();
 
 
-        obj.name = indoorFeatures.activeLayer.level;
-        layer2Obj[indoorFeatures.activeLayer] = obj;
+        obj.name = indoorFeatures.ActiveLayer.level;
+        layer2Obj[indoorFeatures.ActiveLayer] = obj;
 
         indoorFeatures.OnLayerCreated += (layer) =>
         {

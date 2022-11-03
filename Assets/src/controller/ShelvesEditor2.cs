@@ -140,7 +140,7 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
                 case 1: status++; break;
                 case 2: status++; break;
                 case 3:
-                    IndoorSimData!.activeTiling.DisableResultValidate();
+                    IndoorSimData!.ActiveTiling.DisableResultValidate();
                     IndoorSimData?.SessionStart();
                     IndoorSimData?.AddBoundaryAutoSnap(U.Vec2Coor(firstPoint), U.Vec2Coor(secondPoint));
                     CellBoundary? lastBoundary = null;
@@ -160,7 +160,7 @@ public class ShelvesEditor2 : MonoBehaviour, ITool
                         lastBoundary = b2;
                     }
                     IndoorSimData?.SessionCommit();
-                    IndoorSimData!.activeTiling.EnableResultValidateAndDoOnce();
+                    IndoorSimData!.ActiveTiling.EnableResultValidateAndDoOnce();
                     splitCount = 2;
                     status = 0;
                     break;

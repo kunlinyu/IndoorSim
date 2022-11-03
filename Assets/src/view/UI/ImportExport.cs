@@ -182,15 +182,7 @@ public class ImportExport : MonoBehaviour
         }
 #endif
     }
-    public void OnMapUpload(string url_filePath)
-    {
-        string[] array = url_filePath.Split(",");
-        string url = array[0];
-        string filePath = array[1];
-        StartCoroutine(OutputRoutine(url, filePath, (request) =>
-           eventDispatcher.Raise(this, new UIEvent() { name = "load", message = request.text, type = UIEventType.Resources }
-        )));
-    }
+
     private void LoadGridMap()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -209,16 +201,6 @@ public class ImportExport : MonoBehaviour
             Debug.Log("no grid map selected");
         }
 #endif
-    }
-    public void OnGridMapUpload(string url_filePath)
-    {
-        string[] array = url_filePath.Split(",");
-        string url = array[0];
-        string filePath = array[1];
-        StartCoroutine(OutputRoutine(url, filePath, (request) =>
-            {
-                PopGridMapImportPanel(filePath, request.bytes);
-            }));
     }
 
     private void PopGridMapImportPanel(string filePath, byte[] imageBytes)
@@ -259,18 +241,6 @@ public class ImportExport : MonoBehaviour
     public void OnFileDownload()
     {
         Debug.Log("File downloaded... perhabs. If you didn't click \"cancel\"");
-    }
-
-    private IEnumerator OutputRoutine(string url, string filePath, Action<WWW> postAction)
-    {
-        // var request = new UnityWebRequest(url);
-        // request.uploadHandler = new UploadHandlerFile();
-        // yield return request.SendWebRequest();
-        // postAction?.Invoke(request);
-
-        var loader = new WWW(url);
-        yield return loader;
-        postAction?.Invoke(loader);
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR

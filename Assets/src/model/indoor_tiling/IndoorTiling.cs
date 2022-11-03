@@ -14,7 +14,6 @@ using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
 
-
 [Serializable]
 public class IndoorTiling
 {

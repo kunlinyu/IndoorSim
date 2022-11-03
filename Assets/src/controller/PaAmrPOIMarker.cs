@@ -18,8 +18,6 @@ enum PaAmrPoiMarkerStatus
     // end
 }
 
-
-
 public class PaAmrPOIMarker : MonoBehaviour, ITool
 {
     public IndoorSimData? IndoorSimData { set; get; }
@@ -31,15 +29,15 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
     private List<SpaceController> foiSpace = new List<SpaceController>();
     private List<GameObject> pickingAgent2ContainerObj = new List<GameObject>();
     private Vector3 paAmrPoiPosition;
-    private Container paAmrPoiLayOnSpace;
+    private Container? paAmrPoiLayOnSpace;
     private Vector3 humanPoiPosition;
-    private Container humanPoiLayOnSpace;
+    private Container? humanPoiLayOnSpace;
 
     private PaAmrPoiMarkerStatus status = PaAmrPoiMarkerStatus.RelatedSpaceSelecting;
 
     public static float PaAmrFunctionDirection = Mathf.PI;
 
-    private POIType poiType;
+    private POIType? poiType;
 
     private List<Vector3> path = new List<Vector3>();
     private List<GameObject> queueObj = new List<GameObject>();
@@ -83,7 +81,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         else
                         {
                             foiSpace.Add(sc!);
-                            if (foiSpace.Count > poiType.relatedCount)
+                            if (foiSpace.Count > poiType!.relatedCount)
                                 foiSpace.RemoveAt(0);
                         }
 
@@ -107,7 +105,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     if (foiSpace.Count > 0 && CanLayOn(sc?.Space))
                     {
                         paAmrPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
-                        paAmrPoiPosition = ClosestEdgeNode(sc, paAmrPoiPosition, mapView);
+                        paAmrPoiPosition = ClosestEdgeNode(sc!, paAmrPoiPosition, mapView!);
                         paAmrPoiLayOnSpace = sc!.Space;
                         status = PaAmrPoiMarkerStatus.PaAmrPoiMarked;
                     }
@@ -126,7 +124,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         humanPoiPosition = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                         humanPoiLayOnSpace = sc!.Space;
 
-                        if (poiType.needQueue)
+                        if (poiType!.needQueue)
                         {
                             status = PaAmrPoiMarkerStatus.HumanPoiMarked;
                         }
@@ -155,7 +153,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                     Vector3 current = CameraController.mousePositionOnGround() ?? throw new System.Exception("Oops");
                     current = ClosestNode(sc, current);
-                    CellSpace? lastSpace = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastSpace = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
                     List<Vector3>? path = Astar(current, last, lastSpace!);
 
                     if (path == null) break;
@@ -204,21 +202,21 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
         var spaces = foiSpace.Select(sc => sc.Space).ToList();
         var containers = new List<Container>(spaces);
 
-        IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(humanPoiPosition), humanPoiLayOnSpace, containers, new List<Container>(), POICategory.Human.ToString());
+        IndoorPOI humanPoi = new IndoorPOI(U.Vec2Point(humanPoiPosition), humanPoiLayOnSpace!, containers, new List<Container>(), POICategory.Human.ToString());
         humanPoi.id = "picking poi";  // TODO: this is not ID
         IndoorSimData!.AddPOI(humanPoi);
 
-        List<CellSpace?> queueSpace = queueObj.Select(obj => IndoorSimData.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(obj.transform.position))).ToList();
-        List<Container> queueContainer = new List<Container>();
+        List<CellSpace> queueSpace = queueObj.Select(obj => IndoorSimData.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(obj.transform.position))!).ToList();
+        List<Container> queueContainer = new();
         if (queueSpace.Count != 0)
         {
-            queueContainer.Add(paAmrPoiLayOnSpace);
+            queueContainer.Add(paAmrPoiLayOnSpace!);
             queueContainer.AddRange(queueSpace);
         }
 
-        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace, containers, queueContainer, POICategory.PaAmr.ToString());
+        IndoorPOI paAmrPoi = new IndoorPOI(U.Vec2Point(paAmrPoiPosition), paAmrPoiLayOnSpace!, containers, queueContainer, POICategory.PaAmr.ToString());
         paAmrPoi.id = "pa amr poi";  // TODO: this is not ID
-        paAmrPoi.AddLabel(poiType.name);
+        paAmrPoi.AddLabel(poiType!.name);
         IndoorSimData.AddPOI(paAmrPoi);
         Debug.Log("POI inserted");
         foiSpace.Clear();
@@ -248,7 +246,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
     private List<Vector3>? Astar(Vector3 source, Vector3 target, CellSpace targetSpace)
     {
-        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.activeLayer).Search(U.Vec2Coor(source), targetSpace);
+        PlanResult? result = new IndoorDataAStar(IndoorSimData!.indoorFeatures.ActiveLayer).Search(U.Vec2Coor(source), targetSpace);
         PlanSimpleResult? simpleResult = result?.ToSimple();
 
         List<Vector3> path = new List<Vector3>();
@@ -330,9 +328,9 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                         if (CanLayOn(sc.Space))
                         {
                             transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().enabled = true;
-                            transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().color = poiType.color;
+                            transform.Find("PosePOI").gameObject.GetComponent<SpriteRenderer>().color = poiType!.color;
                             transform.Find("PosePOIDark").gameObject.GetComponent<SpriteRenderer>().enabled = false;
-                            position = ClosestEdgeNode(sc, mousePosition.Value, mapView);
+                            position = ClosestEdgeNode(sc, mousePosition.Value, mapView!);
                             transform.Find("PosePOI").position = position;
                         }
                         else
@@ -381,7 +379,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
 
                 // PaAmr sprite
                 GameObject PaAmrSpriteObj = transform.Find("PosePOI").gameObject;
-                PaAmrSpriteObj.gameObject.GetComponent<SpriteRenderer>().color = poiType.color;
+                PaAmrSpriteObj.gameObject.GetComponent<SpriteRenderer>().color = poiType!.color;
                 PaAmrSpriteObj.transform.position = paAmrPoiPosition;
                 Vector3 delta = PickingAgentSpriteObj.transform.position - paAmrPoiPosition;
                 float rotation = (Mathf.Atan2(delta.z, delta.x) - PaAmrFunctionDirection) * 180.0f / Mathf.PI;
@@ -403,7 +401,7 @@ public class PaAmrPOIMarker : MonoBehaviour, ITool
                     Vector3 last = paAmrPoiPosition;
                     if (this.queueObj.Count > 0)
                         last = this.queueObj[this.queueObj.Count - 1].transform.position;
-                    CellSpace? lastCellSpace = IndoorSimData!.indoorFeatures.activeLayer.FindSpaceGeom(U.Vec2Coor(last));
+                    CellSpace? lastCellSpace = IndoorSimData!.indoorFeatures.ActiveLayer.FindSpaceGeom(U.Vec2Coor(last));
 
                     if (sc != null && sc.Space.navigable == Navigable.Navigable && sc.Space != paAmrPoiLayOnSpace && sc.Space != lastCellSpace)
                     {
