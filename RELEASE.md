@@ -1,5 +1,34 @@
 # version list
 
+## V0.10.0
+* [IndoorSim-WebGL-V0.10.0.a84077e](./IndoorSim-WebGL-V0.10.0.a84077e)
+* [IndoorSim-WebGL-dev-V0.10.0.a84077e](./IndoorSim-WebGL-dev-V0.10.0.a84077e)
+* [IndoorSim-StandaloneLinux64-V0.10.0.a84077e.tar.gz](./IndoorSim-StandaloneLinux64-V0.10.0.a84077e.tar.gz)
+* [IndoorSim-StandaloneLinux64-dev-V0.10.0.a84077e.tar.gz](./IndoorSim-StandaloneLinux64-dev-V0.10.0.a84077e.tar.gz)
+* [IndoorSim-StandaloneWindows64-V0.10.0.a84077e.tar.gz](./IndoorSim-StandaloneWindows64-V0.10.0.a84077e.tar.gz)
+* [IndoorSim-StandaloneWindows64-dev-V0.10.0.a84077e.tar.gz](./IndoorSim-StandaloneWindows64-dev-V0.10.0.a84077e.tar.gz)
+
+### DateTime
+2022-11-04 16:02:13+08:00
+
+### ChangeLog
+1. 使用正确的Forms.dll以支持windows
+2. 用JS创建UUID作为deviceID并存入localStorage
+3. 收集软件、硬件、加密信息，整理为debugInfo
+4. 序列化、压缩、加密debugInfo并上传
+5. 每5次编辑触发debugInfo上传流程
+6. 优化序列化速度
+7. 调整latestUpdateTime到微秒以适应python服务端的解析
+8. 按照Windows平台Visual Studio的提示优化了部分代码
+9. 删除了Id，NaviInfo等字段以缩小文件
+10. 添加了author，description字段
+11. 增减了Split，Merge编辑指令以减少history的空间
+
+### Schema
+* [schema](./schema/0.10.0/schema.json)(0564ACBB3D6466252B3C7C167A0F06EF)
+
+---
+
 ## V0.9.0
 * [IndoorSim-WebGL-V0.9.0.3a62a05](./IndoorSim-WebGL-V0.9.0.3a62a05)
 * [IndoorSim-WebGL-dev-V0.9.0.3a62a05](./IndoorSim-WebGL-dev-V0.9.0.3a62a05)

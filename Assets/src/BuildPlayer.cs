@@ -114,8 +114,7 @@ public class BuildPlayer : MonoBehaviour
         string shortSHA1 = lines[0].Substring(0, 7);
 
         string dirName = "IndoorSim-" + target.ToString() + (development ? "-dev" : "") + "-V" + Application.version + "." + shortSHA1;
-        string applicationExtension = (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64) ? ".exe" : "";
-        string applicationName = "IndoorSim" + (development ? "-dev" : "") + "-V" + Application.version + applicationExtension;
+        string applicationName = "IndoorSim" + (development ? "-dev" : "") + "-V" + Application.version + ".exe";
         Debug.Log(dirName);
 
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
