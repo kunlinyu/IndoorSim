@@ -43,6 +43,15 @@ public class BuildPlayer : MonoBehaviour
         Build(BuildTarget.StandaloneLinux64, false);
     }
 
+    [MenuItem("Build/Build Windows")]
+    public static void BuildWindows()
+    {
+        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
+        GenerateSchemaHash();
+        Build(BuildTarget.StandaloneWindows64, true);
+        Build(BuildTarget.StandaloneWindows64, false);
+    }
+
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
@@ -105,11 +114,13 @@ public class BuildPlayer : MonoBehaviour
         string shortSHA1 = lines[0].Substring(0, 7);
 
         string dirName = "IndoorSim-" + target.ToString() + (development ? "-dev" : "") + "-V" + Application.version + "." + shortSHA1;
+        string applicationExtension = (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64) ? ".exe" : "";
+        string applicationName = "IndoorSim" + (development ? "-dev" : "") + "-V" + Application.version + applicationExtension;
         Debug.Log(dirName);
 
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = new[] { "Assets/Scenes/MappingScene.unity" };
-        buildPlayerOptions.locationPathName = releaseDirectoryPath + "/" + dirName + (target == BuildTarget.StandaloneLinux64 ? "/" + dirName : "");
+        buildPlayerOptions.locationPathName = releaseDirectoryPath + "/" + dirName + (target != BuildTarget.WebGL ? "/" + applicationName : "");
         buildPlayerOptions.target = target;
         buildPlayerOptions.options = development ? BuildOptions.Development : BuildOptions.None;
         buildPlayerOptions.extraScriptingDefines = new string[] { "HAVE_DATE_TIME_OFFSET" };  // for Newtonsoft.Json.Schema
@@ -128,7 +139,7 @@ public class BuildPlayer : MonoBehaviour
         }
 
 
-        if (target == BuildTarget.StandaloneLinux64)
+        if (target != BuildTarget.WebGL)
         {
             CreateTarGZ(releaseDirectoryPath + "/" + dirName + ".tar.gz", releaseDirectoryPath + "/" + dirName, releaseDirectoryPath);
             Directory.Delete(releaseDirectoryPath + "/" + dirName, true);

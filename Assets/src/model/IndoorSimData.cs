@@ -26,6 +26,7 @@ public class IndoorSimData
         {"0.8.3", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.8.4", "3AC0BED35318C7E853CAFCBCA198537F"},
         {"0.9.0", "4EBFB912BC82294B445CD7EDE4DD3E2D"},
+        {"0.10.0", "0564ACBB3D6466252B3C7C167A0F06EF"},
     };
     [JsonProperty] private Guid? uuid = null;
     [JsonIgnore] public Guid? Uuid { get => uuid; }
