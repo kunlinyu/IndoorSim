@@ -104,7 +104,7 @@ public class IndoorTiling
         var end = CellVertex.Instantiate(ls.EndPoint, IdGenVertex);
         AddVertexInternal(end);
 
-        CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ResultValidate();
         return boundary;
@@ -121,7 +121,7 @@ public class IndoorTiling
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
         AddVertexInternal(end);
 
-        CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ResultValidate();
         return boundary;
@@ -138,7 +138,7 @@ public class IndoorTiling
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
         AddVertexInternal(start);
 
-        CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ResultValidate();
         return boundary;
@@ -163,7 +163,7 @@ public class IndoorTiling
         if (layer.CrossesBoundaries(ls)) return null;
         if (layer.VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
 
-        CellBoundary boundary = new CellBoundary(start, end, id != null ? id : IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
 
         // create new CellSpace
         List<JumpInfo> jumps1 = PSLGPolygonSearcher.Search(new JumpInfo() { target = start, through = boundary }, end, AdjacentFinder);
@@ -279,6 +279,47 @@ public class IndoorTiling
 
         ResultValidate();
         return middleVertex;
+    }
+
+    public CellBoundary MergeBoundary(CellVertex middleVertex, string? id = null)
+    {
+        if (!layer.Contains(middleVertex)) throw new ArgumentException("unknown vertex");
+        List<CellBoundary> oldBoundaries = new(layer.Vertex2Boundaries(middleVertex));
+        if (oldBoundaries.Count != 2) throw new ArgumentException($"Expecting boundaries to be merge but {oldBoundaries.Count} boundaries connect to this vertex");
+
+        // Remove spaces
+        List<CellSpace> spaces = oldBoundaries[0].Spaces().ToList();
+        spaces.ForEach(s => RemoveSpaceInternal(s));
+
+        // Remove boundaries
+        RemoveBoundaryInternal(oldBoundaries[0]);
+        RemoveBoundaryInternal(oldBoundaries[1]);
+
+        // Remove middle Vertex
+        RemoveVertexInternal(middleVertex);
+
+
+        CellVertex vertex1 = oldBoundaries[0].Another(middleVertex);
+        CellVertex vertex2 = oldBoundaries[1].Another(middleVertex);
+
+        CellBoundary newBoundary = new(vertex1, vertex2, id ?? IdGenBoundary?.Gen() ?? "no id")
+        {
+            Navigable = oldBoundaries[0].Navigable,
+            NaviDir = oldBoundaries[0].NaviDir
+        };
+
+        // Add new boundary
+        AddBoundaryInternal(newBoundary);
+
+        // Add new spaces
+        foreach (var space in spaces)
+        {
+            space.MergeBoundary(oldBoundaries[0], oldBoundaries[1], newBoundary, middleVertex);
+            AddSpaceInternal(space);
+        }
+
+        ResultValidate();
+        return newBoundary;
     }
 
     public bool UpdateVertices(List<CellVertex> vertices, List<Coordinate> newCoors)
@@ -549,8 +590,7 @@ public class IndoorTiling
                     goto OUT;
                 }
 
-        var newIds = new List<string>(childrenId);
-        newIds.Add(newContainerId);
+        var newIds = new List<string>(childrenId) { newContainerId };
         foreach (var newId in newIds)
             foreach (var oldspace in layer.cellSpaceMember)
                 foreach (var container in oldspace.AllNodeInContainerTree())

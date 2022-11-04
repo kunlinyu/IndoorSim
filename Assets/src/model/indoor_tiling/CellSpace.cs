@@ -1,11 +1,9 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using NetTopologySuite.Geometries;
 using NetTopologySuite.Algorithm;
-
+using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 #nullable enable
@@ -92,8 +90,7 @@ public class CellSpace : Container
     // TODO(to support future feature): we should use UpdateFromBoundary to support complex boundary geometry
     public bool UpdateFromVertex()
     {
-        List<CellVertex> shellVertices2 = new List<CellVertex>(shellVertices);
-        shellVertices2.Add(shellVertices.First());
+        List<CellVertex> shellVertices2 = new(shellVertices) { shellVertices.First() };
         LinearRing shellRing = new GeometryFactory().CreateLinearRing(shellVertices2.Select(cv => cv.Coordinate).ToArray());
 
         Holes.ForEach(hole => hole.UpdateFromVertex());
@@ -109,14 +106,16 @@ public class CellSpace : Container
 
     public void SplitBoundary(CellBoundary oldBoundary, CellBoundary newBoundary1, CellBoundary newBoundary2, CellVertex middleVertex)
     {
-        HashSet<CellVertex> vertices = new HashSet<CellVertex>();
-        vertices.Add(oldBoundary.P0);
-        vertices.Add(oldBoundary.P1);
-        vertices.Add(newBoundary1.P0);
-        vertices.Add(newBoundary1.P1);
-        vertices.Add(newBoundary2.P0);
-        vertices.Add(newBoundary2.P1);
-        vertices.Add(middleVertex);
+        HashSet<CellVertex> vertices = new()
+        {
+            oldBoundary.P0,
+            oldBoundary.P1,
+            newBoundary1.P0,
+            newBoundary1.P1,
+            newBoundary2.P0,
+            newBoundary2.P1,
+            middleVertex
+        };
         if (vertices.Count != 3)
             throw new ArgumentException("the old and new boundary don't connect as a triangle");
 
@@ -130,7 +129,7 @@ public class CellSpace : Container
         // looking for index of two vertices in old boundary
         int index1 = 0;
         for (; index1 < target.shellVertices.Count; index1++)
-            if (System.Object.ReferenceEquals(target.shellVertices[index1], oldBoundary.P0))
+            if (ReferenceEquals(target.shellVertices[index1], oldBoundary.P0))
                 break;
         if (index1 == target.shellVertices.Count) throw new ArgumentException("can not find vertices");
         int next = (index1 + 1) % target.shellVertices.Count;
@@ -138,9 +137,9 @@ public class CellSpace : Container
         if (prev < 0) prev += target.shellVertices.Count;
 
         int index2 = 0;
-        if (System.Object.ReferenceEquals(target.shellVertices[next], oldBoundary.P1))
+        if (ReferenceEquals(target.shellVertices[next], oldBoundary.P1))
             index2 = next;
-        else if (System.Object.ReferenceEquals(target.shellVertices[prev], oldBoundary.P1))
+        else if (ReferenceEquals(target.shellVertices[prev], oldBoundary.P1))
             index2 = prev;
         else
             throw new ArgumentException("can not find the second vertices");
@@ -152,10 +151,44 @@ public class CellSpace : Container
             target.shellVertices.Add(middleVertex);
 
 
-        // Handle boundary
+        // Replace Boundaries
         target.shellBoundaries.Remove(oldBoundary);
         target.shellBoundaries.Add(newBoundary1);
         target.shellBoundaries.Add(newBoundary2);
+
+        UpdateFromVertex();
+    }
+
+    public void MergeBoundary(CellBoundary oldBoundary1, CellBoundary oldBoundary2, CellBoundary newBoundary, CellVertex middleVertex)
+    {
+        HashSet<CellVertex> vertices = new()
+        {
+            newBoundary.P0,
+            newBoundary.P1,
+            oldBoundary1.P0,
+            oldBoundary1.P1,
+            oldBoundary2.P0,
+            oldBoundary2.P1,
+            middleVertex
+        };
+        if (vertices.Count != 3)
+            throw new ArgumentException("the old and new boundary don't connect as a triangle");
+
+        CellSpace? target = null;
+        if (shellBoundaries.Contains(oldBoundary1))
+            target = this;
+        else
+            target = Holes.FirstOrDefault(hole => hole.shellBoundaries.Contains(oldBoundary1));
+        if (target == null) throw new ArgumentException("can not find this boundary");
+        if (!target.shellBoundaries.Contains(oldBoundary2)) throw new ArgumentException("the two old boundaries don't belong to same space");
+
+        // Remove vertex
+        target.shellVertices.Remove(middleVertex);
+
+        // Replace Boundaries
+        target.shellBoundaries.Remove(oldBoundary1);
+        target.shellBoundaries.Remove(oldBoundary2);
+        target.shellBoundaries.Add(newBoundary);
 
         UpdateFromVertex();
     }

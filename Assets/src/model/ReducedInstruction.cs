@@ -1,7 +1,8 @@
-using System;
-using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 
 #nullable enable
@@ -10,7 +11,9 @@ public enum Predicate
 {
     Add,
     Update,
-    Remove
+    Remove,
+    Split,
+    Merge,
 }
 
 public enum SubjectType
@@ -49,6 +52,8 @@ public enum SubjectType
 // 16. Add POI
 // 17. Update POI
 // 18. Remove POI
+// 19. Split Boundary
+// 20. Merge Boundary
 
 public class NaviInfo
 {
@@ -137,6 +142,32 @@ public class ReducedInstruction
 
     ReducedInstruction() { }
 
+    [OnDeserialized]
+    void OnReducedInstructionDeserialized(StreamingContext context)
+    {
+        if (oldParam?.naviInfo != null || newParam?.naviInfo != null)
+        {
+            switch (subject)
+            {
+                case SubjectType.BoundaryDirection:
+                    oldParam.direction = oldParam.naviInfo.direction;
+                    newParam.direction = newParam.naviInfo.direction;
+                    break;
+                case SubjectType.BoundaryNavigable:
+                case SubjectType.SpaceNavigable:
+                    oldParam.navigable = oldParam.naviInfo.navigable;
+                    newParam.navigable = newParam.naviInfo.navigable;
+                    break;
+                case SubjectType.RLine:
+                    oldParam.passType = oldParam.naviInfo.passType;
+                    newParam.passType = newParam.naviInfo.passType;
+                    break;
+            }
+            oldParam.naviInfo = null;
+            newParam.naviInfo = null;
+        }
+    }
+
     ReducedInstruction(bool nonDeserialization)
     {
         dateTime = DateTime.Now;
@@ -197,6 +228,28 @@ public class ReducedInstruction
         ri.oldParam = new Parameters() { lineString = Clone(oldLineString) };
         ri.newParam = new Parameters() { lineString = Clone(newLineString) };
         return ri;
+    }
+
+    public static ReducedInstruction SplitBoundary(LineString oldLineString, Coordinate middleCoor)
+    {
+        return new ReducedInstruction(true)
+        {
+            subject = SubjectType.Boundary,
+            predicate = Predicate.Split,
+            oldParam = new() { lineString = Clone(oldLineString) },
+            newParam = new() { coor = middleCoor },
+        };
+    }
+
+    public static ReducedInstruction MergeBoundary(LineString newLineString, Coordinate middleCoor)
+    {
+        return new ReducedInstruction(true)
+        {
+            subject = SubjectType.Boundary,
+            predicate = Predicate.Merge,
+            oldParam = new() { coor = middleCoor },
+            newParam = new() { lineString = Clone(newLineString) },
+        };
     }
 
     public static ReducedInstruction UpdateBoundaryDirection(LineString oldLineString, NaviDirection oldDirection, NaviDirection newDirection)
@@ -348,6 +401,10 @@ public class ReducedInstruction
                         return AddBoundary(oldParam.lineString());
                     case Predicate.Update:
                         return UpdateBoundary(newParam.lineString(), oldParam.lineString());
+                    case Predicate.Split:
+                        return MergeBoundary(oldParam.lineString(), newParam.coor());
+                    case Predicate.Merge:
+                        return SplitBoundary(newParam.lineString(), oldParam.coor());
                     default:
                         throw new ArgumentException("Unknown predicate");
                 }

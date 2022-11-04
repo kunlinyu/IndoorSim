@@ -445,6 +445,20 @@ public class IndoorSimData
                 throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
             boundary.UpdateGeom(ins.newParam.lineString());
         });
+        instructionInterpreter.RegisterExecutor(Predicate.Split, SubjectType.Boundary, (ins) =>
+        {
+            CellBoundary? oldBoundary = indoorFeatures!.FindBoundaryGeom(ins.oldParam.lineString());
+            if (oldBoundary == null)
+                throw new ArgumentException("can not find boundary: " + ins.oldParam.lineString());
+            ActiveTiling.SplitBoundary(ins.newParam.coor(), oldBoundary, out var newBoundary1, out var newBoundary2);
+        });
+        instructionInterpreter.RegisterExecutor(Predicate.Merge, SubjectType.Boundary, (ins) =>
+        {
+            CellVertex? vertex = indoorFeatures!.FindVertexCoor(ins.oldParam.coor());
+            if (vertex == null)
+                throw new ArgumentException("can not find vertex: " + ins.newParam.coor());
+            ActiveTiling.MergeBoundary(vertex);
+        });
         instructionInterpreter.RegisterExecutor(Predicate.Update, SubjectType.BoundaryDirection, (ins) =>
         {
             CellBoundary? boundary = indoorFeatures!.FindBoundaryGeom(ins.oldParam.lineString());
@@ -809,19 +823,7 @@ public class IndoorSimData
     public CellVertex SplitBoundary(Coordinate middleCoor)
     {
         CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
-        history.SessionStart();
-        if (newBoundary1.leftSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
-        if (newBoundary1.rightSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
-        history.DoStep(ReducedInstruction.RemoveBoundary(oldBoundary));
-        history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
-        history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
-        if (newBoundary1.leftSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
-        if (newBoundary1.rightSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
-        history.SessionCommit();
+        history.DoCommit(ReducedInstruction.SplitBoundary(oldBoundary.geom, middleCoor));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
@@ -832,19 +834,7 @@ public class IndoorSimData
     public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
         CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, boundary, out var newBoundary1, out var newBoundary2);
-        history.SessionStart();
-        if (newBoundary1.leftSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
-        if (newBoundary1.rightSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
-        history.DoStep(ReducedInstruction.RemoveBoundary(boundary));
-        history.DoStep(ReducedInstruction.AddBoundary(newBoundary1));
-        history.DoStep(ReducedInstruction.AddBoundary(newBoundary2));
-        if (newBoundary1.leftSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.leftSpace.Geom!.Centroid.Coordinate, newBoundary1.leftSpace.navigable, newBoundary1.leftSpace.navigable));
-        if (newBoundary1.rightSpace != null)
-            history.DoStep(ReducedInstruction.UpdateSpaceNavigable(newBoundary1.rightSpace.Geom!.Centroid.Coordinate, newBoundary1.rightSpace.navigable, newBoundary1.rightSpace.navigable));
-        history.SessionCommit();
+        history.DoCommit(ReducedInstruction.SplitBoundary(boundary.geom, middleCoor));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();

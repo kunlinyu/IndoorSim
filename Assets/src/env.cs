@@ -34,8 +34,6 @@ public class env : MonoBehaviour
         simController.simulationView = simulationView;
 
         uploader.Key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
-        Debug.Log(BitConverter.ToString(uploader.Key));
-
 
         indoorSimData.PostAction = () =>
         {
