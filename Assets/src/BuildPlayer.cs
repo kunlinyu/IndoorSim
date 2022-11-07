@@ -5,18 +5,16 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Build.Reporting;
+using UnityEngine.Assertions;
 
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
-
 using Markdig;
-
-using UnityEngine.Assertions;
 
 public class BuildPlayer : MonoBehaviour
 {
 
-    private static string releaseDirectoryPath = "release";
+    private static readonly string releaseDirectoryPath = "release";
 
     [MenuItem("Build/schema hash")]
     public static void SchemaHash()
@@ -111,18 +109,20 @@ public class BuildPlayer : MonoBehaviour
         if (lines.Length < 1)
             throw new System.Exception("can not read line from file");
 
-        string shortSHA1 = lines[0].Substring(0, 7);
+        string shortSHA1 = lines[0][..7];
 
         string dirName = "IndoorSim-" + target.ToString() + (development ? "-dev" : "") + "-V" + Application.version + "." + shortSHA1;
         string applicationName = "IndoorSim" + (development ? "-dev" : "") + "-V" + Application.version + ".exe";
         Debug.Log(dirName);
 
-        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
-        buildPlayerOptions.scenes = new[] { "Assets/Scenes/MappingScene.unity" };
-        buildPlayerOptions.locationPathName = releaseDirectoryPath + "/" + dirName + (target != BuildTarget.WebGL ? "/" + applicationName : "");
-        buildPlayerOptions.target = target;
-        buildPlayerOptions.options = development ? BuildOptions.Development : BuildOptions.None;
-        buildPlayerOptions.extraScriptingDefines = new string[] { "HAVE_DATE_TIME_OFFSET" };  // for Newtonsoft.Json.Schema
+        BuildPlayerOptions buildPlayerOptions = new()
+        {
+            scenes = new[] { "Assets/Scenes/MappingScene.unity" },
+            locationPathName = releaseDirectoryPath + "/" + dirName + (target != BuildTarget.WebGL ? "/" + applicationName : ""),
+            target = target,
+            options = development ? BuildOptions.Development : BuildOptions.None,
+            extraScriptingDefines = new string[] { "HAVE_DATE_TIME_OFFSET" }  // for Newtonsoft.Json.Schema
+        };
 
         BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
         BuildSummary summary = report.summary;
@@ -138,17 +138,21 @@ public class BuildPlayer : MonoBehaviour
         }
 
 
-        if (target != BuildTarget.WebGL)
+        if (target == BuildTarget.StandaloneLinux64)
         {
             CreateTarGZ(releaseDirectoryPath + "/" + dirName + ".tar.gz", releaseDirectoryPath + "/" + dirName, releaseDirectoryPath);
             Directory.Delete(releaseDirectoryPath + "/" + dirName, true);
+        }
+        else if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
+        {
+            System.IO.Compression.ZipFile.CreateFromDirectory(releaseDirectoryPath + "/" + dirName, releaseDirectoryPath + "/" + dirName + ".zip");
         }
     }
 
     private static void CreateTarGZ(string tgzFilename, string sourceDirectory, string rootPath)
     {
         Stream outStream = File.Create(tgzFilename);
-        GZipOutputStream gzoStream = new GZipOutputStream(outStream);
+        GZipOutputStream gzoStream = new(outStream);
         gzoStream.SetLevel(3);
         TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream);
         tarArchive.RootPath = rootPath;
