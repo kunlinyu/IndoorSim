@@ -1,15 +1,18 @@
 using System;
-using System.Linq;
-using System.IO;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Runtime.InteropServices;  // for DLLImport
+using System.Text;
 
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UIElements;
+
+using Newtonsoft.Json.Linq;
+
 using SFB;
 
 public class ImportExport : MonoBehaviour
@@ -138,8 +141,8 @@ public class ImportExport : MonoBehaviour
 
     private void SaveToFile(string content)
     {
-#if UNITY_WEBGL && !UNITY_EDITOR
         var bytes = Encoding.UTF8.GetBytes(content);
+#if UNITY_WEBGL && !UNITY_EDITOR
         DownloadFile(gameObject.name, "OnFileDownload", "unnamed_map.indoor.json", bytes, bytes.Length);
 #else
         string path = StandaloneFileBrowser.SaveFilePanel("Save File", "Assets/src/Tests/", "unnamed_map", "indoor.json");
@@ -182,7 +185,15 @@ public class ImportExport : MonoBehaviour
         }
 #endif
     }
-
+    public void OnMapUpload(string url_filePath)
+    {
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+           eventDispatcher.Raise(this, new UIEvent() { name = "load", message = request.downloadHandler.text, type = UIEventType.Resources }
+        )));
+    }
     private void LoadGridMap()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -201,6 +212,16 @@ public class ImportExport : MonoBehaviour
             Debug.Log("no grid map selected");
         }
 #endif
+    }
+    public void OnGridMapUpload(string url_filePath)
+    {
+        string[] array = url_filePath.Split(",");
+        string url = array[0];
+        string filePath = array[1];
+        StartCoroutine(OutputRoutine(url, filePath, (request) =>
+            {
+                PopGridMapImportPanel(filePath, request.downloadHandler.data);
+            }));
     }
 
     private void PopGridMapImportPanel(string filePath, byte[] imageBytes)
@@ -241,6 +262,19 @@ public class ImportExport : MonoBehaviour
     public void OnFileDownload()
     {
         Debug.Log("File downloaded... perhabs. If you didn't click \"cancel\"");
+    }
+
+    private IEnumerator OutputRoutine(string url, string filePath, Action<UnityWebRequest> postAction)
+    {
+        UnityWebRequest www = UnityWebRequest.Get(url);
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.LogWarning(www.error);
+        else
+            postAction?.Invoke(www);
+
+
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
