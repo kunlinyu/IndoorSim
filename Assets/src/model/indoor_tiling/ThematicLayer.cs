@@ -40,7 +40,7 @@ public class ThematicLayer
     [JsonIgnore] public Action<IndoorPOI>? OnPOICreated;
     [JsonIgnore] public Action<IndoorPOI>? OnPOIRemoved;
 
-    [JsonIgnore] public const double kFindGeomEpsilon = 1e-4;
+    [JsonIgnore] public const double kFindGeomEpsilon = 1e-3;
 
     [JsonIgnore] private readonly Dictionary<CellVertex, HashSet<CellBoundary>> vertex2Boundaries = new Dictionary<CellVertex, HashSet<CellBoundary>>();
     [JsonIgnore] private readonly Dictionary<CellBoundary, HashSet<RepresentativeLine>> boundary2RLines = new Dictionary<CellBoundary, HashSet<RepresentativeLine>>();
@@ -95,7 +95,7 @@ public class ThematicLayer
         intersections = new List<Coordinate>();
         foreach (var b in cellBoundaryMember)
         {
-            if (b.geom.Crosses(ls))
+            if (b.geom.EnvelopeInternal.Intersects(ls.EnvelopeInternal) && b.geom.Crosses(ls))
             {
                 crossesNumber++;
                 if (crossesNumber >= threshold)

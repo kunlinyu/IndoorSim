@@ -47,8 +47,11 @@ public class IndoorSimData
     [JsonIgnore] public List<IndoorTiling> indoorTilings = new();
 
     [JsonIgnore] public IndoorTiling? activeTiling = null;
-    [JsonIgnore] public IndoorTiling ActiveTiling {
-        get => activeTiling ?? throw new Exception("activeTilling null"); private set => activeTiling = value; }
+    [JsonIgnore]
+    public IndoorTiling ActiveTiling
+    {
+        get => activeTiling ?? throw new Exception("activeTilling null"); private set => activeTiling = value;
+    }
 
     [JsonProperty] public InstructionHistory<ReducedInstruction> history = new();
 
@@ -258,7 +261,7 @@ public class IndoorSimData
         }
 
         simDataList = indoorSimData.simDataList;
-        
+
         assets = indoorSimData.assets;
         history = indoorSimData.history;
 
@@ -774,9 +777,12 @@ public class IndoorSimData
     public CellBoundary? AddBoundary(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = ActiveTiling.AddBoundary(startCoor, endCoor, id);
-        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null)
+        {
+            history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+            latestUpdateTime = DateTime.Now;
+        }
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
-        latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
@@ -784,18 +790,25 @@ public class IndoorSimData
     public CellBoundary? AddBoundary(CellVertex start, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = ActiveTiling.AddBoundary(start, endCoor, id);
-        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
-        if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
-        latestUpdateTime = DateTime.Now;
+        if (boundary != null)
+        {
+            history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+            latestUpdateTime = DateTime.Now;
+        }
+        if (!activeHistory.InSession)
+            OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
     public CellBoundary? AddBoundary(CellVertex start, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = ActiveTiling.AddBoundary(start, end, id);
-        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null)
+        {
+            history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+            latestUpdateTime = DateTime.Now;
+        }
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
-        latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
@@ -803,9 +816,12 @@ public class IndoorSimData
     public CellBoundary? AddBoundary(Coordinate startCoor, CellVertex end, string? id = null)
     {
         CellBoundary? boundary = ActiveTiling.AddBoundary(startCoor, end, id);
-        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null)
+        {
+            history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+            latestUpdateTime = DateTime.Now;
+        }
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
-        latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
@@ -813,17 +829,19 @@ public class IndoorSimData
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellBoundary? boundary = ActiveTiling.AddBoundaryAutoSnap(startCoor, endCoor, id);
-        if (boundary != null) history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+        if (boundary != null)
+        {
+            history.DoCommit(ReducedInstruction.AddBoundary(boundary));
+            latestUpdateTime = DateTime.Now;
+        }
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
-        latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
         return boundary;
     }
 
-    // TODO BUG .Geom!.Centroid.Coordinate
-    public CellVertex SplitBoundary(Coordinate middleCoor)
+    public CellVertex? SplitBoundary(Coordinate middleCoor)
     {
-        CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
+        CellVertex? vertex = ActiveTiling.SplitBoundary(middleCoor, out var oldBoundary, out var newBoundary1, out var newBoundary2);
         history.DoCommit(ReducedInstruction.SplitBoundary(oldBoundary.geom, middleCoor));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;
@@ -831,10 +849,9 @@ public class IndoorSimData
         return vertex;
     }
 
-    // TODO BUG .Geom!.Centroid.Coordinate
-    public CellVertex SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
+    public CellVertex? SplitBoundary(CellBoundary boundary, Coordinate middleCoor)
     {
-        CellVertex vertex = ActiveTiling.SplitBoundary(middleCoor, boundary, out var newBoundary1, out var newBoundary2);
+        CellVertex? vertex = ActiveTiling.SplitBoundary(middleCoor, boundary, out var newBoundary1, out var newBoundary2);
         history.DoCommit(ReducedInstruction.SplitBoundary(boundary.geom, middleCoor));
         if (!activeHistory.InSession) OnIndoorFeatureUpdated?.Invoke(indoorFeatures);
         latestUpdateTime = DateTime.Now;

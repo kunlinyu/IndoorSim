@@ -1,15 +1,11 @@
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
-
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
-
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEngine;
-using UnityEditor;
-
 using JumpInfo = PSLGPolygonSearcher.JumpInfo;
 
 #nullable enable
@@ -121,7 +117,7 @@ public class IndoorTiling
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
         AddVertexInternal(end);
 
-        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ResultValidate();
         return boundary;
@@ -138,7 +134,7 @@ public class IndoorTiling
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
         AddVertexInternal(start);
 
-        CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
+        CellBoundary boundary = new(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
         AddBoundaryInternal(boundary);
         ResultValidate();
         return boundary;
@@ -158,10 +154,18 @@ public class IndoorTiling
 
         if (!layer.Contains(start)) throw new ArgumentException("can not find vertex start");
         if (!layer.Contains(end)) throw new ArgumentException("can not find vertex end");
-        if (System.Object.ReferenceEquals(start, end)) throw new ArgumentException("should not connect same vertex");
+        if (start == end) throw new ArgumentException("should not connect same vertex");
 
-        if (layer.CrossesBoundaries(ls)) return null;
-        if (layer.VertexPair2Boundaries(start, end).Count > 0) return null;  // don't support multiple boundary between two vertices yet
+        if (layer.CrossesBoundaries(ls))
+        {
+            Debug.LogWarning("cross boundary insert failed");
+            return null;
+        }
+        if (layer.VertexPair2Boundaries(start, end).Count > 0)
+        {
+            Debug.LogWarning("insert more than one boundary between two vertices");
+            return null;
+        }
 
         CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
 
@@ -234,7 +238,7 @@ public class IndoorTiling
         return boundary;
     }
 
-    public CellVertex SplitBoundary(Coordinate middleCoor, out CellBoundary oldBoundary, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
+    public CellVertex? SplitBoundary(Coordinate middleCoor, out CellBoundary oldBoundary, out CellBoundary? newBoundary1, out CellBoundary? newBoundary2)
     {
         CellBoundary? boundary = layer.FindBoundaryGeom(middleCoor, 1e-3);
         if (boundary == null) throw new ArgumentException("can not find a boundary according to coordinate: " + middleCoor.ToString());
@@ -243,8 +247,16 @@ public class IndoorTiling
         return SplitBoundary(middleCoor, boundary, out newBoundary1, out newBoundary2);
     }
 
-    public CellVertex SplitBoundary(Coordinate middleCoor, CellBoundary oldBoundary, out CellBoundary newBoundary1, out CellBoundary newBoundary2)
+    static double kSplitEndPointProtectionDistance = 1e-2;
+    public CellVertex? SplitBoundary(Coordinate middleCoor, CellBoundary oldBoundary, out CellBoundary? newBoundary1, out CellBoundary? newBoundary2)
     {
+        if (middleCoor.Distance(oldBoundary.P0.Coordinate) < kSplitEndPointProtectionDistance ||
+            middleCoor.Distance(oldBoundary.P1.Coordinate) < kSplitEndPointProtectionDistance)
+        {
+            newBoundary1 = null;
+            newBoundary2 = null;
+            return null;
+        }
         if (!layer.Contains(oldBoundary)) throw new ArgumentException("unknown boundary");
         if (oldBoundary.geom.NumPoints > 2) throw new ArgumentException("We don't support split boundary with point more than 2 yet");
         // TODO(robust): check middleCoor lay on the old boundary, or we have to check new boundary won't crosses other boundaries

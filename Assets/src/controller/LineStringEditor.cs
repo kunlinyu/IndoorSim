@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Distance;
 using UnityEngine;
@@ -64,6 +65,15 @@ public class LineStringEditor : MonoBehaviour, ITool
                     Coordinate tempCurrentCoor = currentVertex != null ? currentVertex.Coordinate : currentCoor;
                     LineString tempLs = new GeometryFactory().CreateLineString(new Coordinate[] { tempLastCoor, tempCurrentCoor });
                     bool lessthan3 = IndoorSimData!.IntersectionLessThan(tempLs, 3, out List<CellBoundary> crossesBoundaries, out List<Coordinate> intersections);
+
+                    for (int i = 0; i < crossesBoundaries.Count; i++)
+                        if (crossesBoundaries[i].P0.Coordinate.Distance(intersections[i]) < 1e-3 ||
+                            crossesBoundaries[i].P1.Coordinate.Distance(intersections[i]) < 1e-3)
+                        {
+                            lessthan3 = false;
+                            break;
+                        }
+
                     if (lessthan3 && crossesBoundaries.Count == 0)
                     {
                         if (lastVertex == null && currentVertex == null) boundary = IndoorSimData!.AddBoundary(lastCoor, currentCoor);
@@ -87,14 +97,16 @@ public class LineStringEditor : MonoBehaviour, ITool
                     else if (lessthan3 && crossesBoundaries.Count > 0)
                     {
                         IndoorSimData!.SessionStart();
-                        List<CellVertex> newVertices = new List<CellVertex>();
+                        List<CellVertex?> newVertices = new();
                         for (int i = 0; i < crossesBoundaries.Count; i++)
                             newVertices.Add(IndoorSimData!.SplitBoundary(crossesBoundaries[i], intersections[i]));
-                        for (int i = 0; i < newVertices.Count - 1; i++)
-                            IndoorSimData!.AddBoundary(newVertices[i], newVertices[i + 1]);
+                        if (newVertices.Any(v => v == null)) throw new System.Exception("split failed");
 
-                        CellBoundary? firstB = IndoorSimData!.AddBoundaryAutoSnap(tempLastCoor, newVertices[0].Coordinate);
-                        CellBoundary? lastB = IndoorSimData!.AddBoundaryAutoSnap(newVertices[newVertices.Count - 1].Coordinate, tempCurrentCoor);
+                        for (int i = 0; i < newVertices.Count - 1; i++)
+                            IndoorSimData!.AddBoundary(newVertices[i]!, newVertices[i + 1]!);
+
+                        CellBoundary? firstB = IndoorSimData!.AddBoundaryAutoSnap(tempLastCoor, newVertices[0]!.Coordinate);
+                        CellBoundary? lastB = IndoorSimData!.AddBoundaryAutoSnap(newVertices[newVertices.Count - 1]!.Coordinate, tempCurrentCoor);
 
                         IndoorSimData!.SessionCommit();
 
