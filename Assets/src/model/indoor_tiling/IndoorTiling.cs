@@ -75,6 +75,14 @@ public class IndoorTiling
         this.layer.cellSpaceMember.ForEach(s => s.Id = IdGenSpace!.Gen());
     }
 
+
+    static readonly double kCloseToLineStringEpsilon = 1.01;
+    public int CloseToLineStringVertexCount(Coordinate P0, Coordinate P1)
+    {
+        double lengthThreshold = P0.Distance(P1) * kCloseToLineStringEpsilon;
+        return layer.cellVertexMember.Count(v => v.Coordinate.Distance(P0) + v.Coordinate.Distance(P1) < lengthThreshold);
+    }
+
     public CellBoundary? AddBoundaryAutoSnap(Coordinate startCoor, Coordinate endCoor, string? id = null)
     {
         CellVertex? startVertex = layer.FindVertexCoor(startCoor);
@@ -94,6 +102,7 @@ public class IndoorTiling
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, endCoor });
 
         if (layer.CrossesBoundaries(ls)) return null;
+        if (CloseToLineStringVertexCount(startCoor, endCoor) > 0) return null;
 
         var start = CellVertex.Instantiate(ls.StartPoint, IdGenVertex);
         AddVertexInternal(start);
@@ -111,7 +120,7 @@ public class IndoorTiling
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { start.Coordinate, endCoor });
 
         if (!layer.Contains(start)) throw new ArgumentException("can not find vertex start");
-
+        if (CloseToLineStringVertexCount(start.Coordinate, endCoor) > 1) return null;
         if (layer.CrossesBoundaries(ls)) return null;
 
         var end = CellVertex.Instantiate(endCoor, IdGenVertex);
@@ -128,7 +137,7 @@ public class IndoorTiling
         LineString ls = new GeometryFactory().CreateLineString(new Coordinate[] { startCoor, end.Coordinate });
 
         if (!layer.Contains(end)) throw new ArgumentException("can not find vertex end");
-
+        if (CloseToLineStringVertexCount(startCoor, end.Coordinate) > 1) return null;
         if (layer.CrossesBoundaries(ls)) return null;
 
         var start = CellVertex.Instantiate(startCoor, IdGenVertex);
@@ -156,16 +165,9 @@ public class IndoorTiling
         if (!layer.Contains(end)) throw new ArgumentException("can not find vertex end");
         if (start == end) throw new ArgumentException("should not connect same vertex");
 
-        if (layer.CrossesBoundaries(ls))
-        {
-            Debug.LogWarning("cross boundary insert failed");
-            return null;
-        }
-        if (layer.VertexPair2Boundaries(start, end).Count > 0)
-        {
-            Debug.LogWarning("insert more than one boundary between two vertices");
-            return null;
-        }
+        if (layer.CrossesBoundaries(ls)) return null;
+        if (CloseToLineStringVertexCount(start.Coordinate, end.Coordinate) > 2) return null;
+        if (layer.VertexPair2Boundaries(start, end).Count > 0) return null;
 
         CellBoundary boundary = new CellBoundary(start, end, id ?? IdGenBoundary?.Gen() ?? "no id");
 
