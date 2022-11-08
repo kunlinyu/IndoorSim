@@ -1,14 +1,15 @@
-using NetTopologySuite.Geometries;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Schema.Generation;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using UnityEngine;
+
+using NetTopologySuite.Geometries;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Schema.Generation;
 
 #nullable enable
 
@@ -16,18 +17,7 @@ public class IndoorSimData
 {
     [JsonProperty] public string softwareVersion = "unknow";
     [JsonProperty] public string schemaHash = "unknow";
-    [JsonIgnore]
-    public static Dictionary<string, string> schemaHashHistory = new Dictionary<string, string>()
-    {
-        {"0.7.0", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.0", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.1", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.2", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.3", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.8.4", "3AC0BED35318C7E853CAFCBCA198537F"},
-        {"0.9.0", "4EBFB912BC82294B445CD7EDE4DD3E2D"},
-        {"0.10.0", "0564ACBB3D6466252B3C7C167A0F06EF"},
-    };
+
     [JsonProperty] private Guid? uuid = null;
     [JsonIgnore] public Guid? Uuid { get => uuid; }
 
@@ -148,8 +138,8 @@ public class IndoorSimData
         JsonSerializerSettings settings = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
-            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
-            Formatting = indent ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            Formatting = indent ? Formatting.Indented : Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = new List<JsonConverter>() { new WKTConverter(), new CoorConverter() },
             ContractResolver = ShouldSerializeContractResolver.Instance,
@@ -170,7 +160,7 @@ public class IndoorSimData
         return sw.ToString();  // return JsonConvert.SerializeObject(this);
     }
 
-    public bool DeserializeInPlace(string json, bool historyOnly = false)
+    public bool DeserializeInPlace(string json, Dictionary<string, string> schemaHashHistory, bool historyOnly = false)
     {
         assets.Clear();
         history.Clear();
@@ -179,9 +169,9 @@ public class IndoorSimData
         if (indoorSimData == null) return false;
 
         if (indoorSimData.schemaHash == null || indoorSimData.schemaHash.Length == 0)
-            Debug.LogWarning("schemaHash is empty. This file is not official file format. Resave it to generate an official file format.");
+            Console.WriteLine("schemaHash is empty. This file is not official file format. Resave it to generate an official file format.");
         else if (indoorSimData.softwareVersion == null || indoorSimData.softwareVersion.Length == 0)
-            Debug.LogWarning("software version is empty. This file is not official file format. Resave it to generate an official file format.");
+            Console.WriteLine("software version is empty. This file is not official file format. Resave it to generate an official file format.");
         else
         {
             var expectedSchemahash = JSchemaHash();
@@ -197,9 +187,9 @@ public class IndoorSimData
                     }
                     else
                     {
-                        Debug.Log("schema hash history:");
+                        Console.WriteLine("schema hash history:");
                         foreach (var entry in schemaHashHistory)
-                            Debug.Log(entry.Key + ": " + entry.Value);
+                            Console.WriteLine(entry.Key + ": " + entry.Value);
 #if !UNITY_EDITOR
                         throw new ArgumentException($"schemaHash({indoorSimData.schemaHash}) not correct for that software version({indoorSimData.softwareVersion})");
 #endif
@@ -282,9 +272,9 @@ public class IndoorSimData
         uuid = indoorSimData.uuid;
         if (uuid == null)
         {
-            Debug.LogWarning("loaded map don't have uuid");
+            Console.WriteLine("loaded map don't have uuid");
             uuid = Guid.NewGuid();
-            Debug.Log("Generate uuid for loaded map: " + uuid);
+            Console.WriteLine("Generate uuid for loaded map: " + uuid);
         }
 
         return true;
@@ -509,7 +499,7 @@ public class IndoorSimData
             if (ins.newParam.values().Contains(POICategory.Human.ToString()) || ins.newParam.values().Contains(POICategory.PaAmr.ToString()))
             {
                 var poi = new IndoorPOI(new Point(ins.newParam.coor()), layOn!, spaces!, queue!, ins.newParam.values().ToArray());
-                ins.newParam.values2().ForEach(label => Debug.Log(label));
+                ins.newParam.values2().ForEach(label => Console.WriteLine(label));
                 ins.newParam.values2().ForEach(label => poi.AddLabel(label));
                 ActiveTiling.AddPOI(poi);
             }
@@ -535,7 +525,7 @@ public class IndoorSimData
         gridMaps.Insert(0, gridmap.Clone());
         OnGridMapListUpdated?.Invoke(gridMaps);
         OnGridMapCreated?.Invoke(gridMaps[0]);
-        Debug.Log("Grid map added");
+        Console.WriteLine("Grid map added");
         latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();
         return true;
@@ -627,7 +617,7 @@ public class IndoorSimData
         activeInstructionInterpreter = instructionInterpreter;
         if (currentSimData != null)
         {
-            Debug.Log("going to remove agent");
+            Console.WriteLine("going to remove agent");
             currentSimData.agents.ForEach(agent => OnAgentRemoved?.Invoke(agent));
             currentSimData = null;
         }
@@ -714,7 +704,7 @@ public class IndoorSimData
         if (instructions.Count > 0)
         {
             List<ReducedInstruction> reverseIns = ReducedInstruction.Reverse(instructions);
-            reverseIns.ForEach(ins => Debug.Log(ins.ToString()));
+            reverseIns.ForEach(ins => Console.WriteLine(ins.ToString()));
             ActiveTiling.DisableResultValidate();
             activeInstructionInterpreter.Execute(reverseIns);
             ActiveTiling.EnableResultValidateAndDoOnce();
@@ -727,7 +717,7 @@ public class IndoorSimData
         }
         else
         {
-            Debug.LogWarning("can not undo");
+            Console.WriteLine("can not undo");
             return false;
         }
     }
@@ -739,7 +729,7 @@ public class IndoorSimData
         var instructions = activeHistory.Redo(out var snapShot);
         if (instructions.Count > 0)
         {
-            instructions.ForEach(ins => Debug.Log(ins.ToString()));
+            instructions.ForEach(ins => Console.WriteLine(ins.ToString()));
             ActiveTiling.DisableResultValidate();
             activeInstructionInterpreter.Execute(instructions);
             ActiveTiling.EnableResultValidateAndDoOnce();
@@ -752,7 +742,7 @@ public class IndoorSimData
         }
         else
         {
-            Debug.LogWarning("can not redo");
+            Console.WriteLine("can not redo");
             return false;
         }
     }
@@ -944,8 +934,8 @@ public class IndoorSimData
         }
         catch (ArgumentException e)
         {
-            Debug.LogWarning(e.Message);
-            Debug.LogWarning("Ignore the operation. Try another id please");
+            Console.WriteLine(e.Message);
+            Console.WriteLine("Ignore the operation. Try another id please");
         }
         latestUpdateTime = DateTime.Now;
         if (!activeHistory.InSession) PostAction?.Invoke();

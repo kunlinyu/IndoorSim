@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using UnityEditor;
 using UnityEngine;
@@ -35,7 +37,6 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
     {
-        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
         GenerateSchemaHash();
         Build(BuildTarget.StandaloneLinux64, true);
         Build(BuildTarget.StandaloneLinux64, false);
@@ -44,7 +45,6 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Windows")]
     public static void BuildWindows()
     {
-        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
         GenerateSchemaHash();
         Build(BuildTarget.StandaloneWindows64, true);
         Build(BuildTarget.StandaloneWindows64, false);
@@ -53,7 +53,6 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
-        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
         GenerateSchemaHash();
         Build(BuildTarget.WebGL, false);
     }
@@ -61,9 +60,22 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
-        Assert.IsTrue(IndoorSimData.schemaHashHistory.ContainsKey(Application.version));
         GenerateSchemaHash();
         Build(BuildTarget.WebGL, true);
+    }
+
+
+    static string schemaHashHistoryFile = "Assets\\Resources\\schemaHashHistory.txt";
+    [MenuItem("Build/Update schema hash history file")]
+    public static void UpdateSchemaHashHistory()
+    {
+        List<string> lines = new(File.ReadAllLines(schemaHashHistoryFile));
+        if (lines.Count < 3) throw new System.Exception("file too shor");
+        if (lines.Any(line => line.IndexOf(Application.version) != -1)) throw new System.Exception("the file contains the current version: " + Application.version);
+        string newLine = Application.version + " " + IndoorSimData.JSchemaHash();
+        lines.Add(newLine);
+        Debug.Log("Add a new line: " + newLine);
+        File.WriteAllLines(schemaHashHistoryFile, lines);
     }
 
     // [MenuItem("Build/Generate release from markdown")]

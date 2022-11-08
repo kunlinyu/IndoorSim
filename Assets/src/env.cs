@@ -1,6 +1,7 @@
 using System;
-using System.Globalization;
 using UnityEngine;
+
+using Newtonsoft.Json;
 
 
 public class env : MonoBehaviour
@@ -33,7 +34,7 @@ public class env : MonoBehaviour
         simController.indoorSimData = indoorSimData;
         simController.simulationView = simulationView;
 
-        uploader.Key = Hash.GetHash(IndoorSimData.schemaHashHistory[Application.version]);
+        uploader.Key = Hash.GetHash(VersionSchemaHistoryLoader.Load()[Application.version]);
 
         indoorSimData.PostAction = () =>
         {

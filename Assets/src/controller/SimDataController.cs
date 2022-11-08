@@ -355,7 +355,8 @@ public class SimDataController : MonoBehaviour
         }
         else if (e.type == UIEventType.Resources && e.name == "load")
         {
-            indoorSimData.DeserializeInPlace(e.message, false);
+            indoorSimData.DeserializeInPlace(e.message, VersionSchemaHistoryLoader.Load(), false);
+
 
             indoorSimData.gridMaps.ForEach(gridmap =>
             {
