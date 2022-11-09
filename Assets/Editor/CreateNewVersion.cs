@@ -104,8 +104,8 @@ public class CreateNewVersion : EditorWindow
     public static void UpdateSchemaHashHistory(string newVersion)
     {
         List<string> lines = new(File.ReadAllLines(schemaHashHistoryFile));
-        if (lines.Count < 3) throw new System.Exception("file too shor");
-        if (lines.Any(line => line.IndexOf(Application.version) != -1)) throw new System.Exception("the file contains the current version: " + Application.version);
+        if (lines.Count < 3) throw new Exception("file too shor");
+        if (lines.Any(line => line.IndexOf(newVersion) != -1)) throw new Exception("the file contains the current version: " + newVersion);
         string newLine = newVersion + " " + IndoorSimData.JSchemaHash();
         lines.Add(newLine);
         Debug.Log("Add a new line: " + newLine);
