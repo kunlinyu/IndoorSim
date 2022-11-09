@@ -36,6 +36,8 @@ public class CreateNewVersion : EditorWindow
 
         // new schema hash
         root.Q<TextField>("newSchemaHash").value = IndoorSimData.JSchemaHash();
+        if (IndoorSimData.JSchemaHash() != VersionSchemaHistoryLoader.Load()[Application.version])
+            root.Q<TextField>("newSchemaHash").label += "(changed)";
 
         // new version
         root.Q<TextField>("new_version").value = Application.version;

@@ -14,7 +14,7 @@ public class VersionSchemaHistoryLoader
         List<string> validLines = lines.Where(line => line.Length != 0 && line.Count(c => c == ' ') == 1).ToList();
 
         history = new Dictionary<string, string>();
-        validLines.ForEach(line => history.Add(line.Split(' ')[0], line.Split(' ')[1]));
+        validLines.ForEach(line => history.Add(line.Split(' ')[0], line.Split(' ')[1][0..^1]));
 
         return history; 
     }
