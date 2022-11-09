@@ -1,9 +1,13 @@
-using LibGit2Sharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+using LibGit2Sharp;
 
 public class CreateNewVersion : EditorWindow
 {
@@ -24,8 +28,14 @@ public class CreateNewVersion : EditorWindow
         VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
         root.Add(labelFromUXML);
 
+        // current schema hash
+        root.Q<TextField>("lastSchemaHash").value = VersionSchemaHistoryLoader.Load()[Application.version];
+
         // current version
         root.Q<TextField>("current_version").value = Application.version;
+
+        // new schema hash
+        root.Q<TextField>("newSchemaHash").value = IndoorSimData.JSchemaHash();
 
         // new version
         root.Q<TextField>("new_version").value = Application.version;
@@ -43,8 +53,9 @@ public class CreateNewVersion : EditorWindow
             var lines = File.ReadAllLines(projectSettingsFilePath);
 
             // Write new version number to ProjectSettings file
+            var newVersion = root.Q<TextField>("new_version").value;
             var oldLine = "bundleVersion: " + Application.version;
-            var newLine = "bundleVersion: " + root.Q<TextField>("new_version").value;
+            var newLine = "bundleVersion: " + newVersion;
             for (int i = 0; i < lines.Length; i++)
             {
                 if (lines[i].IndexOf(oldLine) > -1)
@@ -56,6 +67,9 @@ public class CreateNewVersion : EditorWindow
             File.WriteAllLines(projectSettingsFilePath, lines);
             Debug.Log($"Write \"{newLine}\" to {projectSettingsFilePath}");
 
+            // update new version and schema hash to schema hash history file
+            UpdateSchemaHashHistory(newVersion);
+
             // Stage
             using var repo = new Repository(".");
             Commands.Stage(repo, "*");
@@ -66,7 +80,8 @@ public class CreateNewVersion : EditorWindow
             Commit commit = repo.Commit(root.Q<TextField>("commit_message").text, author, committer);
             Debug.Log($"committed({commit.Sha[..7]}): " + root.Q<TextField>("commit_message").text);
         };
-        // commit
+
+        // build
         root.Q<Button>("build").clicked += () =>
         {
             GetWindow<CreateNewVersion>().Close();
@@ -81,5 +96,17 @@ public class CreateNewVersion : EditorWindow
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
         root.Q<Button>("cancel_build").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
 
+    }
+
+    static readonly string schemaHashHistoryFile = "Assets\\Resources\\schemaHashHistory.txt";
+    public static void UpdateSchemaHashHistory(string newVersion)
+    {
+        List<string> lines = new(File.ReadAllLines(schemaHashHistoryFile));
+        if (lines.Count < 3) throw new System.Exception("file too shor");
+        if (lines.Any(line => line.IndexOf(Application.version) != -1)) throw new System.Exception("the file contains the current version: " + Application.version);
+        string newLine = newVersion + " " + IndoorSimData.JSchemaHash();
+        lines.Add(newLine);
+        Debug.Log("Add a new line: " + newLine);
+        File.WriteAllLines(schemaHashHistoryFile, lines);
     }
 }

@@ -64,20 +64,6 @@ public class BuildPlayer : MonoBehaviour
         Build(BuildTarget.WebGL, true);
     }
 
-
-    static string schemaHashHistoryFile = "Assets\\Resources\\schemaHashHistory.txt";
-    [MenuItem("Build/Update schema hash history file")]
-    public static void UpdateSchemaHashHistory()
-    {
-        List<string> lines = new(File.ReadAllLines(schemaHashHistoryFile));
-        if (lines.Count < 3) throw new System.Exception("file too shor");
-        if (lines.Any(line => line.IndexOf(Application.version) != -1)) throw new System.Exception("the file contains the current version: " + Application.version);
-        string newLine = Application.version + " " + IndoorSimData.JSchemaHash();
-        lines.Add(newLine);
-        Debug.Log("Add a new line: " + newLine);
-        File.WriteAllLines(schemaHashHistoryFile, lines);
-    }
-
     // [MenuItem("Build/Generate release from markdown")]
     // use ci/generate_markdown.sh instead
     public static void GenerateReleaseFromMarkdown()

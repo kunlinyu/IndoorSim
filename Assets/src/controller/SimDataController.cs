@@ -144,7 +144,7 @@ public class SimDataController : MonoBehaviour
                 toolObj = null;
                 currentTool = null;
                 MousePickController.pickType = CurrentPickType.All;
-                UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             }
 
             if (e.name == "line string")

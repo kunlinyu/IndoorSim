@@ -1,6 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Editor/CreateNewVersion.uss?fileID=7433441132597879392&amp;guid=8e9c3ab0b0de6d546aa619de433f2aa8&amp;type=3#CreateNewVersion" />
+    <ui:TextField picking-mode="Ignore" label="Last Schema Hash" name="lastSchemaHash" readonly="true" password="false" />
     <ui:TextField picking-mode="Ignore" label="Current Version" value="filler text" text="0.0.0" name="current_version" readonly="true" />
+    <ui:TextField picking-mode="Ignore" label="New Schema Hash" name="newSchemaHash" readonly="true" />
     <ui:TextField picking-mode="Ignore" label="New Version" value="filler text" text="0.0.0" name="new_version" />
     <ui:TextField picking-mode="Ignore" label="Commit Message" value="filler text" text="Change version to " multiline="false" name="commit_message" />
     <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;">
