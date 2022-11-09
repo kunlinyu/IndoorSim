@@ -12,6 +12,7 @@ using UnityEngine.Assertions;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using Markdig;
+using LibGit2Sharp;
 
 public class BuildPlayer : MonoBehaviour
 {
@@ -38,30 +39,39 @@ public class BuildPlayer : MonoBehaviour
     public static void BuildLinux()
     {
         GenerateSchemaHash();
-        Build(BuildTarget.StandaloneLinux64, true);
-        Build(BuildTarget.StandaloneLinux64, false);
+        Build(BuildTarget.StandaloneLinux64, Snapshot(), true);
+        Build(BuildTarget.StandaloneLinux64, Snapshot(), false);
     }
 
     [MenuItem("Build/Build Windows")]
     public static void BuildWindows()
     {
         GenerateSchemaHash();
-        Build(BuildTarget.StandaloneWindows64, true);
-        Build(BuildTarget.StandaloneWindows64, false);
+        Build(BuildTarget.StandaloneWindows64, Snapshot(), true);
+        Build(BuildTarget.StandaloneWindows64, Snapshot(), false);
     }
 
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
         GenerateSchemaHash();
-        Build(BuildTarget.WebGL, false);
+        Build(BuildTarget.WebGL, Snapshot(), false);
     }
 
     [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
         GenerateSchemaHash();
-        Build(BuildTarget.WebGL, true);
+        Build(BuildTarget.WebGL, Snapshot(), true);
+    }
+
+    static public bool Snapshot()
+    {
+        using var repo = new Repository(".");
+        Commit lastCommit = repo.Commits.Take(1).First();
+        string CommitMessageFirstLine = lastCommit.Message.Split("\n")[0];
+        bool snapshot = !CommitMessageFirstLine.EndsWith(Application.version);
+        return snapshot;
     }
 
     // [MenuItem("Build/Generate release from markdown")]
@@ -100,16 +110,18 @@ public class BuildPlayer : MonoBehaviour
     }
 
 
-    public static void Build(BuildTarget target, bool development)
+    public static void Build(BuildTarget target, bool snapshot, bool development)
     {
         CheckReleaseDir();
         string[] lines = File.ReadAllLines(".git/refs/heads/master");
         if (lines.Length < 1)
             throw new System.Exception("can not read line from file");
 
-        string shortSHA1 = lines[0][..7];
+        string hash = lines[0][..7];
+        if (snapshot)
+            hash = "SNAPSHOT";
 
-        string dirName = "IndoorSim-" + target.ToString() + (development ? "-dev" : "") + "-V" + Application.version + "." + shortSHA1;
+        string dirName = "IndoorSim-" + target.ToString() + (development ? "-dev" : "") + "-V" + Application.version + "." + hash;
         string applicationName = "IndoorSim" + (development ? "-dev" : "") + "-V" + Application.version + ".exe";
         Debug.Log(dirName);
 

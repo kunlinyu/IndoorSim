@@ -1,13 +1,13 @@
+using LibGit2Sharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-
-using LibGit2Sharp;
 
 public class CreateNewVersion : EditorWindow
 {
@@ -87,12 +87,22 @@ public class CreateNewVersion : EditorWindow
         root.Q<Button>("build").clicked += () =>
         {
             GetWindow<CreateNewVersion>().Close();
+
             if (root.Q<Toggle>("webgl").value)
-                BuildPlayer.BuildWebGL();
+            {
+                BuildPlayer.Build(BuildTarget.WebGL, BuildPlayer.Snapshot(), true);
+                BuildPlayer.Build(BuildTarget.WebGL, BuildPlayer.Snapshot(), false);
+            }
             if (root.Q<Toggle>("windows").value)
-                BuildPlayer.BuildWindows();
+            {
+                BuildPlayer.Build(BuildTarget.StandaloneWindows64, BuildPlayer.Snapshot(), true);
+                BuildPlayer.Build(BuildTarget.StandaloneWindows64, BuildPlayer.Snapshot(), false);
+            }
             if (root.Q<Toggle>("linux").value)
-                BuildPlayer.BuildLinux();
+            {
+                BuildPlayer.Build(BuildTarget.StandaloneLinux64, BuildPlayer.Snapshot(), true);
+                BuildPlayer.Build(BuildTarget.StandaloneLinux64, BuildPlayer.Snapshot(), false);
+            }
         };
 
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
