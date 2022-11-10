@@ -140,6 +140,13 @@ public class CreateNewVersion : EditorWindow
         root.Q<TextField>("targetSHA1").value = repo.Head.Tip.ToString();
         Debug.Log(repo.Head.ToString());
 
+        // make tag
+        root.Q<Button>("makeTag").clicked += () =>
+        {
+            using var repo = new Repository(".");
+            Signature tagger = new("Kunlin Yu", "yukunlin@syriusrobotics.com", DateTime.Now);
+            repo.ApplyTag(root.Q<TextField>("tagName").text, tagger, root.Q<TextField>("tagMessage").text);
+        };
 
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
         root.Q<Button>("cancel_build").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
