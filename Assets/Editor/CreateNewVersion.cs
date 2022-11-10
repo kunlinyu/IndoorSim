@@ -30,7 +30,7 @@ public class CreateNewVersion : EditorWindow
         root.Add(labelFromUXML);
 
         // current schema hash
-        root.Q<TextField>("lastSchemaHash").value = VersionSchemaHistoryLoader.Load()[Application.version];
+        root.Q<TextField>("lastSchemaHash").value = VersionSchemaHistoryLoader.ReLoad()[Application.version];
 
         // current version
         root.Q<TextField>("current_version").value = Application.version;

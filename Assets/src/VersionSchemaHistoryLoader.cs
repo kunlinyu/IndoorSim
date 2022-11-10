@@ -7,8 +7,12 @@ public class VersionSchemaHistoryLoader
     static Dictionary<string, string> history = null;
     public static Dictionary<string, string> Load()
     {
-        if (history != null) return history;
+        history ??= ReLoad();
+        return history;
+    }
 
+    public static Dictionary<string, string> ReLoad()
+    {
         TextAsset schemaHashHistoryAsset = Resources.Load<TextAsset>("schemaHashHistory");
         List<string> lines = new(schemaHashHistoryAsset.text.Split("\n"));
         List<string> validLines = lines.Where(line => line.Length != 0 && line.Count(c => c == ' ') == 1).ToList();
@@ -16,7 +20,7 @@ public class VersionSchemaHistoryLoader
         history = new Dictionary<string, string>();
         validLines.ForEach(line => history.Add(line.Split(' ')[0], line.Split(' ')[1][0..^1]));
 
-        return history; 
+        return history;
     }
 
 
