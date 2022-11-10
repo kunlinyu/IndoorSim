@@ -69,9 +69,8 @@ public class BuildPlayer : MonoBehaviour
     {
         using var repo = new Repository(".");
         Commit lastCommit = repo.Commits.Take(1).First();
-        string CommitMessageFirstLine = lastCommit.Message.Split("\n")[0];
-        bool snapshot = !CommitMessageFirstLine.EndsWith(Application.version);
-        return snapshot;
+        string firstLine = lastCommit.Message.Split("\n")[0];
+        return firstLine != "Change version to " + Application.version;
     }
 
     // [MenuItem("Build/Generate release from markdown")]

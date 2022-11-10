@@ -5,15 +5,23 @@
     <ui:TextField picking-mode="Ignore" label="New Schema Hash" name="newSchemaHash" readonly="true" />
     <ui:TextField picking-mode="Ignore" label="New Version" value="filler text" text="0.0.0" name="new_version" />
     <ui:TextField picking-mode="Ignore" label="Commit Message" value="filler text" text="Change version to " multiline="false" name="commit_message" />
-    <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;">
+    <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; align-items: flex-start; height: auto; min-height: 31px;">
         <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="cancel_commit" />
         <ui:Button tabindex="-1" text="Commit" display-tooltip-when-elided="true" name="commit" />
     </ui:VisualElement>
     <ui:Toggle label="WebGL" focusable="true" value="true" name="webgl" />
     <ui:Toggle label="Windows" name="windows" value="true" />
     <ui:Toggle label="Linux" name="linux" value="true" />
-    <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;">
+    <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; align-items: flex-start; height: 31px; min-height: 31px;">
         <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="cancel_build" />
         <ui:Button tabindex="-1" text="Build" display-tooltip-when-elided="true" name="build" />
+    </ui:VisualElement>
+    <ui:TextField picking-mode="Ignore" label="git log" value="filler text" text="8d06991 Disable libgit2-106a5f2.so for most platforms (Wed 09 Nov 21:15:11 2022 +08:00)&#10;4c3c183 Detect the suffix of the last commit message to determine use SHA1 or &apos;SNAPSHOT&apos; in the file name (Wed 09 Nov 21:04:11 2022 +08:00)&#10;d270fc4 Fix bug about consider old version number in history file (Wed 09 Nov 20:15:10 2022 +08:00)&#10;" name="log" readonly="true" style="-unity-font: none;" />
+    <ui:TextField picking-mode="Ignore" label="Tag Name" name="tagName" />
+    <ui:TextField picking-mode="Ignore" label="Tag Message" value="filler text" name="tagMessage" />
+    <ui:TextField picking-mode="Ignore" label="Target SHA1" name="targetSHA1" readonly="true" />
+    <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; align-items: flex-start; height: 31px; min-height: 31px;">
+        <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="cancel_tag" />
+        <ui:Button tabindex="-1" text="Tag" display-tooltip-when-elided="true" name="makeTag" />
     </ui:VisualElement>
 </ui:UXML>

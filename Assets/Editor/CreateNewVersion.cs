@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -105,8 +106,44 @@ public class CreateNewVersion : EditorWindow
             }
         };
 
+        using var repo = new Repository(".");
+        Tag latestTag = repo.Tags.OrderByDescending(tag => tag.Annotation.Tagger.When).First();
+        Debug.Log(latestTag.FriendlyName);
+
+        // log
+        var filter = new CommitFilter()
+        {
+            IncludeReachableFrom = repo.Head,
+            ExcludeReachableFrom = ((Commit)latestTag.Target).Parents.First().Sha,
+        };
+        var commits = repo.Commits.QueryBy(filter).ToList();
+
+        var format = "ddd dd MMM";
+        TextField textField = root.Q<TextField>("log");
+        StringBuilder sb = new();
+        foreach (Commit c in commits)
+        {
+            sb.Append(c.Id.Sha[..7] + "\t");
+            sb.Append($"({c.Author.When.ToString(format, CultureInfo.InvariantCulture)})\t");
+            sb.Append(c.Message.Split("\n")[0]);
+            if (c.Sha == latestTag.Target.Sha)
+                sb.Append($"\t<-- {latestTag.FriendlyName} {latestTag.Annotation.Message}");
+            sb.Append("\n");
+        }
+
+        textField.value = sb.ToString();
+
+        // tag name
+        root.Q<TextField>("tagName").value = latestTag.FriendlyName;
+
+        // tag target sha1
+        root.Q<TextField>("targetSHA1").value = repo.Head.Tip.ToString();
+        Debug.Log(repo.Head.ToString());
+
+
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
         root.Q<Button>("cancel_build").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
+        root.Q<Button>("cancel_tag").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
 
     }
 
