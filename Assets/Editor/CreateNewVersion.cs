@@ -213,7 +213,7 @@ public class CreateNewVersion : EditorWindow
             List<string> artifacts = files.Select(file => Path.GetFileName(file)).Where(file => file.StartsWith("IndoorSim-")).ToList();
             artifacts.Sort(string.CompareOrdinal);
             artifacts.Sort((str1, str2) => Platform(str1).Length - Platform(str2).Length);
-            File.WriteAllLines(versionPath + "/Artifacts", artifacts);
+            File.WriteAllText(versionPath + "/Artifacts", String.Join("\n", artifacts));
             root.Q<TextField>("artifacts").value = String.Join("\n", artifacts);
 
             GenVersionIndices();
