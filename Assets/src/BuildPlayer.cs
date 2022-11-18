@@ -1,18 +1,13 @@
 #if UNITY_EDITOR
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using UnityEditor;
-using UnityEngine;
-using UnityEditor.Build.Reporting;
-using UnityEngine.Assertions;
-
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
-using Markdig;
 using LibGit2Sharp;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
 
 public class BuildPlayer : MonoBehaviour
 {
@@ -28,7 +23,7 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/generate schema file")]
     private static void GenerateSchemaHash()
     {
-        string dir = releaseDirectoryPath + "/schema/" + Application.version;
+        string dir = VersionPath() + "/schema";
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
         File.WriteAllText(dir + "/schema.json", IndoorSimData.JSchemaStableString());
@@ -38,7 +33,6 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
     {
-        GenerateSchemaHash();
         Build(BuildTarget.StandaloneLinux64, Snapshot(), true);
         Build(BuildTarget.StandaloneLinux64, Snapshot(), false);
     }
@@ -46,7 +40,6 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Windows")]
     public static void BuildWindows()
     {
-        GenerateSchemaHash();
         Build(BuildTarget.StandaloneWindows64, Snapshot(), true);
         Build(BuildTarget.StandaloneWindows64, Snapshot(), false);
     }
@@ -54,14 +47,12 @@ public class BuildPlayer : MonoBehaviour
     [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
-        GenerateSchemaHash();
         Build(BuildTarget.WebGL, Snapshot(), false);
     }
 
     [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
-        GenerateSchemaHash();
         Build(BuildTarget.WebGL, Snapshot(), true);
     }
 
@@ -73,45 +64,24 @@ public class BuildPlayer : MonoBehaviour
         return firstLine != "Change version to " + Application.version;
     }
 
-    // [MenuItem("Build/Generate release from markdown")]
-    // use ci/generate_markdown.sh instead
-    public static void GenerateReleaseFromMarkdown()
+    static public string VersionPath()
     {
-        string header = @"<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
-  <title>IndoorSim Release</title>
-</head>
-<body>
-";
-        string footer = "</body>\n</html>\n";
-
-        string markdownPath = "RELEASE.md";
-        string indexPath = releaseDirectoryPath + "/index.html";
-
-        CheckReleaseDir();
-
-        string markdown = File.ReadAllText(markdownPath);
-
-        MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        string html = Markdown.ToHtml(markdown, pipeline);
-        string fullHtml = header + html + footer;
-
-        File.WriteAllText(indexPath, fullHtml);
-        Debug.Log($"build {indexPath} from {markdownPath}");
+        return releaseDirectoryPath + "/V" + Application.version + (Snapshot() ? ".SNAPSHOT" : "");
     }
 
     private static void CheckReleaseDir()
     {
-        if (!Directory.Exists(releaseDirectoryPath))
-            Directory.CreateDirectory(releaseDirectoryPath);
+        if (!Directory.Exists(VersionPath()))
+            Directory.CreateDirectory(VersionPath());
     }
 
 
     public static void Build(BuildTarget target, bool snapshot, bool development)
     {
         CheckReleaseDir();
+
+        string versionPath = VersionPath();
+
         string[] lines = File.ReadAllLines(".git/refs/heads/master");
         if (lines.Length < 1)
             throw new System.Exception("can not read line from file");
@@ -127,7 +97,7 @@ public class BuildPlayer : MonoBehaviour
         BuildPlayerOptions buildPlayerOptions = new()
         {
             scenes = new[] { "Assets/Scenes/MappingScene.unity" },
-            locationPathName = releaseDirectoryPath + "/" + dirName + (target != BuildTarget.WebGL ? "/" + applicationName : ""),
+            locationPathName = versionPath + "/" + dirName + (target != BuildTarget.WebGL ? "/" + applicationName : ""),
             target = target,
             options = development ? BuildOptions.Development : BuildOptions.None,
             extraScriptingDefines = new string[] { "HAVE_DATE_TIME_OFFSET" }  // for Newtonsoft.Json.Schema
@@ -149,12 +119,13 @@ public class BuildPlayer : MonoBehaviour
 
         if (target == BuildTarget.StandaloneLinux64)
         {
-            CreateTarGZ(releaseDirectoryPath + "/" + dirName + ".tar.gz", releaseDirectoryPath + "/" + dirName, releaseDirectoryPath);
-            Directory.Delete(releaseDirectoryPath + "/" + dirName, true);
+            CreateTarGZ(versionPath + "/" + dirName + ".tar.gz", versionPath + "/" + dirName, versionPath);
+            Directory.Delete(versionPath + "/" + dirName, true);
         }
         else if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
         {
-            System.IO.Compression.ZipFile.CreateFromDirectory(releaseDirectoryPath + "/" + dirName, releaseDirectoryPath + "/" + dirName + ".zip");
+            System.IO.Compression.ZipFile.CreateFromDirectory(versionPath + "/" + dirName, versionPath + "/" + dirName + ".zip");
+            Directory.Delete(versionPath + "/" + dirName, true);
         }
     }
 

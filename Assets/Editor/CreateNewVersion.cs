@@ -1,19 +1,42 @@
 using LibGit2Sharp;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+public class VersionSummary
+{
+    public string version;
+    public string message;
+    public DateTimeOffset dateTime;
+    public string commitId;
+}
+
 
 public class CreateNewVersion : EditorWindow
 {
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
+
+    public static void GenVersionIndices()
+    {
+        using var repo = new Repository(".");
+        var tags = repo.Tags.OrderByDescending(tag => tag.Annotation.Tagger.When).ToList();
+        var versions = tags.Select(tag => new VersionSummary()
+        {
+            version = tag.FriendlyName,
+            message = tag.Annotation.Message.Split("\n")[0],
+            dateTime = tag.Annotation.Tagger.When,
+            commitId = tag.Target.Id.ToString(),
+        }).ToList();
+        File.WriteAllText("release/version_indices.json", JsonConvert.SerializeObject(versions, Formatting.Indented));
+    }
 
 
     [MenuItem("Build/Create New Version")]
@@ -24,6 +47,7 @@ public class CreateNewVersion : EditorWindow
 
     public void CreateGUI()
     {
+
         VisualElement root = rootVisualElement;
 
         VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
@@ -44,7 +68,7 @@ public class CreateNewVersion : EditorWindow
         root.Q<TextField>("new_version").value = Application.version;
         root.Q<TextField>("new_version").RegisterValueChangedCallback((evt) =>
         {
-            if (root.Q<TextField>("commit_message").text.StartsWith("Change version to"))
+            if (root.Q<TextField>("commit_message").text.StartsWith("Change version to "))
                 root.Q<TextField>("commit_message").value = "Change version to " + evt.newValue;
         });
 
@@ -107,8 +131,10 @@ public class CreateNewVersion : EditorWindow
         };
 
         using var repo = new Repository(".");
-        Tag latestTag = repo.Tags.OrderByDescending(tag => tag.Annotation.Tagger.When).First();
-        Debug.Log(latestTag.FriendlyName);
+
+        var tags = repo.Tags.OrderByDescending(tag => tag.Annotation.Tagger.When).ToList();
+        Tag latestTag = tags.First();
+        Debug.Log("Latest: " + latestTag.FriendlyName);
 
         // log
         var filter = new CommitFilter()
@@ -135,10 +161,13 @@ public class CreateNewVersion : EditorWindow
 
         // tag name
         root.Q<TextField>("tagName").value = latestTag.FriendlyName;
+        Commit latestCommit = repo.Commits.Take(1).First();
+        string firstLine = latestCommit.Message.Split("\n")[0];
+        if (firstLine.StartsWith("Change version to "))
+            root.Q<TextField>("tagName").value = "V" + firstLine["Change version to ".Length..];
 
         // tag target sha1
         root.Q<TextField>("targetSHA1").value = repo.Head.Tip.ToString();
-        Debug.Log(repo.Head.ToString());
 
         // make tag
         root.Q<Button>("makeTag").clicked += () =>
@@ -148,10 +177,68 @@ public class CreateNewVersion : EditorWindow
             repo.ApplyTag(root.Q<TextField>("tagName").text, tagger, root.Q<TextField>("tagMessage").text);
         };
 
+        string versionPath = BuildPlayer.VersionPath();
+
+        // Load ChangeLog
+        root.Q<TextField>("changeLog").value = LoadOrEmpty(versionPath + "/ChangeLog");
+
+        // Load KnowIssues
+        root.Q<TextField>("knowIssues").value = LoadOrEmpty(versionPath + "/KnowIssues");
+
+        // Load Artifacts
+        root.Q<TextField>("artifacts").value = LoadOrEmpty(versionPath + "/Artifacts");
+
+        // Load DateTime
+        root.Q<TextField>("dateTime").value = LoadOrEmpty(versionPath + "/DateTime");
+
+        // Generate
+        root.Q<Button>("generate").clicked += () =>
+        {
+            string versionPath = BuildPlayer.VersionPath();
+            Debug.Log(versionPath);
+
+            // ChangeLog
+            File.WriteAllText(versionPath + "/ChangeLog", root.Q<TextField>("changeLog").text);
+
+            // KnowIssues
+            File.WriteAllText(versionPath + "/KnowIssues", root.Q<TextField>("knowIssues").text);
+
+            // DateTime
+            string dateTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK");
+            File.WriteAllText(versionPath + "/DateTime", dateTime);
+            root.Q<TextField>("dateTime").value = dateTime;
+
+            // Artifacts
+            List<string> files = new(Directory.GetFileSystemEntries(versionPath));
+            List<string> artifacts = files.Select(file => Path.GetFileName(file)).Where(file => file.StartsWith("IndoorSim-")).ToList();
+            artifacts.Sort(string.CompareOrdinal);
+            artifacts.Sort((str1, str2) => Platform(str1).Length - Platform(str2).Length);
+            File.WriteAllLines(versionPath + "/Artifacts", artifacts);
+            root.Q<TextField>("artifacts").value = String.Join("\n", artifacts);
+
+            GenVersionIndices();
+        };
+
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
         root.Q<Button>("cancel_build").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
         root.Q<Button>("cancel_tag").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
+        root.Q<Button>("cancel_gen").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
 
+    }
+
+    static private string LoadOrEmpty(string filePath)
+    {
+        if (File.Exists(filePath))
+            return File.ReadAllText(filePath);
+        else
+            return "";
+    }
+
+    static private string Platform(string version)
+    {
+        int begin = version.IndexOf('-');
+        int length = version.Substring(begin + 1).IndexOf('-');
+        return version.Substring(begin + 1, length);
     }
 
     static readonly string schemaHashHistoryFile = "Assets\\Resources\\schemaHashHistory.txt";
