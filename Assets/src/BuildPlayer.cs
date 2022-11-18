@@ -12,7 +12,7 @@ using UnityEngine;
 public class BuildPlayer : MonoBehaviour
 {
 
-    private static readonly string releaseDirectoryPath = "release";
+    public static readonly string releaseDirectoryPath = "release";
 
     [MenuItem("Build/schema hash")]
     public static void SchemaHash()
@@ -21,7 +21,7 @@ public class BuildPlayer : MonoBehaviour
     }
 
     [MenuItem("Build/generate schema file")]
-    private static void GenerateSchemaHash()
+    public static void GenerateSchemaHash()
     {
         string dir = VersionPath() + "/schema";
         if (!Directory.Exists(dir))

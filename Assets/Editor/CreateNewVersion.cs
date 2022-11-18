@@ -35,7 +35,7 @@ public class CreateNewVersion : EditorWindow
             dateTime = tag.Annotation.Tagger.When,
             commitId = tag.Target.Id.ToString(),
         }).ToList();
-        File.WriteAllText("release/version_indices.json", JsonConvert.SerializeObject(versions, Formatting.Indented));
+        File.WriteAllText(BuildPlayer.releaseDirectoryPath +  "/version_indices.json", JsonConvert.SerializeObject(versions, Formatting.Indented));
     }
 
 
@@ -216,7 +216,11 @@ public class CreateNewVersion : EditorWindow
             File.WriteAllText(versionPath + "/Artifacts", String.Join("\n", artifacts));
             root.Q<TextField>("artifacts").value = String.Join("\n", artifacts);
 
+            // Version Indices
             GenVersionIndices();
+
+            // Schema Hash
+            BuildPlayer.GenerateSchemaHash();
         };
 
         root.Q<Button>("cancel_commit").clicked += () => { GetWindow<CreateNewVersion>().Close(); };
