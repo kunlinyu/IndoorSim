@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [RequireComponent(typeof(UIDocument))]
-public class VersionLabel : MonoBehaviour
+public class LeftButtomCorner : MonoBehaviour
 {
     void Start()
     {
@@ -12,11 +12,19 @@ public class VersionLabel : MonoBehaviour
 
         string version = "IndoorSim version: V" + Application.version;
 
-        string schemaHash = "schema hash: " + IndoorSimData.JSchemaHash();
+        string schemaHash = "schema hash: " + IndoorSimData.JSchemaHash()[..7];
 
-        string DUID = "device unique ID: " + platformInfo.deviceUniqueIdentifier;
+        string DUID = "device unique ID: " + platformInfo.deviceUniqueIdentifier[..7];
 
-        List<string> strings = new() {  version, schemaHash, DUID };
+#if UNITY_EDITOR
+        string build = "build: Editor";
+#elif DEVELOPMENT_BUILD
+        string build = "build: Development";
+#else
+        string build = "build: Release";
+#endif
+
+        List<string> strings = new() {  version, schemaHash, DUID, build };
         
 
         Label versionLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("VersionLabel");
