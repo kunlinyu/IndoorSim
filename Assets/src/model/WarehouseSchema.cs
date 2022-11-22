@@ -10,12 +10,8 @@ public class WarehouseSchema
     => JsonConvert.SerializeObject(this, Formatting.Indented);
 
     public WarehouseSchema Deserialize(string json)
-        => JsonConvert.DeserializeObject<WarehouseSchema>(json);
+    {
+        if (json == "") return new();
+        return JsonConvert.DeserializeObject<WarehouseSchema>(json);
+    }
 }
-
-
-// load from storage
-// load default
-// reset to default
-// read from anywhere
-// set from settings panel

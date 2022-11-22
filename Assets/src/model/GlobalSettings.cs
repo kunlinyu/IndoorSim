@@ -9,5 +9,8 @@ public  class GlobalSettings
         => JsonConvert.SerializeObject(this, Formatting.Indented);
 
     public GlobalSettings Deserialize(string json)
-        => JsonConvert.DeserializeObject<GlobalSettings>(json);
+    {
+        if (json == "") return new();
+        return JsonConvert.DeserializeObject<GlobalSettings>(json);
+    }
 }
