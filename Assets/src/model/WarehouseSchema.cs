@@ -12,3 +12,10 @@ public class WarehouseSchema
     public WarehouseSchema Deserialize(string json)
         => JsonConvert.DeserializeObject<WarehouseSchema>(json);
 }
+
+
+// load from storage
+// load default
+// reset to default
+// read from anywhere
+// set from settings panel
