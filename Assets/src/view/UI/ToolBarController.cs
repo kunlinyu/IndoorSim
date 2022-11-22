@@ -39,7 +39,7 @@ public class ToolBarController : MonoBehaviour
             button.text = "";
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
-            button.AddManipulator(new ToolTipManipulator(toolBar));
+            button.AddManipulator(new ToolTipManipulator(rootUIDocument.rootVisualElement));
             if (tbd.m_Class == ToolType.TriggerAndFinish)
             {
                 button.clicked += () =>

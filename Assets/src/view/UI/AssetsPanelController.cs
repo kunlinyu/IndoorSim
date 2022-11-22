@@ -47,7 +47,7 @@ public class AssetsPanelController : MonoBehaviour
             button.tooltip += "\nverticesCount: " + assetJson["verticesCount"].Value<string>();
             button.tooltip += "\nboundariesCount: " + assetJson["boundariesCount"].Value<string>();
             button.tooltip += "\nspacesCount: " + assetJson["spacesCount"].Value<string>();
-            button.AddManipulator(new ToolTipManipulator(assetsPanel));
+            button.AddManipulator(new ToolTipManipulator(rootUIDocument.rootVisualElement));
 
             string base64 = assetJson["thumbnailBase64"].Value<string>();
             byte[] image = Convert.FromBase64String(base64);

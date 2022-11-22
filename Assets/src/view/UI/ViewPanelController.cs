@@ -19,7 +19,7 @@ public class ViewPanelController : MonoBehaviour
             button.text = "";
             button.style.backgroundImage = new StyleBackground(tbd.m_PortraitImage);
             button.tooltip = tbd.m_ToolName;
-            button.AddManipulator(new ToolTipManipulator(viewPanel));
+            button.AddManipulator(new ToolTipManipulator(rootUIDocument.rootVisualElement));
             button.AddToClassList("enable");
             button.clicked += () =>
             {
