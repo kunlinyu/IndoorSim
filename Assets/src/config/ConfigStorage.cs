@@ -11,9 +11,9 @@ public class ConfigStorage : IConfigStorage
 #elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
         inner = new LinuxConfigStorage();
 #elif UNITY_WEBGL
-        inner = new WebGLConfigStorage;
+        inner = new WebGLConfigStorage();
 #else
-        inner = new DefaultConfigStorage;
+        inner = new DefaultConfigStorage();
 #endif
     }
 
