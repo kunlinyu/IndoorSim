@@ -14,13 +14,11 @@ public class BuildPlayer : MonoBehaviour
 
     public static readonly string releaseDirectoryPath = "release";
 
-    [MenuItem("Build/schema hash")]
     public static void SchemaHash()
     {
         Debug.Log(IndoorSimData.JSchemaHash());
     }
 
-    [MenuItem("Build/generate schema file")]
     public static void GenerateSchemaHash()
     {
         string dir = VersionPath() + "/schema";
@@ -30,27 +28,23 @@ public class BuildPlayer : MonoBehaviour
         File.WriteAllText(dir + "/hash.txt", IndoorSimData.JSchemaHash());
     }
 
-    [MenuItem("Build/Build Linux")]
     public static void BuildLinux()
     {
         Build(BuildTarget.StandaloneLinux64, Snapshot(), true);
         Build(BuildTarget.StandaloneLinux64, Snapshot(), false);
     }
 
-    [MenuItem("Build/Build Windows")]
     public static void BuildWindows()
     {
         Build(BuildTarget.StandaloneWindows64, Snapshot(), true);
         Build(BuildTarget.StandaloneWindows64, Snapshot(), false);
     }
 
-    [MenuItem("Build/Build WebGL")]
     public static void BuildWebGL()
     {
         Build(BuildTarget.WebGL, Snapshot(), false);
     }
 
-    [MenuItem("Build/Build WebGL dev")]
     public static void BuildWebGLDev()
     {
         Build(BuildTarget.WebGL, Snapshot(), true);
@@ -142,7 +136,6 @@ public class BuildPlayer : MonoBehaviour
 
         tarArchive.Close();
     }
-
 }
 
 #endif

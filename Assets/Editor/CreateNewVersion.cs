@@ -149,11 +149,16 @@ public class CreateNewVersion : EditorWindow
         StringBuilder sb = new();
         foreach (Commit c in commits)
         {
-            sb.Append(c.Id.Sha[..7] + "\t");
-            sb.Append($"({c.Author.When.ToString(format, CultureInfo.InvariantCulture)})\t");
-            sb.Append(c.Message.Split("\n")[0]);
+            var id = c.Id.Sha[..7];
+            var when = c.Author.When.ToString(format, CultureInfo.InvariantCulture);
+            var fl = c.Message.Split("\n")[0];
+
+            sb.Append(id + " ");
+            sb.Append($"({when}) ");
+            sb.Append($"{fl.Replace(@"\n", @"\\n")}");
+
             if (c.Sha == latestTag.Target.Sha)
-                sb.Append($"\t<-- {latestTag.FriendlyName} {latestTag.Annotation.Message}");
+                sb.Append($" <-- {latestTag.FriendlyName} {latestTag.Annotation.Message}");
             sb.Append("\n");
         }
 
