@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement>
+        <ui:TextField picking-mode="Ignore" label="Global Settings" value="filler text" text="filler text" multiline="true" style="height: 185px;" />
+    </ui:VisualElement>
+</ui:UXML>
