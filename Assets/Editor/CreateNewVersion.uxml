@@ -32,4 +32,5 @@
         <ui:Button tabindex="-1" text="Cancel" display-tooltip-when-elided="true" name="cancel_gen" />
         <ui:Button tabindex="-1" text="Generate" display-tooltip-when-elided="true" name="generate" />
     </ui:VisualElement>
+    <ui:TextField picking-mode="Ignore" label="Text Field" value="filler text" text="aws s3 sync ./V0.10.2 s3://indoorsim/V0.10.2/  --exclude=* --include=*.data.gz --include=*.js.gz --include=*.wasm.gz --content-encoding=gzip --dryrun&#10;aws s3 sync ./V0.10.2 s3://indoorsim/V0.10.2/  --exclude=*.data.gz --exclude=*.js.gz --exclude=*.wasm.gz --dryrun" multiline="true" readonly="true" />
 </ui:UXML>

@@ -134,6 +134,7 @@ public class CreateNewVersion : EditorWindow
 
         var tags = repo.Tags.OrderByDescending(tag => tag.Annotation.Tagger.When).ToList();
         Tag latestTag = tags.First();
+        Tag secondTag = tags.Count > 1 ? tags[1] : latestTag;
         Debug.Log("Latest: " + latestTag.FriendlyName);
 
         // log
@@ -143,6 +144,15 @@ public class CreateNewVersion : EditorWindow
             ExcludeReachableFrom = ((Commit)latestTag.Target).Parents.First().Sha,
         };
         var commits = repo.Commits.QueryBy(filter).ToList();
+        if (commits.Count < 3)
+        {
+            var innerFilter = new CommitFilter()
+            {
+                IncludeReachableFrom = repo.Head,
+                ExcludeReachableFrom = ((Commit)secondTag.Target).Parents.First().Sha,
+            };
+            commits = repo.Commits.QueryBy(innerFilter).ToList();
+        }
 
         var format = "ddd dd MMM";
         TextField textField = root.Q<TextField>("log");
@@ -159,6 +169,8 @@ public class CreateNewVersion : EditorWindow
 
             if (c.Sha == latestTag.Target.Sha)
                 sb.Append($" <-- {latestTag.FriendlyName} {latestTag.Annotation.Message}");
+            else if (c.Sha == secondTag.Target.Sha)
+                sb.Append($" <-- {secondTag.FriendlyName} {secondTag.Annotation.Message}");
             sb.Append("\n");
         }
 
