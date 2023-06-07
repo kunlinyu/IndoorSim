@@ -4,6 +4,10 @@ IndoorGML 1.1 https://docs.ogc.org/is/19-011r4/19-011r4.html
 # UNITY3D VERSION
 2022.1.9f1c1
 
+# TRY IT
+http://indoorsim.s3-website.cn-northwest-1.amazonaws.com.cn/V0.10.2/IndoorSim-WebGL-V0.10.2.4642fda/
+Notice that this binary version is currently an internal tool of our company that collects sensitive data during operation. If you do not wish to disclose sensitive information, please refrain from using it.
+
 # FOR DEVELOPER
 0. Install Unity3D and VSCode
 
