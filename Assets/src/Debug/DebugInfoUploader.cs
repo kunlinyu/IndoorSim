@@ -40,7 +40,7 @@ public class DebugInfoUploader : MonoBehaviour
     
     private void Update()
     {
-        StartCoroutine(GetCompressEncriptBase64PackUpload());
+        //StartCoroutine(GetCompressEncriptBase64PackUpload());
     }
 
     private IEnumerator GetCompressEncriptBase64PackUpload()
